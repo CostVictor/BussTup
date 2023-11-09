@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BussTup</title>
+    <link rel="preload" href="/static/css/index.css" as="style">
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/sweetalert2@11" as="script">
+    <link rel="preload" href="/static/js/animation.js" as="script">
+    <link rel="preload" href="/static/js/validation.js" as="script">
+    <link rel="icon" href="/static/data/img/icon_busstup.png">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body onload="enterInterfaceForm('login')">
+    <section class="img_container recuo_50">
+        <img class="img_container--fundo" src="/static/data/img/fundo_form.png" alt="">
+        <img id="img_logo" class="img_container--principal" src="/static/data/img/logo_busstup.png" alt="Logo do aplicativo BussTup">
+    </section>
+
+    <section class="form_container">
+        <form id="formulario_login" class="form_container__card" method="post" onsubmit=" validationLogin(event)">
+            <h1 class="text--principal">Login</h1>
+
+            <div class="container--line pos_relative">
+                <input class="form__box_input" name="usuario_login" id="usuario_login" type="text" onfocus="focusLabel('usuario_login')" onblur="blurLabel('usuario_login')" required>
+                <label class="form__text_label" for="usuario_login">Usuário</label>
+            </div>
+
+            <div class="container--line pos_relative">
+                <input class="form__box_input pos_relative" name="senha_login" id="senha_login" type="password" onfocus="focusLabel('senha_login')" onblur="blurLabel('senha_login')" required>
+                <label class="form__text_label" for="senha_login">Senha</label>
+                <i id="icon_senha_login" class="bi bi-eye-fill form__icon_password" onclick="animateIconPassword('senha_login')"></i>
+            </div>
+            <input class="form__btn_principal" name="botao" id="botao_entrar" type="submit" value="Entrar">
+        </form>
+
+        <!-- Link para criar conta -->
+        <div class="container--line">
+            <p class="text--tertiary">Não possui uma conta?</p>
+            <a class="text--tertiary" href="/cadastro">Criar conta</a>
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/static/js/animation.js"></script>
+    <script src="/static/js/validation.js"></script>
+</body>
+</html>
