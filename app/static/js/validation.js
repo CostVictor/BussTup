@@ -1,3 +1,19 @@
+// ~~~~~ POPUP ~~~~~ //
+
+function create_popup(title, text='', text_buttom='Ok', icon='info', redirect='') {
+    document.body.classList.add('no-scroll')
+    Swal.fire({
+        title: title,
+        text: text,
+        icon: icon,
+        width: '80%',
+        confirmButtonText: text_buttom
+    }).then(() => {
+        document.body.classList.remove('no-scroll')
+        if (redirect) {window.location.href = redirect}
+    })
+}
+
 // ~~~~~ Validação de login ~~~~~ //
 
 function validationLogin(event) {
@@ -6,19 +22,18 @@ function validationLogin(event) {
     const form = document.getElementById('formulario_login')
     let usuario = form.elements.usuario_login.value
     let senha = form.elements.senha_login.value
-    let tabela = 'motorista'
 
-    if (/^[0-9]+$/.test(usuario)) {
-        tabela = 'aluno'
-    }
-
-    fetch('/validar_usuario', {
+    fetch('/autenticar_usuario', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'table': tabela, 'user': usuario, 'password': senha})
+        body: JSON.stringify({'user': usuario, 'password': senha})
     })
     .then(response => response.json())
-    .then(retorno => {})
+    .then(response => {
+        if (response['error']) {
+            create_popup('Não foi possível fazer login', 'Verifique suas credenciais e tente novamente.', 'Ok', 'info')
+        } else {window.location.href = response['redirect']}
+    })
 }
 
 function validationRegister(type, event) {
@@ -79,42 +94,19 @@ function validationRegister(type, event) {
         })
         .then(response => response.json())
         .then(retorno => {
+            let text = ''; let icon = 'success'
+            let text_buttom = 'Logar'; let redirect = '/'
+
             if (retorno['error']) {
-                Swal.fire({
-                    title: retorno['title'],
-                    text: retorno['text'],
-                    icon: 'info',
-                    width: '80%',
-                    confirmButtonText: 'Voltar'
-                }).then(() => {
-                    document.body.classList.remove('no-scroll')
-                })
-            } else {
-                Swal.fire({
-                    title: retorno['title'],
-                    text: '',
-                    icon: 'success',
-                    width: '80%',
-                    confirmButtonText: 'Logar'
-                }).then(() => {
-                    document.body.classList.remove('no-scroll')
-                    window.location.href = '/'
-                })
+                text = retorno['teste']
+                icon = 'info'
+                text_buttom = 'Voltar'
+                redirect = false
             }
+            create_popup(retorno['title'], text, text_buttom, icon, redirect)
         })
-        .catch(error => {})
     } else {
         campo.classList.add('form__box_input--error')
-        document.body.classList.add('no-scroll')
-
-        Swal.fire({
-            title: erro_titulo,
-            text: erro_texto,
-            icon: 'error',
-            width: '80%',
-            confirmButtonText: 'Voltar'
-        }).then(() => {
-            document.body.classList.remove('no-scroll')
-        })
+        create_popup(erro_titulo, erro_texto, 'Voltar', 'error')
     }
 }

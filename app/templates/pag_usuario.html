@@ -7,6 +7,10 @@
     <link rel="icon" href="/static/data/img/icon_busstup.png">
 </head>
 <body>
-    
+    {% if role == 'aluno' %}
+        <p>Você é um aluno</p>
+    {% elif role == 'motorista' %}
+        <p>Você é um motorista</p>
+    {% endif %}
 </body>
 </html>
