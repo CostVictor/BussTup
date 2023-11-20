@@ -5,12 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BussTup</title>
     <link rel="icon" href="/static/data/img/icon_busstup.png">
+    <link rel="preload" href="/static/css/index.css" as="style">
+    <link rel="preload" href="/static/css/page.css" as="style">
+    <link rel="preload" href="/static/js/page_animation.js" as="script">
+
+    <link rel="stylesheet" href="/static/css/page.css">
+    <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
 </head>
 <body>
-    {% if role == 'aluno' %}
-        <p>Você é um aluno</p>
-    {% elif role == 'motorista' %}
-        <p>Você é um motorista</p>
-    {% endif %}
+    <header class="page__container--header">
+        <h1 class="text--header">BussTup</h1>
+        <div class="page__icon_area">
+            <i class="bi bi-search page__icon"></i>
+            <i class="bi bi-person-circle page__icon"></i>
+        </div>
+    </header>
+    <section class="page__container--content">
+        
+    </section>
+    <section class="page__container--buttom">
+        <div class="page__btn">
+            <i class="bi bi-geo-alt page__icon--btn"></i>
+        </div>
+        <div class="page__btn">
+            <i class="bi bi-bus-front page__icon--btn"></i>
+        </div>
+        <div class="page__btn">
+            <i class="bi bi-chat-dots page__icon--btn"></i>
+        </div>
+    </section>
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="/static/js/page_animation.js"></script>
 </body>
 </html>

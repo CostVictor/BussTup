@@ -28,7 +28,6 @@ security = Security(app, user_datastore)
 
 with app.app_context():
     db_flask.create_all()
-    print(User_flask.query.all())
 
 def create_user_flask(tabela, primary_key, hash_senha):
     user = user_datastore.create_user(primary_key=primary_key, hash_senha=hash_senha)

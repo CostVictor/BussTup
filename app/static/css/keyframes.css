@@ -1,0 +1,21 @@
+@keyframes fadeDown {
+    0% {
+        opacity: 0;
+        transform: translateY(calc(-1vw + -1vh + -1vmin));
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes outUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(calc(-1vw + -1vh + -1vmin));
+    }
+}

@@ -1,42 +1,53 @@
-@import url(form.css);
-@import url(img.css);
 @import url(text.css);
+@import url(keyframes.css);
 
 :root{
-    --branco_primario: #ffffff;
-    --branco_secundario: #f6f6f6;
-    --branco_terciario: #eeeeee;
+    --branco_primario: #f0f6ff;
+    --branco_secundario: #ffffff;
+    --branco_terciario: #f6f6f6;
     --cinza_primario: #7c7c7c;
     --cinza_secundario: #454545;
+    --cinca_terciario: #b3b3b3;
     --azul_primario: #004aad;
     --azul_secundario: #003f93;
+    --azul_terciario: #013983;
+    --azul_quaternario: rgba(6, 66, 149, 0.64);
+    --azul_quintenario: #1560c3;
     --verde_primario: #3bd0c1;
-    --verde_secundario: #47ffed;
+    --verde_secundario: #8ce1d8;
     --verde_terciario: #0aa999;
-    --vermelho_primario: #d10000;
+    --vermelho_primario: #ff8f8f;
 
     --size_16px: calc(0.7vw + 1vh + 1vmin);
 }
 
 @font-face {
-    font-family: Poppins;
+    font-family: "Poppins";
     src: url(/static/data/font/Poppins-Regular.ttf);
 }
 
 @font-face {
-    font-family: Roboto;
+    font-family: "Roboto";
     src: url(/static/data/font/Roboto-Medium.ttf);
 }
 
 * {
-    font-family: Poppins, Arial, Helvetica, sans-serif;
+    font-family: "Poppins", Arial, Helvetica, sans-serif;
+    outline: none;
     margin: 0;
     padding: 0;
 }
 
+*:active {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
 body {
     display: flex;
     flex-direction: column;
+    background-color: var(--azul_primario);
+    min-height: 100vh;
 }
 
 /* Containers */
@@ -66,39 +77,21 @@ body {
     position: relative;
 }
 
-.recuo_50 {
-    transform: translateY(-50%);
-}
-
-.centerX {
-    justify-content: center;
-}
-
 /* Ações */
-
-.enter_opacity {
-    opacity: 1;
-}
 
 .inative {
     position: absolute;
     pointer-events: none;
-    opacity: 0;
+    display: none;
 }
 
-.ative {
-    transition: opacity 0.5s;
-    position: relative;
-    pointer-events: all;
-    opacity: 1;
+.hidden_point {
+    color: transparent;
+    position: absolute;
+    pointer-events: none;
 }
 
-/* Linha */
-
-.linha_horizontal {
-    background-color: var(--branco_primario);
-    margin-bottom: calc(0.5vw + 1vh + 1vmin);
-}
+/* Popup */
 
 .swal2-popup {
     z-index: 2000
@@ -106,4 +99,45 @@ body {
 
 .no-scroll {
     overflow: hidden;
+}
+
+/* Keyframes */
+
+.enter {
+    opacity: 0;
+}
+
+.enter--radius {
+    border-radius: 0 0 calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin);
+}
+
+.close {
+    opacity: 1;
+}
+
+.close--radius {
+    border-radius: 0;
+}
+
+.visible {
+    opacity: 1;
+}
+
+.hidden {
+    opacity: 0;
+}
+
+/* Rolagens */
+
+.scroll_vertical {
+    display: flex;
+    flex-direction: column;
+    max-height: 45vh;
+    overflow-y: auto;
+    position: relative;
+    padding: calc(0.8vw + 0.8vh + 1vmin);
+}
+
+.btn_scroll {
+    width: 80%;
 }

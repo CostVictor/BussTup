@@ -19,4 +19,5 @@ def cadastro():
 @login_required
 def pag_usuario():
     user = database.return_user(current_user.primary_key)
-    return f'Está é a página segura de {user.nome}'
+    role = current_user.roles[0].name
+    return render_template('pag_usuario.html', role=role)
