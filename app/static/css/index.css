@@ -134,7 +134,12 @@ body {
 .swal2-popup {
     z-index: 2000;
     border-radius: 0 calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin);
+    font-size: calc(0.8vw + 0.8vh + 1vmin);
   }
+
+.swal2-title {
+    font-size: calc(1.5vw + 1.5vh + 1vmin);
+}
 
 .no-scroll {
     overflow: hidden;
