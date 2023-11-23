@@ -7,7 +7,9 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
         text: text,
         icon: icon,
         width: '80%',
-        confirmButtonText: text_buttom
+        confirmButtonText: text_buttom,
+        confirmButtonColor: '#004aad',
+        iconColor: `${icon === 'info'? "#ffe959" : icon === 'success'? "#0aa999" : "#35d9c9"}`
     }).then(() => {
         document.body.classList.remove('no-scroll')
         if (redirect) {window.location.href = redirect}
@@ -20,8 +22,8 @@ function validationLogin(event) {
     event.preventDefault()
 
     const form = document.getElementById('formulario_login')
-    let usuario = form.elements.usuario_login.value
-    let senha = form.elements.senha_login.value
+    let usuario = form.elements.user.value
+    let senha = form.elements.password.value
 
     fetch('/autenticar_usuario', {
         method: 'POST',
@@ -32,7 +34,7 @@ function validationLogin(event) {
     .then(response => {
         if (response['error']) {
             create_popup('Não foi possível fazer login', 'Verifique suas credenciais e tente novamente.', 'Ok', 'info')
-        } else {window.location.href = response['redirect']}
+        } else {closeInterface('login', response['redirect'])}
     })
 }
 
@@ -42,7 +44,7 @@ function validationRegister(type, event) {
     function apenas_letras(str) {return /^[a-zA-ZÀ-ÖØ-öø-ÿ\s]*$/.test(str)}
     function sem_espaco(str) {return str.indexOf(' ') === -1}
 
-    const form = document.getElementById(`form_register_${type}`)
+    const form = document.getElementById(`form_${type}`)
     let execute = true
     let data = {}
 
@@ -63,13 +65,13 @@ function validationRegister(type, event) {
                     execute = false; break
                 }
             } else if (campoAlvo === 'Nome' || campoAlvo === 'Curso' || campoAlvo === 'Turno') {
-                if (!apenas_letras(campo.value)) {
+                if (!apenas_letras(campo.value.trim())) {
                     var erro_titulo = `${campoAlvo} inválido`
                     var erro_texto = `O campo ${campo.name} deve conter apenas letras.`
                     execute = false; break
                 }
             } else if (campoAlvo === 'Senha') {
-                if (!sem_espaco(campo.value)) {
+                if (!sem_espaco(campo.value.trim())) {
                     var erro_titulo = 'Formato de senha inválido'
                     var erro_texto = 'A senha não deve conter espaços.'
                     execute = false; break
@@ -77,12 +79,12 @@ function validationRegister(type, event) {
             }
 
             if (campoAlvo === 'Conf_senha') {
-                if (campo.value !== data['senha']) {
+                if (campo.value.trim() !== data['senha']) {
                     var erro_titulo = 'Senha inconsistente'
                     var erro_texto = 'A senha especificada na confirmação é diferente da senha definida.'
                     execute = false; break
                 }
-            } else {data[campo.name] = campo.value}
+            } else {data[campo.name] = campo.value.trim()}
         }
     }
 
@@ -98,15 +100,23 @@ function validationRegister(type, event) {
             let text_buttom = 'Logar'; let redirect = '/'
 
             if (retorno['error']) {
-                text = retorno['teste']
                 icon = 'info'
+                text = `Já existe um usuário cadastrado ${type === "aluno" ? "na matrícula especificada." : "no nome especificado."}`
                 text_buttom = 'Voltar'
                 redirect = false
             }
             create_popup(retorno['title'], text, text_buttom, icon, redirect)
         })
     } else {
-        campo.classList.add('form__box_input--error')
+        campo.classList.add('input_error')
         create_popup(erro_titulo, erro_texto, 'Voltar', 'error')
     }
+}
+
+function submit() {
+    const buttom = document.querySelector('button.form__btn--select_active')
+    const form = document.getElementById(`form_${buttom.textContent.toLowerCase()}`)
+    if (form.checkValidity()) {
+        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    } else {form.reportValidity()}
 }

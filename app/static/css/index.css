@@ -13,10 +13,9 @@
     --azul_terciario: #013983;
     --azul_quaternario: rgba(6, 66, 149, 0.64);
     --azul_quintenario: #1560c3;
-    --verde_primario: #3bd0c1;
-    --verde_secundario: #8ce1d8;
-    --verde_terciario: #0aa999;
-    --vermelho_primario: #ff8f8f;
+    --verde_primario: #35d9c9;
+    --vermelho_primario: #ff7272;
+    --amarelo_primario: #ffe959;
 
     --size_16px: calc(0.7vw + 1vh + 1vmin);
 }
@@ -80,8 +79,6 @@ body {
 /* Ações */
 
 .inative {
-    position: absolute;
-    pointer-events: none;
     display: none;
 }
 
@@ -89,16 +86,6 @@ body {
     color: transparent;
     position: absolute;
     pointer-events: none;
-}
-
-/* Popup */
-
-.swal2-popup {
-    z-index: 2000
-  }
-
-.no-scroll {
-    overflow: hidden;
 }
 
 /* Keyframes */
@@ -140,4 +127,15 @@ body {
 
 .btn_scroll {
     width: 80%;
+}
+
+/* Popup */
+
+.swal2-popup {
+    z-index: 2000;
+    border-radius: 0 calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin);
+  }
+
+.no-scroll {
+    overflow: hidden;
 }

@@ -3,6 +3,7 @@
     margin: 0.4rem;
     color: var(--azul_terciario);
     font-weight: normal;
+    pointer-events: none;
     width: 55%;
 }
 
@@ -12,6 +13,7 @@
     bottom: 20%;
     color: var(--azul_terciario);
     font-size: calc(1vw + 1vh + 1vmin);
+    pointer-events: none;
 }
 
 .text--header {
@@ -22,4 +24,16 @@
     font-weight: bold;
     display: flex;
     align-items: center;
+    pointer-events: none;
+}
+
+.text--click {
+    display: flex;
+    width: 40%;
+    text-decoration: none;
+    border-bottom: none;
+    font-size: calc(0.6vw + 0.5vh + 1vmin);
+    margin-top: calc(0.3vw + 0.3vh + 1vmin);
+    margin-left: calc(0.1vw + 0.1vh + 1vmin);
+    color: var(--azul_terciario);
 }

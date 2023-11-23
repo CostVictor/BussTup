@@ -84,6 +84,7 @@
     font-size: calc(3vw + 2.5vh + 1vmin);
     padding: calc(0.1vw + 0.1vh + 1vmin);
     margin-bottom: calc(2vw + 1.8vh + 1vmin);
+    pointer-events: none;
     width: 80%;
 }
 
@@ -91,6 +92,7 @@
     color: var(--azul_terciario);
     font-size: calc(1.5vw + 1.5vh + 1vmin);
     border-left: var(--azul_primario) solid 0.06rem;
+    pointer-events: none;
     width: 80%;
 }
 
@@ -123,6 +125,10 @@
 
 .input_notIcon {
     text-indent: calc(0.05vw + 0.05vh + 1vmin);
+}
+
+.input_error {
+    border-color: var(--vermelho_primario);
 }
 
 .form__label {

@@ -38,16 +38,18 @@ for (let index = 0; index < forms.length; index++) {
     const div_alvo = forms[index].querySelector('div.form__container--input')
     div_alvo.style.marginTop = 0
 }
-
 inputs.forEach(input => {
     const label = document.querySelector(`label[for="${input.id}"]`)
     const icon = document.getElementById(`icon_${input.id}`)
 
     input.addEventListener('blur', function() {
         if (input.value === '') {
-            label.classList.remove('form__label--animate')
-            icon.classList.remove('form__icon--animate')
             input.value = ''
+            label.classList.remove('form__label--animate')
+            if (icon) {icon.classList.remove('form__icon--animate')}
+        } else {
+            if (label) {label.classList.add('form__label--animate')}
+            if (icon) {icon.classList.add('form__icon--animate')}
         }
     })
 })
@@ -58,8 +60,8 @@ function focusLabel(id) {
     const input = document.getElementById(id)
 
     label.classList.add('form__label--animate')
-    icon.classList.add('form__icon--animate')
-    input.classList.remove('form__box_input--error')
+    if (icon) {icon.classList.add('form__icon--animate')}
+    input.classList.remove('input_error')
 }
 
 // ~~~~~ Animação de icone ~~~~~ //
@@ -102,7 +104,7 @@ function enterInterface(type) {
         content.style.marginTop = '5%'
         elements.forEach((element, index) => {
             element.style.opacity = 0
-            animated(index, element, 'fadeDown', 0.8, 0)
+            animated(index, element, 'fadeDown', 0.8, 0.1)
         })
     }
 }
@@ -113,7 +115,7 @@ function closeInterface(type, redirect) {
 
     elements.forEach((element, index) => {
         element.style.opacity = 1
-        animated(index, element, 'outUp', duraction= 0.3, value_initial = 0)
+        animated(index, element, 'outUp', duraction = 0.3, value_initial = 0)
     })
 
     if (type === 'login') {
