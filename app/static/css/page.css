@@ -28,6 +28,15 @@ body {
     border-radius: 0;
 }
 
+.page__container--aba {
+    display: flex;
+    flex-direction: column;
+    min-width: 100vw;
+    padding: 5% 5% 17% 5%;
+    box-sizing: border-box;
+    scroll-snap-align: start;
+}
+
 .page__container--buttom {
     background-color: var(--branco_terciario);
     border-radius: calc(1vw + 2vh + 1vmin) calc(1vw + 2vh + 1vmin) 0 0;
@@ -60,13 +69,7 @@ body {
     cursor: pointer;
 }
 
-.page__icon--btn:hover {
-    background-color: var(--azul_primario);
-    color: var(--branco_secundario);
-    padding: calc(0.1vw + 0.1vh + 0.3vmin) calc(1.5vw + 1.5vh + 1vmin);
-}
-
-.page__icon--btn_selected {
+.btn_selected {
     background-color: var(--azul_primario);
     color: var(--branco_secundario);
     padding: calc(0.1vw + 0.1vh + 0.3vmin) calc(1.5vw + 1.5vh + 1vmin);
