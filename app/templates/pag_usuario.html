@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +9,11 @@
     <link rel="preload" href="/static/css/page.css" as="style">
     <link rel="preload" href="/static/js/form_animation.js" as="script">
     <link rel="preload" href="/static/js/page_animation.js" as="script">
+    <link rel="preload" href="/static/js/validation.js" as="script">
 
     <link rel="stylesheet" href="/static/css/page.css">
     <link rel="stylesheet" href="/static/css/index.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
 </head>
 <body onload="enterPage()">
     <p class="hidden_point">.</p>
@@ -24,9 +24,18 @@
             <i class="bi bi-person-circle page__icon"></i>
         </div>
     </header>
+
     <section id="content" class="page__container--content scroll_horizontal content_noBorder">
         <div id="aba_agenda" class="page__container--aba">
-            <p>Área agenda</p>
+            {% if role == 'aluno' %}
+                <div id="area_agenda" class="page__container column">
+                    <div class="page__container title">
+                        <h1 id="nome_linha" class="text principal">Nome da linha</h1>
+                        <h1 class="text principal">-</h1>
+                        <h1 id="cidade_linha" class="text principal">Cidade</h1>
+                    </div>
+                </div>
+            {% endif %}
         </div>
         <div id="aba_ponto" class="page__container--aba">
             <p>Área pontos</p>
@@ -38,22 +47,24 @@
             <p>Área chat</p>
         </div>
     </section>
+
     <section id="nav" class="page__container--buttom nav_hidden">
         <div class="page__btn">
-            <i id="btn_agenda" class="bi bi-journal-text page__icon--btn btn_selected" onclick="replaceAba('btn_agenda')"></i>
+            <i id="agenda" class="bi bi-journal-text page__icon--btn btn_selected" onclick="replaceAba('agenda')"></i>
         </div>
         <div class="page__btn">
-            <i id="btn_ponto" class="bi bi-geo-alt page__icon--btn" onclick="replaceAba('btn_ponto')"></i>
+            <i id="ponto" class="bi bi-geo-alt page__icon--btn" onclick="replaceAba('ponto')"></i>
         </div>
         <div class="page__btn">
-            <i id="btn_linha" class="bi bi-bus-front page__icon--btn" onclick="replaceAba('btn_linha')"></i>
+            <i id="linha" class="bi bi-bus-front page__icon--btn" onclick="replaceAba('linha')"></i>
         </div>
         <div class="page__btn">
-            <i id="btn_chat" class="bi bi-chat-dots page__icon--btn" onclick="replaceAba('btn_chat')"></i>
+            <i id="chat" class="bi bi-chat-dots page__icon--btn" onclick="replaceAba('chat')"></i>
         </div>
     </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="/static/js/validation.js"></script>
     <script src="/static/js/form_animation.js"></script>
     <script src="/static/js/page_animation.js"></script>
 </body>

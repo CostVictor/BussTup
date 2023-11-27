@@ -1,5 +1,6 @@
 from flask_security import Security, UserMixin, RoleMixin, SQLAlchemyUserDatastore
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
 from pymysql import cursors
 from app import app
 import pymysql
@@ -25,6 +26,7 @@ class Role_flask(db_flask.Model, RoleMixin):
 
 user_datastore = SQLAlchemyUserDatastore(db_flask, User_flask, Role_flask)
 security = Security(app, user_datastore)
+jwt = JWTManager(app)
 
 with app.app_context():
     db_flask.create_all()
@@ -70,6 +72,48 @@ class DB:
         if return_table:
             return table, where
         return where
+    
+    @staticmethod
+    def format_listDate(list_date, camp_name='data', operator='OR'):
+        dates = f' {operator} {camp_name} = '.join(list_date)
+        return f'({camp_name} = {dates})'
+
+    @staticmethod
+    def format_time(data):
+        def converter(value):
+            horas = value.seconds // 3600
+            minutos = (value.seconds % 3600) // 60
+            segundos = value.seconds % 60
+            return {'hora': horas, 'minuto': minutos, 'segundo': segundos}
+        
+        if isinstance(data, list):
+            for index, element in enumerate(data):
+                if isinstance(element, dict):
+                    data[index]['horario'] = converter(element['horario'])
+                else: data[index] = converter(element)
+            return data
+        elif isinstance(data, dict):
+            data['horario'] = converter(data['horario'])
+            return data
+        return converter(data)
+
+    @staticmethod
+    def format_date(data):
+        def converter(value):
+            value = value.strftime("%Y-%m-%d")
+            value = value.split('-')
+            return {'dia': value[2], 'mes': value[1], 'ano': value[0]}
+        
+        if isinstance(data, list):
+            for index, element in enumerate(data):
+                if isinstance(element, dict):
+                    data[index]['data'] = converter(element['data'])
+                else: data[index] = converter(element)
+            return data
+        elif isinstance(data, dict):
+            data['data'] = converter(data['data'])
+            return data
+        return converter(data)
 
     class User_db:
         def __init__(self, db: object, data: dict) -> None:

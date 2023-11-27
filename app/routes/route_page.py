@@ -18,6 +18,5 @@ def cadastro():
 @app.route("/usuario")
 @login_required
 def pag_usuario():
-    user = database.return_user(current_user.primary_key)
     role = current_user.roles[0].name
     return render_template('pag_usuario.html', role=role)

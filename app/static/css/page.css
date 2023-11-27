@@ -2,6 +2,23 @@ body {
     justify-content: center;
 }
 
+.page__container {
+    display: flex;
+    width: 100%;
+}
+
+.page__container.inative {
+    display: none;
+}
+
+.page__container.column {
+    flex-direction: column;
+}
+
+.page__container.title {
+    border-bottom: var(--azul_terciario) solid 0.06rem;
+}
+
 .page__container--header {
     transition: height 0.7s ease;
     box-sizing: border-box;
@@ -21,7 +38,7 @@ body {
     border-radius: calc(1.5vw + 3vh + 1vmin) calc(1.5vw + 3vh + 1vmin) 0 0;
     display: flex;
     width: 100%;
-    flex: 1;
+    flex-grow: 1;
 }
 
 .content_noBorder {
