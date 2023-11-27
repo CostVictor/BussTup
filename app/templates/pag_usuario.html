@@ -25,6 +25,9 @@
         </div>
     </header>
     <section id="content" class="page__container--content scroll_horizontal content_noBorder">
+        <div id="aba_agenda" class="page__container--aba">
+            <p>Área agenda</p>
+        </div>
         <div id="aba_ponto" class="page__container--aba">
             <p>Área pontos</p>
         </div>
@@ -37,7 +40,10 @@
     </section>
     <section id="nav" class="page__container--buttom nav_hidden">
         <div class="page__btn">
-            <i id="btn_ponto" class="bi bi-geo-alt page__icon--btn btn_selected" onclick="replaceAba('btn_ponto')"></i>
+            <i id="btn_agenda" class="bi bi-journal-text page__icon--btn btn_selected" onclick="replaceAba('btn_agenda')"></i>
+        </div>
+        <div class="page__btn">
+            <i id="btn_ponto" class="bi bi-geo-alt page__icon--btn" onclick="replaceAba('btn_ponto')"></i>
         </div>
         <div class="page__btn">
             <i id="btn_linha" class="bi bi-bus-front page__icon--btn" onclick="replaceAba('btn_linha')"></i>

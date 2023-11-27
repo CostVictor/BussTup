@@ -1,9 +1,11 @@
-from flask_security import login_user, logout_user, login_required
+from flask_security import login_user, logout_user, login_required, current_user
 from app.models import user_datastore, database, create_user_flask
 from app.format import formatData
 from flask import request, jsonify
-from app import app
+from app import app, socketio
 import bcrypt
+
+# ~~ Flask
 
 @app.route("/logout")
 @login_required
@@ -42,3 +44,28 @@ def cadastro_usuario():
             'error': False,
             'title': 'Usuário cadastrado'
         })
+
+
+# ~~ WebSocket
+
+def confirm_user():
+    if current_user and current_user.is_authenticated:
+        return database.return_user(current_user.primary_key)
+    return False
+
+
+@socketio.on('send_points')
+def send_points():
+    user = confirm_user()
+    if user:
+        match current_user.roles[0]:
+            case 'aluno':
+                if user.Ponto_id:
+                    aluno_point = database.select('Ponto', where=f'id = {user.Ponto_id}')
+                    route_has_point = database.select('Rota_has_Ponto', where=f'Ponto_id = {aluno_point["id"]}')
+                    aluno_route = database.select('Rota', where=f'codigo = {route_has_point["Rota_codigo"]}')
+                    bus = database.select('Onibus', where=f'placa = "{aluno_route["Onibus_placa"]}"')
+                    driver = database.select('Motorista', where=f'nome = "{aluno_route["Onibus_Motorista_nome"]}"')
+                    linha = database.select('Linha', where=f'nome = "{driver["Linha_nome"]}"')
+                    
+
