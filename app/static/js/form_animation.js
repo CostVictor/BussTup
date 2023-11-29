@@ -8,26 +8,30 @@ if (window.location.href.includes('/cadastro')) {
         divRolagem = divRolagem[0]
     } else {divRolagem = divRolagem[1]}
 
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            entry.target.classList.remove('hidden')
-          } else {
-            entry.target.classList.remove('visible');
-            entry.target.classList.add('hidden');
-          }
-        });
-      }, {
-        root: divRolagem,
-        rootMargin: '0px',
-        threshold: 0.2
-      });
-
+    const observer = createObserver(divRolagem)
     const elements_animate = divRolagem.querySelectorAll('div.hidden')
     elements_animate.forEach(element => {
         observer.observe(element)
     })
+}
+
+function createObserver(root) {
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                entry.target.classList.remove('hidden')
+            } else {
+                entry.target.classList.remove('visible');
+                entry.target.classList.add('hidden');
+            }
+        });
+    }, {
+        root: root,
+        rootMargin: '0px',
+        threshold: 0.2
+    });
+    return observer
 }
 
 // ~~~~~ Animações do rótulo (Label) ~~~~~ //

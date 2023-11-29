@@ -10,12 +10,39 @@
 
 .text.principal {
     font-size: calc(1.15vw + 1.15vh + 1vmin);
-    margin-right: 0.4rem;
+    margin-right: calc(0.2vw + 0.2vh + 1vmin);
 }
 
 .text.secundario {
-    font-size: calc(0.9vw + 0.9vh + 1vmin);
-    margin-top: 0.8rem;
+    font-size: calc(0.8vw + 0.85vh + 1vmin);
+    margin-top: calc(0.1vw + 0.1vh + 0.1vmin);
+    margin-right: calc(0.1vw + 0.1vh + 1vmin);
+}
+
+.text.terciario {
+    margin: 0;
+    font-size: calc(0.65vw + 0.65vh + 1vmin);
+    margin-top: calc(0.1vw + 0.1vh + 0.1vmin);
+    margin-right: calc(0.1vw + 0.1vh + 1vmin);
+}
+
+.text.title {
+    margin: calc(1.5vw + 1.5vh + 1vmin) 0 calc(0.7vw + 0.7vh + 1vmin) 0;
+    font-size: calc(1vw + 1vh + 1vmin);
+    border-left: var(--azul_terciario) solid 0.06rem;
+    padding-left: calc(0.3vw + 0.3vh + 1vmin);
+    font-weight: bold;
+}
+
+.text.content {
+    color: var(--cinza_secundario);
+    align-items: center;
+}
+
+.text.emphasis {
+    padding: calc(0.1vw + 0.1vh + 0.7vmin) calc(0.3vw + 0.3vh + 0.7vmin) calc(0.1vw + 0.1vh + 0.7vmin) calc(0.3vw + 0.3vh + 0.7vmin);
+    background-color: var(--branco_primario);
+    border-radius: calc(0.5vw + 0.5vh + 1vmin)
 }
 
 .text--select {

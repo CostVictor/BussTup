@@ -27,15 +27,162 @@
 
     <section id="content" class="page__container--content scroll_horizontal content_noBorder">
         <div id="aba_agenda" class="page__container--aba">
-            {% if role == 'aluno' %}
-                <div id="area_agenda" class="page__container column">
-                    <div class="page__container title">
-                        <h1 id="nome_linha" class="text principal">Nome da linha</h1>
-                        <h1 class="text principal">-</h1>
-                        <h1 id="cidade_linha" class="text principal">Cidade</h1>
-                    </div>
+            <div id="area_agenda" class="page__container column">
+                <div class="page__container title enter">
+                    <h1 id="nome_linha" class="text principal">Nome da linha</h1>
+                    <h1 class="text principal">-</h1>
+                    <h1 id="cidade_linha" class="text principal">Cidade</h1>
                 </div>
-            {% endif %}
+
+                {% if role == 'aluno' %}
+                <div class="page__container enter">
+                    <h1 class="text title">Meu ponto</h1>
+                </div>
+                    <div id="meu_ponto" class="enter">
+                        <div class="page__container">
+                            <h2 class="text secundario emphasis">Motorista</h2>
+                            <h2 id="nome_motorista" class="text secundario content">Nome do motorista</h2>
+                        </div>
+                        <div class="page__container">
+                            <div class="page__container">
+                                <h2 class="text secundario emphasis">Ponto</h2>
+                                <h2 id="nome_ponto" class="text secundario content">Nome do ponto</h2>
+                            </div>
+                            <div class="page__container">
+                                <h2 class="text secundario emphasis">Turno</h2>
+                                <h2 id="turno_rota" class="text secundario content">Matutino</h2>
+                            </div>
+                        </div>
+                        <div class="page__container">
+                            <div class="page__container">
+                                <h2 class="text secundario emphasis">Ordem do ponto</h2>
+                                <h2 id="ordem_ponto" class="text secundario content">1</h2>
+                            </div>
+                            <div class="page__container">
+                                <h2 class="text secundario emphasis">Horário</h2>
+                                <h2 class="text secundario content">07h</h2>
+                            </div>
+                        </div>
+                        <div class="page__container">
+                            <h2 class="text secundario emphasis">Localização</h2>
+                            <h2 class="text secundario content">Localização do ponto</h2>
+                        </div>
+                    </div>
+
+                    <h1 class="text title enter">Minha semana</h1>
+                    <div id="minha_semana" class="enter">
+                        <div class="page__container">
+                            <h2 class="text secundario">Tickets restantes:</h2>
+                            <h2 class="text secundario content">21</h2>
+                        </div>
+                        <div class="page__container">
+                            <h2 class="text secundario">Contraturno fixo:</h2>
+                            <h2 class="text secundario content">Nenhum</h2>
+                        </div>
+                        <div class="page__container">
+                        </div>
+                        <div class="page__container scroll_horizontal">
+                            <div class="page__container--card hidden">
+                                <div class="page__container--card_title">
+                                    <h1 class="text terciario">Segunda</h1>
+                                </div>
+                                <div class="page__container--card_body">
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Data:</h3>
+                                        <h3 class="text terciario content">27/11/2023</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Irá faltar:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Contraturno:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="page__container--card hidden">
+                                <div class="page__container--card_title">
+                                    <h1 class="text terciario">Terça</h1>
+                                </div>
+                                <div class="page__container--card_body">
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Data:</h3>
+                                        <h3 class="text terciario content">28/11/2023</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Irá faltar:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Contraturno:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="page__container--card hidden">
+                                <div class="page__container--card_title">
+                                    <h1 class="text terciario">Quarta</h1>
+                                </div>
+                                <div class="page__container--card_body">
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Data:</h3>
+                                        <h3 class="text terciario content">29/11/2023</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Irá faltar:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Contraturno:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="page__container--card hidden">
+                                <div class="page__container--card_title">
+                                    <h1 class="text terciario">Quinta</h1>
+                                </div>
+                                <div class="page__container--card_body">
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Data:</h3>
+                                        <h3 class="text terciario content">30/11/2023</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Irá faltar:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Contraturno:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="page__container--card hidden">
+                                <div class="page__container--card_title">
+                                    <h1 class="text terciario">Sexta</h1>
+                                </div>
+                                <div class="page__container--card_body">
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Data:</h3>
+                                        <h3 class="text terciario content">01/12/2023</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Irá faltar:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                    <div class="page__container">
+                                        <h3 class="text terciario">Contraturno:</h3>
+                                        <h3 class="text terciario content">Não</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <h1 class="text title enter">Previsão do ônibus</h1>
+            </div>
         </div>
         <div id="aba_ponto" class="page__container--aba">
             <p>Área pontos</p>

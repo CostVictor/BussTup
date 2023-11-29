@@ -57,6 +57,11 @@ function enterPage() {
         sr.reveal('.page__container--header', { duration: 600 })
         nav.classList.remove('nav_hidden')
     }, 500)
+    var elements = document.querySelectorAll('[class*="enter"]')
+    elements.forEach((element, index) => {
+        element.style.opacity = 0
+        animated(index, element, 'fadeDown', 0.8, 0.6)
+    })
 }
 
 // ~~ Animação de rolamento ~~ //
@@ -67,22 +72,37 @@ content.addEventListener('scroll', function() {
     isScrolling = setTimeout(function() {
         const larguraDiv = content.scrollWidth / divs.length;
         const index = Math.floor(content.scrollLeft / larguraDiv)
+        const abas = document.querySelectorAll('div.page__container--aba')
       
-        btns.forEach(btn => btn.classList.remove('btn_selected'))
+        btns.forEach((btn) => {
+            btn.classList.remove('btn_selected')
+        })
         btns[index].classList.add('btn_selected')
-        aba_atual = btns[index].id
     }, 40)
   })
 
 function replaceAba(btn_id) {
+    const abas = document.querySelectorAll('div.page__container--aba')
     btns.forEach((element, index) => {
         if (element.id === btn_id) {
             const divAlvo = divs[index]
             content.scrollLeft = divAlvo.offsetLeft
             element.classList.add('btn_selected')
             aba_atual = element.id
+            // abas[index].style.display = 'flex'
         } else {
             element.classList.remove('btn_selected')
+            // abas[index].style.display = 'none'
         }
+    })
+}
+
+const rolagens = document.querySelectorAll('div.scroll_horizontal')
+for (let index = 0; index < rolagens.length; index++) {
+    const observer = createObserver(rolagens[index])
+    let elements_animate = rolagens[index]
+    elements_animate = elements_animate.querySelectorAll('div.hidden')
+    elements_animate.forEach(element => {
+        observer.observe(element)
     })
 }
