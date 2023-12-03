@@ -13,7 +13,7 @@
     --azul_terciario: #013983;
     --azul_quaternario: rgba(6, 66, 149, 0.64);
     --azul_quintenario: #1560c3;
-    --verde_primario: #35d9c9;
+    --verde_primario: #008e80;
     --vermelho_primario: #ff7272;
     --amarelo_primario: #ffe959;
 
@@ -114,6 +114,10 @@ body {
     opacity: 0;
 }
 
+.expansive {
+    animation: openForecast 1s ease;
+}
+
 /* Rolagens */
 
 .scroll_vertical {
@@ -128,7 +132,7 @@ body {
 .scroll_horizontal {
     display: flex;
     flex-direction: row;
-    overflow-x: scroll;
+    overflow-x: auto;
     scroll-snap-type: x mandatory;
 }
 
@@ -150,4 +154,8 @@ body {
 
 .no-scroll {
     overflow: hidden;
+}
+
+.btn_click {
+    cursor: pointer;
 }

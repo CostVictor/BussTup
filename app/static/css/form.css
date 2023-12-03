@@ -45,6 +45,7 @@
     width: 75%;
     align-items: center;
     margin-top: calc(0.4vw + 0.4vh + 1vmin);
+    margin-bottom: calc(0.4vw + 0.4vh + 1vmin);
 }
 
 .form__container--card {
@@ -83,7 +84,7 @@
     border-bottom: var(--azul_primario) solid 0.06rem;
     font-size: calc(3vw + 2.5vh + 1vmin);
     padding: calc(0.1vw + 0.1vh + 1vmin);
-    margin-bottom: calc(2vw + 1.8vh + 1vmin);
+    margin-bottom: calc(1vw + 1vh + 1vmin);
     pointer-events: none;
     width: 80%;
 }

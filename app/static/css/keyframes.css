@@ -19,3 +19,31 @@
         transform: translateY(calc(-1vw + -1vh + -1vmin));
     }
 }
+
+@keyframes popupOpen {
+  0% {
+    scale: 0.85;
+    opacity: 0;
+  }
+  50% {
+    scale: 1.02;
+    opacity: 1;
+  }
+  80% {
+    scale: 0.98;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+@keyframes popupClose {
+  0% {
+    scale: 1;
+    opacity: 1;
+  }
+  100% {
+    scale: 0.7;
+    opacity: 0;
+  }
+}

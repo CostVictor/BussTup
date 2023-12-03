@@ -9,12 +9,24 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
         width: '80%',
         confirmButtonText: text_buttom,
         confirmButtonColor: '#004aad',
-        iconColor: `${icon === 'info'? "#ffe959" : icon === 'success'? "#0aa999" : "#35d9c9"}`
+        iconColor: `${icon === 'info'? "#ffe959" : icon === 'success'? "#0aa999" : "#ff7272"}`
     }).then(() => {
         document.body.classList.remove('no-scroll')
         if (redirect) {window.location.href = redirect}
     })
 }
+
+function create_popup_edit(type) {
+    if (type === 'ponto') {
+        Swal.fire({
+            title: 'teste',
+            customClass: {
+                title: 'form__text_title'
+            }
+        })
+    }
+}
+
 
 // ~~~~~ Validação de login ~~~~~ //
 
@@ -68,6 +80,12 @@ function validationRegister(type, event) {
                 if (!apenas_letras(campo.value.trim())) {
                     var erro_titulo = `${campoAlvo} inválido`
                     var erro_texto = `O campo ${campo.name} deve conter apenas letras.`
+                    execute = false; break
+                }
+            } else if (campoAlvo === 'Email') {
+                if (!campo.value.trim().includes('@')) {
+                    var erro_titulo = 'Email inválido'
+                    var erro_texto = 'O email especificado não é válido.'
                     execute = false; break
                 }
             } else if (campoAlvo === 'Senha') {

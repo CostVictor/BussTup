@@ -34,17 +34,19 @@ fetch('/gerar_token', {method: 'GET'})
                 request_data()
             }
         }, 500)
-        setInterval(request_data, 5000)
+        setInterval(request_data, 3000)
         
         socket.on('return_lines', (data) => {
             console.log(data)
         })
 
         socket.on('return_schedule', (data) => {
+            console.log(data)
             const area_agenda = document.getElementById('area_agenda')
         })
     })
 })
+
 
 // ~~ Animação de página ~~ //
 
@@ -58,13 +60,49 @@ function enterPage() {
         nav.classList.remove('nav_hidden')
     }, 500)
     var elements = document.querySelectorAll('[class*="enter"]')
-    elements.forEach((element, index) => {
-        element.style.opacity = 0
-        animated(index, element, 'fadeDown', 0.8, 0.6)
-    })
+    setTimeout(() => {
+        elements.forEach((element, index) => {
+            element.style.opacity = 0
+            animated(index, element, 'fadeDown', 0.7, 0)
+        })
+    }, 600)
 }
 
+function closePage() {}
+
+function open_popup_edit(id) {
+    document.body.classList.add('no-scroll')
+    const popup = document.getElementById(id)
+    const card = popup.querySelector('div.popup__container')
+    popup.classList.remove('inative')
+    popup.classList.remove('close')
+    card.classList.remove('close')
+}
+
+function cancel_popup_edit(id) {
+    const popup = document.getElementById(id)
+    const card = popup.querySelector('div.popup__container')
+    card.classList.add('close')
+    popup.classList.add('close')
+    setTimeout(() => {
+        popup.classList.add('inative')
+        document.body.classList.remove('no-scroll')
+    }, 100)
+}
+
+
 // ~~ Animação de rolamento ~~ //
+
+function ajustAba(index_atual) {
+    const abas = document.querySelectorAll('div.page__container.column')
+    abas.forEach((aba, index_aba) => {
+        if (index_aba === index_atual) {
+            aba.classList.remove('inative')
+        } else {
+            aba.classList.add('inative')
+        }
+    })
+}
 
 let isScrolling
 content.addEventListener('scroll', function() {
@@ -72,37 +110,60 @@ content.addEventListener('scroll', function() {
     isScrolling = setTimeout(function() {
         const larguraDiv = content.scrollWidth / divs.length;
         const index = Math.floor(content.scrollLeft / larguraDiv)
-        const abas = document.querySelectorAll('div.page__container--aba')
       
         btns.forEach((btn) => {
             btn.classList.remove('btn_selected')
         })
         btns[index].classList.add('btn_selected')
+        ajustAba(index)
     }, 40)
   })
 
 function replaceAba(btn_id) {
-    const abas = document.querySelectorAll('div.page__container--aba')
+    let index_atual = 0
     btns.forEach((element, index) => {
         if (element.id === btn_id) {
             const divAlvo = divs[index]
             content.scrollLeft = divAlvo.offsetLeft
             element.classList.add('btn_selected')
             aba_atual = element.id
-            // abas[index].style.display = 'flex'
+            index_atual = index
         } else {
             element.classList.remove('btn_selected')
-            // abas[index].style.display = 'none'
         }
     })
+    ajustAba(index_atual)
 }
 
 const rolagens = document.querySelectorAll('div.scroll_horizontal')
 for (let index = 0; index < rolagens.length; index++) {
-    const observer = createObserver(rolagens[index])
+    const observer = createObserver(rolagens[index], 0.15)
     let elements_animate = rolagens[index]
     elements_animate = elements_animate.querySelectorAll('div.hidden')
     elements_animate.forEach(element => {
         observer.observe(element)
     })
+}
+
+
+// ~~ Interações na aba ~~ //
+
+// ~~ Aba agenda
+function checkForecast(pos) {
+    const btn_title = document.getElementById(`title_${pos}`)
+    const icon_title = btn_title.querySelector('i')
+    const container_dias = document.getElementById(`dias_${pos}`)
+    dias = container_dias.querySelectorAll('div.align')
+    
+    if (container_dias.className.includes('inative')) {
+        dias.forEach((item, index) => {
+            item.style.opacity = 0
+            animated(index, item, 'fadeDown', 0.3, 0)
+        })
+        container_dias.classList.remove('inative')
+        icon_title.classList.add('open')
+    } else {
+        container_dias.classList.add('inative')
+        icon_title.classList.remove('open')
+    }
 }

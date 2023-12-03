@@ -15,8 +15,7 @@
 
 .text.secundario {
     font-size: calc(0.8vw + 0.85vh + 1vmin);
-    margin-top: calc(0.1vw + 0.1vh + 0.1vmin);
-    margin-right: calc(0.1vw + 0.1vh + 1vmin);
+    margin: calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin) calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin);
 }
 
 .text.terciario {
@@ -24,6 +23,18 @@
     font-size: calc(0.65vw + 0.65vh + 1vmin);
     margin-top: calc(0.1vw + 0.1vh + 0.1vmin);
     margin-right: calc(0.1vw + 0.1vh + 1vmin);
+}
+
+.text.quaternario {
+    font-size: calc(0.45vw + 0.45vh + 1vmin);
+}
+
+.text.indicate {
+    display: flex;
+    justify-content: center;
+    font-size: calc(0.65vw + 0.65vh + 1vmin);
+    margin-right: calc(0.1vw + 0.1vh + 1vmin);
+    width: calc(4vw + 4.5vh + 1vmin);
 }
 
 .text.title {
@@ -43,6 +54,10 @@
     padding: calc(0.1vw + 0.1vh + 0.7vmin) calc(0.3vw + 0.3vh + 0.7vmin) calc(0.1vw + 0.1vh + 0.7vmin) calc(0.3vw + 0.3vh + 0.7vmin);
     background-color: var(--branco_primario);
     border-radius: calc(0.5vw + 0.5vh + 1vmin)
+}
+
+.text.emphasis.max_width {
+    width: 100%;
 }
 
 .text--select {
@@ -74,4 +89,12 @@
     margin-top: calc(0.3vw + 0.3vh + 1vmin);
     margin-left: calc(0.1vw + 0.1vh + 1vmin);
     color: var(--azul_terciario);
+}
+
+.text.content.green {
+    color: var(--verde_primario);
+}
+
+.text.content.red {
+    color: var(--vermelho_primario);
 }

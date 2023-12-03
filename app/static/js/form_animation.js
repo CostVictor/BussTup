@@ -15,7 +15,7 @@ if (window.location.href.includes('/cadastro')) {
     })
 }
 
-function createObserver(root) {
+function createObserver(root, range_visibility=0.2) {
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -29,7 +29,7 @@ function createObserver(root) {
     }, {
         root: root,
         rootMargin: '0px',
-        threshold: 0.2
+        threshold: range_visibility
     });
     return observer
 }
@@ -45,28 +45,27 @@ for (let index = 0; index < forms.length; index++) {
 inputs.forEach(input => {
     const label = document.querySelector(`label[for="${input.id}"]`)
     const icon = document.getElementById(`icon_${input.id}`)
+    let inFocus = false
 
-    input.addEventListener('blur', function() {
-        if (input.value === '') {
-            input.value = ''
-            label.classList.remove('form__label--animate')
-            if (icon) {icon.classList.remove('form__icon--animate')}
-        } else {
+    function verify() {
+        if (inFocus) {
+            input.classList.remove('input_error')
             if (label) {label.classList.add('form__label--animate')}
             if (icon) {icon.classList.add('form__icon--animate')}
+        } else {
+            if (input.value.trim() === '') {
+                label.classList.remove('form__label--animate')
+                if (icon) {icon.classList.remove('form__icon--animate')}
+            } else {
+                if (label) {label.classList.add('form__label--animate')}
+                if (icon) {icon.classList.add('form__icon--animate')}
+            }
         }
-    })
+    }
+    input.addEventListener('focus', function() {inFocus = true})
+    input.addEventListener('blur', function() {inFocus = false})
+    setInterval(verify, 100)
 })
-
-function focusLabel(id) {
-    const label = document.querySelector(`label[for="${id}"]`)
-    const icon = document.getElementById(`icon_${id}`)
-    const input = document.getElementById(id)
-
-    label.classList.add('form__label--animate')
-    if (icon) {icon.classList.add('form__icon--animate')}
-    input.classList.remove('input_error')
-}
 
 // ~~~~~ Animação de icone ~~~~~ //
 
@@ -85,7 +84,7 @@ function animateIconPassword(id) {
 
 // ~~~~~ Animação de interface ~~~~~ //
 
-function animated(index, item, name, duraction = 0.5, value_initial = 0.55, sum = 0.06) {
+function animated(index, item, name, duraction = 0.5, value_initial = 0.55, sum = 0.07) {
     item.style.animation = `${name} ${duraction}s forwards ${value_initial + (index * sum)}s`
 }
 
@@ -105,7 +104,7 @@ function enterInterface(type) {
         })
     } else if (type === 'register') {
         const content = document.getElementById('content')
-        content.style.marginTop = '5%'
+        content.style.marginTop = '4.5%'
         elements.forEach((element, index) => {
             element.style.opacity = 0
             animated(index, element, 'fadeDown', 0.8, 0.1)
