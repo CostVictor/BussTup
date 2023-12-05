@@ -47,7 +47,13 @@
 .popup__container--content {
     width: 80%;
     height: 70%;
-    min-height: calc(13vw + 13vh + 1vmin);
+}
+
+.popup__container--content.local {
+    width: 100%;
+    min-height: 80%;
+    box-sizing: border-box;
+    max-height: calc(15vw + 15vh + 1vmin);
 }
 
 .popup__container--footer {
@@ -72,15 +78,28 @@
     font-size: calc(0.8vw + 0.8vh + 1vmin);
     margin-right: calc(0.5vw + 0.5vh + 1vmin);
     margin-bottom: calc(0.1vw + 0.1vh + 1vmin);
+    pointer-events: none;
     color: var(--azul_terciario);
 }
 
 .popup__text.content {
-    color: var(--cinza_secundario)
+    color: var(--azul_terciario)
 }
 
 .popup__text.info {
     font-size: calc(0.5vw + 0.5vh + 1vmin);
+}
+
+.popup__text.input {
+    margin: 0 0 0 calc(0.5vw + 0.5vh + 1vmin);
+}
+
+.popup__text.input.title {
+    border-right: var(--azul_terciario) solid 0.06rem;
+    padding: 0 calc(0.2vw + 0.2vh + 1vmin) 0 calc(0.2vw + 0.2vh + 1vmin);
+    text-align: center;
+    margin: 0;
+    width: 5%;
 }
 
 .popup__btn {
@@ -91,6 +110,7 @@
     padding: calc(0.5vw + 0.5vh + 0.5vmin) calc(1vw + 1vh + 0.5vmin) calc(0.5vw + 0.5vh + 0.5vmin) calc(1vw + 1vh + 0.5vmin);
     font-size: calc(0.7vw + 0.7vh + 1vmin);
     border-radius: calc(0.5vw + 0.5vh + 1vmin);
+    letter-spacing: calc(0.1vw + 0.1vh + 0.1vmin);
     background-color: var(--azul_terciario);
     color: var(--branco_secundario);
     transition: scale 0.2s ease;
@@ -105,4 +125,51 @@
 .popup__btn.cancel {
     background-color: var(--branco_secundario);
     color: var(--azul_terciario);
+}
+
+.popup__input {
+    display: flex;
+    align-items: center;
+    background-color: var(--branco_terciario);
+    border-radius: calc(0.1vw + 0.1vh + 1vmin);
+    padding: calc(0.1vw + 0.1vh + 1vmin) 0 calc(0.1vw + 0.1vh + 1vmin) 0;
+    margin: calc(0.2vw + 0.2vh + 1vmin) 0 calc(0.2vw + 0.2vh + 1vmin) 0;
+    cursor: pointer
+}
+
+.popup__input.inative {
+    display: none;
+}
+
+.popup__input.checkbox {
+    width: 100%;
+    transition: opacity 0.2s ease, background-color 0.25s ease;
+}
+
+.popup__input.checkbox.selected {
+    background-color: var(--branco_quaternario);
+}
+
+.popup__icon {
+    right: 0;
+    color: var(--azul_terciario);
+    font-size: calc(1vw + 1vh + 1vmin);
+    transition: opacity 0.2s ease, scale 0.2s ease;
+}
+
+.popup__icon.selected {
+    scale: 1.2;
+}
+
+.popup__icon.checkbox {
+    margin-right: calc(0.5vw + 0.5vh + 1vmin);
+    margin-left: auto;
+}
+
+.popup__icon.ratio {
+    margin: 0 0 0 calc(0.5vw + 0.5vh + 1vmin);
+}
+
+.popup__icon.hidden {
+    opacity: 0;
 }

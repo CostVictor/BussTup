@@ -87,6 +87,7 @@ function cancel_popup_edit(id) {
     setTimeout(() => {
         popup.classList.add('inative')
         document.body.classList.remove('no-scroll')
+        popup_resetContent(id)
     }, 100)
 }
 
@@ -135,24 +136,27 @@ function replaceAba(btn_id) {
     ajustAba(index_atual)
 }
 
-const rolagens = document.querySelectorAll('div.scroll_horizontal')
-for (let index = 0; index < rolagens.length; index++) {
-    const observer = createObserver(rolagens[index], 0.15)
-    let elements_animate = rolagens[index]
-    elements_animate = elements_animate.querySelectorAll('div.hidden')
-    elements_animate.forEach(element => {
-        observer.observe(element)
-    })
+function set_observerScroll(obj) {
+    for (let index = 0; index < obj.length; index++) {
+        const observer = createObserver(obj[index], 0.15)
+        let elements_animate = obj[index]
+        elements_animate = elements_animate.querySelectorAll('div.hidden')
+        elements_animate.forEach(element => {
+            observer.observe(element)
+        })
+    }
 }
+set_observerScroll(document.querySelectorAll('div.scroll_horizontal'))
+set_observerScroll(document.querySelectorAll('div.scroll_vertical'))
 
 
 // ~~ Interações na aba ~~ //
 
 // ~~ Aba agenda
-function checkForecast(pos) {
-    const btn_title = document.getElementById(`title_${pos}`)
+function checkForecast(id) {
+    const btn_title = document.getElementById(`title_${id}`)
     const icon_title = btn_title.querySelector('i')
-    const container_dias = document.getElementById(`dias_${pos}`)
+    const container_dias = document.getElementById(`dias_${id}`)
     dias = container_dias.querySelectorAll('div.align')
     
     if (container_dias.className.includes('inative')) {
@@ -165,5 +169,52 @@ function checkForecast(pos) {
     } else {
         container_dias.classList.add('inative')
         icon_title.classList.remove('open')
+    }
+}
+
+
+// ~~ Interações popup edit ~~ //
+
+function popup_resetContent(popup_id) {
+    const popup = document.getElementById(popup_id)
+    const itens = popup.querySelectorAll('div.popup__input')
+
+    if (popup_id === 'edit_ponto') {
+        itens.forEach(element => {
+            if (element.className.includes('conf')) {
+                element.classList.add('selected')
+            } else {
+                element.classList.remove('selected')
+            }
+        })
+    } else if (popup_id === 'edit_contraturno') {
+        itens.forEach(element => {
+            icon = element.querySelector('i')
+            if (icon.className.includes('conf')) {
+                icon.classList.replace('bi-circle', 'bi-check2-circle')
+                icon.classList.add('selected')
+            } else {
+                icon.classList.replace('bi-check2-circle', 'bi-circle')
+                icon.classList.remove('selected')
+            }
+        })
+    }
+}
+
+function popup_selectOption(popup_id) {
+    const elements_popup = Array.from(document.getElementById(popup_id).children)
+    elements_popup.forEach(item => {
+        item.classList.toggle('selected')
+    })
+}
+
+function popup_confirmBox(item) {
+    icon = item.querySelector('i')
+    if (icon.className.includes('check')) {
+        icon.classList.replace('bi-check2-circle', 'bi-circle')
+        icon.classList.remove('selected')
+    } else {
+        icon.classList.replace('bi-circle', 'bi-check2-circle')
+        icon.classList.add('selected')
     }
 }

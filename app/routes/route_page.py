@@ -19,4 +19,6 @@ def cadastro():
 @login_required
 def pag_usuario():
     role = current_user.roles[0].name
-    return render_template('pag_usuario.html', role=role)
+    turnos = ('Matutino', 'Vespertino', 'Noturno')
+    dias_semana = ('Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta')
+    return render_template('pag_usuario.html', role=role, turnos=turnos, dias_semana=dias_semana)

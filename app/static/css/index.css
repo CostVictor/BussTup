@@ -5,6 +5,7 @@
     --branco_primario: #f0f6ff;
     --branco_secundario: #ffffff;
     --branco_terciario: #fafafa;
+    --branco_quaternario: #dfecff;
     --cinza_primario: #7c7c7c;
     --cinza_secundario: #454545;
     --cinca_terciario: #b3b3b3;
@@ -124,9 +125,13 @@ body {
     display: flex;
     padding: calc(0.8vw + 0.8vh + 1vmin);
     flex-direction: column;
-    max-height: 45vh;
     overflow-y: auto;
     position: relative;
+}
+
+.scroll_vertical.no_borderY {
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .scroll_horizontal {

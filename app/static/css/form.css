@@ -53,6 +53,7 @@
     flex-direction: column;
     padding: calc(0.1vw + 0.1vh + 1vmin);
     padding-bottom: calc(0.5vw + 0.5vh + 1vmin);
+    max-height: 45vh;
     width: 80%;
 }
 

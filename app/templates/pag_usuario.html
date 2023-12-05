@@ -23,17 +23,44 @@
     <div id="edit_ponto" class="popup__container--shadow inative">
         <div class="popup__container">
             <div class="popup__container--header">
-                <h1 class="popup__title">Mudar ponto</h1>
+                <h1 class="popup__title">Editar ponto</h1>
             </div>
             <div class="popup__container--content">
                 <h2 class="popup__text info">(OBS) Mudar o ponto altera seu local fixo.</h2>
                 <h2 class="popup__text">Selecione o novo local:</h2>
-                <div class="scroll_vertical">
-                    
+                <div id="content_local_ponto" class="scroll_vertical no_borderY popup__container--content local">
+                    <div class="popup__input checkbox inative" onclick="popup_selectOption('content_local_ponto')">
+                        <h2 class="popup__text input title"></h2>
+                        <h2 class="popup__text content input"></h2>
+                        <i class="bi bi-check-lg popup__icon checkbox inative"></i>
+                    </div>
                 </div>
             </div>
             <div class="popup__container--footer">
                 <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_ponto')">Cancelar</button>
+                <button class="popup__btn">Salvar</button>
+            </div>
+        </div>
+    </div>
+    <div id="edit_contraturno" class="popup__container--shadow inative">
+        <div class="popup__container">
+            <div class="popup__container--header">
+                <h1 class="popup__title">Definir contraturno</h1>
+            </div>
+            <div class="popup__container--content">
+                <h2 class="popup__text">Selecione seus dias fixos:</h2>
+                <div id="content_local_contraturno" class="scroll_vertical no_borderY popup__container--content local">
+                    {% for index in range(5) %}
+                    <div class="popup__input checkbox hidden" onclick="popup_confirmBox(this)">
+                        <i class="bi bi-circle popup__icon ratio"></i>
+                        <h2 class="popup__text content input">{{ dias_semana[index] }}</h2>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <h2 class="popup__text info">Você pode selecionar mais de uma alternativa.</h2>
+            <div class="popup__container--footer">
+                <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_contraturno')">Cancelar</button>
                 <button class="popup__btn">Salvar</button>
             </div>
         </div>
@@ -102,13 +129,13 @@
                     <div class="page__container">
                         <h2 class="text secundario">Contraturno fixo:</h2>
                         <h2 class="text secundario content">Nenhum</h2>
-                        <i class="bi bi-pencil-square page__icon content"></i>
+                        <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_contraturno')"></i>
                     </div>
                     <div class="page__container scroll_horizontal">
                         {% for index in range(5) %}
                         <div class="page__container--card hidden">
                             <div class="page__container--card_title pos_relative">
-                                <h1 class="text terciario">Segunda</h1>
+                                <h1 class="text terciario">{{ dias_semana[index] }}</h1>
                                 <i class="bi bi-pencil-square page__icon card"></i>
                             </div>
                             <div class="page__container--card_body">
@@ -118,7 +145,7 @@
                                 </div>
                                 <div class="page__container">
                                     <h3 class="text terciario">Irá faltar:</h3>
-                                    <h3 id="falta" class="text terciario content">Não</h3>
+                                    <h3 class="text terciario content">Não</h3>
                                 </div>
                                 <div class="page__container">
                                     <h3 class="text terciario">Contraturno:</h3>
@@ -145,19 +172,19 @@
                     </div>
 
                     {% for index_previsao in range(3) %}
-                    <div id="previsao_{{ index_previsao }}" class="enter">
-                        <div id="title_{{ index_previsao }}" class="page__container interaction pos_relative" onclick="checkForecast('{{ index_previsao }}')">
-                            <h2 class="text secundario emphasis max_width">Matutino</h2>
+                    <div id="previsao_{{ turnos[index_previsao] }}" class="enter">
+                        <div id="title_{{ turnos[index_previsao] }}" class="page__container interaction pos_relative" onclick="checkForecast('{{ turnos[index_previsao] }}')">
+                            <h2 class="text secundario emphasis max_width">{{ turnos[index_previsao] }}</h2>
                             <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                         </div>
-                        <div id="dias_{{ index_previsao }}" class="inative">
+                        <div id="dias_{{ turnos[index_previsao] }}" class="inative">
                             {% for index_dia in range(5) %}
-                            <div id="previsao_{{ index_previsao }}-dia_{{ index_dia }}" class="page__container align">
-                                <h2 class="text indicate emphasis">Segunda</h2>
+                            <div id="previsao_{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
+                                <h2 class="text indicate emphasis">{{ dias_semana[index_dia] }}</h2>
                                 <i class="bi bi-arrow-right-short page__icon indicate"></i>
                                 <div class="page__container">
                                     <h2 class="text terciario">Previsão:</h2>
-                                    <h2 id="previsao_pessoas" class="text terciario content">24</h2>
+                                    <h2 id="previsao_pessoas" class="text terciario content">0</h2>
                                     <h2 class="text terciario content">pessoas</h2>
                                 </div>
                                 <div class="page__container">

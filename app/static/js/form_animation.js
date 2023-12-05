@@ -34,6 +34,7 @@ function createObserver(root, range_visibility=0.2) {
     return observer
 }
 
+
 // ~~~~~ Animações do rótulo (Label) ~~~~~ //
 
 const inputs = document.querySelectorAll('input')
@@ -67,6 +68,7 @@ inputs.forEach(input => {
     setInterval(verify, 100)
 })
 
+
 // ~~~~~ Animação de icone ~~~~~ //
 
 function animateIconPassword(id) {
@@ -81,6 +83,7 @@ function animateIconPassword(id) {
         inputPassword.type = 'password'
     }
 }
+
 
 // ~~~~~ Animação de interface ~~~~~ //
 
@@ -140,6 +143,7 @@ function closeInterface(type, redirect) {
         }, 980)
     }
 }
+
 
 // ~~~~~ Troca de formulário ~~~~~ //
 
