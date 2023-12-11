@@ -59,7 +59,7 @@
 
 .form__container--input {
     display: flex;
-    margin-top: calc(1vw + 2vh + 1vmin);
+    margin-top: calc(1vw + 1.1vh + 1vmin);
     transition: 0.4s ease;
 }
 
@@ -180,7 +180,7 @@
     background-color: var(--azul_primario);
     font-size: calc(1vw + 1vh + 1vmin);
     letter-spacing: calc(0.1vw + 0.1vh + 0.5vmin);
-    margin-top: calc(2vw + 1.8vh + 1vmin);
+    margin-top: calc(1vw + 1.5vh + 1vmin);
     font-weight: bold;
     cursor: pointer;
 }

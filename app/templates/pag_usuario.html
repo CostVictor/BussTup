@@ -8,8 +8,8 @@
     <link rel="preload" href="/static/css/index.css" as="style">
     <link rel="preload" href="/static/css/page.css" as="style">
     <link rel="preload" href="/static/css/popup.css" as="style">
-    <link rel="preload" href="/static/js/form_animation.js" as="script">
-    <link rel="preload" href="/static/js/page_animation.js" as="script">
+    <link rel="preload" href="/static/js/interface.js" as="script">
+    <link rel="preload" href="/static/js/page.js" as="script">
     <link rel="preload" href="/static/js/validation.js" as="script">
 
     <link rel="stylesheet" href="/static/css/page.css">
@@ -20,28 +20,71 @@
 <body onload="enterPage()">
     <p class="hidden_point">.</p>
     {% if role == 'aluno' %}
+    <!-- Modelos -->
+    <div id="model_ponto" class="popup__input checkbox inative">
+        <p id="number_ponto" class="popup__text input title"></p>
+        <p id="name_ponto" class="popup__text input"></p>
+        <i class="bi bi-check-lg popup__icon checkbox inative"></i>
+    </div>
+
+    <!-- POPUPs -->
     <div id="edit_ponto" class="popup__container--shadow inative">
         <div class="popup__container">
             <div class="popup__container--header">
                 <h1 class="popup__title">Editar ponto</h1>
             </div>
             <div class="popup__container--content">
-                <h2 class="popup__text info">(OBS) Mudar o ponto altera seu local fixo.</h2>
-                <h2 class="popup__text">Selecione o novo local:</h2>
-                <div id="content_local_ponto" class="scroll_vertical no_borderY popup__container--content local">
-                    <div class="popup__input checkbox inative" onclick="popup_selectOption('content_local_ponto')">
-                        <h2 class="popup__text input title"></h2>
-                        <h2 class="popup__text content input"></h2>
-                        <i class="bi bi-check-lg popup__icon checkbox inative"></i>
+                <h4 class="popup__text info margin_bottom">(OBS) Esta edição altera seus locais fixos.</h4>
+                <div id="scroll_principal" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                    <h3 class="popup__text question first">Deseja mudar o ponto de subida?</h3>
+                    <div id="options_subida_fixo" class="popup__container--options">
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_subida_fixo', this)">
+                            <i class="bi bi-circle popup__icon ratio"></i>
+                            <p class="popup__text content input">Sim</p>
+                        </div>
+    
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_subida_fixo', this)">
+                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                            <p class="popup__text content input">Não</p>
+                        </div>
                     </div>
+    
+                    <h3 id="options_subida_fixo_title" class="popup__text info space inative">Selecione o novo local de subida:</h3>
+                    <div id="options_subida_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative">
+                        {% for index in range(10) %}
+                        <div id="model_ponto_{{ index }}" class="popup__input checkbox hidden">
+                            <p id="number_ponto" class="popup__text input title">{{ index + 1 }}</p>
+                            <p id="name_ponto" class="popup__text input">Teste</p>
+                            <i class="bi bi-check-lg popup__icon checkbox inative"></i>
+                        </div>
+                        {% endfor %}
+                    </div>
+    
+                    <h3 class="popup__text question">Deseja mudar o ponto de descida?</h3>
+                    <div id="options_retorno_fixo" class="popup__container--options">
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_retorno_fixo', this)">
+                            <i class="bi bi-circle popup__icon ratio"></i>
+                            <p class="popup__text content input">Sim</p>
+                        </div>
+    
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_retorno_fixo', this)">
+                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                            <p class="popup__text content input">Não</p>
+                        </div>
+                    </div>
+    
+                    <h3 id="options_retorno_fixo_title" class="popup__text info space inative">Selecione o novo local de descida:</h3>
+                    <div id="options_retorno_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
                 </div>
             </div>
+
             <div class="popup__container--footer">
                 <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_ponto')">Cancelar</button>
                 <button class="popup__btn">Salvar</button>
             </div>
         </div>
     </div>
+
     <div id="edit_contraturno" class="popup__container--shadow inative">
         <div class="popup__container">
             <div class="popup__container--header">
@@ -49,18 +92,93 @@
             </div>
             <div class="popup__container--content">
                 <h2 class="popup__text">Selecione seus dias fixos:</h2>
-                <div id="content_local_contraturno" class="scroll_vertical no_borderY popup__container--content local">
+                <div id="content_local_contraturno" class="scroll_vertical no_borderY popup__container--scroll principal">
                     {% for index in range(5) %}
                     <div class="popup__input checkbox hidden" onclick="popup_confirmBox(this)">
                         <i class="bi bi-circle popup__icon ratio"></i>
-                        <h2 class="popup__text content input">{{ dias_semana[index] }}</h2>
+                        <p class="popup__text input">{{ dias_semana[index] }}</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
-            <h2 class="popup__text info">Você pode selecionar mais de uma alternativa.</h2>
+            <h4 class="popup__text info space">Você pode selecionar mais de uma opção.</h4>
             <div class="popup__container--footer">
                 <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_contraturno')">Cancelar</button>
+                <button class="popup__btn">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit_dia" class="popup__container--shadow inative">
+        <div class="popup__container">
+            <div class="popup__container--header">
+                <h1 id="dia" class="popup__title"></h1>
+            </div>
+            <div class="popup__container--content">
+                <div class="page__container margin_botton">
+                    <h4 class="popup__text">Data:</h4>
+                    <h4 id="data_dia" class="popup__text"></h4>
+                </div>
+                <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                    <h3 class="popup__text question first">Irá faltar no dia?</h3>
+                    <div id="options_falta" class="popup__container--options">
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_falta', this)">
+                            <i class="bi bi-circle popup__icon ratio"></i>
+                            <p class="popup__text content input">Sim</p>
+                        </div>
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_falta', this)">
+                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                            <p class="popup__text content input">Não</p>
+                        </div>
+                    </div>
+
+                    <h3 class="popup__text question">Irá ficar contraturno?</h3>
+                    <div id="options_contraturno" class="popup__container--options">
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_contraturno', this)">
+                            <i class="bi bi-circle popup__icon ratio"></i>
+                            <p class="popup__text content input">Sim</p>
+                        </div>
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_contraturno', this)">
+                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                            <p class="popup__text content input">Não</p>
+                        </div>
+                    </div>
+
+                    <h3 class="popup__text question">Deseja subir em outro local?</h3>
+                    <div id="options_subida" class="popup__container--options">
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_subida', this)">
+                            <i class="bi bi-circle popup__icon ratio"></i>
+                            <p class="popup__text content input">Sim</p>
+                        </div>
+
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_subida', this)">
+                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                            <p class="popup__text content input">Não</p>
+                        </div>
+                    </div>
+
+                    <h3 id="options_subida_title" class="popup__text info space inative">Selecione o local de subida:</h3>
+                    <div id="options_subida_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
+
+                    <h3 class="popup__text question">Deseja descer em outro local?</h3>
+                    <div id="options_retorno" class="popup__container--options">
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_retorno', this)">
+                            <i class="bi bi-circle popup__icon ratio"></i>
+                            <p class="popup__text content input">Sim</p>
+                        </div>
+
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_retorno', this)">
+                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                            <p class="popup__text content input">Não</p>
+                        </div>
+                    </div>
+
+                    <h3 id="options_retorno_title" class="popup__text info space inative">Selecione o local de descida:</h3>
+                    <div id="options_retorno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
+                </div>
+            </div>
+            <div class="popup__container--footer">
+                <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_dia')">Cancelar</button>
                 <button class="popup__btn">Salvar</button>
             </div>
         </div>
@@ -74,9 +192,14 @@
             <i class="bi bi-person-circle page__icon"></i>
         </div>
     </header>
-
+    
     <section id="content" class="page__container--content scroll_horizontal content_noBorder">
+        
         <div id="aba_agenda" class="page__container--aba">
+            <div id="not_line_agenda" class="inative">
+                Você não possui uma linha
+            </div>
+
             <div id="area_agenda" class="page__container column">
                 <div class="page__container title enter">
                     <h1 id="nome_linha" class="text principal">Nome da linha</h1>
@@ -85,71 +208,73 @@
                 </div>
 
                 {% if role == 'aluno' %}
+                <h1 class="text title enter">Meu ponto</h1>
                 <div class="page__container enter">
-                    <h1 class="text title">Meu ponto</h1>
-                    <i class="bi bi-pencil-square page__icon title" onclick="open_popup_edit('edit_ponto')"></i>
+                    <p class="text secundario emphasis">Motorista</p>
+                    <p id="motorista_nome" class="text secundario content fundo">Nome do motorista</p>
                 </div>
-                <div id="meu_ponto" class="enter">
-                    <div class="page__container">
-                        <h2 class="text secundario emphasis">Motorista</h2>
-                        <h2 id="nome_motorista" class="text secundario content">Nome do motorista</h2>
+
+                <div class="enter">
+                    <div class="page__container pos_relative">
+                        <p class="text secundario emphasis">Ponto</p>
+                        <p id="nome_ponto" class="text secundario emphasis max_width">Nome do ponto</p>
+                        <i class="bi bi-pencil-square page__icon content absolute" onclick="open_popup_edit('edit_ponto')"></i>
                     </div>
-                    <div class="page__container">
-                        <div class="page__container">
-                            <h2 class="text secundario emphasis">Ponto</h2>
-                            <h2 id="nome_ponto" class="text secundario content">Nome do ponto</h2>
-                        </div>
-                        <div class="page__container">
-                            <h2 class="text secundario emphasis">Turno</h2>
-                            <h2 id="turno_rota" class="text secundario content">Matutino</h2>
-                        </div>
-                    </div>
-                    <div class="page__container">
-                        <div class="page__container">
-                            <h2 class="text secundario emphasis">Ordem do ponto</h2>
-                            <h2 id="ordem_ponto" class="text secundario content">1</h2>
-                        </div>
-                        <div class="page__container">
-                            <h2 class="text secundario emphasis">Horário</h2>
-                            <h2 class="text secundario content">07h</h2>
-                        </div>
-                    </div>
-                    <div class="page__container">
-                        <h2 class="text secundario emphasis">Localização</h2>
-                        <h2 class="text secundario content">Localização do ponto</h2>
+
+                    <div class="page__container space_itens">
+                        <p class="text secundario emphasis">Ordem</p>
+                        <p id="ordem_ponto" class="text secundario content fundo">1</p>
+                        <p class="text secundario emphasis">Horário</p>
+                        <p id="horario_ponto" class="text secundario content fundo">07h</p>
+                        <p class="text secundario emphasis">Localização</p>
+                        <i id="localizacao_ponto" class="bi bi-pin-map page__icon content location"></i>
                     </div>
                 </div>
 
                 <h1 class="text title enter">Minha semana</h1>
-                <div id="minha_semana" class="enter">
-                    <div class="page__container">
-                        <h2 class="text secundario">Tickets restantes:</h2>
-                        <h2 class="text secundario content">21</h2>
-                    </div>
-                    <div class="page__container">
-                        <h2 class="text secundario">Contraturno fixo:</h2>
-                        <h2 class="text secundario content">Nenhum</h2>
+                <div id="minha_semana" class="">
+                    <!-- <div class="page__container">
+                        <p class="text secundario fundo">Tickets restantes:</p>
+                        <p id="quant_tickets" class="text secundario content fundo"></p>
+                    </div> -->
+                    <div class="page__container enter">
+                        <p class="text secundario fundo">Contraturno fixo:</p>
+                        <p id="contaturnos_fixos" class="text secundario content fundo">Nenhum</p>
                         <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_contraturno')"></i>
                     </div>
-                    <div class="page__container scroll_horizontal">
+
+                    <div class="page__container scroll_horizontal enter">
                         {% for index in range(5) %}
-                        <div class="page__container--card hidden">
+                        <div class="page__container--card hidden" onclick="open_popup_edit('edit_dia', this)">
                             <div class="page__container--card_title pos_relative">
                                 <h1 class="text terciario">{{ dias_semana[index] }}</h1>
                                 <i class="bi bi-pencil-square page__icon card"></i>
                             </div>
+
                             <div class="page__container--card_body">
                                 <div class="page__container">
-                                    <h3 class="text terciario">Data:</h3>
-                                    <h3 class="text terciario content">27/11/2023</h3>
+                                    <p class="text terciario">Data:</p>
+                                    <p id="data_{{ dias_semana[index] }}" class="text terciario content">27/11/2023</p>
                                 </div>
+
                                 <div class="page__container">
-                                    <h3 class="text terciario">Irá faltar:</h3>
-                                    <h3 class="text terciario content">Não</h3>
+                                    <p class="text terciario">Irá faltar:</p>
+                                    <p id="falta_{{ dias_semana[index] }}" class="text terciario content">Não</p>
                                 </div>
+
                                 <div class="page__container">
-                                    <h3 class="text terciario">Contraturno:</h3>
-                                    <h3 class="text terciario content">Não</h3>
+                                    <p class="text terciario">Contraturno:</p>
+                                    <p id="contraturno_{{ dias_semana[index] }}" class="text terciario content">Não</p>
+                                </div>
+
+                                <div class="page__container inative">
+                                    <p class="text terciario">Ponto subida:</p>
+                                    <p id="pSubida_{{ dias_semana[index] }}" class="text terciario content"></p>
+                                </div>
+
+                                <div class="page__container inative">
+                                    <p class="text terciario">Ponto descida:</p>
+                                    <p id="pDescida_{{ dias_semana[index] }}" class="text terciario content"></p>
                                 </div>
                             </div>
                         </div>
@@ -162,13 +287,16 @@
                 <div id="previsao_onibus">
                     {% if role == 'aluno' %}
                     <div class="page__container enter">
-                        <h3 class="text secundario">Capacidade total:</h3>
-                        <h3 id="capacidade_onibus" class="text secundario content">30</h3>
-                        <h3 class="text secundario content">pessoas</h3>
+                        <p class="text secundario fundo">Capacidade total:</p>
+                        <div class="text secundario fundo">
+                            <p id="capacidade_onibus" class="text secundario content container space">30</p>
+                            <p class="text secundario content container">pessoas</p>
+                        </div>
                     </div>
+
                     <div class="page__container enter">
-                        <h3 class="text secundario">Período:</h3>
-                        <h3 class="text secundario content">27/11/2023 - 01/12/2023</h3>
+                        <p class="text secundario fundo">Período:</p>
+                        <p class="text secundario content fundo">27/11/2023 - 01/12/2023</p>
                     </div>
 
                     {% for index_previsao in range(3) %}
@@ -177,37 +305,132 @@
                             <h2 class="text secundario emphasis max_width">{{ turnos[index_previsao] }}</h2>
                             <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                         </div>
+                        
                         <div id="dias_{{ turnos[index_previsao] }}" class="inative">
                             {% for index_dia in range(5) %}
                             <div id="previsao_{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
-                                <h2 class="text indicate emphasis">{{ dias_semana[index_dia] }}</h2>
+                                <h2 class="text indicate emphasis">{{ dias_semana[index_dia][0:3] }}</h2>
                                 <i class="bi bi-arrow-right-short page__icon indicate"></i>
-                                <div class="page__container">
-                                    <h2 class="text terciario">Previsão:</h2>
-                                    <h2 id="previsao_pessoas" class="text terciario content">0</h2>
-                                    <h2 class="text terciario content">pessoas</h2>
+                                <p class="text terciario fundo">Previsão:</p>
+                                <div class="text secundario fundo">
+                                    <p id="previsao_pessoas" class="text terciario content container space">0</p>
+                                    <p class="text terciario content container">pessoas</p>
                                 </div>
-                                <div class="page__container">
-                                    <h2 class="text terciario">Estado:</h2>
-                                    <h2 id="previsao_estado" class="text terciario content green">Normal</h2>
-                                </div>
+                                <p class="text terciario fundo">Estado:</p>
+                                <p id="previsao_estado" class="text terciario content green fundo">Normal</p>
                             </div>
                             {% endfor %}
                         </div>
                     </div>
                     {% endfor %}
+
+                    {% elif role == 'motorista' %}
+                    <!-- Modelos -->
+                    <div class="page__container enter">
+                        <p class="text secundario fundo">Período:</p>
+                        <p id="periodo_previsao" class="text secundario content fundo">09/12/2023 - 10/12/2023</p>
+                    </div>
+
+                    <div id="model_forecast_onibus" class="inative">
+                        <h1 class="page__division enter"></h1>
+                        <div class="page__container">
+                            <p class="text secundario emphasis">Ônibus</p>
+                            <p id="placa_onibus" class="text secundario emphasis max_width">Placa do ônibus</p>
+                        </div>
+
+                        <div class="page__container enter">
+                            <p class="text secundario emphasis">Motorista</p>
+                            <p id="motorista_nome" class="text secundario content fundo">Nome do motorista</p>
+                        </div>
+
+                        <div class="page__container enter">
+                            <p class="text secundario fundo">Capacidade total:</p>
+                            <div class="text secundario fundo">
+                                <p id="onibus_capacidade" class="text secundario content container space">0</p>
+                                <p class="text secundario content container">pessoas</p>
+                            </div>
+                        </div>
+
+                        {% for index_previsao in range(3) %}
+                        <div id="previsao_{{ turnos[index_previsao] }}" class="enter">
+                            <div id="title_{{ turnos[index_previsao] }}" class="page__container interaction pos_relative" onclick="checkForecast('{{ turnos[index_previsao] }}')">
+                                <h2 class="text secundario emphasis max_width">{{ turnos[index_previsao] }}</h2>
+                                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                            </div>
+                            
+                            <div id="dias_{{ turnos[index_previsao] }}" class="inative">
+                                {% for index_dia in range(5) %}
+                                <div id="previsao_{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
+                                    <h2 class="text indicate emphasis">{{ dias_semana[index_dia][0:3] }}</h2>
+                                    <i class="bi bi-arrow-right-short page__icon indicate"></i>
+                                    <p class="text terciario fundo">Previsão:</p>
+                                    <div class="text secundario fundo">
+                                        <p id="previsao_pessoas" class="text terciario content container space">0</p>
+                                        <p class="text terciario content container">pessoas</p>
+                                    </div>
+                                    <p class="text terciario fundo">Estado:</p>
+                                    <p id="previsao_estado" class="text terciario content green fundo">Normal</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
+
         <div id="aba_ponto" class="page__container--aba">
-            <p>Área pontos</p>
+            <div id="area_ponto" class="page__container column inative"></div>
         </div>
-        <div id="aba_onibus" class="page__container--aba">
-            <p>Área ônibus</p>
+
+        <div id="aba_linhas" class="page__container--aba">
+            <!-- Modelos -->
+            <div id="model_regiao" class="inative">
+                <h2 class="text title enter">Nome da cidade</h2>
+            </div>
+
+            <div id="model_line" class="page__container--line inative">
+                <div class="page__container--line_content">
+                    <div class="page__container">
+                        <i class="bi bi-bus-front-fill page__icon--box"></i>
+                        <h1 id="linha_nome" class="text box title_box">Nome da linha</h1>
+                    </div>
+                    <h3 id="nome_dono" class="text box">Nome do dono</h3>
+                </div>
+
+                <div class="page__container--line_image">
+                    <img class="page__line_img" src="/static/data/img/logo_busstup.png">
+                </div>
+            </div>
+            
+            <div id="area_linhas" class="page__container column inative">
+                <div class="page__container title enter">
+                    <h1 class="text principal">Linhas</h1>
+                </div>
+
+                {% if role == 'motorista' %}
+                <h2 class="text title enter">Minha linha</h2>
+                <div id="msg_criar_linha" class="enter">
+                    <p class="text secundario emphasis">Você ainda não está relacionado a nenhuma linha.</p>
+                    <p class="text secundario fundo">Solicite entrada em alguma linha ou crie a sua:</p>
+                    <div class="page__container--line selected">
+                        <i class="bi bi-plus-lg page__icon--box plus"></i>
+                    </div>
+                </div>
+                <div id="minha_linha_area" class="enter"></div>
+                <h1 class="page__division enter"></h1>
+                <div class="page__container">
+                    <p class="text secundario fundo enter">Solicite entrada:</p>
+                </div>
+                {% endif %}
+                </div>
+            </div>
         </div>
+
         <div id="aba_chat" class="page__container--aba">
-            <p>Área chat</p>
+            <div id="area_chat" class="page__container column inative"></div>
         </div>
     </section>
 
@@ -215,12 +438,15 @@
         <div class="page__btn">
             <i id="agenda" class="bi bi-journal-text page__icon--btn btn_selected" onclick="replaceAba('agenda')"></i>
         </div>
+
         <div class="page__btn">
             <i id="ponto" class="bi bi-geo-alt page__icon--btn" onclick="replaceAba('ponto')"></i>
         </div>
+
         <div class="page__btn">
-            <i id="linha" class="bi bi-bus-front page__icon--btn" onclick="replaceAba('linha')"></i>
+            <i id="linhas" class="bi bi-bus-front page__icon--btn" onclick="replaceAba('linhas')"></i>
         </div>
+
         <div class="page__btn">
             <i id="chat" class="bi bi-chat-dots page__icon--btn" onclick="replaceAba('chat')"></i>
         </div>
@@ -228,7 +454,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="/static/js/validation.js"></script>
-    <script src="/static/js/form_animation.js"></script>
-    <script src="/static/js/page_animation.js"></script>
+    <script src="/static/js/interface.js"></script>
+    <script src="/static/js/page.js"></script>
+    <script>checkLine()</script>
 </body>
 </html>

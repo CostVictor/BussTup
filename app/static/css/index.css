@@ -9,6 +9,7 @@
     --cinza_primario: #7c7c7c;
     --cinza_secundario: #454545;
     --cinca_terciario: #b3b3b3;
+    --cinza_quaternario: #b3b3b345;
     --azul_primario: #004aad;
     --azul_secundario: #003f93;
     --azul_terciario: #013983;
@@ -50,6 +51,7 @@ body {
     min-height: 100vh;
 }
 
+
 /* Containers */
 
 .container--alert_msg {
@@ -67,6 +69,7 @@ body {
     width: 75vw;
 }
 
+
 /* Posições */
 
 .pos_absolute {
@@ -76,6 +79,7 @@ body {
 .pos_relative {
     position: relative;
 }
+
 
 /* Ações */
 
@@ -88,6 +92,7 @@ body {
     position: absolute;
     pointer-events: none;
 }
+
 
 /* Keyframes */
 
@@ -118,6 +123,7 @@ body {
 .expansive {
     animation: openForecast 1s ease;
 }
+
 
 /* Rolagens */
 

@@ -16,6 +16,7 @@ class User_flask(db_flask.Model, UserMixin):
     hash_senha = db_flask.Column(db_flask.LargeBinary(60), nullable=False)
     fs_uniquifier = db_flask.Column(db_flask.String(64), nullable=False)
     active = db_flask.Column(db_flask.Boolean, nullable=False, default=True)
+    aceitou_termos = db_flask.Column(db_flask.Boolean, nullable=False, default=True)
 
 class Role_flask(db_flask.Model, RoleMixin):
     __tablename__ = 'Role'

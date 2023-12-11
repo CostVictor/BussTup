@@ -87,8 +87,16 @@ function animateIconPassword(id) {
 
 // ~~~~~ Animação de interface ~~~~~ //
 
-function animated(index, item, name, duraction = 0.5, value_initial = 0.55, sum = 0.07) {
-    item.style.animation = `${name} ${duraction}s forwards ${value_initial + (index * sum)}s`
+function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_init = 0, interval_itens = 0.06, opacity = 0) {
+    function config_animate(index, item, name, duraction, value_initial, sum) {
+        item.style.animation = `${name} ${duraction}s forwards ${value_initial + (index * sum)}s`
+    }
+    if (list_itens) {
+        list_itens.forEach((item, index) => {
+            item.style.opacity = opacity
+            config_animate(index, item, animate, duraction, dalay_init, interval_itens)
+        })
+    }
 }
 
 function enterInterface(type) {
@@ -101,17 +109,12 @@ function enterInterface(type) {
         container.style.transition = 'border-radius 0.5s ease, height 0.85s ease 0.15s'
         container.classList.remove('container_complete')
         container.classList.add('enter--radius')
-        elements.forEach((element, index) => {
-            element.style.opacity = 0
-            animated(index, element, 'fadeDown')
-        })
+        animate_itens(elements, 'fadeDown', 0.6, 0.55)
+        
     } else if (type === 'register') {
         const content = document.getElementById('content')
         content.style.marginTop = '4.5%'
-        elements.forEach((element, index) => {
-            element.style.opacity = 0
-            animated(index, element, 'fadeDown', 0.8, 0.1)
-        })
+        animate_itens(elements, 'fadeDown', 0.8, 0.1)
     }
 }
 
@@ -119,11 +122,7 @@ function closeInterface(type, redirect) {
     const container = document.getElementById('container')
     let elements = container.querySelectorAll('[class*="enter"]')
 
-    elements.forEach((element, index) => {
-        element.style.opacity = 1
-        animated(index, element, 'outUp', duraction = 0.3, value_initial = 0)
-    })
-
+    animate_itens(elements, 'outUp', 0.3, 0, 0.07, 1)
     if (type === 'login') {
         container.style.transition = 'border-radius 0.5s ease 0.4s, height 0.7s ease'
         
@@ -151,6 +150,8 @@ function replace_form(button_id) {
     const buttons = document.querySelectorAll('button.form__btn--select')
     const form_aluno = document.getElementById('form_aluno')
     const form_motorista = document.getElementById('form_motorista')
+    form_aluno.scrollTop = 0
+    form_motorista.scrollTop = 0
 
     if (button_id === 'aluno' && !buttons[0].className.includes('active')) {
         buttons[0].classList.add('form__btn--select_active')

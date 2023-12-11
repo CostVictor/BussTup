@@ -53,6 +53,50 @@ def create_token():
     return jsonify({'token_access': create_access_token(identity=current_user.primary_key, expires_delta=timedelta(days=1))})
 
 
+@app.route("/checar_linha", methods=['GET'])
+@login_required
+def checkLine():
+    key = current_user.primary_key
+    response = {'conf': True}
+    if key.isdigit():
+        if database.select('Aluno_has_Ponto', where=f'Aluno_matricula = "{key}"'):
+            response['conf'] = True
+    else:
+        user = database.return_user(key)
+        print(key)
+        if user.Linha_nome:
+            response['conf'] = True
+    return jsonify(response)
+
+
+@app.route('/requerir', methods=['POST'])
+@login_required
+def required():
+    data = request.get_json()
+    retorno = {'return': ''}
+    if data:
+        if data['required'] == 'pontos':
+            point_user = database.select('Aluno_has_Ponto', data='Ponto_id', where=f'Aluno_matricula = "{current_user.primary_key}" AND acao = "ida"')
+            if point_user:
+                route_code = database.select('Rota_has_Ponto', data='Rota_codigo', where=f'Ponto_id = {point_user}')
+                allPoints = database.select('Ponto, Rota_has_Ponto', data={'pontos': ('*', 'Ponto')},  where=f'Rota_has_Ponto.Ponto_id = Ponto.id AND Rota_has_Ponto.Rota_codigo = {route_code}')
+
+                retorno['return'] = 'pontos'
+                retorno['ponto_atual'] = point_user
+                retorno['pontos'] = allPoints
+
+        elif data['required'] == 'contraturnos':
+            contraturnos = database.select('Contraturnos_Fixos', data='numero_do_dia', where=f'Aluno_matricula = "{current_user.primary_key}"')
+            retorno['return'] = 'contraturnos'
+            retorno['contraturnos'] = []
+
+            if contraturnos:
+                dias = ('Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta')
+                for contraturno in contraturnos:
+                    retorno['contraturnos'].append(dias[int(contraturno['numero_do_dia'])])
+    return jsonify(retorno)
+
+
 # ~~ WebSocket
 
 def return_users(token):
@@ -78,7 +122,7 @@ def return_dates():
     return datas_semana
 
 
-@socketio.on('send_schedule')
+@socketio.on('send_line_schedule')
 def send_schedule(data):
     token = data.get('token')
     if token:
@@ -86,91 +130,11 @@ def send_schedule(data):
         if user:
             match user_flask.roles[0]:
                 case 'aluno':
-                    aluno_has_ponto = database.select('Aluno_has_Ponto', where=f'Aluno_matricula = "{user_flask.primary_key}"')
-                    information = {'ponto_cadastrado': True}
+                    retorno = {'possui_ponto': False}
+                    aluno_has_ponto = database.select('Aluno_has_Ponto', data='Ponto_id', where=f'Aluno_matricula = "{user_flask.primary_key}" AND acao = "ida"')
+
                     if aluno_has_ponto:
-                        points = {}
-                        for element in aluno_has_ponto:
-                            rota_has_ponto = database.select('Rota_has_Ponto', where=f'Ponto_id = {element["Ponto_id"]}')
-                            route = database.select('Rota', where=f'codigo = {rota_has_ponto["Rota_codigo"]}')
-                            name_line = database.select('Motorista', data='Linha_nome', where=f'nome = "{route["Onibus_Motorista_nome"]}"')['Linha_nome']
-                            line = database.select('Linha', data='nome, cidade', where=f'nome = "{name_line}"')
-
-                            if 'dados' not in information and route['tipo'] == 'ida':
-                                bus = database.select('Onibus', where=f'placa = "{route["Onibus_placa"]}"')
-                                records_bus = database.select('Registro_Diario_Onibus', where=f'Onibus_placa = "{bus["placa"]}" AND {database.format_listDate(return_dates())}')
-
-                                if records_bus:
-                                    records_bus = database.format_date(records_bus)
-                                    if isinstance(records_bus, list):
-                                        for index in records_bus:
-                                            del index['Onibus_Motorista_nome']
-                                            del index['Onibus_placa']
-                                    else:
-                                        del records_bus['Onibus_Motorista_nome']
-                                        del records_bus['Onibus_placa']
-
-                                route = database.format_time(route)
-                                del route['Onibus_placa']; del route['Onibus_Motorista_nome']
-
-                                information['dados'] = {
-                                    'linha': line,
-                                    'onibus': bus,
-                                    'onibus_registros': records_bus,
-                                    'rota_ida': route,
-                                }
-
-                            point = database.select('Ponto', where=f'id = {element["Ponto_id"]}')
-                            point['ordem'] = rota_has_ponto['ordem']
-                            point['horario'] = database.format_time(rota_has_ponto['hora_passagem'])
-                            points[point['id']] = point
-                        
-                        information['pontos'] = points
-                        records_aluno = database.select('Registro_Diario_Aluno', where=f'Aluno_matricula = "{user_flask.primary_key}" AND {database.format_listDate(return_dates())}')
-
-                        if records_aluno:
-                            records_aluno = database.format_date(records_aluno)
-                            if isinstance(records_aluno, list):
-                                for index in records_aluno:
-                                    del index['Aluno_matricula']
-                            else: del records_aluno['Aluno_matricula']
-
-                        contraturno = database.select('Contraturnos_Fixos', data='numero_do_dia', where=f'Aluno_matricula = "{user_flask.primary_key}"')
-                        information['aluno_registros'] = records_aluno
-                        information['contraturnos_fixos'] = contraturno
-                    else:
-                        information['ponto_cadastrado'] = False
+                        retorno['possui_ponto'] = True
+                        info_ponto = database.select('Ponto', data='nome, linkGPS', where=f'id = {aluno_has_ponto}')
 
                 case 'motorista':...
-            socketio.emit('return_schedule', information)
-
-
-@socketio.on('send_lines')
-def send_lines(data):
-    token = data.get('token')
-    if token:
-        user, user_flask = return_users(token)
-        if user:
-            data = {}
-            linhas = database.select('Linha')
-            if linhas:
-                match user_flask.roles[0]:
-                    case 'aluno':
-                        data['linha_aluno'] = None
-                        point_id = database.select('Aluno_has_Ponto', data='Ponto_id', where=f'Aluno_matricula = "{user.get_PrimaryKey()}"')
-                        if point_id:
-                            route_code = database.select('Rota_has_Ponto', data='Rota_codigo', where=f'Ponto_id = {point_id}')
-                            name_driver = database.select('Rota', data='Onibus_Motorista_nome', where=f'codigo = {route_code}')
-                            name_line = database.select('Motorista', data='Linha_nome', where=f'nome = "{name_driver}"')
-
-                            for index, value in enumerate(linhas):
-                                if value['nome'] == name_line:
-                                    line = value
-                                    linhas.remove(index)
-                                    break
-                            data['linha_aluno'] = line
-
-                    case 'motorista':...
-
-                data['outras_linhas'] = linhas
-                socketio.emit('return_lines', data)

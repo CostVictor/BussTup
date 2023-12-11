@@ -16,17 +16,6 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
     })
 }
 
-function create_popup_edit(type) {
-    if (type === 'ponto') {
-        Swal.fire({
-            title: 'teste',
-            customClass: {
-                title: 'form__text_title'
-            }
-        })
-    }
-}
-
 
 // ~~~~~ Validação de login ~~~~~ //
 
