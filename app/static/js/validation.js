@@ -1,6 +1,6 @@
 // ~~~~~ POPUP ~~~~~ //
 
-function create_popup(title, text='', text_buttom='Ok', icon='info', redirect='') {
+function create_popup(title, text='', text_buttom='Ok', icon='info', redirect='', open_scroll = true) {
     document.body.classList.add('no-scroll')
     Swal.fire({
         title: title,
@@ -11,7 +11,7 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
         confirmButtonColor: '#004aad',
         iconColor: `${icon === 'info'? "#ffe959" : icon === 'success'? "#0aa999" : "#ff7272"}`
     }).then(() => {
-        document.body.classList.remove('no-scroll')
+        if (open_scroll) {document.body.classList.remove('no-scroll')}
         if (redirect) {window.location.href = redirect}
     })
 }
@@ -120,9 +120,56 @@ function validationRegister(type, event) {
     }
 }
 
-function submit() {
-    const buttom = document.querySelector('button.form__btn--select_active')
-    const form = document.getElementById(`form_${buttom.textContent.toLowerCase()}`)
+function validationLine(obj_form, event) {
+    event.preventDefault()
+    let execute = true
+    let data = {'particular': true}
+    
+    const options_gratuidade = document.getElementById('options_gratuidade').querySelectorAll('div')
+    options_gratuidade.forEach(element => {
+        const text = element.querySelector('p').textContent
+        const icon = element.querySelector('i')
+
+        if (text === 'Sim') {
+            if (!icon.className.includes('selected')) {
+                data['particular'] = false
+            }
+        }
+    })
+
+    for (let index = 0; index < obj_form.length; index++) {
+        var campo = obj_form.elements[index]
+
+        if (campo.name) {
+            if (data['particular'] && !campo.name.includes('nome') && !campo.name.includes('cidade')) {
+                const value = parseFloat(campo.value)
+                if (!value || value <= 0) {
+                    var erro_titulo = 'Valor inválido'
+                    var erro_texto = `O ${campo.name} deve ser maior que 0.`
+                    execute = false; break
+                } else {
+                    const nome_campo = `${campo.name.includes('cartela')? 'valor_cartela' : 'valor_diaria'}`
+                    data[nome_campo] = value
+                }
+            } else if (!campo.name.includes('preço')) {
+                data[campo.name.trim()] = campo.value.trim()
+            }
+        }
+    }
+
+    if (execute) {
+        console.log(data)
+    } else {
+        campo.classList.add('input_error')
+        create_popup(erro_titulo, erro_texto, 'Voltar', 'error', '', false)
+    }
+}
+
+function submit(form_id = false) {
+    if (!form_id) {
+        const buttom = document.querySelector('button.form__btn--select_active')
+        var form = document.getElementById(`form_${buttom.textContent.toLowerCase()}`)
+    } else {var form = document.getElementById(form_id)}
     if (form.checkValidity()) {
         form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
     } else {form.reportValidity()}

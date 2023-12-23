@@ -1,0 +1,157 @@
+<div id="edit_ponto" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Editar ponto</h1>
+        </div>
+        <div class="popup__container--content">
+            <h4 class="popup__text info margin_bottom">(OBS) Esta edição altera seus locais fixos.</h4>
+            <div id="scroll_principal" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                <h3 class="popup__text question first">Deseja mudar o ponto de subida?</h3>
+                <div id="options_subida_fixo" class="popup__container--options">
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-circle popup__icon ratio"></i>
+                        <p class="popup__text content input">Sim</p>
+                    </div>
+
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                        <p class="popup__text content input">Não</p>
+                    </div>
+                </div>
+
+                <h3 id="options_subida_fixo_title" class="popup__text info space inative">Selecione o novo local de subida:</h3>
+                <div id="options_subida_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative">
+                    {% for index in range(10) %}
+                    <div id="model_ponto_{{ index }}" class="popup__input checkbox hidden" onclick="popup_selectOption(this, false, true)">
+                        <p id="number_ponto" class="popup__text input title">{{ index + 1 }}</p>
+                        <p id="name_ponto" class="popup__text input">Teste</p>
+                        <i class="bi bi-check-lg popup__icon checkbox inative"></i>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <h3 class="popup__text question">Deseja mudar o ponto de descida?</h3>
+                <div id="options_retorno_fixo" class="popup__container--options">
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-circle popup__icon ratio"></i>
+                        <p class="popup__text content input">Sim</p>
+                    </div>
+
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                        <p class="popup__text content input">Não</p>
+                    </div>
+                </div>
+
+                <h3 id="options_retorno_fixo_title" class="popup__text info space inative">Selecione o novo local de descida:</h3>
+                <div id="options_retorno_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
+            </div>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_ponto', true)">Cancelar</button>
+            <button class="popup__btn">Salvar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="edit_contraturno" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Definir contraturno</h1>
+        </div>
+        <div class="popup__container--content">
+            <h2 class="popup__text">Selecione seus dias fixos:</h2>
+            <div id="content_local_contraturno" class="scroll_vertical no_borderY popup__container--scroll principal">
+                {% for index in range(5) %}
+                <div class="popup__input checkbox hidden" onclick="popup_confirmBox(this)">
+                    <i class="bi bi-circle popup__icon ratio"></i>
+                    <p class="popup__text input">{{ dias_semana[index] }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <h4 class="popup__text info space">Você pode selecionar mais de uma opção.</h4>
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_contraturno')">Cancelar</button>
+            <button class="popup__btn">Salvar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="edit_dia" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 id="dia" class="popup__title"></h1>
+        </div>
+        <div class="popup__container--content">
+            <div class="page__container margin_bottom">
+                <h4 class="popup__text">Data:</h4>
+                <h4 id="data_dia" class="popup__text"></h4>
+            </div>
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                <h3 class="popup__text question first">Irá faltar no dia?</h3>
+                <div id="options_falta" class="popup__container--options">
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
+                        <i class="bi bi-circle popup__icon ratio"></i>
+                        <p class="popup__text content input">Sim</p>
+                    </div>
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
+                        <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                        <p class="popup__text content input">Não</p>
+                    </div>
+                </div>
+
+                <h3 class="popup__text question">Irá ficar contraturno?</h3>
+                <div id="options_contraturno" class="popup__container--options">
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
+                        <i class="bi bi-circle popup__icon ratio"></i>
+                        <p class="popup__text content input">Sim</p>
+                    </div>
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
+                        <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                        <p class="popup__text content input">Não</p>
+                    </div>
+                </div>
+
+                <h3 class="popup__text question">Deseja subir em outro local?</h3>
+                <div id="options_subida" class="popup__container--options">
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-circle popup__icon ratio"></i>
+                        <p class="popup__text content input">Sim</p>
+                    </div>
+
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                        <p class="popup__text content input">Não</p>
+                    </div>
+                </div>
+
+                <h3 id="options_subida_title" class="popup__text info space inative">Selecione o local de subida:</h3>
+                <div id="options_subida_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
+
+                <h3 class="popup__text question">Deseja descer em outro local?</h3>
+                <div id="options_retorno" class="popup__container--options">
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-circle popup__icon ratio"></i>
+                        <p class="popup__text content input">Sim</p>
+                    </div>
+
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                        <p class="popup__text content input">Não</p>
+                    </div>
+                </div>
+
+                <h3 id="options_retorno_title" class="popup__text info space inative">Selecione o local de descida:</h3>
+                <div id="options_retorno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
+            </div>
+        </div>
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_dia')">Cancelar</button>
+            <button class="popup__btn">Salvar</button>
+        </div>
+    </div>
+</div>

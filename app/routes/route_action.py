@@ -63,8 +63,7 @@ def checkLine():
             response['conf'] = True
     else:
         user = database.return_user(key)
-        print(key)
-        if user.Linha_nome:
+        if user.Linha_codigo:
             response['conf'] = True
     return jsonify(response)
 

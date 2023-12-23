@@ -1,8 +1,8 @@
 window.sr = ScrollReveal({ reset: true })
 
-const header = document.getElementById('header')
-const content = document.getElementById('content')
-const nav = document.getElementById('nav')
+const header = document.getElementById('header_page')
+const content = document.getElementById('content_page')
+const nav = document.getElementById('nav_page')
 
 const divs = content.querySelectorAll('div.page__container--aba')
 const btns = nav.querySelectorAll('i.page__icon--btn')
@@ -60,24 +60,53 @@ fetch('/gerar_token', {method: 'GET'})
 
 // ~~ Página ~~ //
 
-function enterPage() {
+function enterPage(reset_header = false) {
     content.classList.remove('content_noBorder')
+
     setTimeout(() => {
         header.classList.remove('header_hidden')
     }, 180)
+
     setTimeout(() => {
-        sr.reveal('.page__container--header', { duration: 600 })
+        header.style.opacity = '1'
+        sr.reveal('.page__container--header', {
+            duraction: 600, 
+            beforeReveal: (domElement) => {
+                domElement.style.opacity = '1';
+            } 
+        })
         nav.classList.remove('nav_hidden')
     }, 500)
+
     setTimeout(() => {
         divs.forEach(element => {
             itens = element.querySelectorAll('[class*="enter"]')
             animate_itens(itens, 'fadeDown', 0.7, 0)
         })
     }, 600)
+    setTimeout(() => {
+        sr.reveal(header, { reset: true })
+    }, 1150)
 }
 
-function closePage() {}
+function closePage() {
+    const aba = document.getElementById(`aba_${aba_atual}`)
+    const itens = aba.querySelectorAll('[class*="enter"]')
+    header.style.opacity = '0'
+
+    setTimeout(() => {
+        animate_itens(itens, 'outUp', 0.5, 0, 0.03, 1)
+    }, 100)
+
+    setTimeout(() => {
+        header.classList.add('header_hidden')
+        nav.classList.add('nav_hidden')
+    }, 150)
+
+    setTimeout(() => {
+        content.classList.add('content_noBorder')
+    }, 400)
+}
 
 function open_popup_edit(id, obj_click=false) {
     document.body.classList.add('no-scroll')
@@ -100,7 +129,6 @@ function open_popup_edit(id, obj_click=false) {
                 options.forEach(item => {define_checkbox(item, 'Sim')})
                 title.classList.remove('inative')
                 container.classList.remove('inative')
-                container.scrollTop = 0
                 animate_itens(list_itens)
                 list_itens.forEach((item, index) => {
                     if (index === parseInt(condiction)) {
@@ -118,37 +146,56 @@ function open_popup_edit(id, obj_click=false) {
                 })
             }
         }
-        const dia = document.getElementById('dia')
-        const data = document.getElementById('data_dia')
-        const options_falta = document.getElementById('options_falta').querySelectorAll('div')
-        const options_contraturno = document.getElementById('options_contraturno').querySelectorAll('div')
-        const options_subida = document.getElementById('options_subida').querySelectorAll('div')
-        const options_descer = document.getElementById('options_retorno').querySelectorAll('div')
-        
-        const text_dia = obj_click.querySelector('h1').textContent
-        const text_falta = obj_click.querySelector(`p#falta_${text_dia}`).textContent
-        const text_contraturno = obj_click.querySelector(`p#contraturno_${text_dia}`).textContent
-        const text_subir = obj_click.querySelector(`p#pSubida_${text_dia}`).textContent
-        const text_descer = obj_click.querySelector(`p#pDescida_${text_dia}`).textContent
+        function extract_placa() {
+            const reference = obj_click.parentNode.parentNode.id.replace('_container', '_placa')
+            return document.getElementById(reference).textContent
+        }
 
-        dia.textContent = `Editar ${text_dia}`
-        data.textContent = obj_click.querySelector(`p#data_${text_dia}`).textContent
-        options_falta.forEach(item => {define_checkbox(item, text_falta)})
-        options_contraturno.forEach(item => {define_checkbox(item, text_contraturno)})
-        
-        const title_subir = document.getElementById('options_subida_title')
-        const container_subir = document.getElementById('options_subida_container')
-        const list_itens_subir = container_subir.querySelectorAll('div')
-        correct_options(text_subir, options_subida, title_subir, container_subir, list_itens_subir)
+        if (id === 'edit_dia') {
+            const dia = document.getElementById('dia')
+            const data = document.getElementById('data_dia')
+            const options_falta = document.getElementById('options_falta').querySelectorAll('div')
+            const options_contraturno = document.getElementById('options_contraturno').querySelectorAll('div')
+            const options_subida = document.getElementById('options_subida').querySelectorAll('div')
+            const options_descer = document.getElementById('options_retorno').querySelectorAll('div')
+            
+            const text_dia = obj_click.querySelector('h1').textContent
+            const text_falta = obj_click.querySelector(`p#falta_${text_dia}`).textContent
+            const text_contraturno = obj_click.querySelector(`p#contraturno_${text_dia}`).textContent
+            const text_subir = obj_click.querySelector(`p#pSubida_${text_dia}`).textContent
+            const text_descer = obj_click.querySelector(`p#pDescida_${text_dia}`).textContent
+    
+            dia.textContent = `Editar ${text_dia}`
+            data.textContent = obj_click.querySelector(`p#data_${text_dia}`).textContent
+            options_falta.forEach(item => {define_checkbox(item, text_falta)})
+            options_contraturno.forEach(item => {define_checkbox(item, text_contraturno)})
+            
+            const title_subir = document.getElementById('options_subida_title')
+            const container_subir = document.getElementById('options_subida_container')
+            const list_itens_subir = container_subir.querySelectorAll('div')
+            correct_options(text_subir, options_subida, title_subir, container_subir, list_itens_subir)
+    
+            const title_descer = document.getElementById('options_retorno_title')
+            const container_descer = document.getElementById('options_retorno_container')
+            const list_itens_descer = container_descer.querySelectorAll('div')
+            correct_options(text_descer, options_descer, title_descer, container_descer, list_itens_descer)
 
-        const title_descer = document.getElementById('options_retorno_title')
-        const container_descer = document.getElementById('options_retorno_container')
-        const list_itens_descer = container_descer.querySelectorAll('div')
-        correct_options(text_descer, options_descer, title_descer, container_descer, list_itens_descer)
+        } else if (id === 'edit_valor') {
+            card.querySelector('h2').textContent = `Digite o novo valor da ${obj_click.id.includes('cartela') ? 'cartela' : 'diária'}:`
+
+        } else if (id === 'edit_capacidade') {
+            card.querySelector('h2').textContent = `Digite a capacidade de ${extract_placa()}:`
+
+        } else if (id === 'edit_motorista') {
+            card.querySelector('h2').textContent = `Selecione o motorista de ${extract_placa()}:`
+
+        } else if (id == 'excluir_veiculo') {
+            card.querySelector(`h2#${id}_placa`).textContent = extract_placa()
+        }
     }
 }
 
-function cancel_popup_edit(id) {
+function cancel_popup_edit(id, reset_bool = false, reference_bool = 'Não') {
     const popup = document.getElementById(id)
     const card = popup.querySelector('div.popup__container')
     const scrolls = popup.querySelectorAll('div.scroll_vertical')
@@ -159,35 +206,52 @@ function cancel_popup_edit(id) {
         popup.classList.add('inative')
         document.body.classList.remove('no-scroll')
         
-        if (id.includes('ponto')) {
-            const titles = popup.querySelectorAll('h3.popup__text.info.space')
-            const containers = popup.querySelectorAll('div.scroll_vertical')
-            const options = card.querySelectorAll('div.popup__input')
-
-            titles.forEach(element => {
-                element.classList.add('inative')
-            })
-            containers.forEach(element => {
-                if (element.id !== 'scroll_principal') {
-                    element.classList.add('inative')
-                }
-            })
-            options.forEach(element => {
-                if (element.className.includes('bool')) {
-                    const icon = element.querySelector('i')
-                    const text = element.querySelector('p')
-                    if (text.textContent === 'Sim') {
-                        icon.className = 'bi bi-circle popup__icon ratio'
-                    } else {
-                        icon.className = 'bi bi-check2-circle popup__icon ratio selected'
-                    }
-                } else {
-                    if (element.id !== 'model_ponto') {
-                        element.remove()
-                    }
-                }
+        if (popup.querySelector('form')) {
+            const inputs = popup.querySelectorAll('input')
+            inputs.forEach(element => {
+                element.classList.remove('input_error')
+                element.value = ''
             })
         }
+        if (reset_bool) {
+            const options = card.querySelectorAll('div.popup__input.bool')
+            options.forEach(element => {
+                const icon = element.querySelector('i')
+                const text = element.querySelector('p')
+                if (text.textContent !== reference_bool) {
+                    icon.className = 'bi bi-circle popup__icon ratio'
+                } else {
+                    const titles = popup.querySelectorAll('h3.popup__text.info.space')
+                    const containers = popup.querySelectorAll('[id*="container"]')
+
+                    icon.className = 'bi bi-check2-circle popup__icon ratio selected'
+                    if (titles && containers) {
+                        titles.forEach(element => {
+                            text.textContent == 'Não' ? element.classList.add('inative') : element.classList.remove('inative')
+                        })
+                        containers.forEach(element => {
+                            if (element.id !== 'scroll_principal') {
+                                text.textContent == 'Não' ? element.classList.add('inative') : element.classList.remove('inative')
+
+                                Array.from(element.children).forEach(item => {
+                                    item.classList.remove('selected')
+                                })
+                            }
+                        })
+                    }
+                }
+            })
+        } else {
+            const containers = popup.querySelectorAll('[id*="container"]')
+            if (containers) {
+                containers.forEach(element => {
+                    Array.from(element.children).forEach(item => {
+                        item.classList.remove('selected')
+                    })
+                })
+            }
+        }
+
     }, 100)
     scrolls.forEach(element => {
         element.scrollTop = 0
@@ -286,13 +350,46 @@ function checkForecast(id) {
     }
 }
 
+// ~~ Interface
+function actionContainer(obj_click) {
+    const icon = obj_click.querySelector('i')
+    const container = document.getElementById(obj_click.id.replace('_btn', '_container'))
+    const elements = Array.from(container.children)
+    obj_click.style.transition = '0s ease'
+
+    if (obj_click.id.includes('onibus')) {
+        const motorista_nome = obj_click.querySelectorAll('h3')
+        motorista_nome.forEach((element, index) => {
+            if (!index) {
+                icon.className.includes('open') ? element.classList.remove('max_width'): element.classList.add('max_width')
+            } else {
+                icon.className.includes('open') ? element.classList.remove('inative') : element.classList.add('inative')
+            }
+        })
+
+    }
+    
+    animate_itens(elements)
+    if (icon.className.includes('open')) {
+        container.classList.add('inative')
+        icon.classList.remove('open')
+        obj_click.classList.remove('margin_bottom')
+    } else {
+        container.classList.remove('inative')
+        container.scrollTop = 0
+        icon.classList.add('open')
+        obj_click.classList.add('margin_bottom')
+    }
+    const rolament = container.querySelector('div.scroll_vertical')
+    if (rolament) {rolament.scrollTop = 0}
+}
+
 
 // ~~ Interações popup edit ~~ //
 
 function set_limitScroll(element_scroll, size_limit = 30) {
     const maxHeight = size_limit * window.innerHeight / 100
     const size_element = element_scroll.scrollHeight
-    console.log(size_element)
 
     if (element_scroll.childElementCount) {
         if (size_element > maxHeight) {
@@ -301,37 +398,37 @@ function set_limitScroll(element_scroll, size_limit = 30) {
     } else {element_scroll.style.minHeight = '0px'}
 }
 
-function popup_selectOption(popup_id, obj_click, multiple_options = false) {
-    const popup = document.getElementById(popup_id)
-    const elements_popup = Array.from(popup.children)
+function popup_selectOption(obj_click,  open_boxOptions = false, multiple_options = false) {
+    const reference = obj_click.parentNode
+    const reference_elements = Array.from(reference.children)
     const text = obj_click.querySelector('p')
     const icon = obj_click.querySelector('i')
 
     if (!multiple_options) {
         if (!icon.className.includes('selected')) {
-            elements_popup.forEach(item => {popup_confirmBox(item)})
-            if (popup_id.includes('subida') || popup_id.includes('retorno')) {
-                const title_options = document.getElementById(`${popup_id}_title`)
-                const container_options = document.getElementById(`${popup_id}_container`)
-                const list_itens = container_options.querySelectorAll('div')
+            reference_elements.forEach(item => {popup_confirmBox(item)})
+            if (open_boxOptions) {
+                const title_options = document.getElementById(`${reference.id}_title`)
+                const reference_container = document.getElementById(`${reference.id}_container`)
+                const list_itens = reference_container.querySelectorAll('div')
 
                 if (text.textContent === 'Sim') {
-                    title_options.classList.remove('inative')
-                    container_options.classList.remove('inative')
-                    container_options.scrollTop = 0
-                    set_limitScroll(container_options)
+                    if (title_options) {title_options.classList.remove('inative')}
+                    reference_container.classList.remove('inative')
+                    reference_container.scrollTop = 0
+                    set_limitScroll(reference_container)
                     animate_itens(list_itens)
                 } else {
-                    const options = container_options.querySelectorAll('div')
+                    const options = reference_container.querySelectorAll('div')
                     options.forEach(item => {item.classList.remove('selected')})
-                    title_options.classList.add('inative')
-                    container_options.classList.add('inative')
+                    if (title_options) {title_options.classList.add('inative')}
+                    reference_container.classList.add('inative')
                 }
             }
         }
     } else {
         if (!obj_click.className.includes('selected')) {
-            elements_popup.forEach(item => {
+            reference_elements.forEach(item => {
                 if (item === obj_click) {
                     item.classList.add('selected')
                 } else {

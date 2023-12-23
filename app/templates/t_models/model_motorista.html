@@ -1,0 +1,77 @@
+<div id="model_forecast_onibus" class="inative">
+    <h1 class="page__division enter"></h1>
+    <div class="page__container">
+        <p class="text secundario emphasis">Ônibus</p>
+        <p id="placa_onibus" class="text secundario emphasis max_width">Placa do ônibus</p>
+    </div>
+
+    <div class="page__container enter">
+        <p class="text secundario emphasis">Motorista</p>
+        <p id="motorista_nome" class="text secundario content fundo">Nome do motorista</p>
+    </div>
+
+    <div class="page__container enter">
+        <p class="text secundario fundo">Capacidade total:</p>
+        <div class="text secundario fundo">
+            <p id="onibus_capacidade" class="text secundario content container space">0</p>
+            <p class="text secundario content container">pessoas</p>
+        </div>
+    </div>
+
+    {% for index_previsao in range(3) %}
+    <div id="previsao_{{ turnos[index_previsao] }}" class="enter">
+        <div id="title_{{ turnos[index_previsao] }}" class="page__container interaction pos_relative" onclick="checkForecast('{{ turnos[index_previsao] }}')">
+            <h2 class="text secundario emphasis max_width">{{ turnos[index_previsao] }}</h2>
+            <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+        
+        <div id="dias_{{ turnos[index_previsao] }}" class="inative">
+            {% for index_dia in range(5) %}
+            <div id="previsao_{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
+                <h2 class="text indicate emphasis">{{ dias_semana[index_dia][0:3] }}</h2>
+                <i class="bi bi-arrow-right-short page__icon indicate"></i>
+                <p class="text terciario fundo">Previsão:</p>
+                <div class="text secundario fundo">
+                    <p id="previsao_pessoas" class="text terciario content container space">0</p>
+                    <p class="text terciario content container">pessoas</p>
+                </div>
+                <p class="text terciario fundo">Estado:</p>
+                <p id="previsao_estado" class="text terciario content green fundo">Normal</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+<div id="model_onibus" class="inative">
+    <div id="model_onibus_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+        <h3 id="model_onibus_placa" class="text secundario fundo"></h3>
+        <h3 id="model_onibus_motorista" class="text secundario max_width fundo"></h3>
+        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+    </div>
+
+    <div id="model_onibus_container" class="inative">
+        <div class="page__container">
+            <p class="text secundario fundo">Capacidade:</p>
+            <div class="text secundario fundo">
+                <p id="model_onibus_capacidae" class="text secundario container content space"></p>
+                <p class="text secundario container content">pessoas</p>
+            </div>
+            <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('')"></i>
+        </div>
+
+        <div class="page__container">
+            <p class="text secundario fundo">Motorista:</p>
+            <p id="model_onibus_motorista" class="text secundario fundo content">Nenhum</p>
+            <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_motorista', this)"></i>
+        </div>
+        
+        <div class="page__container justify">
+            <div class="interface__container--btn remove">
+                <i class="bi bi-trash3 interface__icon del"></i>
+            </div>
+        </div>
+    </div>
+</div>

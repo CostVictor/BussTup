@@ -32,7 +32,19 @@
 .text.secundario {
     font-size: calc(0.8vw + 0.85vh + 1vmin);
     margin: calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin) calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin);
-    margin-right: calc(0.1vw + 0.1vh + 0.5vmin);
+}
+
+.text.secundario.selected {
+    background-color: var(--branco_primario);
+}
+
+.text.secundario.max_width {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.text.secundario.interaction {
+    cursor: pointer;
 }
 
 .text.secundario.margin_bottom {
@@ -63,6 +75,14 @@
     border-left: var(--azul_terciario) solid 0.06rem;
     padding-left: calc(0.3vw + 0.3vh + 1vmin);
     font-weight: bold;
+}
+
+.text.text.title.no_marge {
+    margin: 0;
+}
+
+.text.title.no_border {
+    border: none;
 }
 
 .text.content {
@@ -104,11 +124,6 @@
 .text.fundo.no_margin {
     margin: 0;
     margin-right: calc(0.1vw + 0.1vh + 1vmin);
-}
-
-.text.emphasis.max_width {
-    width: 100%;
-    box-sizing: border-box;
 }
 
 .text--select {

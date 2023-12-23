@@ -1,0 +1,64 @@
+<div id="model_regiao" class="inative">
+    <h2 class="text title">Nome da cidade</h2>
+</div>
+
+
+<div id="model_line" class="page__container--line inative">
+    <div class="page__container--line_content">
+        <div class="page__container">
+            <i class="bi bi-bus-front-fill page__icon--box"></i>
+            <h1 id="linha_nome" class="text box title_box">Nome da linha</h1>
+        </div>
+        <h3 id="nome_dono" class="text box">Nome do dono</h3>
+    </div>
+
+    <div class="page__container--line_image">
+        <img class="page__line_img" src="/static/data/img/logo_busstup.png">
+    </div>
+</div>
+
+
+<div id="model_motorista" class="inative">
+    <h1 class="page__division inative"></h1>
+    <div class="page__container">
+        <p id="model_motorista_dono" class="text secundario emphasis inative">Dono</p>
+        <p id="model_motorista_adm" class="text secundario emphasis inative">Adm</p>
+        <p id="model_motorista_nome" class="text secundario emphasis max_width"></p>
+        {% if role == 'motorista' %}
+        <i id="model_motorista_btn" class="bi bi-three-dots-vertical page__icon content emphasis"></i>
+        {% endif %}
+    </div>
+    
+    <div class="page__container">
+        <p class="text secundario fundo">Pix:</p>
+        <p id="model_motorista_pix" class="text secundario fundo content"></p>
+        <i id="model_motorista_copy_pix" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
+    </div>
+
+    <div class="page__container">
+        <p class="text secundario fundo">Telefone:</p>
+        <p id="model_motorista_telefone" class="text secundario fundo content"></p>
+        <i id="model_motorista_copy_telefone" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
+    </div>
+</div>
+
+
+<div id="interface_model_option" class="popup__input checkbox inative hidden" onclick="popup_selectOption(this, false, true)">
+    <p id="model_option_nome" class="popup__text input">Teste</p>
+</div>
+
+
+<div id="interface_model_ponto" class="popup__input grow min_height inative" onclick="">
+    <p id="interface_model_ponto_nome" class="popup__text input">Ponto Teste</p>
+    <i class="bi bi-three-dots-vertical page__icon content right"></i>
+</div>
+
+
+<div id="interface_model_rota" class="popup__input grow min_height inative" onclick="">
+    <p id="interface_model_rota_placa_onibus" class="popup__text input"></p>
+    <p class="popup__text input">|</p>
+    <p id="interface_model_rota_turno" class="popup__text input"></p>
+    <p class="popup__text input">|</p>
+    <p id="interface_model_quant_pessoas" class="popup__text input"></p>
+    <i class="bi bi-three-dots-vertical page__icon content right"></i>
+</div>

@@ -1,0 +1,297 @@
+<div id="edit_valor" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Editar valor</h1>
+        </div>
+
+        <div class="popup__container--content">
+            <h2 id="edit_valor_msg" class="popup__text"></h2>
+            <form id="formulario_edit_valor" class="form__container--card max_width" method="post">
+                <div class="form__container--input first">
+                    <input id="input_new_valor" class="form__input white input_notIcon" type="number" step="0.01">
+                    <label class="form__label intense label_notIcon" for="input_new_valor">Novo valor</label>
+                </div>
+            </form>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_valor')">Cancelar</button>
+            <button class="popup__btn">Salvar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="edit_capacidade" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Editar capacidade</h1>
+        </div>
+
+        <div class="popup__container--content">
+            <h2 id="edit_capacidade" class="popup__text"></h2>
+            <form id="formulario_edit_capacidade" class="form__container--card max_width" method="post">
+                <div class="form__container--input first">
+                    <input id="input_new_capacidade" class="form__input white input_notIcon" type="number" min="1">
+                    <label class="form__label intense label_notIcon" for="input_new_capacidade">Capacidade</label>
+                </div>
+            </form>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_capacidade')">Cancelar</button>
+            <button class="popup__btn">Salvar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="edit_motorista" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Definir motorista</h1>
+        </div>
+
+        <div class="popup__container--content">
+            <h2 id="edit_motorista" class="popup__text"></h2>
+            <div id="edit_motorista_container" class="scroll_vertical init_top no_borderY popup__container--scroll">
+                <div id="edit_motorista_option_nenhum" class="popup__input checkbox hidden" onclick="popup_selectOption(this, false, true)">
+                    <p id="model_option_nome" class="popup__text input">Nenhum</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_motorista')">Cancelar</button>
+            <button class="popup__btn">Salvar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="configArea_motorista" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 id="configArea_motorista_nome" class="popup__title"></h1>
+        </div>
+
+        <div class="popup__container--content center_itens">
+            <div class="interface__container--btn add">
+                <p id="configArea_motorista_promover" class="interface__text">Promover a administrador</p>
+            </div>
+
+            <div class="interface__container--btn add inative">
+                <p id="configArea_motorista_rebaixar" class="interface__text">Rebaixar a participante</p>
+            </div>
+
+            <div class="interface__container--btn remove">
+                <p id="configArea_motorista_remover" class="interface__text remove">Remover da linha</p>
+            </div>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn" onclick="cancel_popup_edit('configArea_motorista')">Fechar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="excluir_veiculo" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Excluir veículo</h1>
+        </div>
+
+        <div class="popup__container--content">
+            <h4 class="popup__text info">Ao proseguir, você irá excluir permanentemente:</h4>
+            <h2 id="excluir_veiculo_placa" class="popup__text emphasis"></h2>
+            <h4 class="popup__text info">Todas as rotas relacionadas a este veículo serão apagadas e o motorista ficará sem veículo.</h4>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('excluir_veiculo')">Cancelar</button>
+            <button class="popup__btn">Excluir</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="add_veicle" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Adicionar veículo</h1>
+        </div>
+
+        <div class="popup__container--content">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                <form id="formulario_add_veicle" class="form__container--card max_width" method="post">
+                    <div class="form__container--input first">
+                        <input id="input_veicle_placa" class="form__input white input_notIcon" type="text" required>
+                        <label class="form__label intense label_notIcon" for="input_veicle_placa">Placa</label>
+                    </div>
+        
+                    <div class="form__container--input">
+                        <input id="input_veicle_capacidade" class="form__input white input_notIcon" type="number" min="1" required>
+                        <label class="form__label intense label_notIcon" for="input_veicle_capacidade">Capacidade</label>
+                    </div>
+    
+                    <h3 class="popup__text question">Deseja definir um motorista agora?</h3>
+                    <div id="add_veicle_motorista" class="popup__container--options">
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                            <i class="bi bi-circle popup__icon ratio"></i>
+                            <p class="popup__text content input">Sim</p>
+                        </div>
+    
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                            <p class="popup__text content input">Não</p>
+                        </div>
+                    </div>
+    
+                    <h3 id="add_veicle_motorista_title" class="popup__text info space inative">Selecione o motorista:</h3>
+                    <div id="add_veicle_motorista_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative">
+                        {% for index in range(5) %}
+                        <div id="interface_model_option" class="popup__input checkbox inative hidden" onclick="popup_selectOption(this, false, true)">
+                            <p id="model_option_nome" class="popup__text input">Teste</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('add_veicle', true)">Cancelar</button>
+            <button class="popup__btn">Adicionar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="add_ponto" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Criar ponto</h1>
+        </div>
+
+        <div class="popup__container--content">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                <form id="formulario_add_veicle" class="form__container--card max_width" method="post">
+                    <div class="form__container--input first">
+                        <input id="input_ponto_nome" class="form__input white input_notIcon" type="text" required>
+                        <label class="form__label intense label_notIcon" for="input_ponto_nome">Nome</label>
+                    </div>
+                    
+                    <div class="form__container--input">
+                        <input id="input_ponto_tolerancia" class="form__input white input_notIcon" type="number" min="1">
+                        <label class="form__label intense label_notIcon" for="input_ponto_tolerancia">Tempo tolerância</label>
+                    </div>
+
+                    <div class="form__container--input">
+                        <input id="input_ponto_gps" class="form__input white input_notIcon" type="text">
+                        <label class="form__label intense label_notIcon" for="input_ponto_gps">Link GPS</label>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('add_ponto')">Cancelar</button>
+            <button class="popup__btn">Criar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="add_rota" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Criar rota</h1>
+        </div>
+
+        <div class="popup__container--content">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                <form id="formulario_add_veicle" class="form__container--card max_width" method="post">
+                    <div class="form__container--input first">
+                        <input id="input_rota_turno" class="form__input white input_notIcon" type="text" required>
+                        <label class="form__label intense label_notIcon" for="input_rota_turno">Turno</label>
+                    </div>
+
+                    <div class="form__container--input">
+                        <input id="input_rota_horario" class="form__input white input_notIcon time" type="time" required>
+                        <label class="form__label intense label_notIcon" for="input_rota_horario">Horário</label>
+                    </div>
+
+                    <h3 class="popup__text question">Selecione o veículo da rota:</h3>
+                    <div id="add_rota_veicles_container" class="scroll_vertical init_top no_borderY popup__container--scroll">
+                        {% for index in range(2) %}
+                        <div id="interface_model_option" class="popup__input checkbox hidden" onclick="popup_selectOption(this, false, true)">
+                            <p id="model_option_nome" class="popup__text input">Teste</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('add_rota')">Cancelar</button>
+            <button class="popup__btn">Criar</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="create_line" class="popup__container--shadow inative">
+    <div class="popup__container">
+        <div class="popup__container--header">
+            <h1 class="popup__title">Criar linha</h1>
+        </div>
+
+        <div class="popup__container--content">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                <form id="formulario_create_line" class="form__container--card max_width" method="post" onsubmit="validationLine(this, event)">
+                    <div class="form__container--input first">
+                        <input id="nome_create_line" class="form__input white input_notIcon" type="text" name="nome" required>
+                        <label class="form__label intense label_notIcon" for="nome_create_line">Nome da linha</label>
+                    </div>
+                    
+                    <div class="form__container--input">
+                        <input id="cidade_create_line" class="form__input white input_notIcon" type="text" name="cidade" required>
+                        <label class="form__label intense label_notIcon" for="cidade_create_line">Cidade de atuação</label>
+                    </div>
+                    
+                    <h3 class="popup__text question">Esta linha será paga?</h3>
+                    <div id="options_gratuidade" class="popup__container--options">
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                            <p class="popup__text content input">Sim</p>
+                        </div>
+
+                        <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                            <i class="bi bi-circle popup__icon ratio"></i>
+                            <p class="popup__text content input">Não</p>
+                        </div>
+                    </div>
+
+                    <div id="options_gratuidade_container" class="">
+                        <div class="form__container--input">
+                            <input id="valor_cartela" class="form__input white input_notIcon" type="number" step="0.01" name="preço da cartela">
+                            <label class="form__label intense label_notIcon" for="valor_cartela">Preço da cartela</label>
+                        </div>
+
+                        <div class="form__container--input">
+                            <input id="valor_diaria" class="form__input white input_notIcon" type="number" step="0.01" name="preço da diária">
+                            <label class="form__label intense label_notIcon" for="valor_diaria">Preço da diária</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('create_line', true, 'Sim')">Cancelar</button>
+            <button class="popup__btn" onclick="submit('formulario_create_line')">Criar</button>
+        </div>
+    </div>
+</div>

@@ -8,184 +8,42 @@
     <link rel="preload" href="/static/css/index.css" as="style">
     <link rel="preload" href="/static/css/page.css" as="style">
     <link rel="preload" href="/static/css/popup.css" as="style">
+    <link rel="preload" href="/static/css/form.css" as="style">
+    <link rel="preload" href="/static/css/interface.css" as="style">
     <link rel="preload" href="/static/js/interface.js" as="script">
     <link rel="preload" href="/static/js/page.js" as="script">
     <link rel="preload" href="/static/js/validation.js" as="script">
 
     <link rel="stylesheet" href="/static/css/page.css">
     <link rel="stylesheet" href="/static/css/index.css">
+    <link rel="stylesheet" href="/static/css/form.css">
     <link rel="stylesheet" href="/static/css/popup.css">
+    <link rel="stylesheet" href="/static/css/interface.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body onload="enterPage()">
     <p class="hidden_point">.</p>
+    <!-- Models -->
+    {% include "t_models_index.html" %}
+
     {% if role == 'aluno' %}
-    <!-- Modelos -->
-    <div id="model_ponto" class="popup__input checkbox inative">
-        <p id="number_ponto" class="popup__text input title"></p>
-        <p id="name_ponto" class="popup__text input"></p>
-        <i class="bi bi-check-lg popup__icon checkbox inative"></i>
-    </div>
 
-    <!-- POPUPs -->
-    <div id="edit_ponto" class="popup__container--shadow inative">
-        <div class="popup__container">
-            <div class="popup__container--header">
-                <h1 class="popup__title">Editar ponto</h1>
-            </div>
-            <div class="popup__container--content">
-                <h4 class="popup__text info margin_bottom">(OBS) Esta edição altera seus locais fixos.</h4>
-                <div id="scroll_principal" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
-                    <h3 class="popup__text question first">Deseja mudar o ponto de subida?</h3>
-                    <div id="options_subida_fixo" class="popup__container--options">
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_subida_fixo', this)">
-                            <i class="bi bi-circle popup__icon ratio"></i>
-                            <p class="popup__text content input">Sim</p>
-                        </div>
-    
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_subida_fixo', this)">
-                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-                            <p class="popup__text content input">Não</p>
-                        </div>
-                    </div>
-    
-                    <h3 id="options_subida_fixo_title" class="popup__text info space inative">Selecione o novo local de subida:</h3>
-                    <div id="options_subida_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative">
-                        {% for index in range(10) %}
-                        <div id="model_ponto_{{ index }}" class="popup__input checkbox hidden">
-                            <p id="number_ponto" class="popup__text input title">{{ index + 1 }}</p>
-                            <p id="name_ponto" class="popup__text input">Teste</p>
-                            <i class="bi bi-check-lg popup__icon checkbox inative"></i>
-                        </div>
-                        {% endfor %}
-                    </div>
-    
-                    <h3 class="popup__text question">Deseja mudar o ponto de descida?</h3>
-                    <div id="options_retorno_fixo" class="popup__container--options">
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_retorno_fixo', this)">
-                            <i class="bi bi-circle popup__icon ratio"></i>
-                            <p class="popup__text content input">Sim</p>
-                        </div>
-    
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_retorno_fixo', this)">
-                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-                            <p class="popup__text content input">Não</p>
-                        </div>
-                    </div>
-    
-                    <h3 id="options_retorno_fixo_title" class="popup__text info space inative">Selecione o novo local de descida:</h3>
-                    <div id="options_retorno_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
-                </div>
-            </div>
+        {% include "t_models/model_aluno.html" %}
 
-            <div class="popup__container--footer">
-                <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_ponto')">Cancelar</button>
-                <button class="popup__btn">Salvar</button>
-            </div>
-        </div>
-    </div>
+        <!-- POPUPs edit -->
+        {% include "t_popups_edit/popup_aluno.html" %}
 
-    <div id="edit_contraturno" class="popup__container--shadow inative">
-        <div class="popup__container">
-            <div class="popup__container--header">
-                <h1 class="popup__title">Definir contraturno</h1>
-            </div>
-            <div class="popup__container--content">
-                <h2 class="popup__text">Selecione seus dias fixos:</h2>
-                <div id="content_local_contraturno" class="scroll_vertical no_borderY popup__container--scroll principal">
-                    {% for index in range(5) %}
-                    <div class="popup__input checkbox hidden" onclick="popup_confirmBox(this)">
-                        <i class="bi bi-circle popup__icon ratio"></i>
-                        <p class="popup__text input">{{ dias_semana[index] }}</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            <h4 class="popup__text info space">Você pode selecionar mais de uma opção.</h4>
-            <div class="popup__container--footer">
-                <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_contraturno')">Cancelar</button>
-                <button class="popup__btn">Salvar</button>
-            </div>
-        </div>
-    </div>
+    {% elif role == 'motorista' %}
 
-    <div id="edit_dia" class="popup__container--shadow inative">
-        <div class="popup__container">
-            <div class="popup__container--header">
-                <h1 id="dia" class="popup__title"></h1>
-            </div>
-            <div class="popup__container--content">
-                <div class="page__container margin_botton">
-                    <h4 class="popup__text">Data:</h4>
-                    <h4 id="data_dia" class="popup__text"></h4>
-                </div>
-                <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
-                    <h3 class="popup__text question first">Irá faltar no dia?</h3>
-                    <div id="options_falta" class="popup__container--options">
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_falta', this)">
-                            <i class="bi bi-circle popup__icon ratio"></i>
-                            <p class="popup__text content input">Sim</p>
-                        </div>
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_falta', this)">
-                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-                            <p class="popup__text content input">Não</p>
-                        </div>
-                    </div>
+        {% include "t_models/model_motorista.html" %}
 
-                    <h3 class="popup__text question">Irá ficar contraturno?</h3>
-                    <div id="options_contraturno" class="popup__container--options">
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_contraturno', this)">
-                            <i class="bi bi-circle popup__icon ratio"></i>
-                            <p class="popup__text content input">Sim</p>
-                        </div>
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_contraturno', this)">
-                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-                            <p class="popup__text content input">Não</p>
-                        </div>
-                    </div>
+        <!-- POPUPs edit -->
+        {% include "t_popups_edit/popup_motorista.html" %}
 
-                    <h3 class="popup__text question">Deseja subir em outro local?</h3>
-                    <div id="options_subida" class="popup__container--options">
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_subida', this)">
-                            <i class="bi bi-circle popup__icon ratio"></i>
-                            <p class="popup__text content input">Sim</p>
-                        </div>
-
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_subida', this)">
-                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-                            <p class="popup__text content input">Não</p>
-                        </div>
-                    </div>
-
-                    <h3 id="options_subida_title" class="popup__text info space inative">Selecione o local de subida:</h3>
-                    <div id="options_subida_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
-
-                    <h3 class="popup__text question">Deseja descer em outro local?</h3>
-                    <div id="options_retorno" class="popup__container--options">
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_retorno', this)">
-                            <i class="bi bi-circle popup__icon ratio"></i>
-                            <p class="popup__text content input">Sim</p>
-                        </div>
-
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption('options_retorno', this)">
-                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-                            <p class="popup__text content input">Não</p>
-                        </div>
-                    </div>
-
-                    <h3 id="options_retorno_title" class="popup__text info space inative">Selecione o local de descida:</h3>
-                    <div id="options_retorno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
-                </div>
-            </div>
-            <div class="popup__container--footer">
-                <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_dia')">Cancelar</button>
-                <button class="popup__btn">Salvar</button>
-            </div>
-        </div>
-    </div>
     {% endif %}
 
-    <header id="header" class="page__container--header header_hidden">
+    <!-- ----- -->
+    <header id="header_page" class="page__container--header header_hidden">
         <h1 class="text--header">BussTup</h1>
         <div class="page__icon_area">
             <i class="bi bi-search page__icon"></i>
@@ -193,8 +51,7 @@
         </div>
     </header>
     
-    <section id="content" class="page__container--content scroll_horizontal content_noBorder">
-        
+    <section id="content_page" class="page__container--content scroll_horizontal content_noBorder">
         <div id="aba_agenda" class="page__container--aba">
             <div id="not_line_agenda" class="inative">
                 Você não possui uma linha
@@ -237,6 +94,7 @@
                         <p class="text secundario fundo">Tickets restantes:</p>
                         <p id="quant_tickets" class="text secundario content fundo"></p>
                     </div> -->
+
                     <div class="page__container enter">
                         <p class="text secundario fundo">Contraturno fixo:</p>
                         <p id="contaturnos_fixos" class="text secundario content fundo">Nenhum</p>
@@ -325,56 +183,9 @@
                     {% endfor %}
 
                     {% elif role == 'motorista' %}
-                    <!-- Modelos -->
                     <div class="page__container enter">
                         <p class="text secundario fundo">Período:</p>
                         <p id="periodo_previsao" class="text secundario content fundo">09/12/2023 - 10/12/2023</p>
-                    </div>
-
-                    <div id="model_forecast_onibus" class="inative">
-                        <h1 class="page__division enter"></h1>
-                        <div class="page__container">
-                            <p class="text secundario emphasis">Ônibus</p>
-                            <p id="placa_onibus" class="text secundario emphasis max_width">Placa do ônibus</p>
-                        </div>
-
-                        <div class="page__container enter">
-                            <p class="text secundario emphasis">Motorista</p>
-                            <p id="motorista_nome" class="text secundario content fundo">Nome do motorista</p>
-                        </div>
-
-                        <div class="page__container enter">
-                            <p class="text secundario fundo">Capacidade total:</p>
-                            <div class="text secundario fundo">
-                                <p id="onibus_capacidade" class="text secundario content container space">0</p>
-                                <p class="text secundario content container">pessoas</p>
-                            </div>
-                        </div>
-
-                        {% for index_previsao in range(3) %}
-                        <div id="previsao_{{ turnos[index_previsao] }}" class="enter">
-                            <div id="title_{{ turnos[index_previsao] }}" class="page__container interaction pos_relative" onclick="checkForecast('{{ turnos[index_previsao] }}')">
-                                <h2 class="text secundario emphasis max_width">{{ turnos[index_previsao] }}</h2>
-                                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-                            </div>
-                            
-                            <div id="dias_{{ turnos[index_previsao] }}" class="inative">
-                                {% for index_dia in range(5) %}
-                                <div id="previsao_{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
-                                    <h2 class="text indicate emphasis">{{ dias_semana[index_dia][0:3] }}</h2>
-                                    <i class="bi bi-arrow-right-short page__icon indicate"></i>
-                                    <p class="text terciario fundo">Previsão:</p>
-                                    <div class="text secundario fundo">
-                                        <p id="previsao_pessoas" class="text terciario content container space">0</p>
-                                        <p class="text terciario content container">pessoas</p>
-                                    </div>
-                                    <p class="text terciario fundo">Estado:</p>
-                                    <p id="previsao_estado" class="text terciario content green fundo">Normal</p>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endfor %}
                     </div>
                     {% endif %}
                 </div>
@@ -386,25 +197,6 @@
         </div>
 
         <div id="aba_linhas" class="page__container--aba">
-            <!-- Modelos -->
-            <div id="model_regiao" class="inative">
-                <h2 class="text title enter">Nome da cidade</h2>
-            </div>
-
-            <div id="model_line" class="page__container--line inative">
-                <div class="page__container--line_content">
-                    <div class="page__container">
-                        <i class="bi bi-bus-front-fill page__icon--box"></i>
-                        <h1 id="linha_nome" class="text box title_box">Nome da linha</h1>
-                    </div>
-                    <h3 id="nome_dono" class="text box">Nome do dono</h3>
-                </div>
-
-                <div class="page__container--line_image">
-                    <img class="page__line_img" src="/static/data/img/logo_busstup.png">
-                </div>
-            </div>
-            
             <div id="area_linhas" class="page__container column inative">
                 <div class="page__container title enter">
                     <h1 class="text principal">Linhas</h1>
@@ -416,7 +208,7 @@
                     <p class="text secundario emphasis">Você ainda não está relacionado a nenhuma linha.</p>
                     <p class="text secundario fundo">Solicite entrada em alguma linha ou crie a sua:</p>
                     <div class="page__container--line selected">
-                        <i class="bi bi-plus-lg page__icon--box plus"></i>
+                        <i class="bi bi-plus-lg page__icon--box plus" onclick="open_popup_edit('create_line')"></i>
                     </div>
                 </div>
                 <div id="minha_linha_area" class="enter"></div>
@@ -425,6 +217,24 @@
                     <p class="text secundario fundo enter">Solicite entrada:</p>
                 </div>
                 {% endif %}
+
+                <div id="model_regiao">
+                    <h2 class="text title enter">Apodi</h2>
+                    {% for index in range(3) %}
+                    <div id="model_line" class="page__container--line enter" onclick="enterInterface_popup(this)">
+                        <div class="page__container--line_content">
+                            <div class="page__container">
+                                <i class="bi bi-bus-front-fill page__icon--box"></i>
+                                <h1 id="linha_nome" class="text box title_box">Nome da linha</h1>
+                            </div>
+                            <h3 id="nome_dono" class="text box">Nome do dono</h3>
+                        </div>
+        
+                        <div class="page__container--line_image">
+                            <img class="page__line_img" src="/static/data/img/logo_busstup.png">
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -434,7 +244,7 @@
         </div>
     </section>
 
-    <section id="nav" class="page__container--buttom nav_hidden">
+    <section id="nav_page" class="page__container--buttom nav_hidden">
         <div class="page__btn">
             <i id="agenda" class="bi bi-journal-text page__icon--btn btn_selected" onclick="replaceAba('agenda')"></i>
         </div>
@@ -451,7 +261,221 @@
             <i id="chat" class="bi bi-chat-dots page__icon--btn" onclick="replaceAba('chat')"></i>
         </div>
     </section>
+
+    <section id="interface_linha" class="interface__container scroll_vertical no_border inative">
+        <header id="interface_linha_header" class="interface__container--header">
+            <i class="bi bi-arrow-left-short interface__icon" onclick="closeInterface_popup('interface_linha')"></i>
+            <h1 id="interface_title" class="text title no_marge no_border">Nome da linha</h1>
+            <h1 class="text title no_marge no_border">-</h1>
+            <h1 id="interface_cidade" class="text title no_marge no_border">Apodi</h1>
+            <h1 id="interface_ferias" class="text title no_marge no_border inative">(Férias)</h1>
+
+            {% if role == 'motorista' %}
+            <i class="bi bi-gear interface__icon--header"></i>
+            <button id="btn_acao" class="form__btn--simple small margin_right inative">Entrar</button>            
+            {% endif %}
+        </header>
+
+        <div id="interface_linha_content" class="interface__container--content">
+            <div id="area_precos" class="interface__container--area">
+                <h2 class="text title">Valores</h2>
+                <div class="page__container">
+                    <p class="text secundario fundo">Valor da cartela:</p>
+                    <div class="text secundario fundo">
+                        <p class="text secundario content container space">R$</p>
+                        <p id="interface_preco_cartela" class="text secundario content container">100,0</p>
+                    </div>
+                    {% if role == 'motorista' %}
+                    <i id="edit_valor_cartela" class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_valor', this)"></i>
+                    {% endif %}
+                </div>
+
+                <div class="page__container">
+                    <p class="text secundario fundo">Valor da diária:</p>
+                    <div class="text secundario fundo">
+                        <p class="text secundario content container space">R$</p>
+                        <p id="interface_preco_diaria" class="text secundario content container">5,0</p>
+                    </div>
+                    {% if role == 'motorista' %}
+                    <i id="edit_valor_diaria" class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_valor', this)"></i>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="area_motoristas" class="interface__container--area">
+                <h2 class="text title">Motoristas</h2>
+                <div id="model_motorista">
+                    <h1 class="page__division inative"></h1>
+                    <div class="page__container pos_relative">
+                        <p id="model_motorista_dono" class="text secundario emphasis">Dono</p>
+                        <p id="model_motorista_adm" class="text secundario emphasis">Adm</p>
+                        <p id="model_motorista_nome" class="text secundario emphasis max_width">Nome do motorista</p>
+                        <i class="bi bi-three-dots-vertical page__icon content emphasis" onclick="open_popup_edit('configArea_motorista')"></i>
+                    </div>
+                    
+                    <div class="page__container">
+                        <p class="text secundario fundo">Pix:</p>
+                        <p id="model_motorista_pix" class="text secundario fundo content">motoristaTeste@gmail.com</p>
+                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
+                    </div>
+
+                    <div class="page__container">
+                        <p class="text secundario fundo">Telefone:</p>
+                        <p id="model_motorista_telefone" class="text secundario fundo content">(84) 99999-9999</p>
+                        <i id="model_motorista_copy_telefone" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
+                    </div>
+                </div>
+
+                <div id="model_motorista" class="">
+                    <h1 class="page__division"></h1>
+                    <div class="page__container pos_relative">
+                        <p id="model_motorista_dono" class="text secundario emphasis inative">Dono</p>
+                        <p id="model_motorista_adm" class="text secundario emphasis">Adm</p>
+                        <p id="model_motorista_nome" class="text secundario emphasis max_width">Nome do motorista</p>
+                        <button class="interface__btn_remove inative">Remover</button>
+                    </div>
+                    
+                    <div class="page__container inative">
+                        <p class="text secundario fundo">Pix:</p>
+                        <p id="model_motorista_pix" class="text secundario fundo content"></p>
+                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
+                    </div>
+        
+                    <div class="page__container">
+                        <p class="text secundario fundo">Telefone:</p>
+                        <p id="model_motorista_telefone" class="text secundario fundo content">(84) 99999-9999</p>
+                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
+                    </div>
+                </div>
+
+                <div id="model_motorista" class="">
+                    <h1 class="page__division"></h1>
+                    <div class="page__container pos_relative">
+                        <p id="model_motorista_dono" class="text secundario emphasis inative">Dono</p>
+                        <p id="model_motorista_adm" class="text secundario emphasis inative">Adm</p>
+                        <p id="model_motorista_nome" class="text secundario emphasis max_width">Nome do motorista</p>
+                        <button class="interface__btn_remove inative">Remover</button>
+                    </div>
+                    
+                    <div class="page__container inative">
+                        <p class="text secundario fundo">Pix:</p>
+                        <p id="model_motorista_pix" class="text secundario fundo content"></p>
+                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
+                    </div>
+        
+                    <div class="page__container">
+                        <p class="text secundario fundo">Telefone:</p>
+                        <p id="model_motorista_telefone" class="text secundario fundo content">(84) 99999-9999</p>
+                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
+                    </div>
+                </div>
+            </div>
+
+            {% if role == 'motorista' %}
+            <div id="area_onibus" class="interface__container--area">
+                <h2 class="text title">Ônibus</h2>
+                <div id="area_onibus_content">
+                    <div id="teste_onibus" class="">
+                        <div id="teste_onibus_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                            <h3 id="teste_onibus_placa" class="text secundario fundo">1234567</h3>
+                            <h3 id="teste_onibus_motorista" class="text secundario max_width fundo">Nenhum</h3>
+                            <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                        </div>
+
+                        <div id="teste_onibus_container" class="inative">
+                            <div class="page__container">
+                                <p class="text secundario fundo">Capacidade:</p>
+                                <div class="text secundario fundo">
+                                    <p id="teste_onibus_capacidae" class="text secundario container content space">30</p>
+                                    <p class="text secundario container content">pessoas</p>
+                                </div>
+                                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_capacidade', this)"></i>
+                            </div>
+            
+                            <div class="page__container">
+                                <p class="text secundario fundo">Motorista:</p>
+                                <p id="teste_onibus_motorista" class="text secundario fundo content">Nenhum</p>
+                                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_motorista', this)"></i>
+                            </div>
+                            
+                            <div class="page__container justify">
+                                <div class="interface__container--btn remove" onclick="open_popup_edit('excluir_veiculo', this)">
+                                    <i class="bi bi-trash3 interface__icon del"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h1 class="page__division"></h1>
+                <div class="page__container justify">
+                    <div class="interface__container--btn add" onclick="open_popup_edit('add_veicle')">
+                        <i class="bi bi-plus-lg interface__icon plus"></i>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div id="area_rotas" class="interface__container--area">
+                {% if role == 'aluno' %}
+                <h2 class="text title">Rotas</h2>
+
+                {% elif role == 'motorista' %}
+                <h2 class="text title">Pontos e Rotas</h2>
+                <div id="interface_pontos_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                    <h3 class="text secundario fundo max_width">Pontos</h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+
+                <div id="interface_pontos_container" class="inative">
+                    <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                        {% for index in range(20) %}
+                        <div id="interface_model_ponto" class="popup__input grow min_height" onclick="">
+                            <p id="interface_model_ponto_nome" class="popup__text input">Ponto Teste</p>
+                            <i class="bi bi-three-dots-vertical page__icon content right"></i>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <h1 class="page__division aba"></h1>
+                    <div class="page__container justify">
+                        <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('add_ponto')">
+                            <i class="bi bi-plus-lg interface__icon plus"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="interface_rotas_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                    <h3 class="text secundario fundo max_width">Rotas</h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+
+                <div id="interface_rotas_container" class="inative">
+                    <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                        <div id="interface_model_rota" class="popup__input grow min_height" onclick="">
+                            <p id="interface_model_rota_placa_onibus" class="popup__text input">Placa do ônibus</p>
+                            <p class="popup__text input">|</p>
+                            <p id="interface_model_rota_turno" class="popup__text input">Matutino</p>
+                            <p class="popup__text input">|</p>
+                            <p id="interface_model_quant_pessoas" class="popup__text input">30 pessoas</p>
+                            <i class="bi bi-three-dots-vertical page__icon content right"></i>
+                        </div>
+                    </div>
+
+                    <h1 class="page__division aba"></h1>
+                    <div class="page__container justify">
+                        <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('add_rota')">
+                            <i class="bi bi-plus-lg interface__icon plus"></i>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="/static/js/validation.js"></script>
     <script src="/static/js/interface.js"></script>

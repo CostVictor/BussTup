@@ -5,7 +5,7 @@
     --branco_primario: #f0f6ff;
     --branco_secundario: #ffffff;
     --branco_terciario: #fafafa;
-    --branco_quaternario: #dfecff;
+    --branco_quaternario: #d5e6ff;
     --cinza_primario: #7c7c7c;
     --cinza_secundario: #454545;
     --cinca_terciario: #b3b3b3;
@@ -17,6 +17,8 @@
     --azul_quintenario: #1560c3;
     --verde_primario: #008e80;
     --vermelho_primario: #ff7272;
+    --vermelho_secundario: #ff72721b;
+    --vermelho_terciario: #ff0000b7;
     --amarelo_primario: #ffe959;
 
     --size_16px: calc(0.7vw + 1vh + 1vmin);
@@ -93,6 +95,10 @@ body {
     pointer-events: none;
 }
 
+.interaction {
+    cursor: pointer;
+}
+
 
 /* Keyframes */
 
@@ -135,6 +141,10 @@ body {
     position: relative;
 }
 
+.scroll_vertical.no_border {
+    padding: 0;
+}
+
 .scroll_vertical.no_borderY {
     padding-top: 0;
     padding-bottom: 0;
@@ -170,3 +180,4 @@ body {
 .btn_click {
     cursor: pointer;
 }
+

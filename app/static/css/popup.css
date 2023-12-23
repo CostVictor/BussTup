@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     width: 90%;
-    border-radius: calc(2vw + 2vh + 1vmin);
+    border-radius: calc((2vw + 2vh + 1vmin));
     background-color: var(--branco_secundario);
     box-shadow: 0px 3px 15px var(--cinza_primario);
     animation: popupOpen 0.25s ease;
@@ -24,7 +24,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2;
+    z-index: 999;
 }
 
 .popup__container--shadow.close {
@@ -47,6 +47,17 @@
     width: 80%;
 }
 
+.popup__container--content.center_itens {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup__container--content.inative {
+    display: none;
+}
+
 .popup__container--scroll {
     box-sizing: border-box;
     width: 100%;
@@ -57,10 +68,6 @@
 }
 
 .popup__container--scroll.inative {
-    display: none;
-}
-
-.popup__container--content.inative {
     display: none;
 }
 
@@ -96,6 +103,19 @@
     color: var(--azul_terciario);
 }
 
+.popup__text.justify {
+    text-align: center;
+}
+
+.popup__text.emphasis {
+    display: flex;
+    justify-content: center;
+    margin: calc(0.5vw + 0.5vh + 1vmin) 0 calc(0.5vw + 0.5vh + 1vmin) 0;
+    font-size: calc(1.5vw + 1.5vh + 1vmin);
+    color: var(--azul_terciario);
+    font-weight: bold;
+}
+
 .popup__text.center {
     justify-content: center;
 }
@@ -106,6 +126,10 @@
 
 .popup__text.info.space {
     margin: calc(0.4vh + 1vmin) 0;
+}
+
+.popup__text.format_label {
+    margin: calc(1vh + 1vmin) 0 calc(0.4vh + 1vmin) calc(0.4vh + 1vmin);
 }
 
 .popup__text.info.margin_bottom {
@@ -170,17 +194,29 @@
     cursor: pointer
 }
 
+.popup__input.grow {
+    transition: scale 0.2s ease-in-out;
+}
+
+.popup__input.grow:hover {
+    scale: 1.03;
+}
+
+.popup__input.min_height {
+    height: 2.5vh;
+}
+
 .popup__input.inative {
     display: none;
+}
+
+.popup__input.selected {
+    background-color: var(--branco_quaternario);
 }
 
 .popup__input.checkbox {
     width: 100%;
     transition: opacity 0.2s ease, background-color 0.25s ease;
-}
-
-.popup__input.checkbox.selected {
-    background-color: var(--branco_quaternario);
 }
 
 .popup__input.checkbox.bool {

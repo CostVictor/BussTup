@@ -57,10 +57,23 @@
     width: 80%;
 }
 
+.form__container--card.max_width {
+    box-sizing: border-box;
+    width: 100%;
+}
+
 .form__container--input {
     display: flex;
     margin-top: calc(1vw + 1.1vh + 1vmin);
     transition: 0.4s ease;
+}
+
+.form__container--input.first {
+    margin-top: 0;
+}
+
+.form__container--input.margin_bottom {
+    margin-bottom: calc(1.5vw + 2vh + 1vmin);
 }
 
 .form__container--btn_select {
@@ -112,6 +125,20 @@
     width: 100%;
 }
 
+.form__input.time {
+    color: transparent;
+    transition: color 0.2s ease;
+}
+
+.form__input.time.visible {
+    color: var(--cinza_terciario);
+}
+
+.form__input.white {
+    background-color: var(--branco_terciario);
+    border-color: var(--branco_terciario);
+}
+
 .form__input:focus {
     transition: border 0.1s;
     border: var(--azul_primario) solid 0.06rem;
@@ -121,15 +148,15 @@
     display: none;
 }
 
-.input_password {
+.form__input.input_password {
     border-radius: calc(0.5vw + 0.5vh + 1vmin) 0 0 calc(0.5vw + 0.5vh + 1vmin);
 }
 
-.input_notIcon {
+.form__input.input_notIcon {
     text-indent: calc(0.05vw + 0.05vh + 1vmin);
 }
 
-.input_error {
+.form__input.input_error {
     border-color: var(--vermelho_primario);
 }
 
@@ -141,6 +168,10 @@
     font-size: calc(1vw + 1vh + 1vmin);
     color: var(--azul_quaternario);
     pointer-events: none;
+}
+
+.form__label.intense {
+    color: var(--azul_terciario);
 }
 
 .form__label--animate {
@@ -205,6 +236,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: 0.2s ease;
     width: 30%;
     height: 80%;
     cursor: pointer;
@@ -214,6 +246,35 @@
     color: var(--azul_terciario);
     font-size: calc(1vw + 0.5vh + 1vmin);
     padding: calc(0.1vw + 0.1vh + 1vmin);
+}
+
+.form__btn--simple.selected {
+    background-color: var(--azul_terciario);
+    color: var(--branco_secundario);
+}
+
+.form__btn--simple.selected:hover {
+    background-color: var(--azul_primario);
+}
+
+.form__btn--simple.inative {
+    display: none;
+}
+
+.form__btn--simple.right {
+    margin-left: auto;
+    margin-right: calc(1vw + 1vh + 1vmin);
+}
+
+.form__btn--simple.margin_right {
+    margin-right: calc(1vw + 1vh + 1vmin);
+}
+
+.form__btn--simple.small {
+    font-size: calc(1vh + 1vmin);
+    padding: calc(0.6vw + 0.6vh + 0.5vmin);
+    height: 60%;
+    width: auto;
 }
 
 .form__btn--simple:hover {

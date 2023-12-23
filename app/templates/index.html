@@ -34,15 +34,18 @@
                     <i id="icon_user" class="bi bi-person-fill form__icon"></i>
                     <label class="form__label" for="user">Usuário</label>
                 </div>
+
                 <div class="form__container--input enter">
                     <input id="password" class="form__input input_password" type="password" required>
                     <i id="btn_password" class="bi bi-eye-fill form__btn--password" onclick="animateIconPassword('password')"></i>
                     <i id="icon_password" class="bi bi-key-fill form__icon"></i>
                     <label class="form__label" for="password">Senha</label>
                 </div>
+
                 <a class="text--click enter" href="">Esqueceu sua senha?</a>
                 <input class="form__btn enter" type="submit" value="Entrar">
             </form>
+            
             <div class="form__container--text_info enter">
                 <p class="text">Não possui uma conta?</p>
                 <button class="form__btn--simple" onclick="closeInterface('login', '/cadastro')">Criar conta</button>

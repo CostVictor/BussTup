@@ -53,13 +53,16 @@ inputs.forEach(input => {
             input.classList.remove('input_error')
             if (label) {label.classList.add('form__label--animate')}
             if (icon) {icon.classList.add('form__icon--animate')}
+            if (input.type === 'time') { input.classList.add('visible') }
         } else {
             if (input.value.trim() === '') {
-                label.classList.remove('form__label--animate')
+                if (label) {label.classList.remove('form__label--animate')}
                 if (icon) {icon.classList.remove('form__icon--animate')}
+                if (input.type === 'time') { input.classList.remove('visible') }
             } else {
                 if (label) {label.classList.add('form__label--animate')}
                 if (icon) {icon.classList.add('form__icon--animate')}
+                if (input.type === 'time') { input.classList.add('visible') }
             }
         }
     }
@@ -87,10 +90,11 @@ function animateIconPassword(id) {
 
 // ~~~~~ Animação de interface ~~~~~ //
 
+function config_animate(index, item, name, duraction, value_initial, sum) {
+    item.style.animation = `${name} ${duraction}s forwards ${value_initial + (index * sum)}s`
+}
+
 function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_init = 0, interval_itens = 0.06, opacity = 0) {
-    function config_animate(index, item, name, duraction, value_initial, sum) {
-        item.style.animation = `${name} ${duraction}s forwards ${value_initial + (index * sum)}s`
-    }
     if (list_itens) {
         list_itens.forEach((item, index) => {
             item.style.opacity = opacity
@@ -122,7 +126,7 @@ function closeInterface(type, redirect) {
     const container = document.getElementById('container')
     let elements = container.querySelectorAll('[class*="enter"]')
 
-    animate_itens(elements, 'outUp', 0.3, 0, 0.07, 1)
+    animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
     if (type === 'login') {
         container.style.transition = 'border-radius 0.5s ease 0.4s, height 0.7s ease'
         
@@ -141,6 +145,65 @@ function closeInterface(type, redirect) {
             window.location.href = redirect
         }, 980)
     }
+}
+
+function enterInterface_popup(obj_line) {
+    closePage()
+
+    const interface = document.getElementById('interface_linha')
+    const header_interface = document.getElementById('interface_linha_header')
+    const content_interface = document.getElementById('interface_linha_content')
+    const header_pag = document.getElementById('header_page')
+    const content_page = document.getElementById('content_page')
+    const nav_page = document.getElementById('nav_page')
+    const elements = Array.from(content_interface.children)
+    const abas = content_interface.querySelectorAll('[id*="btn"]')
+    const containers = content_interface.querySelectorAll('[id*="container"]')
+
+    abas.forEach(aba => {
+        const icon = aba.querySelector('i')
+        icon.classList.remove('open')
+        aba.classList.remove('margin_bottom')
+    })
+    containers.forEach(container => {
+        container.classList.add('inative')
+    })
+
+    setTimeout(() => {
+        interface.classList.remove('inative')
+        header_pag.classList.add('inative')
+        content_page.classList.add('inative')
+        nav_page.classList.add('inative')
+        interface.scrollTop = 0
+        
+        config_animate(0, header_interface, 'fadeDown', 0.5, 0, 0.07)
+        animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0)
+    }, 900)
+}
+
+function closeInterface_popup() {
+    const interface = document.getElementById('interface_linha')
+    const header_interface = document.getElementById('interface_linha_header')
+    const content_interface = document.getElementById('interface_linha_content')
+    const header_pag = document.getElementById('header_page')
+    const content_page = document.getElementById('content_page')
+    const nav_page = document.getElementById('nav_page')
+    const elements = Array.from(content_interface.children)
+
+    header_pag.classList.remove('inative')
+    content_page.classList.remove('inative')
+    nav_page.classList.remove('inative')
+    
+    animate_itens(elements, 'outUp', 0.7, 0.07, 0.07, 1)
+    setTimeout(() => {
+        config_animate(0, header_interface, 'outUp', 0.7, 0, 0.07)
+    }, 350)
+    
+    setTimeout(() => {
+        interface.classList.add('inative')
+        enterPage(true)
+        copy_text()
+    }, 650)
 }
 
 
@@ -169,4 +232,22 @@ function replace_form(button_id) {
         form_aluno.classList.add('inative')
         form_aluno.classList.remove('scroll_vertical')
     }
+}
+
+
+// ~~~~~ Ação de icone ~~~~~ //
+
+function copy_text(obj_click = null) {
+    const icons = document.querySelectorAll('[id*=copy]')
+    
+    icons.forEach(icon => {
+        if (icon === obj_click) {
+            icon.classList.replace('bi-clipboard', 'bi-check-lg')
+            const div_pai = icon.parentNode
+            const element_text = div_pai.querySelector('p.content')
+            navigator.clipboard.writeText(element_text.innerText)
+        } else {
+            icon.classList.replace('bi-check-lg', 'bi-clipboard')
+        }
+    })
 }
