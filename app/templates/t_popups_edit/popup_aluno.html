@@ -1,8 +1,9 @@
-<div id="edit_ponto" class="popup__container--shadow inative">
+<section id="edit_ponto" class="popup__container--shadow inative">
     <div class="popup__container">
-        <div class="popup__container--header">
+        <header class="popup__container--header">
             <h1 class="popup__title">Editar ponto</h1>
-        </div>
+        </header>
+
         <div class="popup__container--content">
             <h4 class="popup__text info margin_bottom">(OBS) Esta edição altera seus locais fixos.</h4>
             <div id="scroll_principal" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
@@ -48,19 +49,20 @@
             </div>
         </div>
 
-        <div class="popup__container--footer">
+        <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_ponto', true)">Cancelar</button>
             <button class="popup__btn">Salvar</button>
-        </div>
+        </footer>
     </div>
-</div>
+</section>
 
 
-<div id="edit_contraturno" class="popup__container--shadow inative">
+<section id="edit_contraturno" class="popup__container--shadow inative">
     <div class="popup__container">
-        <div class="popup__container--header">
+        <header class="popup__container--header">
             <h1 class="popup__title">Definir contraturno</h1>
-        </div>
+        </header>
+
         <div class="popup__container--content">
             <h2 class="popup__text">Selecione seus dias fixos:</h2>
             <div id="content_local_contraturno" class="scroll_vertical no_borderY popup__container--scroll principal">
@@ -72,20 +74,22 @@
                 {% endfor %}
             </div>
         </div>
+
         <h4 class="popup__text info space">Você pode selecionar mais de uma opção.</h4>
-        <div class="popup__container--footer">
+        <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_contraturno')">Cancelar</button>
             <button class="popup__btn">Salvar</button>
-        </div>
+        </footer>
     </div>
-</div>
+</section>
 
 
-<div id="edit_dia" class="popup__container--shadow inative">
+<section id="edit_dia" class="popup__container--shadow inative">
     <div class="popup__container">
-        <div class="popup__container--header">
+        <header class="popup__container--header">
             <h1 id="dia" class="popup__title"></h1>
-        </div>
+        </header>
+
         <div class="popup__container--content">
             <div class="page__container margin_bottom">
                 <h4 class="popup__text">Data:</h4>
@@ -149,9 +153,10 @@
                 <div id="options_retorno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
             </div>
         </div>
-        <div class="popup__container--footer">
+
+        <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_dia')">Cancelar</button>
             <button class="popup__btn">Salvar</button>
-        </div>
+        </footer>
     </div>
-</div>
+</section>

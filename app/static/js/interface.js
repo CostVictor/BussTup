@@ -74,15 +74,16 @@ inputs.forEach(input => {
 
 // ~~~~~ Animação de icone ~~~~~ //
 
-function animateIconPassword(id) {
-    const iconPassword = document.getElementById(`btn_${id}`)
-    const inputPassword = document.getElementById(id)
+function animateIconPassword(obj_click) {
+    const container_password = obj_click.parentNode
+    const iconPassword = container_password.querySelector('[id*="btn"]')
+    const inputPassword = container_password.querySelector('input')
 
     if (inputPassword.type === 'password') {
-        iconPassword.className = "bi bi-eye-slash-fill form__btn--password"
+        iconPassword.className = inputPassword.className.includes('white') ? "bi bi-eye-slash-fill form__btn--password white" : "bi bi-eye-slash-fill form__btn--password"
         inputPassword.type = 'text'
     } else {
-        iconPassword.className = "bi bi-eye-fill form__btn--password"
+        iconPassword.className = inputPassword.className.includes('white') ? "bi bi-eye-fill form__btn--password white" : "bi bi-eye-fill form__btn--password"
         inputPassword.type = 'password'
     }
 }
@@ -193,6 +194,7 @@ function closeInterface_popup() {
     header_pag.classList.remove('inative')
     content_page.classList.remove('inative')
     nav_page.classList.remove('inative')
+    header_pag.style.opacity = '0'
     
     animate_itens(elements, 'outUp', 0.7, 0.07, 0.07, 1)
     setTimeout(() => {
@@ -238,7 +240,7 @@ function replace_form(button_id) {
 // ~~~~~ Ação de icone ~~~~~ //
 
 function copy_text(obj_click = null) {
-    const icons = document.querySelectorAll('[id*=copy]')
+    const icons = document.querySelectorAll('[class*="copy"]')
     
     icons.forEach(icon => {
         if (icon === obj_click) {

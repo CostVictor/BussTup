@@ -62,8 +62,7 @@ def checkLine():
         if database.select('Aluno_has_Ponto', where=f'Aluno_matricula = "{key}"'):
             response['conf'] = True
     else:
-        user = database.return_user(key)
-        if user.Linha_codigo:
+        if database.select('Linha_has_Motorista', where=f'Motorista_nome = "{key}"'):
             response['conf'] = True
     return jsonify(response)
 

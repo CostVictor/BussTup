@@ -265,13 +265,13 @@
     <section id="interface_linha" class="interface__container scroll_vertical no_border inative">
         <header id="interface_linha_header" class="interface__container--header">
             <i class="bi bi-arrow-left-short interface__icon" onclick="closeInterface_popup('interface_linha')"></i>
-            <h1 id="interface_title" class="text title no_marge no_border">Nome da linha</h1>
+            <h1 id="interface_nome" class="text title no_marge no_border">Nome da linha</h1>
             <h1 class="text title no_marge no_border">-</h1>
             <h1 id="interface_cidade" class="text title no_marge no_border">Apodi</h1>
             <h1 id="interface_ferias" class="text title no_marge no_border inative">(Férias)</h1>
 
             {% if role == 'motorista' %}
-            <i class="bi bi-gear interface__icon--header"></i>
+            <i class="bi bi-gear interface__icon--header" onclick="open_popup_edit('config_linha', this)"></i>
             <button id="btn_acao" class="form__btn--simple small margin_right inative">Entrar</button>            
             {% endif %}
         </header>
@@ -309,13 +309,17 @@
                     <div class="page__container pos_relative">
                         <p id="model_motorista_dono" class="text secundario emphasis">Dono</p>
                         <p id="model_motorista_adm" class="text secundario emphasis">Adm</p>
-                        <p id="model_motorista_nome" class="text secundario emphasis max_width">Nome do motorista</p>
-                        <i class="bi bi-three-dots-vertical page__icon content emphasis" onclick="open_popup_edit('configArea_motorista')"></i>
+                        <p id="model_motorista_nome" class="text secundario emphasis max_width">Israel Bezerra</p>
+                        {% if role == 'motorista' %}
+                        <i class="bi bi-three-dots-vertical page__icon content emphasis" onclick="open_popup_edit('config_motorista', this)"></i>
+                        {% endif %}
                     </div>
                     
                     <div class="page__container">
                         <p class="text secundario fundo">Pix:</p>
-                        <p id="model_motorista_pix" class="text secundario fundo content">motoristaTeste@gmail.com</p>
+                        <div class="scroll_horizontal">
+                            <p id="model_motorista_pix" class="text secundario fundo content">motoristaTeste@gmail.com</p>
+                        </div>
                         <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
                     </div>
 
@@ -323,50 +327,6 @@
                         <p class="text secundario fundo">Telefone:</p>
                         <p id="model_motorista_telefone" class="text secundario fundo content">(84) 99999-9999</p>
                         <i id="model_motorista_copy_telefone" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
-                    </div>
-                </div>
-
-                <div id="model_motorista" class="">
-                    <h1 class="page__division"></h1>
-                    <div class="page__container pos_relative">
-                        <p id="model_motorista_dono" class="text secundario emphasis inative">Dono</p>
-                        <p id="model_motorista_adm" class="text secundario emphasis">Adm</p>
-                        <p id="model_motorista_nome" class="text secundario emphasis max_width">Nome do motorista</p>
-                        <button class="interface__btn_remove inative">Remover</button>
-                    </div>
-                    
-                    <div class="page__container inative">
-                        <p class="text secundario fundo">Pix:</p>
-                        <p id="model_motorista_pix" class="text secundario fundo content"></p>
-                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
-                    </div>
-        
-                    <div class="page__container">
-                        <p class="text secundario fundo">Telefone:</p>
-                        <p id="model_motorista_telefone" class="text secundario fundo content">(84) 99999-9999</p>
-                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
-                    </div>
-                </div>
-
-                <div id="model_motorista" class="">
-                    <h1 class="page__division"></h1>
-                    <div class="page__container pos_relative">
-                        <p id="model_motorista_dono" class="text secundario emphasis inative">Dono</p>
-                        <p id="model_motorista_adm" class="text secundario emphasis inative">Adm</p>
-                        <p id="model_motorista_nome" class="text secundario emphasis max_width">Nome do motorista</p>
-                        <button class="interface__btn_remove inative">Remover</button>
-                    </div>
-                    
-                    <div class="page__container inative">
-                        <p class="text secundario fundo">Pix:</p>
-                        <p id="model_motorista_pix" class="text secundario fundo content"></p>
-                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
-                    </div>
-        
-                    <div class="page__container">
-                        <p class="text secundario fundo">Telefone:</p>
-                        <p id="model_motorista_telefone" class="text secundario fundo content">(84) 99999-9999</p>
-                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
                     </div>
                 </div>
             </div>
@@ -389,17 +349,17 @@
                                     <p id="teste_onibus_capacidae" class="text secundario container content space">30</p>
                                     <p class="text secundario container content">pessoas</p>
                                 </div>
-                                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_capacidade', this)"></i>
+                                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_capacidade_veicle', this)"></i>
                             </div>
             
                             <div class="page__container">
                                 <p class="text secundario fundo">Motorista:</p>
                                 <p id="teste_onibus_motorista" class="text secundario fundo content">Nenhum</p>
-                                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_motorista', this)"></i>
+                                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_motorista_veicle', this)"></i>
                             </div>
                             
                             <div class="page__container justify">
-                                <div class="interface__container--btn remove" onclick="open_popup_edit('excluir_veiculo', this)">
+                                <div class="interface__container--btn remove" onclick="open_popup_edit('del_veicle', this)">
                                     <i class="bi bi-trash3 interface__icon del"></i>
                                 </div>
                             </div>
@@ -429,9 +389,9 @@
 
                 <div id="interface_pontos_container" class="inative">
                     <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
-                        {% for index in range(20) %}
-                        <div id="interface_model_ponto" class="popup__input grow min_height" onclick="">
-                            <p id="interface_model_ponto_nome" class="popup__text input">Ponto Teste</p>
+                        {% for index in range(1) %}
+                        <div id="interface_model_ponto" class="popup__input grow min_height" onclick="open_popup_edit('config_ponto', this)">
+                            <p id="interface_model_ponto_nome" class="popup__text input">Bacurau 1</p>
                             <i class="bi bi-three-dots-vertical page__icon content right"></i>
                         </div>
                         {% endfor %}
@@ -471,6 +431,59 @@
                 </div>
                 {% endif %}
             </div>
+
+            {% if role == 'motorista' %}
+            <div id="area_alunos" class="interface__container--area">
+                <h2 class="text title">Alunos e Tickets</h2>
+                <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                    <h3 class="text secundario fundo">Alunos</h3>
+                    <h3 id="interface_alunos_quant" class="text secundario fundo max_width">0 cadastrados</h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+
+                <div id="interface_alunos_container" class="scroll_vertical no_borderY popup__container--scroll inative">
+                    <div id="interface_alunos_matutino_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                        <h3 class="text secundario emphasis">Matutino</h3>
+                        <h3 id="interface_alunos_matutino_quant" class="text secundario fundo max_width">0 cadastrados</h3>
+                        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                    </div>
+
+                    <div id="interface_alunos_matutino_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                        {% for index in range(1) %}
+                        <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                            <p id="interface_model_aluno_title" class="popup__text input">Israel Bezerra da Silva</p>
+                            <i class="bi bi-three-dots-vertical page__icon content right"></i>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div id="interface_alunos_vespertino_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                        <h3 class="text secundario emphasis">Vespertino</h3>
+                        <h3 id="interface_alunos_vespertino_quant" class="text secundario fundo max_width">0 cadastrados</h3>
+                        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                    </div>
+                    
+                    <div id="interface_alunos_vespertino_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
+
+                    <div id="interface_alunos_noturno_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                        <h3 class="text secundario emphasis">Noturno</h3>
+                        <h3 id="interface_alunos_noturno_quant" class="text secundario fundo max_width">0 cadastrados</h3>
+                        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                    </div>
+                    
+                    <div id="interface_alunos_noturno_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
+                </div>
+
+                <div id="interface_tickets_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                    <h3 class="text secundario fundo max_width">Tickets</h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+
+                <div id="interface_tickets_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal inative">
+                    <h3 class="text secundario fundo">Não disponível.</h3>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </section>
 

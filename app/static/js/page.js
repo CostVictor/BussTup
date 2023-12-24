@@ -68,13 +68,7 @@ function enterPage(reset_header = false) {
     }, 180)
 
     setTimeout(() => {
-        header.style.opacity = '1'
-        sr.reveal('.page__container--header', {
-            duraction: 600, 
-            beforeReveal: (domElement) => {
-                domElement.style.opacity = '1';
-            } 
-        })
+        sr.reveal('.page__container--header', { duraction: 600, })
         nav.classList.remove('nav_hidden')
     }, 500)
 
@@ -150,47 +144,99 @@ function open_popup_edit(id, obj_click=false) {
             const reference = obj_click.parentNode.parentNode.id.replace('_container', '_placa')
             return document.getElementById(reference).textContent
         }
+        function extract_nome() {
+            const verify = obj_click.querySelector('[id*="nome"]')
+            if (verify) {return verify.textContent}
 
-        if (id === 'edit_dia') {
-            const dia = document.getElementById('dia')
-            const data = document.getElementById('data_dia')
-            const options_falta = document.getElementById('options_falta').querySelectorAll('div')
-            const options_contraturno = document.getElementById('options_contraturno').querySelectorAll('div')
-            const options_subida = document.getElementById('options_subida').querySelectorAll('div')
-            const options_descer = document.getElementById('options_retorno').querySelectorAll('div')
+            let tag = obj_click.parentNode
+            while (true) {
+                var identify_nome = tag.querySelector('[id*="nome"]')
+                if (identify_nome) {
+                    return identify_nome.textContent
+                } else {
+                    tag = tag.parentNode
+                }
+            }
+        }
+
+        switch (id) {
+            case 'edit_dia':
+                const dia = document.getElementById('dia')
+                const data = document.getElementById('data_dia')
+                const options_falta = document.getElementById('options_falta').querySelectorAll('div')
+                const options_contraturno = document.getElementById('options_contraturno').querySelectorAll('div')
+                const options_subida = document.getElementById('options_subida').querySelectorAll('div')
+                const options_descer = document.getElementById('options_retorno').querySelectorAll('div')
+                
+                const text_dia = obj_click.querySelector('h1').textContent
+                const text_falta = obj_click.querySelector(`p#falta_${text_dia}`).textContent
+                const text_contraturno = obj_click.querySelector(`p#contraturno_${text_dia}`).textContent
+                const text_subir = obj_click.querySelector(`p#pSubida_${text_dia}`).textContent
+                const text_descer = obj_click.querySelector(`p#pDescida_${text_dia}`).textContent
+        
+                dia.textContent = `Editar ${text_dia}`
+                data.textContent = obj_click.querySelector(`p#data_${text_dia}`).textContent
+                options_falta.forEach(item => {define_checkbox(item, text_falta)})
+                options_contraturno.forEach(item => {define_checkbox(item, text_contraturno)})
+                
+                const title_subir = document.getElementById('options_subida_title')
+                const container_subir = document.getElementById('options_subida_container')
+                const list_itens_subir = container_subir.querySelectorAll('div')
+                correct_options(text_subir, options_subida, title_subir, container_subir, list_itens_subir)
+        
+                const title_descer = document.getElementById('options_retorno_title')
+                const container_descer = document.getElementById('options_retorno_container')
+                const list_itens_descer = container_descer.querySelectorAll('div')
+                correct_options(text_descer, options_descer, title_descer, container_descer, list_itens_descer)
+                break
+
+            case 'edit_valor':
+                card.querySelector('h2').textContent = `Digite o novo valor da ${obj_click.id.includes('cartela') ? 'cartela' : 'diária'}:`
+                break
             
-            const text_dia = obj_click.querySelector('h1').textContent
-            const text_falta = obj_click.querySelector(`p#falta_${text_dia}`).textContent
-            const text_contraturno = obj_click.querySelector(`p#contraturno_${text_dia}`).textContent
-            const text_subir = obj_click.querySelector(`p#pSubida_${text_dia}`).textContent
-            const text_descer = obj_click.querySelector(`p#pDescida_${text_dia}`).textContent
-    
-            dia.textContent = `Editar ${text_dia}`
-            data.textContent = obj_click.querySelector(`p#data_${text_dia}`).textContent
-            options_falta.forEach(item => {define_checkbox(item, text_falta)})
-            options_contraturno.forEach(item => {define_checkbox(item, text_contraturno)})
+            case 'edit_capacidade_veicle':
+                card.querySelector('h2').textContent = `Digite a capacidade de ${extract_placa()}:`
+                break
+
+            case 'edit_motorista_veicle':
+                card.querySelector('h2').textContent = `Selecione o motorista de ${extract_placa()}:`
+                break
+
+            case 'config_motorista':
+                card.querySelector('h1').textContent = extract_nome()
+                break
             
-            const title_subir = document.getElementById('options_subida_title')
-            const container_subir = document.getElementById('options_subida_container')
-            const list_itens_subir = container_subir.querySelectorAll('div')
-            correct_options(text_subir, options_subida, title_subir, container_subir, list_itens_subir)
-    
-            const title_descer = document.getElementById('options_retorno_title')
-            const container_descer = document.getElementById('options_retorno_container')
-            const list_itens_descer = container_descer.querySelectorAll('div')
-            correct_options(text_descer, options_descer, title_descer, container_descer, list_itens_descer)
+            case 'config_ponto':
+                card.querySelector('h1').textContent = extract_nome()
+                break
 
-        } else if (id === 'edit_valor') {
-            card.querySelector('h2').textContent = `Digite o novo valor da ${obj_click.id.includes('cartela') ? 'cartela' : 'diária'}:`
+            case 'config_linha':
+                card.querySelector('h1').textContent = extract_nome()
+                break
 
-        } else if (id === 'edit_capacidade') {
-            card.querySelector('h2').textContent = `Digite a capacidade de ${extract_placa()}:`
-
-        } else if (id === 'edit_motorista') {
-            card.querySelector('h2').textContent = `Selecione o motorista de ${extract_placa()}:`
-
-        } else if (id == 'excluir_veiculo') {
-            card.querySelector(`h2#${id}_placa`).textContent = extract_placa()
+            case 'promover_motorista':
+                card.querySelector('h2').textContent = extract_nome()
+                break
+            
+            case 'rebaixar_motorista':
+                card.querySelector('h2').textContent = extract_nome()
+                break
+            
+            case 'remover_motorista':
+                card.querySelector('h2').textContent = extract_nome()
+                break
+            
+            case 'del_ponto':
+                card.querySelector('h2').textContent = extract_nome()
+                break
+            
+            case 'del_linha':
+                card.querySelector('h2').textContent = extract_nome()
+                break
+            
+            case 'del_veicle':
+                card.querySelector(`h2#${id}_placa`).textContent = extract_placa()
+                break
         }
     }
 }
@@ -242,12 +288,22 @@ function cancel_popup_edit(id, reset_bool = false, reference_bool = 'Não') {
                 }
             })
         } else {
+            const btns = popup.querySelectorAll('[id*="btn"]')
             const containers = popup.querySelectorAll('[id*="container"]')
+            
             if (containers) {
                 containers.forEach(element => {
                     Array.from(element.children).forEach(item => {
                         item.classList.remove('selected')
                     })
+                })
+            }
+            if (btns) {
+                btns.forEach(btn => {
+                    const icon = btn.querySelector('i')
+                    if (icon && icon.className.includes('open')) {
+                        actionContainer(btn)
+                    }
                 })
             }
         }
@@ -256,6 +312,7 @@ function cancel_popup_edit(id, reset_bool = false, reference_bool = 'Não') {
     scrolls.forEach(element => {
         element.scrollTop = 0
     })
+    copy_text()
 }
 
 
@@ -361,24 +418,42 @@ function actionContainer(obj_click) {
         const motorista_nome = obj_click.querySelectorAll('h3')
         motorista_nome.forEach((element, index) => {
             if (!index) {
-                icon.className.includes('open') ? element.classList.remove('max_width'): element.classList.add('max_width')
+                icon.className.includes('open') ? element.classList.remove('max_width') : element.classList.add('max_width')
             } else {
                 icon.className.includes('open') ? element.classList.remove('inative') : element.classList.add('inative')
             }
         })
-
     }
-    
+
+    const btn_children = container.querySelectorAll('[id*="btn"]')
+    if (btn_children) {
+        btn_children.forEach(btn => {
+            const icon = btn.querySelector('i')
+            if (icon.className.includes('open')) {
+                actionContainer(btn)
+            }
+        })
+    }
+
     animate_itens(elements)
     if (icon.className.includes('open')) {
+        container.classList.remove('space')
         container.classList.add('inative')
         icon.classList.remove('open')
         obj_click.classList.remove('margin_bottom')
+        elements.forEach(element => {
+            element.classList.remove('selected')
+        })
     } else {
         container.classList.remove('inative')
+        if (container.className.includes('scroll')) {
+            container.classList.add('space')
+        } else {
+            obj_click.classList.add('margin_bottom')
+        }
         container.scrollTop = 0
         icon.classList.add('open')
-        obj_click.classList.add('margin_bottom')
+        set_limitScroll(container)
     }
     const rolament = container.querySelector('div.scroll_vertical')
     if (rolament) {rolament.scrollTop = 0}
@@ -410,19 +485,23 @@ function popup_selectOption(obj_click,  open_boxOptions = false, multiple_option
             if (open_boxOptions) {
                 const title_options = document.getElementById(`${reference.id}_title`)
                 const reference_container = document.getElementById(`${reference.id}_container`)
-                const list_itens = reference_container.querySelectorAll('div')
+                const list_itens = reference_container ? reference_container.querySelectorAll('div') : false
 
                 if (text.textContent === 'Sim') {
                     if (title_options) {title_options.classList.remove('inative')}
-                    reference_container.classList.remove('inative')
-                    reference_container.scrollTop = 0
-                    set_limitScroll(reference_container)
-                    animate_itens(list_itens)
+                    if (reference_container) {
+                        reference_container.classList.remove('inative')
+                        reference_container.scrollTop = 0
+                        set_limitScroll(reference_container)
+                        animate_itens(list_itens)
+                    }
                 } else {
-                    const options = reference_container.querySelectorAll('div')
-                    options.forEach(item => {item.classList.remove('selected')})
-                    if (title_options) {title_options.classList.add('inative')}
-                    reference_container.classList.add('inative')
+                    if (reference_container) {
+                        const options = reference_container.querySelectorAll('div')
+                        options.forEach(item => {item.classList.remove('selected')})
+                        if (title_options) {title_options.classList.add('inative')}
+                        reference_container.classList.add('inative')
+                    }
                 }
             }
         }

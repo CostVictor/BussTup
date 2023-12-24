@@ -232,6 +232,10 @@
     cursor: pointer;
 }
 
+.form__btn--password.white {
+    background-color: var(--branco_terciario);
+}
+
 .form__btn--simple {
     display: flex;
     align-items: center;
