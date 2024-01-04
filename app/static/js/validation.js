@@ -1,4 +1,4 @@
-// ~~~~~ POPUP ~~~~~ //
+// ~~~~~ POPUP Mensagem de validação (swal2) ~~~~~ //
 
 function create_popup(title, text='', text_buttom='Ok', icon='info', redirect='', open_scroll = true) {
     document.body.classList.add('no-scroll')
@@ -9,7 +9,7 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
         width: '80%',
         confirmButtonText: text_buttom,
         confirmButtonColor: '#004aad',
-        iconColor: `${icon === 'info'? "#ffe959" : icon === 'success'? "#0aa999" : "#ff7272"}`
+        iconColor: `${icon === 'info' ? "#ffe646" : icon === 'success'? "#0aa999" : "#ff7272"}`
     }).then(() => {
         if (open_scroll) {document.body.classList.remove('no-scroll')}
         if (redirect) {window.location.href = redirect}

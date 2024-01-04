@@ -193,7 +193,8 @@
     border-right: var(--azul_terciario) solid 0.06rem;
     font-size: calc(1vw + 1.5vh + 1vmin);
     padding: 0 calc(0.2vw + 0.2vh + 1vmin) 0 calc(0.2vw + 0.2vh + 1vmin);
-    margin-top: calc(0.4vw + 0.8vh + 1vmin);
+    transform: translateY(-50%);
+    top: 50%;
 }
 
 .form__icon--animate {
@@ -261,7 +262,7 @@
     background-color: var(--azul_primario);
 }
 
-.form__btn--simple.inative {
+.form__btn--simple.inactive {
     display: none;
 }
 

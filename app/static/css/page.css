@@ -1,5 +1,5 @@
 body {
-    justify-content: center;
+    align-items: center;
 }
 
 .page__container {
@@ -34,7 +34,7 @@ body {
     box-sizing: border-box;
 }
 
-.page__container.inative {
+.page__container.inactive {
     display: none;
 }
 
@@ -46,7 +46,7 @@ body {
     border-bottom: var(--azul_terciario) solid 0.06rem;
 }
 
-.page__container.inative {
+.page__container.inactive {
     display: none;
 }
 
@@ -55,20 +55,29 @@ body {
 }
 
 .page__container--header {
-    transition: height 0.7s ease, transform 0.2s ease-in-out;
+    transition: height 0.7s ease, transform 0.2s ease-in-out, opacity 0.3s ease-in-out;
     box-sizing: border-box;
     display: flex;
     height: calc(4vw + 4vh + 1vmin);
-    width: 95%;
-    visibility: hidden;
+    width: 85%;
+    opacity: 0;
 }
 
-.page__container--header.inative {
+.page__container--icon {
+    width: 100%;
+    display: flex;
+}
+
+.page__container--header.inactive {
     display: none;
 }
 
 .page__container--header.recuoLeft {
     transform: translateX(-30%);
+}
+
+.page__container--header.visible {
+    opacity: 1;
 }
 
 .header_hidden {
@@ -84,7 +93,7 @@ body {
     flex-grow: 1;
 }
 
-.page__container--content.inative {
+.page__container--content.inactive {
     display: none;
 }
 
@@ -151,7 +160,7 @@ body {
     bottom: 0;
 }
 
-.page__container--buttom.inative {
+.page__container--buttom.inactive {
     display: none;
 }
 
@@ -177,9 +186,18 @@ body {
 .page__container--line_content {
     display: flex;
     flex-direction: column;
-    margin: 0 calc(1vw + 1vh + 1vmin) 0 calc(1.4vw + 1.4vh + 1vmin);
-    width: 70%;
+    margin: 0;
+    margin-left: calc(1vw + 1vh + 1vmin);
+    width: 55%;
     height: 100%;
+}
+
+.page__container--line_content.info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 calc(0.2vw + 0.2vh + 1vmin);
+    width: 25%;
 }
 
 .page__container--line_image {
@@ -222,21 +240,26 @@ body {
     padding: calc(0.1vw + 0.1vh + 0.3vmin) calc(1.5vw + 1.5vh + 1vmin);
 }
 
-.page__icon_area {
-    display: grid;
-    width: 100%;
-    grid-auto-flow: column;
-    justify-content: end;
-}
-
 .page__icon {
     color: var(--branco_secundario);
     font-size: calc(2vw + 1.4vh + 1vmin);
-    margin-right: calc(0.7vw + 0.5vh + 1vmin);
     padding: calc(0.5vw + 0.6vh + 1vmin);
+    margin-left: calc(0.7vw + 0.5vh + 1vmin);
     display: flex;
     align-items: center;
     cursor: pointer;
+}
+
+.page__icon.animate {
+    transition: scale 0.2s ease-in-out;
+}
+
+.page__icon.animate:hover {
+    scale: 1.15;
+}
+
+.page__icon.first {
+    margin-left: auto;
 }
 
 .page__icon.indicate {

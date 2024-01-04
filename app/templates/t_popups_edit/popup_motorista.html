@@ -1,4 +1,4 @@
-<section id="edit_valor" class="popup__container--shadow inative">
+<section id="edit_valor" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Editar valor</h1>
@@ -22,7 +22,7 @@
 </section>
 
 
-<section id="edit_capacidade_veicle" class="popup__container--shadow inative">
+<section id="edit_capacidade_veicle" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Editar capacidade</h1>
@@ -46,7 +46,7 @@
 </section>
 
 
-<section id="edit_motorista_veicle" class="popup__container--shadow inative">
+<section id="edit_motorista_veicle" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Definir motorista</h1>
@@ -69,7 +69,7 @@
 </section>
 
 
-<section id="del_veicle" class="popup__container--shadow inative">
+<section id="del_veicle" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Excluir veículo</h1>
@@ -89,7 +89,35 @@
 </section>
 
 
-<section id="add_veicle" class="popup__container--shadow inative">
+<section id="del_rota" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Excluir rota</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <h4 class="popup__text info">Ao proseguir, você irá excluir permanentemente esta rota. Todos os alunos cadastrados serão removidos.</h4>
+
+            <form id="formulario_del_rota" class="form__container--card max_width" method="post">
+                <h1 class="page__division"></h1>
+                <h3 class="popup__text info space">Confirme a exclusão com sua senha:</h3>
+                <div class="form__container--input first">
+                    <input id="del_rota_conf" class="form__input input_password white input_notIcon" type="password" required>
+                    <i id="del_rota_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
+                    <label class="form__label intense label_notIcon" for="del_rota_conf">Senha de confirmação</label>
+                </div>
+            </form>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('del_rota')">Cancelar</button>
+            <button class="popup__btn">Excluir</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="add_veicle" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Adicionar veículo</h1>
@@ -121,10 +149,10 @@
                         </div>
                     </div>
     
-                    <h3 id="add_veicle_motorista_title" class="popup__text info space inative">Selecione o motorista:</h3>
-                    <div id="add_veicle_motorista_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative">
+                    <h3 id="add_veicle_motorista_title" class="popup__text info space inactive">Selecione o motorista:</h3>
+                    <div id="add_veicle_motorista_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive">
                         {% for index in range(5) %}
-                        <div id="interface_model_option" class="popup__input checkbox inative hidden" onclick="popup_selectOption(this, false, true)">
+                        <div id="interface_model_option" class="popup__input checkbox inactive hidden" onclick="popup_selectOption(this, false, true)">
                             <p id="model_option_nome" class="popup__text input">Teste</p>
                         </div>
                         {% endfor %}
@@ -141,7 +169,7 @@
 </section>
 
 
-<section id="add_ponto" class="popup__container--shadow inative">
+<section id="add_ponto" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Criar ponto</h1>
@@ -176,7 +204,39 @@
 </section>
 
 
-<section id="add_rota" class="popup__container--shadow inative">
+<section id="add_ponto_rota" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Adicionar ponto a rota</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <h3 class="popup__text question first">Selecione o novo ponto da rota:</h3>
+            <div id="add_ponto_rota_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                {% for index in range(2) %}
+                <div id="interface_model_option" class="popup__input checkbox hidden" onclick="popup_selectOption(this, false, true)">
+                    <p id="model_option_nome" class="popup__text input">Teste</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h3 class="popup__text question">Selecione o horário de passagem:</h3>
+            <h4 class="popup__text info">Este horário refere-se ao momento de passagem deste ponto nesta rota.</h4>
+            <form id="formulario_add_ponto_rota" class="form__container--card max_width" method="post">
+                <input id="add_ponto_rota_horario" class="form__input white input_notIcon time" type="time" required>
+                <label class="form__label intense label_notIcon" for="add_ponto_rota_horario">Horário de passagem</label>
+            </form>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('add_ponto_rota')">Cancelar</button>
+            <button class="popup__btn">Adicionar</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="add_rota" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Criar rota</h1>
@@ -215,7 +275,7 @@
 </section>
 
 
-<section id="config_motorista" class="popup__container--shadow inative">
+<section id="config_motorista" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 id="config_motorista_nome" class="popup__title"></h1>
@@ -226,7 +286,7 @@
                 <p id="config_motorista_promover" class="interface__text">Promover a administrador</p>
             </div>
 
-            <div class="interface__container--btn add inative" onclick="open_popup_edit('rebaixar_motorista', this)">
+            <div class="interface__container--btn add inactive" onclick="open_popup_edit('rebaixar_motorista', this)">
                 <p id="config_motorista_rebaixar" class="interface__text">Rebaixar a participante</p>
             </div>
 
@@ -242,7 +302,7 @@
 </section>
 
 
-<section id="config_linha" class="popup__container--shadow inative">
+<section id="config_linha" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header pos_relative">
             <h1 id="config_linha_nome" class="popup__title"></h1>
@@ -297,7 +357,7 @@
 </section>
 
 
-<section id="config_ponto" class="popup__container--shadow inative">
+<section id="config_ponto" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header pos_relative">
             <h1 id="config_ponto_nome" class="popup__title"></h1>
@@ -305,11 +365,11 @@
         </header>
 
         <div class="popup__container--content">
-            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
                 <div class="page__container">
                     <p class="text secundario fundo">Tempo tolerância:</p>
                     <div class="text secundario fundo">
-                        <p id="config_ponto_tolerancia" class="text secundario container content space"></p>
+                        <p id="config_ponto_tolerancia" class="text secundario container content space">1</p>
                         <p class="text secundario fundo container content">min</p>
                     </div>
                     <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_tolerancia_ponto')"></i>
@@ -318,21 +378,21 @@
                 <div class="page__container">
                     <p class="text secundario fundo">Link GPS:</p>
                     <div class="scroll_horizontal">
-                        <p id="config_ponto_gps" class="text secundario content fundo"></p>
+                        <p id="config_ponto_gps" class="text secundario nowrap content fundo">Link</p>
                     </div>
                     <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_gps_ponto')"></i>
                 </div>
                 
                 <div id="config_ponto_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
                     <h3 class="text secundario fundo">Alunos</h3>
-                    <h3 class="text secundario fundo max_width"></h3>
+                    <h3 class="text secundario fundo max_width">1 cadastrado</h3>
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                 </div>
 
-                <div id="config_ponto_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative">
-                    {% for index in range(5) %}
-                    <div id="interface_model_ponto" class="popup__input grow min_height">
-                        <p id="interface_model_ponto_title" class="popup__text input"></p>
+                <div id="config_ponto_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive">
+                    {% for index in range(1) %}
+                    <div id="interface_model_ponto" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                        <p id="interface_model_ponto_title" class="popup__text input">Victor Gabriel</p>
                         <i class="bi bi-three-dots-vertical page__icon content right"></i>
                     </div>
                     {% endfor %}
@@ -354,37 +414,70 @@
 </section>
 
 
-<section id="config_aluno" class="popup__container--shadow inative">
+<section id="config_relacao_ponto_rota" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header pos_relative">
+            <h1 id="config_ponto_nome" class="popup__title">Relação do ponto</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <div class="page__container">
+                <p class="text secundario fundo">Nome:</p>
+                <div class="scroll_horizontal">
+                    <p id="config_relacao_ponto_rota_nome" class="text secundario content fundo nowrap"></p>
+                </div>
+            </div>
+
+            <div class="page__container">
+                <p class="text secundario fundo">Ordem de passagem:</p>
+                <p id="config_relacao_ponto_rota_ordem" class="text secundario content fundo"></p>
+            </div>
+
+            <div class="page__container">
+                <p class="text secundario fundo">Horário de passagem:</p>
+                <p id="config_relacao_ponto_rota_horario" class="text secundario content fundo"></p>
+                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_horario_relacao_ponto_rota', this)"></i>
+            </div>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn" onclick="cancel_popup_edit('config_relacao_ponto_rota')">Fechar</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="config_aluno" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header pos_relative">
             <h1 class="popup__title">Aluno</h1>
         </header>
 
         <div class="popup__container--content">
-            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
                 <div class="page__container">
                     <p class="text secundario emphasis">Nome</p>
                     <div class="scroll_horizontal">
-                        <p id="config_aluno_nome" class="text secundario content fundo"></p>
+                        <p id="config_aluno_nome" class="text secundario nowrap content fundo"></p>
                     </div>
                     <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
                 </div>
     
                 <div class="page__container">
                     <p class="text secundario emphasis">Telefone</p>
-                    <p id="config_aluno_telefone" class="text secundario content fundo"></p>
+                    <p id="config_aluno_telefone" class="text secundario content fundo">(84) 99999-9999</p>
                     <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
                 </div>
     
                 <div class="page__container">
                     <p class="text secundario emphasis">Curso</p>
-                    <p id="config_aluno_curso" class="text secundario content fundo"></p>
+                    <p id="config_aluno_curso" class="text secundario content fundo">Informática</p>
                     <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
                 </div>
     
                 <div class="page__container">
                     <p class="text secundario emphasis">Turno</p>
-                    <p id="config_aluno_turno" class="text secundario content fundo"></p>
+                    <p id="config_aluno_turno" class="text secundario content fundo">Matutino</p>
                     <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
                 </div>
 
@@ -395,7 +488,7 @@
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                 </div>
 
-                <div id="config_aluno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative">
+                <div id="config_aluno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive">
                     <h3 class="text secundario fundo">Não disponível.</h3>
                 </div>
             </div>
@@ -408,7 +501,7 @@
 </section>
 
 
-<section id="create_line" class="popup__container--shadow inative">
+<section id="create_line" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Criar linha</h1>
@@ -440,7 +533,7 @@
                         </div>
                     </div>
 
-                    <div id="options_gratuidade_container" class="">
+                    <div id="options_gratuidade_container">
                         <div class="form__container--input">
                             <input id="valor_cartela" class="form__input white input_notIcon" type="number" step="0.01" name="preço da cartela">
                             <label class="form__label intense label_notIcon" for="valor_cartela">Preço da cartela</label>
@@ -463,7 +556,7 @@
 </section>
 
 
-<section id="promover_motorista" class="popup__container--shadow inative">
+<section id="promover_motorista" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Promover motorista</h1>
@@ -485,7 +578,7 @@
 </section>
 
 
-<section id="rebaixar_motorista" class="popup__container--shadow inative">
+<section id="rebaixar_motorista" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Rebaixar motorista</h1>
@@ -505,7 +598,7 @@
 </section>
 
 
-<section id="remover_motorista" class="popup__container--shadow inative">
+<section id="remover_motorista" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Remover motorista</h1>
@@ -525,7 +618,7 @@
 </section>
 
 
-<section id="edit_nome_linha" class="popup__container--shadow inative">
+<section id="edit_nome_linha" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Editar nome da linha</h1>
@@ -557,7 +650,7 @@
 </section>
 
 
-<section id="edit_cidade_linha" class="popup__container--shadow inative">
+<section id="edit_cidade_linha" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Editar cidade da linha</h1>
@@ -589,7 +682,7 @@
 </section>
 
 
-<section id="edit_nome_ponto" class="popup__container--shadow inative">
+<section id="edit_nome_ponto" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Editar nome do ponto</h1>
@@ -613,7 +706,7 @@
 </section>
 
 
-<section id="edit_tolerancia_ponto" class="popup__container--shadow inative">
+<section id="edit_tolerancia_ponto" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Editar tolerância</h1>
@@ -637,7 +730,7 @@
 </section>
 
 
-<section id="edit_gps_ponto" class="popup__container--shadow inative">
+<section id="edit_gps_ponto" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Definir GPS</h1>
@@ -661,7 +754,104 @@
 </section>
 
 
-<section id="del_linha" class="popup__container--shadow inative">
+<section id="edit_horario_rota" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Alterar horário</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <form id="formulario_edit_horario" class="form__container--card max_width" method="post">
+                <h2 class="popup__text">Digite o novo horário da rota:</h2>
+                <div class="form__container--input">
+                    <input id="edit_horario_rota_new_horario" class="form__input white input_notIcon time" type="time" required>
+                    <label class="form__label intense label_notIcon" for="edit_horario_rota_new_horario">Horário</label>
+                </div>
+            </form>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_horario_rota')">Cancelar</button>
+            <button class="popup__btn">Alterar</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="edit_onibus_rota" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Alterar veículo</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <h2 class="popup__text">Selecione o novo veículo da rota:</h2>
+            <div id="edit_onibus_rota_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                {% for index in range(1) %}
+                <div id="interface_model_option" class="popup__input checkbox hidden" onclick="popup_selectOption(this, false, true)">
+                    <p id="model_option_nome" class="popup__text input">Teste</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_onibus_rota')">Cancelar</button>
+            <button class="popup__btn">Alterar</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="edit_turno_rota" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Editar turno</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <form id="formulario_turno_rota" class="form__container--card max_width" method="post">
+                <h2 class="popup__text">Digite o novo turno:</h2>
+                <div class="form__container--input">
+                    <input id="edit_turno_rota_new_turno" class="form__input white input_notIcon" type="text" required>
+                    <label class="form__label intense label_notIcon" for="edit_turno_rota_new_turno">Turno</label>
+                </div>
+            </form>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_turno_rota')">Cancelar</button>
+            <button class="popup__btn">Alterar</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="edit_horario_relacao_ponto_rota" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Editar horário</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <form id="formulario_edit_horario_relacao_ponto_rota" class="form__container--card max_width" method="post">
+                <h2 class="popup__text">Digite o novo horário em que o ônibus passa neste ponto:</h2>
+                <div class="form__container--input">
+                    <input id="edit_horario_relacao_ponto_rota_new_horario" class="form__input white input_notIcon time" type="time" required>
+                    <label class="form__label intense label_notIcon" for="edit_horario_relacao_ponto_rota_new_horario">Horário</label>
+                </div>
+            </form>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_horario_relacao_ponto_rota')">Cancelar</button>
+            <button class="popup__btn">Alterar</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="del_linha" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Excluir linha</h1>
@@ -691,7 +881,7 @@
 </section>
 
 
-<section id="del_ponto" class="popup__container--shadow inative">
+<section id="del_ponto" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Excluir ponto</h1>

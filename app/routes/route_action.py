@@ -15,7 +15,7 @@ def autenticar_usuario():
     user = user_datastore.find_user(primary_key=data['user'])
     if user and bcrypt.checkpw(data['password'].encode('utf-8'), user.hash_senha):
         login_user(user)
-        return jsonify({'error': False, 'redirect': '/usuario'})
+        return jsonify({'error': False, 'redirect': '/pagina-usuario'})
     return jsonify({'error': True})
 
 
@@ -59,40 +59,12 @@ def checkLine():
     key = current_user.primary_key
     response = {'conf': True}
     if key.isdigit():
-        if database.select('Aluno_has_Ponto', where=f'Aluno_matricula = "{key}"'):
+        if database.select('Aluno_has_Ponto', where={'where': 'Aluno_matricula = %s', 'value': key}):
             response['conf'] = True
     else:
-        if database.select('Linha_has_Motorista', where=f'Motorista_nome = "{key}"'):
+        if database.select('Linha_has_Motorista', where={'where': 'Motorista_nome = %s', 'value': key}):
             response['conf'] = True
     return jsonify(response)
-
-
-@app.route('/requerir', methods=['POST'])
-@login_required
-def required():
-    data = request.get_json()
-    retorno = {'return': ''}
-    if data:
-        if data['required'] == 'pontos':
-            point_user = database.select('Aluno_has_Ponto', data='Ponto_id', where=f'Aluno_matricula = "{current_user.primary_key}" AND acao = "ida"')
-            if point_user:
-                route_code = database.select('Rota_has_Ponto', data='Rota_codigo', where=f'Ponto_id = {point_user}')
-                allPoints = database.select('Ponto, Rota_has_Ponto', data={'pontos': ('*', 'Ponto')},  where=f'Rota_has_Ponto.Ponto_id = Ponto.id AND Rota_has_Ponto.Rota_codigo = {route_code}')
-
-                retorno['return'] = 'pontos'
-                retorno['ponto_atual'] = point_user
-                retorno['pontos'] = allPoints
-
-        elif data['required'] == 'contraturnos':
-            contraturnos = database.select('Contraturnos_Fixos', data='numero_do_dia', where=f'Aluno_matricula = "{current_user.primary_key}"')
-            retorno['return'] = 'contraturnos'
-            retorno['contraturnos'] = []
-
-            if contraturnos:
-                dias = ('Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta')
-                for contraturno in contraturnos:
-                    retorno['contraturnos'].append(dias[int(contraturno['numero_do_dia'])])
-    return jsonify(retorno)
 
 
 # ~~ WebSocket
@@ -127,12 +99,5 @@ def send_schedule(data):
         user, user_flask = return_users(token)
         if user:
             match user_flask.roles[0]:
-                case 'aluno':
-                    retorno = {'possui_ponto': False}
-                    aluno_has_ponto = database.select('Aluno_has_Ponto', data='Ponto_id', where=f'Aluno_matricula = "{user_flask.primary_key}" AND acao = "ida"')
-
-                    if aluno_has_ponto:
-                        retorno['possui_ponto'] = True
-                        info_ponto = database.select('Ponto', data='nome, linkGPS', where=f'id = {aluno_has_ponto}')
-
+                case 'aluno':...
                 case 'motorista':...

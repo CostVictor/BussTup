@@ -1,4 +1,4 @@
-<section id="edit_ponto" class="popup__container--shadow inative">
+<section id="edit_ponto" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Editar ponto</h1>
@@ -6,7 +6,7 @@
 
         <div class="popup__container--content">
             <h4 class="popup__text info margin_bottom">(OBS) Esta edição altera seus locais fixos.</h4>
-            <div id="scroll_principal" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+            <div id="scroll_principal" class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
                 <h3 class="popup__text question first">Deseja mudar o ponto de subida?</h3>
                 <div id="options_subida_fixo" class="popup__container--options">
                     <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
@@ -20,13 +20,13 @@
                     </div>
                 </div>
 
-                <h3 id="options_subida_fixo_title" class="popup__text info space inative">Selecione o novo local de subida:</h3>
-                <div id="options_subida_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative">
+                <h3 id="options_subida_fixo_title" class="popup__text info space inactive">Selecione o novo local de subida:</h3>
+                <div id="options_subida_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive">
                     {% for index in range(10) %}
                     <div id="model_ponto_{{ index }}" class="popup__input checkbox hidden" onclick="popup_selectOption(this, false, true)">
                         <p id="number_ponto" class="popup__text input title">{{ index + 1 }}</p>
                         <p id="name_ponto" class="popup__text input">Teste</p>
-                        <i class="bi bi-check-lg popup__icon checkbox inative"></i>
+                        <i class="bi bi-check-lg popup__icon checkbox inactive"></i>
                     </div>
                     {% endfor %}
                 </div>
@@ -44,8 +44,8 @@
                     </div>
                 </div>
 
-                <h3 id="options_retorno_fixo_title" class="popup__text info space inative">Selecione o novo local de descida:</h3>
-                <div id="options_retorno_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
+                <h3 id="options_retorno_fixo_title" class="popup__text info space inactive">Selecione o novo local de descida:</h3>
+                <div id="options_retorno_fixo_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
             </div>
         </div>
 
@@ -57,7 +57,7 @@
 </section>
 
 
-<section id="edit_contraturno" class="popup__container--shadow inative">
+<section id="edit_contraturno" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Definir contraturno</h1>
@@ -84,7 +84,7 @@
 </section>
 
 
-<section id="edit_dia" class="popup__container--shadow inative">
+<section id="edit_dia" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 id="dia" class="popup__title"></h1>
@@ -95,7 +95,7 @@
                 <h4 class="popup__text">Data:</h4>
                 <h4 id="data_dia" class="popup__text"></h4>
             </div>
-            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
                 <h3 class="popup__text question first">Irá faltar no dia?</h3>
                 <div id="options_falta" class="popup__container--options">
                     <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
@@ -133,8 +133,8 @@
                     </div>
                 </div>
 
-                <h3 id="options_subida_title" class="popup__text info space inative">Selecione o local de subida:</h3>
-                <div id="options_subida_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
+                <h3 id="options_subida_title" class="popup__text info space inactive">Selecione o local de subida:</h3>
+                <div id="options_subida_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
 
                 <h3 class="popup__text question">Deseja descer em outro local?</h3>
                 <div id="options_retorno" class="popup__container--options">
@@ -149,8 +149,8 @@
                     </div>
                 </div>
 
-                <h3 id="options_retorno_title" class="popup__text info space inative">Selecione o local de descida:</h3>
-                <div id="options_retorno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inative"></div>
+                <h3 id="options_retorno_title" class="popup__text info space inactive">Selecione o local de descida:</h3>
+                <div id="options_retorno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
             </div>
         </div>
 

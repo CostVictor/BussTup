@@ -20,6 +20,13 @@
     <link rel="stylesheet" href="/static/css/popup.css">
     <link rel="stylesheet" href="/static/css/interface.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" integrity="sha512-0bEtK0USNd96MnO4XhH8jhv3nyRF0eK87pJke6pkYf3cM0uDIhNJy9ltuzqgypoIFXw3JSuiy04tVk4AjpZdZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body onload="enterPage()">
     <p class="hidden_point">.</p>
@@ -43,24 +50,23 @@
     {% endif %}
 
     <!-- ----- -->
-    <header id="header_page" class="page__container--header header_hidden">
+    <header id="header_page" class="page__container--header header_hidden hidden">
         <h1 class="text--header">BussTup</h1>
-        <div class="page__icon_area">
-            <i class="bi bi-search page__icon"></i>
-            <i class="bi bi-person-circle page__icon"></i>
+        <div class="page__container--icon">
+            <i class="bi bi-person-circle page__icon animate first" onclick="closeInterface('pag_usuario', '/perfil-usuario')"></i>
         </div>
     </header>
     
     <section id="content_page" class="page__container--content scroll_horizontal content_noBorder">
         <div id="aba_agenda" class="page__container--aba">
-            <div id="not_line_agenda" class="inative">
+            <div id="not_line_agenda" class="inactive">
                 Você não possui uma linha
             </div>
 
             <div id="area_agenda" class="page__container column">
                 <div class="page__container title enter">
                     <h1 id="nome_linha" class="text principal">Nome da linha</h1>
-                    <h1 class="text principal">-</h1>
+                    <h1 class="text principal">~</h1>
                     <h1 id="cidade_linha" class="text principal">Cidade</h1>
                 </div>
 
@@ -125,12 +131,12 @@
                                     <p id="contraturno_{{ dias_semana[index] }}" class="text terciario content">Não</p>
                                 </div>
 
-                                <div class="page__container inative">
+                                <div class="page__container inactive">
                                     <p class="text terciario">Ponto subida:</p>
                                     <p id="pSubida_{{ dias_semana[index] }}" class="text terciario content"></p>
                                 </div>
 
-                                <div class="page__container inative">
+                                <div class="page__container inactive">
                                     <p class="text terciario">Ponto descida:</p>
                                     <p id="pDescida_{{ dias_semana[index] }}" class="text terciario content"></p>
                                 </div>
@@ -159,23 +165,23 @@
 
                     {% for index_previsao in range(3) %}
                     <div id="previsao_{{ turnos[index_previsao] }}" class="enter">
-                        <div id="title_{{ turnos[index_previsao] }}" class="page__container interaction pos_relative" onclick="checkForecast('{{ turnos[index_previsao] }}')">
-                            <h2 class="text secundario emphasis max_width">{{ turnos[index_previsao] }}</h2>
+                        <div id="{{ turnos[index_previsao] }}_btn" class="page__container interaction pos_relative" onclick="actionContainer(this, true)">
+                            <h2 class="text secundario fundo max_width">{{ turnos[index_previsao] }}</h2>
                             <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                         </div>
                         
-                        <div id="dias_{{ turnos[index_previsao] }}" class="inative">
+                        <div id="{{ turnos[index_previsao] }}_container" class="inactive">
                             {% for index_dia in range(5) %}
-                            <div id="previsao_{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
+                            <div id="{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
                                 <h2 class="text indicate emphasis">{{ dias_semana[index_dia][0:3] }}</h2>
                                 <i class="bi bi-arrow-right-short page__icon indicate"></i>
                                 <p class="text terciario fundo">Previsão:</p>
                                 <div class="text secundario fundo">
-                                    <p id="previsao_pessoas" class="text terciario content container space">0</p>
+                                    <p id="{{ turnos[index_previsao] }}-dia_{{ index_dia }}_previsao" class="text terciario content container space">0</p>
                                     <p class="text terciario content container">pessoas</p>
                                 </div>
                                 <p class="text terciario fundo">Estado:</p>
-                                <p id="previsao_estado" class="text terciario content green fundo">Normal</p>
+                                <p id="{{ turnos[index_previsao] }}-dia_{{ index_dia }}_estado" class="text terciario content green fundo">Normal</p>
                             </div>
                             {% endfor %}
                         </div>
@@ -192,12 +198,68 @@
             </div>
         </div>
 
-        <div id="aba_ponto" class="page__container--aba">
-            <div id="area_ponto" class="page__container column inative"></div>
+        <!-- ----- -->
+
+        <div id="aba_rota" class="page__container--aba">
+            <div id="area_rota" class="page__container column inactive">
+                {% if role == 'motorista' %}
+                <div class="page__container title enter">
+                    <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
+                    <h1 class="text principal">></h1>
+                    <h1 class="text principal">Rotas</h1>
+                </div>
+
+                <h2 class="text title enter">Minhas rotas</h2>
+                <div id="minhas_rota">
+                    <div id="sem_veiculo" class="enter">
+                        <p class="text secundario emphasis">Você não possui relação com nenhum veículo.</p>
+                        <p class="text secundario fundo">Defina um veículo para conseguir iniciar um trajeto:</p>
+                        <div class="page__container justify">
+                            <div class="interface__container--btn add margin_top big" onclick="">
+                                <i class="bi bi-box-arrow-up-right interface__icon redirect"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sem_rota" class="inactive">
+                        <p class="text secundario emphasis">Seu veículo não possui nenhuma rota definida.</p>
+                        <p class="text secundario fundo">Crie uma rota para conseguir iniciar um trajeto:</p>
+                        <div class="page__container justify">
+                            <div class="interface__container--btn add margin_top big" onclick="">
+                                <i class="bi bi-box-arrow-up-right interface__icon redirect"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="minha_linha_area" class="enter"></div>
+                    <h1 class="page__division enter"></h1>
+                </div>
+
+                {% else %}
+                <div class="page__container title enter">
+                    <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
+                    <h1 class="text principal">></h1>
+                    <h1 class="text principal">Rota</h1>
+                </div>
+
+                <h2 class="text title enter">Minha rota</h2>
+                <div id="minha_linha_area" class="enter"></div>
+                <h1 class="page__division enter"></h1>
+
+                {% endif %}
+
+                {% for index in range(3) %}
+                <div id="rotas_{{ turnos[index] }}">
+                    <h2 class="text title enter {{ 'first' if not index else '' }}">{{ turnos[index] }}</h2>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
+        <!-- ----- -->
+
         <div id="aba_linhas" class="page__container--aba">
-            <div id="area_linhas" class="page__container column inative">
+            <div id="area_linhas" class="page__container column inactive">
                 <div class="page__container title enter">
                     <h1 class="text principal">Linhas</h1>
                 </div>
@@ -223,11 +285,17 @@
                     {% for index in range(3) %}
                     <div id="model_line" class="page__container--line enter" onclick="enterInterface_popup(this)">
                         <div class="page__container--line_content">
-                            <div class="page__container">
+                            <div class="page__container pos_relative">
                                 <i class="bi bi-bus-front-fill page__icon--box"></i>
-                                <h1 id="linha_nome" class="text box title_box">Nome da linha</h1>
+                                <h1 id="model_line_nome" class="text box title_box">Nome da linha</h1>
                             </div>
                             <h3 id="nome_dono" class="text box">Nome do dono</h3>
+                        </div>
+
+                        <div class="page__container--line_content info">
+                            <h1 id="model_line_pago" class="text box info_box">Linha paga</h1>
+                            <h1 id="model_line_pago" class="text box info_box inactive">Gratuita</h1>
+                            <h1 id="model_line_ferias" class="text box info_box inactive">(Férias)</h1>
                         </div>
         
                         <div class="page__container--line_image">
@@ -239,40 +307,52 @@
             </div>
         </div>
 
+        <!-- ----- -->
+
         <div id="aba_chat" class="page__container--aba">
-            <div id="area_chat" class="page__container column inative"></div>
+            <div id="area_chat" class="page__container column inactive">
+                <div class="page__container title enter">
+                    <h1 id="area_chat_nome_linha" class="text principal">Nome da linha</h1>
+                    <h1 class="text principal">></h1>
+                    <h1 class="text principal">Chat</h1>
+                </div>
+
+                <h2 class="text title enter">Aviso</h2>
+                <p class="text secundario emphasis enter">O recurso de chat ainda se encontra em desenvolvimento.</p>
+                <p class="text secundario fundo enter">Estamos trabalhando para permitir uma linha de comunicação estável para todos os usuários.</p>
+            </div>
         </div>
     </section>
 
     <section id="nav_page" class="page__container--buttom nav_hidden">
         <div class="page__btn">
-            <i id="agenda" class="bi bi-journal-text page__icon--btn btn_selected" onclick="replaceAba('agenda')"></i>
+            <i id="agenda" class="bi bi-journal-text page__icon--btn btn_selected" onclick="replaceAba(this)"></i>
         </div>
 
         <div class="page__btn">
-            <i id="ponto" class="bi bi-geo-alt page__icon--btn" onclick="replaceAba('ponto')"></i>
+            <i id="rota" class="bi bi-geo-alt page__icon--btn" onclick="replaceAba(this)"></i>
         </div>
 
         <div class="page__btn">
-            <i id="linhas" class="bi bi-bus-front page__icon--btn" onclick="replaceAba('linhas')"></i>
+            <i id="linhas" class="bi bi-bus-front page__icon--btn" onclick="replaceAba(this)"></i>
         </div>
 
         <div class="page__btn">
-            <i id="chat" class="bi bi-chat-dots page__icon--btn" onclick="replaceAba('chat')"></i>
+            <i id="chat" class="bi bi-chat-dots page__icon--btn" onclick="replaceAba(this)"></i>
         </div>
     </section>
 
-    <section id="interface_linha" class="interface__container scroll_vertical no_border inative">
+    <section id="interface_linha" class="interface__container scroll_vertical no_border inactive">
         <header id="interface_linha_header" class="interface__container--header">
-            <i class="bi bi-arrow-left-short interface__icon" onclick="closeInterface_popup('interface_linha')"></i>
+            <i class="bi bi-arrow-left-short interface__icon animate" onclick="closeInterface_popup('interface_linha')"></i>
             <h1 id="interface_nome" class="text title no_marge no_border">Nome da linha</h1>
-            <h1 class="text title no_marge no_border">-</h1>
+            <h1 class="text title no_marge no_border">~</h1>
             <h1 id="interface_cidade" class="text title no_marge no_border">Apodi</h1>
-            <h1 id="interface_ferias" class="text title no_marge no_border inative">(Férias)</h1>
+            <h1 id="interface_ferias" class="text title no_marge no_border inactive">(Férias)</h1>
 
             {% if role == 'motorista' %}
             <i class="bi bi-gear interface__icon--header" onclick="open_popup_edit('config_linha', this)"></i>
-            <button id="btn_acao" class="form__btn--simple small margin_right inative">Entrar</button>            
+            <button id="btn_acao" class="form__btn--simple small margin_right inactive">Entrar</button>            
             {% endif %}
         </header>
 
@@ -305,7 +385,7 @@
             <div id="area_motoristas" class="interface__container--area">
                 <h2 class="text title">Motoristas</h2>
                 <div id="model_motorista">
-                    <h1 class="page__division inative"></h1>
+                    <h1 class="page__division inactive"></h1>
                     <div class="page__container pos_relative">
                         <p id="model_motorista_dono" class="text secundario emphasis">Dono</p>
                         <p id="model_motorista_adm" class="text secundario emphasis">Adm</p>
@@ -318,7 +398,7 @@
                     <div class="page__container">
                         <p class="text secundario fundo">Pix:</p>
                         <div class="scroll_horizontal">
-                            <p id="model_motorista_pix" class="text secundario fundo content">motoristaTeste@gmail.com</p>
+                            <p id="model_motorista_pix" class="text secundario nowrap fundo content">motoristaTeste@gmail.com</p>
                         </div>
                         <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
                     </div>
@@ -342,7 +422,7 @@
                             <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                         </div>
 
-                        <div id="teste_onibus_container" class="inative">
+                        <div id="teste_onibus_container" class="inactive">
                             <div class="page__container">
                                 <p class="text secundario fundo">Capacidade:</p>
                                 <div class="text secundario fundo">
@@ -387,7 +467,7 @@
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                 </div>
 
-                <div id="interface_pontos_container" class="inative">
+                <div id="interface_pontos_container" class="inactive">
                     <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
                         {% for index in range(1) %}
                         <div id="interface_model_ponto" class="popup__input grow min_height" onclick="open_popup_edit('config_ponto', this)">
@@ -410,9 +490,9 @@
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                 </div>
 
-                <div id="interface_rotas_container" class="inative">
+                <div id="interface_rotas_container" class="inactive">
                     <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
-                        <div id="interface_model_rota" class="popup__input grow min_height" onclick="">
+                        <div id="interface_model_rota" class="popup__input grow min_height" onclick="open_popup_edit('config_rota', this)">
                             <p id="interface_model_rota_placa_onibus" class="popup__text input">Placa do ônibus</p>
                             <p class="popup__text input">|</p>
                             <p id="interface_model_rota_turno" class="popup__text input">Matutino</p>
@@ -437,21 +517,21 @@
                 <h2 class="text title">Alunos e Tickets</h2>
                 <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
                     <h3 class="text secundario fundo">Alunos</h3>
-                    <h3 id="interface_alunos_quant" class="text secundario fundo max_width">0 cadastrados</h3>
+                    <h3 id="interface_alunos_quant" class="text secundario fundo max_width">1 cadastrado</h3>
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                 </div>
 
-                <div id="interface_alunos_container" class="scroll_vertical no_borderY popup__container--scroll inative">
+                <div id="interface_alunos_container" class="scroll_vertical no_borderY popup__container--scroll inactive">
                     <div id="interface_alunos_matutino_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
                         <h3 class="text secundario emphasis">Matutino</h3>
-                        <h3 id="interface_alunos_matutino_quant" class="text secundario fundo max_width">0 cadastrados</h3>
+                        <h3 id="interface_alunos_matutino_quant" class="text secundario fundo max_width">1 cadastrado</h3>
                         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                     </div>
 
                     <div id="interface_alunos_matutino_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
                         {% for index in range(1) %}
                         <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
-                            <p id="interface_model_aluno_title" class="popup__text input">Israel Bezerra da Silva</p>
+                            <p id="interface_model_aluno_title" class="popup__text input">Victor Gabriel</p>
                             <i class="bi bi-three-dots-vertical page__icon content right"></i>
                         </div>
                         {% endfor %}
@@ -479,20 +559,18 @@
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                 </div>
 
-                <div id="interface_tickets_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal inative">
+                <div id="interface_tickets_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal inactive">
                     <h3 class="text secundario fundo">Não disponível.</h3>
                 </div>
             </div>
             {% endif %}
         </div>
     </section>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/scrollreveal"></script>
+    
     <script src="/static/js/validation.js"></script>
     <script src="/static/js/interface.js"></script>
     <script src="/static/js/page.js"></script>
+    <script src="/static/js/interaction.js"></script>
     <script>checkLine()</script>
 </body>
 </html>

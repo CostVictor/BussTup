@@ -1,4 +1,4 @@
-<div id="model_forecast_onibus" class="inative">
+<div id="model_forecast_onibus" class="inactive">
     <h1 class="page__division enter"></h1>
     <div class="page__container">
         <p class="text secundario emphasis">Ônibus</p>
@@ -25,7 +25,7 @@
             <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
         
-        <div id="dias_{{ turnos[index_previsao] }}" class="inative">
+        <div id="dias_{{ turnos[index_previsao] }}" class="inactive">
             {% for index_dia in range(5) %}
             <div id="previsao_{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
                 <h2 class="text indicate emphasis">{{ dias_semana[index_dia][0:3] }}</h2>
@@ -45,14 +45,14 @@
 </div>
 
 
-<div id="model_onibus" class="inative">
+<div id="model_onibus" class="inactive">
     <div id="model_onibus_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
         <h3 id="model_onibus_placa" class="text secundario fundo"></h3>
         <h3 id="model_onibus_motorista" class="text secundario max_width fundo"></h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
     </div>
 
-    <div id="model_onibus_container" class="inative">
+    <div id="model_onibus_container" class="inactive">
         <div class="page__container">
             <p class="text secundario fundo">Capacidade:</p>
             <div class="text secundario fundo">
@@ -75,3 +75,16 @@
         </div>
     </div>
 </div>
+
+
+<div id="model_turno" class="inactive">
+    <h2 id="model_turno_turno" class="text title first enter"></h2>
+</div>
+
+
+<div id="model_btn_proseguir" class="page__container justify inactive">
+    <div class="interface__container--btn add aba space" onclick="">
+        <p class="interface__text">Seguir para o próximo ponto</p>
+    </div>
+</div>
+

@@ -25,14 +25,15 @@ def formatData(dadosAdquiridos):
         data = dadosAdquiridos['data']
         for campo, dado in data.items():
             if campo == 'matricula':
-                if database.select(tabela, where=f'matricula = "{dado}"'):
+                print(dado, type(dado))
+                if database.select(tabela, where={'where': 'matricula = %s', 'value': dado}):
                     erro_titulo = 'Usuário existente'
                     erro_texto = 'Já existe um usuário registrado na matrícula especificada.'
                     inconsistencia = True; break
             elif campo == 'nome':
                 nome = capitalizar(dado)
                 if tabela == 'motorista':
-                    if database.select(tabela, where=f'nome = "{nome}"'):
+                    if database.select(tabela, where={'where': 'nome = %s', 'value': nome}):
                         erro_titulo = 'Usuário existente'
                         erro_texto = 'Já existe um usuário registrado no nome especificado.'
                         inconsistencia = True; break

@@ -15,7 +15,8 @@ if (window.location.href.includes('/cadastro')) {
     })
 }
 
-function createObserver(root, range_visibility=0.2) {
+
+function createObserver(root = null, range_visibility = 0.2) {
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -35,13 +36,41 @@ function createObserver(root, range_visibility=0.2) {
 }
 
 
+function set_observerScroll(list_obj) {
+    for (let index = 0; index < list_obj.length; index++) {
+        const observer = createObserver(list_obj[index], 0.15)
+        let elements_animate = list_obj[index]
+        elements_animate = elements_animate.querySelectorAll('div.hidden')
+        elements_animate.forEach(element => {
+            observer.observe(element)
+        })
+    }
+}
+
+
+function extract_info(obj_click, reference, local = 'id') {
+    const verify = obj_click.querySelector(`[${local}*="${reference}"]`)
+    if (verify) {return verify.textContent}
+
+    let tag = obj_click.parentNode
+    while (true) {
+        var identify_nome = tag.querySelector(`[${local}*="${reference}"]`)
+        if (identify_nome) {
+            return identify_nome.textContent
+        } else {
+            tag = tag.parentNode
+        }
+    }
+}
+
+
 // ~~~~~ Animações do rótulo (Label) ~~~~~ //
 
 const inputs = document.querySelectorAll('input')
 const forms = document.querySelectorAll('form')
 for (let index = 0; index < forms.length; index++) {
     const div_alvo = forms[index].querySelector('div.form__container--input')
-    div_alvo.style.marginTop = 0
+    if (div_alvo) {div_alvo.style.marginTop = 0}
 }
 inputs.forEach(input => {
     const label = document.querySelector(`label[for="${input.id}"]`)
@@ -95,6 +124,7 @@ function config_animate(index, item, name, duraction, value_initial, sum) {
     item.style.animation = `${name} ${duraction}s forwards ${value_initial + (index * sum)}s`
 }
 
+
 function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_init = 0, interval_itens = 0.06, opacity = 0) {
     if (list_itens) {
         list_itens.forEach((item, index) => {
@@ -103,6 +133,7 @@ function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_in
         })
     }
 }
+
 
 function enterInterface(type) {
     if (type === 'login' || type === 'register') {
@@ -123,12 +154,13 @@ function enterInterface(type) {
     }
 }
 
+
 function closeInterface(type, redirect) {
-    const container = document.getElementById('container')
-    let elements = container.querySelectorAll('[class*="enter"]')
+    let elements = document.querySelectorAll('[class*="enter"]:not(#container)')
 
     animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
     if (type === 'login') {
+        const container = document.getElementById('container')
         container.style.transition = 'border-radius 0.5s ease 0.4s, height 0.7s ease'
         
         setTimeout(() => {
@@ -137,16 +169,34 @@ function closeInterface(type, redirect) {
         }, 300)
 
         setTimeout(() => {
-            enterInterface('login')
             window.location.href = redirect
-        }, 980)
-    } else {
+        }, 1000)
+
+        setTimeout(() => {
+            enterInterface('login')
+        }, 1100)
+
+    } else if (type === 'register') {
+        setTimeout(() => {
+            window.location.href = redirect
+        }, 1000)
+
         setTimeout(() => {
             enterInterface('register')
+        }, 1100)
+
+    } else if (type === 'pag_usuario') {
+        closePage()
+        setTimeout(() => {
             window.location.href = redirect
-        }, 980)
+        }, 1000)
+
+        setTimeout(() => {
+            enterPage()
+        }, 1100)
     }
 }
+
 
 function enterInterface_popup(obj_line) {
     closePage()
@@ -167,20 +217,21 @@ function enterInterface_popup(obj_line) {
         aba.classList.remove('margin_bottom')
     })
     containers.forEach(container => {
-        container.classList.add('inative')
+        container.classList.add('inactive')
     })
 
     setTimeout(() => {
-        interface.classList.remove('inative')
-        header_pag.classList.add('inative')
-        content_page.classList.add('inative')
-        nav_page.classList.add('inative')
+        interface.classList.remove('inactive')
+        header_pag.classList.add('inactive')
+        content_page.classList.add('inactive')
+        nav_page.classList.add('inactive')
         interface.scrollTop = 0
         
         config_animate(0, header_interface, 'fadeDown', 0.5, 0, 0.07)
         animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0)
     }, 900)
 }
+
 
 function closeInterface_popup() {
     const interface = document.getElementById('interface_linha')
@@ -191,10 +242,9 @@ function closeInterface_popup() {
     const nav_page = document.getElementById('nav_page')
     const elements = Array.from(content_interface.children)
 
-    header_pag.classList.remove('inative')
-    content_page.classList.remove('inative')
-    nav_page.classList.remove('inative')
-    header_pag.style.opacity = '0'
+    header_pag.classList.remove('inactive')
+    content_page.classList.remove('inactive')
+    nav_page.classList.remove('inactive')
     
     animate_itens(elements, 'outUp', 0.7, 0.07, 0.07, 1)
     setTimeout(() => {
@@ -202,10 +252,78 @@ function closeInterface_popup() {
     }, 350)
     
     setTimeout(() => {
-        interface.classList.add('inative')
-        enterPage(true)
+        interface.classList.add('inactive')
+        enterPage()
         copy_text()
     }, 650)
+}
+
+
+function actionContainer(obj_click, container_space = false, set_limit = false) {
+    const icon = obj_click.querySelector('i')
+    const container = document.getElementById(obj_click.id.replace('btn', 'container'))
+    const elements = Array.from(container.children)
+    obj_click.style.transition = '0s ease'
+    container.removeAttribute('style')
+
+    if (obj_click.id.includes('onibus')) {
+        const motorista_nome = obj_click.querySelectorAll('h3')
+        motorista_nome.forEach((element, index) => {
+            if (!index) {
+                icon.className.includes('open') ? element.classList.remove('max_width') : element.classList.add('max_width')
+            } else {
+                icon.className.includes('open') ? element.classList.remove('inactive') : element.classList.add('inactive')
+            }
+        })
+    }
+
+    animate_itens(elements)
+    if (icon.className.includes('open')) {
+        container.classList.remove('space')
+        container.classList.add('inactive')
+        icon.classList.remove('open')
+        obj_click.classList.remove('margin_bottom')
+
+        elements.forEach(element => {
+            element.classList.remove('selected')
+        })
+    } else {
+        container.classList.remove('inactive')
+        if (!container_space) {
+            if (container.className.includes('scroll')) {
+                container.classList.add('space')
+            } else {
+                obj_click.classList.add('margin_bottom')
+            }
+        } else { container.classList.add('space') }
+        container.scrollTop = 0
+        icon.classList.add('open')
+
+        if (set_limit) {
+            set_limitScroll(container, set_limit)
+        } else {
+            set_limitScroll(container)
+        }
+    }
+
+    const btn_children = container.querySelectorAll('[id*="btn"]')
+    if (btn_children) {
+        btn_children.forEach(btn => {
+            const icon = btn.querySelector('i')
+            if (icon.className.includes('open')) {
+                actionContainer(btn)
+            }
+        })
+    }
+
+    const rolament = container.querySelector('div.scroll_vertical')
+    if (rolament) { rolament.scrollTop = 0 }
+
+    elements.forEach(element => {
+        if (element.className.includes('scroll')) {
+            set_limitScroll(element)
+        }
+    })
 }
 
 
@@ -222,16 +340,16 @@ function replace_form(button_id) {
         buttons[0].classList.add('form__btn--select_active')
         buttons[1].classList.remove('form__btn--select_active')
         form_aluno.classList.add('scroll_vertical')
-        form_aluno.classList.remove('inative')
-        form_motorista.classList.add('inative')
+        form_aluno.classList.remove('inactive')
+        form_motorista.classList.add('inactive')
         form_motorista.classList.remove('scroll_vertical')
 
     } else if (button_id === 'motorista' && !buttons[1].className.includes('active')) {
         buttons[1].classList.add('form__btn--select_active')
         buttons[0].classList.remove('form__btn--select_active')
         form_motorista.classList.add('scroll_vertical')
-        form_motorista.classList.remove('inative')
-        form_aluno.classList.add('inative')
+        form_motorista.classList.remove('inactive')
+        form_aluno.classList.add('inactive')
         form_aluno.classList.remove('scroll_vertical')
     }
 }
