@@ -1,6 +1,5 @@
 from flask_security import Security, UserMixin, RoleMixin, SQLAlchemyUserDatastore
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
 from pymysql import cursors
 from app import app
 import pymysql
@@ -28,7 +27,6 @@ class Role_flask(db_flask.Model, RoleMixin):
 
 user_datastore = SQLAlchemyUserDatastore(db_flask, User_flask, Role_flask)
 security = Security(app, user_datastore)
-jwt = JWTManager(app)
 
 with app.app_context():
     db_flask.create_all()
@@ -80,11 +78,13 @@ class DB:
             return self.nome
 
     @classmethod
-    def execute(self, command: str, placeholders):
+    def execute(self, command: str, placeholders=False):
         self.open_connect()
-        if not isinstance(placeholders, tuple) and not isinstance(placeholders, list):
-            placeholders = (placeholders)
-        self._cursor.execute(command, placeholders)
+        if placeholders:
+            if not isinstance(placeholders, tuple) and not isinstance(placeholders, list):
+                placeholders = (placeholders)
+            self._cursor.execute(command, placeholders)
+        else: self._cursor.execute(command)
 
     @classmethod
     def open_connect(self):
@@ -155,9 +155,11 @@ class DB:
             pesquisa = ', '.join(pesquisa) if pesquisa != '*' and formatar else pesquisa
 
             command = self._selecionar.format(pesquisa, tabelas)
-            sql_where, value_where = self.format_where(where)
+            if where:
+                sql_where, value_where = self.format_where(where)
+                self.execute(command + sql_where, value_where)
+            else: self.execute(command)
 
-            self.execute(command + sql_where, value_where)
             retorno = self._cursor.fetchall()
             self.close_connect()
 
@@ -188,7 +190,7 @@ class DB:
         if primary_key.isdigit():
             reference = 'matricula'
             table = 'aluno'
-        where = f'{reference} = "{primary_key}"'
+        where = {'where': f'{reference} = %s', 'value': primary_key}
 
         if return_table:
             return table, where

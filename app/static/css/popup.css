@@ -113,7 +113,8 @@
 }
 
 .popup__text.justify {
-    text-align: center;
+    text-align: justify;
+    margin-right: 0;
 }
 
 .popup__text.emphasis {

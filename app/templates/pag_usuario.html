@@ -24,8 +24,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" integrity="sha512-0bEtK0USNd96MnO4XhH8jhv3nyRF0eK87pJke6pkYf3cM0uDIhNJy9ltuzqgypoIFXw3JSuiy04tVk4AjpZdZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body onload="enterPage()">
@@ -231,7 +229,7 @@
                         </div>
                     </div>
 
-                    <div id="minha_linha_area" class="enter"></div>
+                    <div id="minha_rota_area" class="enter"></div>
                     <h1 class="page__division enter"></h1>
                 </div>
 
@@ -241,18 +239,173 @@
                     <h1 class="text principal">></h1>
                     <h1 class="text principal">Rota</h1>
                 </div>
-
-                <h2 class="text title enter">Minha rota</h2>
-                <div id="minha_linha_area" class="enter"></div>
-                <h1 class="page__division enter"></h1>
-
+                <!-- <h2 class="text title enter">Minha rota</h2>
+                <div id="minha_rota_area" class="enter"></div>
+                <h1 class="page__division enter"></h1> -->
                 {% endif %}
 
-                {% for index in range(3) %}
-                <div id="rotas_{{ turnos[index] }}">
-                    <h2 class="text title enter {{ 'first' if not index else '' }}">{{ turnos[index] }}</h2>
+                <div id="rotas_matutino">
+                    <h2 class="text title enter">Matutino</h2>
+
+                    <div id="rota_matutino" class="enter">
+                        <h1 class="page__division inactive"></h1>
+                        <div id="rota_matutino_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                            <h3 id="rota_matutino_iniciado" class="text secundario emphasis inactive">Iniciado</h3>
+                            <h3 id="rota_matutino_placa" class="text secundario max_width fundo">AAA-123</h3>
+                            <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                        </div>
+                    
+                        <div id="rota_matutino_container" class="inactive">
+                            {% if role == 'motorista' %}
+                            <div class="page__container justify">
+                                <div class="interface__container--btn add margin_bottom" onclick="">
+                                    <p class="interface__text">Iniciar trajeto de partida</p>
+                                </div>
+                            </div>
+                    
+                            <div class="page__container justify">
+                                <div class="interface__container--btn add margin_bottom" onclick="">
+                                    <p class="interface__text">Iniciar trajeto de retorno</p>
+                                </div>
+                            </div>
+                    
+                            <div class="page__container justify inactive">
+                                <div class="interface__container--btn add margin_bottom" onclick="">
+                                    <p class="interface__text">Cancelar trajeto de partida</p>
+                                </div>
+                            </div>
+                    
+                            <div class="page__container justify inactive">
+                                <div class="interface__container--btn add margin_bottom" onclick="">
+                                    <p class="interface__text">Cancelar trajeto de retorno</p>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="page__container justify">
+                                <div class="interface__container--btn add margin_bottom" onclick="">
+                                    <p class="interface__text">Marcar presença</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                    
+                            <div class="page__container">
+                                <p class="text secundario fundo">Cadastrados na rota:</p>
+                                <div class="text secundario fundo">
+                                    <p id="model_rota_capacidade" class="text secundario container content space">14</p>
+                                    <p class="text secundario container content">pessoas</p>
+                                </div>
+                            </div>
+                    
+                            <div class="page__container">
+                                <p class="text secundario fundo">Acompanhar por GPS:</p>
+                                <i id="localizacao_ponto" class="bi bi-pin-map page__icon content location"></i>
+                            </div>
+                    
+                            <div id="model_rota_teste_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                                <h3 id="model_rota_placa" class="text secundario max_width fundo">Pontos de partida</h3>
+                                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                            </div>
+                    
+                            <div id="model_rota_teste_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal_max inactive">
+                                {% for index in range(5) %}
+                                <div id="model_ponto">
+                                    <div id="model_ponto_{{ index }}_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                                        <h3 id="model_ponto_number" class="text secundario fundo">{{ index + 1 }}</h3>
+                                        <h3 id="model_ponto_passou" class="text secundario emphasis {{ 'inactive' if index > 1 else '' }}">Passou</h3>
+                                        <h3 id="model_ponto_aCaminho" class="text secundario emphasis {{ 'inactive' if index != 2 else '' }}">Seguindo</h3>
+                                        <h3 id="model_ponto_nome" class="text secundario max_width fundo">Ponto {{ index }}</h3>
+                                        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                                    </div>
+                                
+                                    <div id="model_ponto_{{ index }}_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal_big inactive">
+                                
+                                        <div id="model_ponto_espera" class="">
+                                            <p class="text secundario emphasis margin_bottom">Solicitando espera</p>
+                                            {% for index in range(2) %}
+                                            <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                                                <p id="interface_model_aluno_title" class="popup__text input">Aluno {{ index }}</p>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                
+                                        <div id="model_ponto_faltam" class="">
+                                            <h1 class="page__division"></h1>
+                                            <p class="text secundario emphasis margin_bottom">Falta subir no veículo</p>
+                                            {% for index in range(2) %}
+                                            <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                                                <p id="interface_model_aluno_title" class="popup__text input">Aluno {{ index }}</p>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                
+                                        <div id="model_ponto_presente" class="">
+                                            <h1 class="page__division"></h1>
+                                            <p class="text secundario emphasis margin_bottom">Presente no veículo</p>
+                                            {% for index in range(3) %}
+                                            <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                                                <p id="interface_model_aluno_title" class="popup__text input">Aluno {{ index }}</p>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                    
+                            <div id="rota_teste2_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                                <h3 id="model_rota_placa" class="text secundario max_width fundo">Pontos de retorno</h3>
+                                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                            </div>
+                    
+                            <div id="rota_teste2_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal_max inactive">
+                                {% for index in range(5) %}
+                                <div id="model_ponto">
+                                    <div id="model_ponto_{{ index }}_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                                        <h3 id="model_ponto_number" class="text secundario fundo">{{ index + 1 }}</h3>
+                                        <h3 id="model_ponto_passou" class="text secundario emphasis {{ 'inactive' if index > 1 else '' }}">Passou</h3>
+                                        <h3 id="model_ponto_aCaminho" class="text secundario emphasis {{ 'inactive' if index != 2 else '' }}">Seguindo</h3>
+                                        <h3 id="model_ponto_nome" class="text secundario max_width fundo">Ponto {{ index }}</h3>
+                                        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                                    </div>
+                                
+                                    <div id="model_ponto_{{ index }}_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal_big inactive">
+                                
+                                        <div id="model_ponto_espera" class="">
+                                            <p class="text secundario emphasis margin_bottom">Solicitando espera</p>
+                                            {% for index in range(2) %}
+                                            <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                                                <p id="interface_model_aluno_title" class="popup__text input">Aluno {{ index }}</p>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                
+                                        <div id="model_ponto_faltam" class="">
+                                            <h1 class="page__division"></h1>
+                                            <p class="text secundario emphasis margin_bottom">Falta subir no veículo</p>
+                                            {% for index in range(2) %}
+                                            <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                                                <p id="interface_model_aluno_title" class="popup__text input">Aluno {{ index }}</p>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                
+                                        <div id="model_ponto_presente" class="">
+                                            <h1 class="page__division"></h1>
+                                            <p class="text secundario emphasis margin_bottom">Presente no veículo</p>
+                                            {% for index in range(3) %}
+                                            <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                                                <p id="interface_model_aluno_title" class="popup__text input">Aluno {{ index }}</p>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <h1 id="model_rota_division" class="page__division inactive"></h1>
+                    </div> 
                 </div>
-                {% endfor %}
             </div>
         </div>
 
@@ -265,7 +418,9 @@
                 </div>
 
                 {% if role == 'motorista' %}
-                <h2 class="text title enter">Minha linha</h2>
+                <h2 class="text title enter">Minhas linhas</h2>
+                <div id="minha_linha_area" class="enter"></div>
+
                 <div id="msg_criar_linha" class="enter">
                     <p class="text secundario emphasis">Você ainda não está relacionado a nenhuma linha.</p>
                     <p class="text secundario fundo">Solicite entrada em alguma linha ou crie a sua:</p>
@@ -273,37 +428,13 @@
                         <i class="bi bi-plus-lg page__icon--box plus" onclick="open_popup_edit('create_line')"></i>
                     </div>
                 </div>
-                <div id="minha_linha_area" class="enter"></div>
                 <h1 class="page__division enter"></h1>
-                <div class="page__container">
+                <div id="msg_solicitar_entrada" class="page__container">
                     <p class="text secundario fundo enter">Solicite entrada:</p>
                 </div>
                 {% endif %}
 
-                <div id="model_regiao">
-                    <h2 class="text title enter">Apodi</h2>
-                    {% for index in range(3) %}
-                    <div id="model_line" class="page__container--line enter" onclick="enterInterface_popup(this)">
-                        <div class="page__container--line_content">
-                            <div class="page__container pos_relative">
-                                <i class="bi bi-bus-front-fill page__icon--box"></i>
-                                <h1 id="model_line_nome" class="text box title_box">Nome da linha</h1>
-                            </div>
-                            <h3 id="nome_dono" class="text box">Nome do dono</h3>
-                        </div>
-
-                        <div class="page__container--line_content info">
-                            <h1 id="model_line_pago" class="text box info_box">Linha paga</h1>
-                            <h1 id="model_line_pago" class="text box info_box inactive">Gratuita</h1>
-                            <h1 id="model_line_ferias" class="text box info_box inactive">(Férias)</h1>
-                        </div>
-        
-                        <div class="page__container--line_image">
-                            <img class="page__line_img" src="/static/data/img/logo_busstup.png">
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+                <div id="local_linhas"></div>
             </div>
         </div>
 
@@ -345,9 +476,9 @@
     <section id="interface_linha" class="interface__container scroll_vertical no_border inactive">
         <header id="interface_linha_header" class="interface__container--header">
             <i class="bi bi-arrow-left-short interface__icon animate" onclick="closeInterface_popup('interface_linha')"></i>
-            <h1 id="interface_nome" class="text title no_marge no_border">Nome da linha</h1>
+            <h1 id="interface_nome" class="text title no_marge no_border"></h1>
             <h1 class="text title no_marge no_border">~</h1>
-            <h1 id="interface_cidade" class="text title no_marge no_border">Apodi</h1>
+            <h1 id="interface_cidade" class="text title no_marge no_border"></h1>
             <h1 id="interface_ferias" class="text title no_marge no_border inactive">(Férias)</h1>
 
             {% if role == 'motorista' %}
@@ -363,7 +494,7 @@
                     <p class="text secundario fundo">Valor da cartela:</p>
                     <div class="text secundario fundo">
                         <p class="text secundario content container space">R$</p>
-                        <p id="interface_preco_cartela" class="text secundario content container">100,0</p>
+                        <p id="interface_valor_cartela" class="text secundario content container"></p>
                     </div>
                     {% if role == 'motorista' %}
                     <i id="edit_valor_cartela" class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_valor', this)"></i>
@@ -374,7 +505,7 @@
                     <p class="text secundario fundo">Valor da diária:</p>
                     <div class="text secundario fundo">
                         <p class="text secundario content container space">R$</p>
-                        <p id="interface_preco_diaria" class="text secundario content container">5,0</p>
+                        <p id="interface_valor_diaria" class="text secundario content container"></p>
                     </div>
                     {% if role == 'motorista' %}
                     <i id="edit_valor_diaria" class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_valor', this)"></i>
@@ -384,31 +515,6 @@
 
             <div id="area_motoristas" class="interface__container--area">
                 <h2 class="text title">Motoristas</h2>
-                <div id="model_motorista">
-                    <h1 class="page__division inactive"></h1>
-                    <div class="page__container pos_relative">
-                        <p id="model_motorista_dono" class="text secundario emphasis">Dono</p>
-                        <p id="model_motorista_adm" class="text secundario emphasis">Adm</p>
-                        <p id="model_motorista_nome" class="text secundario emphasis max_width">Israel Bezerra</p>
-                        {% if role == 'motorista' %}
-                        <i class="bi bi-three-dots-vertical page__icon content emphasis" onclick="open_popup_edit('config_motorista', this)"></i>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="page__container">
-                        <p class="text secundario fundo">Pix:</p>
-                        <div class="scroll_horizontal">
-                            <p id="model_motorista_pix" class="text secundario nowrap fundo content">motoristaTeste@gmail.com</p>
-                        </div>
-                        <i id="model_motorista_copy_email" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
-                    </div>
-
-                    <div class="page__container">
-                        <p class="text secundario fundo">Telefone:</p>
-                        <p id="model_motorista_telefone" class="text secundario fundo content">(84) 99999-9999</p>
-                        <i id="model_motorista_copy_telefone" class="bi bi-clipboard page__icon content" onclick="copy_text(this)"></i>
-                    </div>
-                </div>
             </div>
 
             {% if role == 'motorista' %}

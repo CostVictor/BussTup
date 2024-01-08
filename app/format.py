@@ -1,9 +1,11 @@
 from app.models import database
+from datetime import timedelta, datetime
 import difflib, bcrypt, numpy as np
 
 # ~~ Cursos e turnos
 cursos = ['informática', 'química', 'agropecuária']
 turnos = ['matutino', 'vespertino', 'noturno']
+
 
 def capitalizar(string):
     nome = string.split(' ')
@@ -14,6 +16,15 @@ def capitalizar(string):
                 palavra = palavra.capitalize()
             nome[index] = palavra
     return ' '.join(nome)
+
+
+def formatTelefone(dado):
+    ddd = dado[:2]
+    telefone = dado[2:]
+    if telefone[0] != '9':
+        return False
+    return f'({ddd}) {telefone[:5]}-{telefone[5:]}'
+
 
 def formatData(dadosAdquiridos):
     if dadosAdquiridos:
@@ -56,14 +67,31 @@ def formatData(dadosAdquiridos):
                     turnoIdentify = np.argmax(comparacoes)
                     data[campo] = turnos[turnoIdentify].capitalize()
             elif campo == 'telefone':
-                ddd = dado[:2]
-                telefone = dado[2:]
-                if telefone[0] != '9':
+                value_telefone = formatTelefone(dado)
+                if not value_telefone:
                     erro_titulo = 'Telefone inválido'
                     erro_texto = 'O telefone especificado é inválido.'
                     inconsistencia = True; break
-                data[campo] = f'({ddd}) {telefone[:5]}-{telefone[5:]}'
+                data[campo] = value_telefone
 
         senha = data['senha'].encode('utf-8'); del data['senha']
         hash_senha = bcrypt.hashpw(senha, bcrypt.gensalt())
         return tabela, data, hash_senha, inconsistencia, erro_titulo, erro_texto
+
+
+def return_dates():
+    hoje = datetime.now()
+    dia_semana = hoje.weekday()
+    dias_ate_segunda = (dia_semana + 1) % 7
+    if dia_semana == 5 or dia_semana == 6:
+        dias_ate_segunda = 7 - dia_semana
+        segunda = hoje + timedelta(days=dias_ate_segunda)
+    else: segunda = hoje - timedelta(days=dias_ate_segunda)
+
+    datas_semana = []
+    for index in range(5):
+        data_dia = segunda + timedelta(days=index)
+        data_dia = f'"{data_dia.strftime("%Y-%m-%d")}"'
+        datas_semana.append(data_dia)
+        
+    return datas_semana

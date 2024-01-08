@@ -85,6 +85,7 @@ inputs.forEach(input => {
             if (input.type === 'time') { input.classList.add('visible') }
         } else {
             if (input.value.trim() === '') {
+                input.value = ''
                 if (label) {label.classList.remove('form__label--animate')}
                 if (icon) {icon.classList.remove('form__icon--animate')}
                 if (input.type === 'time') { input.classList.remove('visible') }
@@ -190,7 +191,6 @@ function closeInterface(type, redirect) {
         setTimeout(() => {
             window.location.href = redirect
         }, 1000)
-
         setTimeout(() => {
             enterPage()
         }, 1100)
@@ -213,7 +213,9 @@ function enterInterface_popup(obj_line) {
 
     abas.forEach(aba => {
         const icon = aba.querySelector('i')
-        icon.classList.remove('open')
+        if (icon) {
+            icon.classList.remove('open')
+        }
         aba.classList.remove('margin_bottom')
     })
     containers.forEach(container => {
@@ -229,6 +231,8 @@ function enterInterface_popup(obj_line) {
         
         config_animate(0, header_interface, 'fadeDown', 0.5, 0, 0.07)
         animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0)
+
+        loadInterfaceLinha(obj_line)
     }, 900)
 }
 

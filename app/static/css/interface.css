@@ -38,6 +38,10 @@
     width: 90%;
 }
 
+.interface__container--area.inactive {
+    display: none;
+}
+
 .interface__container--btn {
     width: 98%;
     height: 3.8vh;

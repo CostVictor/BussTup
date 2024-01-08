@@ -10,57 +10,194 @@ header.style.opacity = 0
 observer_header = createObserver(null)
 observer_header.observe(header)
 
-// ~~ Web Socket ~~ //
 
-fetch('/gerar_token', {method: 'GET'})
-.then(response => response.json())
-.then(response => {
-    const token = response['token_access']
-    const socket = io.connect('http://localhost:5000', {secure: true})
-
-    // ~~ Connect
-    
-    socket.on('connect', () => {
-        function request_line(type) {
-            if (type === 'schedule') {
-                socket.emit('send_line_schedule', { token })
-            }
-        }
-
-        function request_realTime() {
-            switch (aba_atual) {
-                case 'agenda': break
-                case 'ponto': break
-                case 'linha': break
-                case 'chat': break
-            }
-        }
-        socket.emit('send_schedule', { token })
-        let aba_ant = aba_atual
-    
-        setInterval(() => {
-            if (aba_ant !== aba_atual) {
-                aba_ant = aba_atual
-                request_realTime()
-            }
-        }, 500)
-        setInterval(request_realTime, 3000)
-        
-        // ~~ Action
-
-        socket.on('return_lines', (data) => {
-            console.log(data)
-        })
-
-        socket.on('return_schedule', (data) => {
-            const area_agenda = document.getElementById('area_agenda')
-        })
-
-    })
-})
+// ~~ SSE ~~ //
 
 
 // ~~ Página ~~ //
+
+function loadLinha() {
+    function create_lines(local, list_datas, list_minha_linha = false) {
+        for (index_linha in list_datas) {
+            const model_linha = document.getElementById('model_line')
+            const linha = model_linha.cloneNode(true)
+            linha.id = `${local.id}-linha_${index_linha}`
+
+            const dados = list_datas[index_linha]
+            for (data in dados) {
+                const value = dados[data]
+
+                if (data === 'particular') {
+                    const pago = linha.querySelector('h1#model_line_pago')
+                    const gratuito = linha.querySelector('h1#model_line_gratuito')
+                    pago.id = pago.id.replace('model_line', linha.id)
+                    gratuito.id = gratuito.id.replace('model_line', linha.id)
+
+                    if (!value) {
+                        pago.classList.add('inactive')
+                        gratuito.classList.remove('inactive')
+                    }
+                } else if (data === 'ferias') {
+                    const ferias = linha.querySelector('h1#model_line_ferias')
+                    ferias.id = ferias.id.replace('model_line', linha.id)
+
+                    if (value) {ferias.classList.remove('inactive')}
+                } else {
+                    const info = linha.querySelector(`[id*="${data}"]`)
+                    info.id = linha.id + '_' + data
+                    info.textContent = value
+                }
+                linha.classList.remove('inactive')
+
+                if (list_minha_linha) {
+                    for (minha_linha in list_minha_linha) {
+                        if (list_minha_linha[minha_linha]['nome'] === dados['nome']) {
+                            linha.classList.add('selected')
+                        }
+                    }
+                }
+            }
+            local.appendChild(linha)
+        }
+    }
+
+    fetch("/get_linhas", { method: "GET" })
+    .then(response => response.json())
+    .then(response => {
+        if (response['identify']) {
+            const local_linhas = document.getElementById('local_linhas')
+            const minha_linha_area = document.getElementById('minha_linha_area')
+            if (minha_linha_area) {minha_linha_area.innerHTML = ''}
+            local_linhas.innerHTML = ''
+
+            for (cidade in response['cidades']) {
+                if (!local_linhas.querySelector(`div#${cidade}`)) {
+                    const model_regiao = document.getElementById('model_regiao')
+                    var regiao = model_regiao.cloneNode(true)
+                    regiao.id = cidade
+
+                    regiao.querySelector('h2').textContent = cidade
+                    regiao.classList.remove('inactive')
+                    regiao.classList.add('enter')
+                    local_linhas.appendChild(regiao)
+                }
+                create_lines(regiao, response['cidades'][cidade], response['minha_linha'])
+            }
+            if (minha_linha_area) {
+                create_lines(minha_linha_area, response['minha_linha'])
+            }
+            const elements = divs[2].querySelectorAll('[class*="enter"]')
+            animate_itens(elements, 'fadeDown', 0.7, 0)
+        }
+
+
+        if (response['role'] === 'motorista') {
+            const container_msg = document.getElementById('msg_criar_linha')
+            const texts_msg = container_msg.querySelectorAll('p')
+            const text_solicitar = document.getElementById('msg_solicitar_entrada')
+
+            if (!response['minha_linha'].length) {
+                text_solicitar.classList.remove('inactive')
+                texts_msg.forEach(msg => {
+                    msg.classList.remove('inactive')
+                })
+            } else {
+                text_solicitar.classList.add('inactive')
+                texts_msg.forEach(msg => {
+                    msg.classList.add('inactive')
+                })
+            }
+        }
+    })
+}
+
+
+function loadMotoristasInterface(nome_linha) {
+    fetch("/get_interfaceMotoristas", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({'nome_linha': nome_linha})
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            const data = response['data']
+            const local_motorista = document.getElementById('area_motoristas')
+            const elements_remove = Array.from(local_motorista.children)
+            elements_remove.forEach(element => {
+                if (element.id.includes('motorista')) {
+                    local_motorista.removeChild(element)
+                }
+            })
+
+            for (tipo in data) {
+                for (pos in data[tipo]) {
+                    const model_motorista = document.getElementById('model_motorista')
+                    const motorista = model_motorista.cloneNode(true)
+                    motorista.id = `motorista_${tipo}_${pos}`
+                    
+                    const elements = motorista.querySelectorAll('[id*="model_motorista"]')
+                    elements.forEach(element => {
+                        element.id = element.id.replace('model_motorista', motorista.id)
+                    })
+
+                    for (info in data[tipo][pos]) {
+                        const tag = motorista.querySelector(`[id*="${info}"]`)
+                        tag.textContent = data[tipo][pos][info]
+                    }
+
+                    const dono = motorista.querySelector('[id*="dono"]')
+                    const adm = motorista.querySelector('[id*="adm"]')
+                    if (tipo === 'dono') {
+                        dono.classList.remove('inactive')
+                        adm.classList.remove('inactive')
+                    } else if (tipo === 'adm') {
+                        adm.classList.remove('inactive')
+                    }
+
+                    motorista.classList.remove('inactive')
+                    local_motorista.appendChild(motorista)
+                }
+            }
+        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+    })
+}
+
+
+function loadInterfaceLinha(obj_linha, nome_linha = false) {
+    if (nome_linha) {
+        name_reference = nome_linha
+    } else {
+        name_reference = obj_linha.querySelector('[id*="nome"]').textContent
+    }
+    fetch("/get_interfaceLinha", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({'nome_linha': name_reference})
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            for (dado in response['data']) {
+                if (dado === 'particular') {
+                    const area_precos = document.getElementById('area_precos')
+                    if (!response['data'][dado]) {
+                        area_precos.classList.add('inactive')
+                    } else {
+                        area_precos.classList.remove('inactive')
+                    }
+                } else {
+                    const info = document.getElementById(`interface_${dado}`)
+                    info.textContent = response['data'][dado]
+                }
+            }
+        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+    })
+    setTimeout(() => {
+        loadMotoristasInterface(name_reference)
+    }, 100)
+}
+
 
 function enterPage() {
     content.classList.remove('content_noBorder')
@@ -105,6 +242,7 @@ function closePage() {
 
 // ~~ Animação de rolamento ~~ //
 
+let update_aba = false
 function ajustAba(index_atual) {
     const abas = document.querySelectorAll('[id*="area"].page__container.column')
     abas.forEach((aba, index_aba) => {
@@ -114,24 +252,28 @@ function ajustAba(index_atual) {
             aba.classList.add('inactive')
         }
     })
+    update_aba = false
 }
 
 
 let isScrolling
 content.addEventListener('scroll', function() {
-    clearTimeout(isScrolling)
-    isScrolling = setTimeout(function() {
-        const larguraDiv = content.scrollWidth / divs.length;
-        const index = Math.floor(content.scrollLeft / larguraDiv)
-      
-        btns.forEach((btn) => {
-            btn.classList.remove('btn_selected')
-        })
-        btns[index].classList.add('btn_selected')
-        aba_atual = btns[index].id
-        ajustAba(index)
-    }, 40)
+    if (update_aba) {
+        clearTimeout(isScrolling)
+        isScrolling = setTimeout(function() {
+            const larguraDiv = content.scrollWidth / divs.length;
+            const index = Math.floor(content.scrollLeft / larguraDiv)
+          
+            btns.forEach((btn) => {
+                btn.classList.remove('btn_selected')
+            })
+            btns[index].classList.add('btn_selected')
+            aba_atual = btns[index].id
+            ajustAba(index)
+        }, 40)
+    }
   })
+
 
 function replaceAba(btn_click) {
     btns.forEach((element, index) => {
@@ -143,6 +285,7 @@ function replaceAba(btn_click) {
             element.classList.remove('btn_selected')
         }
     })
+    update_aba = true
 }
 
 set_observerScroll(document.querySelectorAll('div.scroll_horizontal'))
@@ -164,6 +307,74 @@ function checkLine() {
         } else {
             if (area) {area.classList.remove('inactive')}
             if (aviso) {aviso.classList.add('inactive')}
+
+            if (aba_atual === 'agenda') {
+
+            } else if (aba_atual === 'rota') {
+                
+            } else if (aba_atual === 'linhas') {
+                loadLinha()
+            }
         }
     })
+}
+
+
+function validationLine(obj_form, event) {
+    event.preventDefault()
+    let execute = true
+    let data = {'particular': true}
+    
+    const options_gratuidade = document.getElementById('options_gratuidade').querySelectorAll('div')
+    options_gratuidade.forEach(element => {
+        const text = element.querySelector('p').textContent
+        const icon = element.querySelector('i')
+
+        if (text === 'Sim') {
+            if (!icon.className.includes('selected')) {
+                data['particular'] = false
+            }
+        }
+    })
+
+    for (let index = 0; index < obj_form.length; index++) {
+        var campo = obj_form.elements[index]
+
+        if (campo.name) {
+            if (data['particular'] && !campo.name.includes('nome') && !campo.name.includes('cidade')) {
+                const value = parseFloat(campo.value)
+                if (!value || value <= 0) {
+                    var erro_titulo = 'Valor inválido'
+                    var erro_texto = `O ${campo.name} deve ser maior que 0.`
+                    execute = false; break
+                } else {
+                    const nome_campo = `${campo.name.includes('cartela')? 'valor_cartela' : 'valor_diaria'}`
+                    data[nome_campo] = value
+                }
+            } else if (!campo.name.includes('preço')) {
+                data[campo.name.trim()] = campo.value.trim()
+            }
+        }
+    }
+
+    if (execute) {
+        fetch("/create_linha", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({'data': data})
+        })
+        .then(response => response.json())
+        .then(response => {
+            if (response['error']) {
+                create_popup(response['title'], response['text'], 'Voltar', 'error', '', false)
+            } else {
+                cancel_popup_edit('create_line')
+                loadLinha()
+                create_popup(response['title'], response['text'], 'Ok', 'success')
+            }
+        })
+    } else {
+        campo.classList.add('input_error')
+        create_popup(erro_titulo, erro_texto, 'Voltar', 'error', '', false)
+    }
 }

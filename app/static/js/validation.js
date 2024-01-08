@@ -17,6 +17,27 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
 }
 
 
+// ~~~~~ Validações ~~~~~ //
+
+function apenas_numeros(str) {return /^[0-9]+$/.test(str)}
+function apenas_letras(str) {return /^[a-zA-ZÀ-ÖØ-öø-ÿ\s]*$/.test(str)}
+function sem_espaco(str) {return str.indexOf(' ') === -1}
+
+function validationTelefone(str_telefone) {
+    if (!apenas_numeros(str_telefone)) {
+        return false
+    }
+    return true
+}
+
+function validationEmail(str_email) {
+    if (!str_email.includes('@') || str_email.includes(',') || !sem_espaco(str_email)) {
+        return false
+    }
+    return true
+}
+
+
 // ~~~~~ Validação de login ~~~~~ //
 
 function validationLogin(event) {
@@ -41,9 +62,6 @@ function validationLogin(event) {
 
 function validationRegister(type, event) {
     event.preventDefault()
-    function apenas_numeros(str) {return /^[0-9]+$/.test(str)}
-    function apenas_letras(str) {return /^[a-zA-ZÀ-ÖØ-öø-ÿ\s]*$/.test(str)}
-    function sem_espaco(str) {return str.indexOf(' ') === -1}
 
     const form = document.getElementById(`form_${type}`)
     let execute = true
@@ -72,7 +90,7 @@ function validationRegister(type, event) {
                     execute = false; break
                 }
             } else if (campoAlvo === 'Email') {
-                if (!campo.value.trim().includes('@')) {
+                if (!validationEmail(campo.value.trim())) {
                     var erro_titulo = 'Email inválido'
                     var erro_texto = 'O email especificado não é válido.'
                     execute = false; break
@@ -120,50 +138,6 @@ function validationRegister(type, event) {
     }
 }
 
-function validationLine(obj_form, event) {
-    event.preventDefault()
-    let execute = true
-    let data = {'particular': true}
-    
-    const options_gratuidade = document.getElementById('options_gratuidade').querySelectorAll('div')
-    options_gratuidade.forEach(element => {
-        const text = element.querySelector('p').textContent
-        const icon = element.querySelector('i')
-
-        if (text === 'Sim') {
-            if (!icon.className.includes('selected')) {
-                data['particular'] = false
-            }
-        }
-    })
-
-    for (let index = 0; index < obj_form.length; index++) {
-        var campo = obj_form.elements[index]
-
-        if (campo.name) {
-            if (data['particular'] && !campo.name.includes('nome') && !campo.name.includes('cidade')) {
-                const value = parseFloat(campo.value)
-                if (!value || value <= 0) {
-                    var erro_titulo = 'Valor inválido'
-                    var erro_texto = `O ${campo.name} deve ser maior que 0.`
-                    execute = false; break
-                } else {
-                    const nome_campo = `${campo.name.includes('cartela')? 'valor_cartela' : 'valor_diaria'}`
-                    data[nome_campo] = value
-                }
-            } else if (!campo.name.includes('preço')) {
-                data[campo.name.trim()] = campo.value.trim()
-            }
-        }
-    }
-
-    if (execute) {
-        console.log(data)
-    } else {
-        campo.classList.add('input_error')
-        create_popup(erro_titulo, erro_texto, 'Voltar', 'error', '', false)
-    }
-}
 
 function submit(form_id = false) {
     if (!form_id) {

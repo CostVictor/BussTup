@@ -33,7 +33,7 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite o email:</h2>
-            <form id="formulario_edit_email" class="form__container--card max_width" method="post">
+            <form id="formulario_edit_email" class="form__container--card max_width" method="post"  onsubmit="editData_perfil(this)">
                 <div class="form__container--input first">
                     <input id="edit_email_new" class="form__input white input_notIcon" type="text" required>
                     <label class="form__label intense label_notIcon" for="edit_email_new">Email</label>
@@ -51,7 +51,7 @@
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_email')">Cancelar</button>
-            <button class="popup__btn">Alterar</button>
+            <button class="popup__btn" onclick="submit('formulario_edit_email')">Alterar</button>
         </footer>
     </div>
 </section>
@@ -65,9 +65,9 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite o novo telefone:</h2>
-            <form id="formulario_edit_telefone" class="form__container--card max_width" method="post">
+            <form id="formulario_edit_telefone" class="form__container--card max_width" method="post"  onsubmit="editData_perfil(this)">
                 <div class="form__container--input first">
-                    <input id="edit_telefone_new" class="form__input white input_notIcon" type="text" required>
+                    <input id="edit_telefone_new" class="form__input white input_notIcon" type="text" minlength="11" maxlength="11" required>
                     <label class="form__label intense label_notIcon" for="edit_telefone_new">Telefone (Com DDD)</label>
                 </div>
 
@@ -83,7 +83,7 @@
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_telefone')">Cancelar</button>
-            <button class="popup__btn">Alterar</button>
+            <button class="popup__btn" onclick="submit('formulario_edit_telefone')">Alterar</button>
         </footer>
     </div>
 </section>
@@ -98,7 +98,7 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite a chave do pix:</h2>
-            <form id="formulario_edit_pix" class="form__container--card max_width" method="post">
+            <form id="formulario_edit_pix" class="form__container--card max_width" method="post" onsubmit="editData_perfil(this)">
                 <div class="form__container--input first">
                     <input id="edit_pix_new" class="form__input white input_notIcon" type="text" required>
                     <label class="form__label intense label_notIcon" for="edit_pix_new">Chave pix</label>
@@ -116,7 +116,7 @@
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_pix')">Cancelar</button>
-            <button class="popup__btn">Alterar</button>
+            <button class="popup__btn" onclick="submit('formulario_edit_pix')">Alterar</button>
         </footer>
     </div>
 </section>
@@ -130,24 +130,44 @@
         </header>
 
         <div class="popup__container--content">
-            <div class="form__container--input first">
-                <input id="trocar_senha_new" class="form__input input_password white input_notIcon" type="password" required>
-                <i id="trocar_senha_new_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                <label class="form__label intense label_notIcon" for="trocar_senha_new">Nova senha</label>
-            </div>
-
-            <h1 class="perfil__division"></h1>
-            <h3 class="popup__text info space">Confirme a alteração com sua senha atual:</h3>
-            <div class="form__container--input first">
-                <input id="trocar_senha_conf" class="form__input input_password white input_notIcon" type="password" required>
-                <i id="trocar_senha_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                <label class="form__label intense label_notIcon" for="trocar_senha_conf">Senha de confirmação</label>
-            </div>
+            <form id="formulario_trocar_senha" class="form__container--card max_width" method="post" onsubmit="editData_perfil(this)">
+                <div class="form__container--input first">
+                    <input id="trocar_senha_new" class="form__input input_password white input_notIcon" type="password" required>
+                    <i id="trocar_senha_new_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
+                    <label class="form__label intense label_notIcon" for="trocar_senha_new">Nova senha</label>
+                </div>
+    
+                <h1 class="perfil__division"></h1>
+                <h3 class="popup__text info space">Confirme a alteração com sua senha atual:</h3>
+                <div class="form__container--input first">
+                    <input id="trocar_senha_conf" class="form__input input_password white input_notIcon" type="password" required>
+                    <i id="trocar_senha_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
+                    <label class="form__label intense label_notIcon" for="trocar_senha_conf">Senha de confirmação</label>
+                </div>
+            </form>
         </div>
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('trocar_senha')">Cancelar</button>
-            <button class="popup__btn">Alterar</button>
+            <button class="popup__btn" onclick="submit('formulario_trocar_senha')">Alterar</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="confirm_logout" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Sair da conta</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <h4 class="popup__text">Tem certeza de que deseja sair da sua conta?</h4>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('confirm_logout')">Cancelar</button>
+            <button class="popup__btn" onclick="closePerfil(true)">Sair</button>
         </footer>
     </div>
 </section>
@@ -160,7 +180,7 @@
         </header>
 
         <div class="popup__container--content">
-            <h4 class="popup__text info">Você está prestes a excluir permanentemente sua conta. Ao fazê-lo, observe que todos os dados e informações associadas à sua conta serão removidos de forma irrecuperável. Além disso, quaisquer gastos vinculados à sua conta serão perdidos sem a possibilidade de recuperação. Esta ação é irreversível.</h4>
+            <p class="popup__text justify">Você está prestes a excluir permanentemente sua conta. Ao fazê-lo, observe que todos os dados e informações associadas à sua conta serão removidos de forma irrecuperável. Além disso, quaisquer gastos vinculados à sua conta serão perdidos sem a possibilidade de recuperação. Esta ação é irreversível.</p>
         </div>
 
         <footer class="popup__container--footer">
@@ -178,7 +198,7 @@
         </header>
 
         <div class="popup__container--content">
-            <h4 class="popup__text info">Ao clicar em "Excluir", você concorda que todos os dados, informações e quaisquer gastos associados à sua conta serão permanentemente removidos e não poderão ser recuperados. Esta ação implica na perda irreversível de todos os dados armazenados, bem como de quaisquer valores ou gastos relacionados à sua conta. Certifique-se de estar ciente das consequências antes de prosseguir com esta ação.</h4>
+            <p class="popup__text justify">Ao clicar em "Excluir", você concorda que todos os dados, informações e quaisquer gastos associados à sua conta serão permanentemente removidos e não poderão ser recuperados. Esta ação implica na perda irreversível de todos os dados armazenados, bem como de quaisquer valores ou gastos relacionados à sua conta. Certifique-se de estar ciente das consequências antes de prosseguir com esta ação.</p>
 
             <h1 class="perfil__division"></h1>
             <form id="formulario_termo_concordancia_excusao" class="form__container--card max_width" method="post">

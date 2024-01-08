@@ -1,20 +1,20 @@
 <div id="model_regiao" class="inactive">
-    <h2 class="text title">Nome da cidade</h2>
+    <h2 class="text title"></h2>
 </div>
 
 
-<div id="model_line" class="page__container--line enter inactive" onclick="enterInterface_popup(this)">
+<div id="model_line" class="page__container--line inactive" onclick="enterInterface_popup(this)">
     <div class="page__container--line_content">
         <div class="page__container pos_relative">
             <i class="bi bi-bus-front-fill page__icon--box"></i>
             <h1 id="model_line_nome" class="text box title_box"></h1>
         </div>
-        <h3 id="nome_dono" class="text box"></h3>
+        <h3 id="model_line_dono" class="text box"></h3>
     </div>
 
     <div class="page__container--line_content info">
         <h1 id="model_line_pago" class="text box info_box">Pago</h1>
-        <h1 id="model_line_pago" class="text box info_box inactive">Gratuito</h1>
+        <h1 id="model_line_gratuito" class="text box info_box inactive">Gratuito</h1>
         <h1 id="model_line_ferias" class="text box info_box inactive">(Férias)</h1>
     </div>
 
@@ -85,6 +85,12 @@
                 <p class="interface__text">Cancelar trajeto de retorno</p>
             </div>
         </div>
+        {% else %}
+        <div class="page__container justify inactive">
+            <div class="interface__container--btn add margin_bottom" onclick="">
+                <p class="interface__text">Marcar presença</p>
+            </div>
+        </div>
         {% endif %}
 
         <div class="page__container">
@@ -125,7 +131,7 @@
         <p id="model_motorista_adm" class="text secundario emphasis inactive">Adm</p>
         <p id="model_motorista_nome" class="text secundario emphasis max_width"></p>
         {% if role == 'motorista' %}
-        <i id="model_motorista_btn" class="bi bi-three-dots-vertical page__icon content emphasis"></i>
+        <i id="model_motorista_btn" class="bi bi-three-dots-vertical page__icon content emphasis inactive"></i>
         {% endif %}
     </div>
     
