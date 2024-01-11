@@ -141,7 +141,7 @@ function validationRegister(type, event) {
 
 function submit(form_id = false) {
     if (!form_id) {
-        const buttom = document.querySelector('button.form__btn--select_active')
+        const buttom = document.querySelector('button.form__btn--select.selected')
         var form = document.getElementById(`form_${buttom.textContent.toLowerCase()}`)
     } else {var form = document.getElementById(form_id)}
     if (form.checkValidity()) {

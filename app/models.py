@@ -118,7 +118,7 @@ class DB:
         self.execute(command, [value for value in data.values()])
         self.close_connect()
 
-    def select(self, table: str, data=None, where=None):
+    def select(self, table: str, data=None, where=None, order=''):
         # INFO: "data" --> texto OU {nome desejado à pesquisa: item OU (item, tabela do item)}
         # EX: "nome, idade" OU {nome do aluno: "nome" OU ("nome", "aluno")}
         # Os valores só devem ser tuplas quando a pesquisa envolver mais de uma tabela
@@ -157,8 +157,12 @@ class DB:
             command = self._selecionar.format(pesquisa, tabelas)
             if where:
                 sql_where, value_where = self.format_where(where)
-                self.execute(command + sql_where, value_where)
-            else: self.execute(command)
+                if order: command = command + f' ORDER BY {order}' + sql_where
+                else: command = command + sql_where
+                self.execute(command, value_where)
+            else:
+                if order: self.execute(command + f' ORDER BY {order}')
+                else: self.execute(command)
 
             retorno = self._cursor.fetchall()
             self.close_connect()

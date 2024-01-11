@@ -12,6 +12,10 @@
     text-align: justify;
 }
 
+.text.nowrap {
+    white-space: nowrap;
+}
+
 .text.box {
     margin: 0;
     font-size: calc(0.7vw + 0.7vh + 1vmin);
@@ -36,10 +40,6 @@
 .text.secundario {
     font-size: calc(0.8vw + 0.85vh + 1vmin);
     margin: calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin) calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin);
-}
-
-.text.secundario.nowrap {
-    white-space: nowrap;
 }
 
 .text.secundario.selected {

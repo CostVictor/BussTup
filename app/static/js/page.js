@@ -112,8 +112,70 @@ function loadLinha() {
 }
 
 
-function loadMotoristasInterface(nome_linha) {
-    fetch("/get_interfaceMotoristas", {
+function loadInterfaceLinha(obj_linha, nome_linha = false) {
+    if (nome_linha) {
+        name_reference = nome_linha
+    } else {
+        name_reference = obj_linha.querySelector('[id*="nome"]').textContent
+    }
+    fetch("/get_interface-linha", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({'nome_linha': name_reference})
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            let adm = false
+
+            if (response['role'] === 'motorista') {
+                const config_linha = document.getElementById('interface_config')
+                config_linha.classList.add('inactive')
+
+                if (response['relacao'] === 'dono') {
+                    config_linha.classList.remove('inactive')
+                    adm = true
+                } else if (response['relacao'] === 'adm') {
+                    adm = true
+                }
+            }
+
+            for (dado in response['data']) {
+                if (dado === 'particular') {
+                    const area_precos = document.getElementById('area_precos')
+                    if (!response['data'][dado]) {
+                        area_precos.classList.add('inactive')
+                    } else {area_precos.classList.remove('inactive')}
+
+                } else if (dado === 'ferias') {
+                    const info_ferias = document.getElementById('interface_ferias')
+                    if (!response['data'][dado]) {
+                        info_ferias.classList.add('inactive')
+                    } else {info_ferias.classList.remove('inactive')}
+
+                } else {
+                    const info = document.getElementById(`interface_${dado}`)
+                    const edit = document.getElementById(info.id.replace('interface', 'edit'))
+                    info.textContent = response['data'][dado]
+
+                    if (edit) {
+                        if (adm) {
+                            edit.classList.remove('inactive')
+                        } else {edit.classList.add('inactive')}
+                    }
+                }
+            }
+
+        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+    })
+    setTimeout(() => {
+        loadMotoristaInterface(name_reference)
+    }, 100)
+}
+
+
+function loadMotoristaInterface(nome_linha) {
+    fetch("/get_interface-motorista", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({'nome_linha': nome_linha})
@@ -148,6 +210,10 @@ function loadMotoristasInterface(nome_linha) {
 
                     const dono = motorista.querySelector('[id*="dono"]')
                     const adm = motorista.querySelector('[id*="adm"]')
+                    if (response['role'] === 'motorista' && response['relacao'] === 'dono' && tipo !== 'dono') {
+                        const btn_config = motorista.querySelector('[id*="btn"]')
+                        btn_config.classList.remove('inactive')
+                    }
                     if (tipo === 'dono') {
                         dono.classList.remove('inactive')
                         adm.classList.remove('inactive')
@@ -164,38 +230,18 @@ function loadMotoristasInterface(nome_linha) {
 }
 
 
-function loadInterfaceLinha(obj_linha, nome_linha = false) {
-    if (nome_linha) {
-        name_reference = nome_linha
-    } else {
-        name_reference = obj_linha.querySelector('[id*="nome"]').textContent
-    }
-    fetch("/get_interfaceLinha", {
+function loadVeiculoInterface(nome_linha) {
+    fetch("/get_interface-veiculo", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'nome_linha': name_reference})
+        body: JSON.stringify({'nome_linha': nome_linha})
     })
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            for (dado in response['data']) {
-                if (dado === 'particular') {
-                    const area_precos = document.getElementById('area_precos')
-                    if (!response['data'][dado]) {
-                        area_precos.classList.add('inactive')
-                    } else {
-                        area_precos.classList.remove('inactive')
-                    }
-                } else {
-                    const info = document.getElementById(`interface_${dado}`)
-                    info.textContent = response['data'][dado]
-                }
-            }
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+            
+        }
     })
-    setTimeout(() => {
-        loadMotoristasInterface(name_reference)
-    }, 100)
 }
 
 
@@ -295,7 +341,7 @@ set_observerScroll(document.querySelectorAll('div.scroll_vertical'))
 // ~~ Interações na aba ~~ //
 
 function checkLine() {
-    fetch('/checar_linha', { method: 'GET' })
+    fetch("/checar_linha", { method: 'GET' })
     .then(response => response.json())
     .then(response => {
         const aviso = document.getElementById(`not_line_${aba_atual}`)

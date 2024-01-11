@@ -22,6 +22,7 @@ body {
 
 .page__container.interaction {
     cursor: pointer;
+    user-select: none;
 }
 
 .page__container.justify {

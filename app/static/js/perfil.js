@@ -28,7 +28,7 @@ function closePerfil(logout = false) {
     } else {
         setTimeout(() => {
             window.location.href = "/pagina-usuario"
-        }, 1000)
+        }, 700)
     }
     setTimeout(() => {enterPerfil()}, 1100)
 }

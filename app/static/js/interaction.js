@@ -285,6 +285,7 @@ function set_sequence(obj_child) {
     })
 }
 
+
 if (window.location.href.includes('/pagina-usuario')) {
     $(function() {
         $(".sortable").sortable({

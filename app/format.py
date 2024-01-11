@@ -1,5 +1,6 @@
 from app.models import database
 from datetime import timedelta, datetime
+from flask_security import current_user
 import difflib, bcrypt, numpy as np
 
 # ~~ Cursos e turnos
@@ -95,3 +96,16 @@ def return_dates():
         datas_semana.append(data_dia)
         
     return datas_semana
+
+
+def return_relacao(codigo_linha):
+    verify = database.select('Linha_has_Motorista', where={'where': 'Motorista_nome = %s AND Linha_codigo = %s', 'value': (current_user.primary_key, codigo_linha)})
+
+    if verify:
+        if verify['motorista_dono']:
+            relacao = 'dono'
+        elif verify['motorista_adm']:
+            relacao = 'adm'
+        else: relacao = 'membro'
+    else: relacao = None
+    return relacao

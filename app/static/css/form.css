@@ -25,6 +25,10 @@
     width: 100%;
 }
 
+.form__container--content.register {
+    margin-top: 4.5%;
+}
+
 .form__container--img {
     display: flex;
     flex-direction: column;
@@ -53,7 +57,7 @@
     flex-direction: column;
     padding: calc(0.1vw + 0.1vh + 1vmin);
     padding-bottom: calc(0.5vw + 0.5vh + 1vmin);
-    max-height: 45vh;
+    max-height: 50vh;
     width: 80%;
 }
 
@@ -64,7 +68,9 @@
 
 .form__container--input {
     display: flex;
-    margin-top: calc(1vw + 1.1vh + 1vmin);
+    position: relative;
+    margin-top: calc(1vw + 1vh + 1vmin);
+    margin-bottom: 0.1vh;
     transition: 0.4s ease;
 }
 
@@ -163,8 +169,9 @@
 .form__label {
     transition: 0.2s ease;
     position: absolute;
-    margin-top: calc(0.5vw + 0.5vh + 1vmin);
-    margin-left: calc(3vw + 3vh + 1vmin);
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: calc(3vw + 2.9vh + 1vmin);
     font-size: calc(1vw + 1vh + 1vmin);
     color: var(--azul_quaternario);
     pointer-events: none;
@@ -174,13 +181,13 @@
     color: var(--azul_terciario);
 }
 
-.form__label--animate {
-    transform: translateX(calc(-0.1vw + -0.04vh + -1vmin));
+.form__label.selected {
+    transform: translate(calc(-0.1vw + -0.04vh + -1vmin), -50%);
     opacity: 0;
 }
 
 .label_notIcon {
-    margin-left: calc(0.8vw + 1.5vh + 1vmin);
+    margin-left: calc(0.8vw + 1.3vh + 1vmin);
 
 }
 
@@ -197,7 +204,7 @@
     top: 50%;
 }
 
-.form__icon--animate {
+.form__icon.selected {
     border: none;
 }
 
@@ -215,6 +222,11 @@
     margin-top: calc(1vw + 1.5vh + 1vmin);
     font-weight: bold;
     cursor: pointer;
+    user-select: none;
+}
+
+.form__btn.margin_bottom {
+    margin-bottom: 2.5%;
 }
 
 .form__btn:hover {
@@ -250,7 +262,8 @@
     border-radius: calc(0.5vw + 0.5vh + 1vmin);
     color: var(--azul_terciario);
     font-size: calc(1vw + 0.5vh + 1vmin);
-    padding: calc(0.1vw + 0.1vh + 1vmin);
+    padding: 0.2rem;
+    user-select: none;
 }
 
 .form__btn--simple.selected {
@@ -304,7 +317,7 @@
     scale: 1.05;
 }
 
-.form__btn--select_active {
+.form__btn--select.selected {
     background-color: var(--azul_primario);
     color: var(--branco_secundario);
 }

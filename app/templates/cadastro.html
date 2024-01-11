@@ -14,88 +14,87 @@
     <link rel="stylesheet" href="/static/css/form.css">
     <link rel="stylesheet" href="/static/css/index.css">
 </head>
-<body onload="enterInterface('register')">
-    <section id="container" class="form__container container_complete">
-        <div id="content" class="form__container--content">
-            <h1 class="form__text_title enter">Cadastro</h1>
-            <div id="select_register" class="form__container--card">
-                <h2 class="text--select enter">Cadastrar como:</h2>
-                <div class="form__container--btn_select enter">
-                    <button onclick="replace_form('aluno')" class="form__btn--select form__btn--select_active">Aluno</button>
-                    <button onclick="replace_form('motorista')" class="form__btn--select">Motorista</button>
-                </div>
-            </div>
-
-            <form id="form_aluno" class="form__container--card enter scroll_vertical" method="post" onsubmit="validationRegister('aluno', event)">
-                <div class="form__container--input hidden">
-                    <input id="matricula" class="form__input input_notIcon" type="text" minlength="14" maxlength="14" name="matricula" required>
-                    <label class="form__label label_notIcon" for="matricula">Matrícula (Usuário de login)</label>
-                </div>
-                
-                <div class="form__container--input hidden">
-                    <input id="nome_aluno" class="form__input input_notIcon" type="text" name="nome" required>
-                    <label class="form__label label_notIcon" for="nome_aluno">Nome completo</label>
-                </div>
-
-                <div class="form__container--input hidden">
-                    <input id="curso" class="form__input input_notIcon" type="text" name="curso" required>
-                    <label class="form__label label_notIcon" for="curso">Curso</label>
-                </div>
-                <div class="form__container--input hidden">
-                    <input id="turno" class="form__input input_notIcon" type="text" name="turno" required>
-                    <label class="form__label label_notIcon" for="turno">Turno</label>
-                </div>
-
-                <div class="form__container--input hidden">
-                    <input id="telefone_aluno" class="form__input input_notIcon" type="text" minlength="11" maxlength="11" name="telefone" required>
-                    <label class="form__label label_notIcon" for="telefone_aluno">Telefone (Com DDD)</label>
-                </div>
-
-                <div class="form__container--input hidden">
-                    <input id="senha_aluno" class="form__input input_notIcon" type="password" name="senha" required>
-                    <label class="form__label label_notIcon" for="senha_aluno">Senha</label>
-                </div>
-
-                <div class="form__container--input hidden">
-                    <input id="conf_senha_aluno" class="form__input input_notIcon" type="password" name="conf_senha" required>
-                    <label class="form__label label_notIcon" for="conf_senha_aluno">Confirmar senha</label>
-                </div>
-            </form>
-
-            <form id="form_motorista" class="form__container--card enter inactive" method="post" onsubmit="validationRegister('motorista', event)">
-                <div class="form__container--input">
-                    <input id="nome_motorista" class="form__input input_notIcon" type="text" name="nome" required>
-                    <label class="form__label label_notIcon" for="nome_motorista">Nome (Usuário de login)</label>
-                </div>
-
-                <div class="form__container--input">
-                    <input id="telefone_motorista" class="form__input input_notIcon" type="text" name="telefone" required>
-                    <label class="form__label label_notIcon" for="telefone_motorista">Telefone (Com DDD)</label>
-                </div>
-
-                <div class="form__container--input">
-                    <input id="email" class="form__input input_notIcon" type="text" name="email" required>
-                    <label class="form__label label_notIcon" for="email">Email</label>
-                </div>
-
-                <div class="form__container--input">
-                    <input id="senha_motorista" class="form__input input_notIcon" type="password" name="senha" required>
-                    <label class="form__label label_notIcon" for="senha_motorista">Senha</label>
-                </div>
-
-                <div class="form__container--input">
-                    <input id="conf_senha_motorista" class="form__input input_notIcon" type="password" name="conf_senha" required>
-                    <label class="form__label label_notIcon" for="conf_senha_motorista">Confirmar senha</label>
-                </div>
-            </form>
-
-            <button id="button_submit" class="form__btn btn_scroll enter" onclick="submit()">Enviar</button>
-            <div class="form__container--text_info enter">
-                <p class="text">Já possui uma conta?</p>
-                <button class="form__btn--simple" onclick="closeInterface('register', '/')">Logar</button>
+<body onload="enterInterface('register')" style="background-color: var(--branco_secundario);">
+    <p class="hidden_point">.</p>
+    <div id="content" class="form__container--content register">
+        <h1 class="form__text_title enter">Cadastro</h1>
+        <div id="select_register" class="form__container--card enter">
+            <h2 class="text--select">Cadastrar como:</h2>
+            <div class="form__container--btn_select">
+                <button onclick="replace_form(this)" class="form__btn--select selected">Aluno</button>
+                <button onclick="replace_form(this)" class="form__btn--select">Motorista</button>
             </div>
         </div>
-    </section>
+
+        <form id="form_aluno" class="form__container--card scroll_vertical no_borderY enter" method="post" onsubmit="validationRegister('aluno', event)">
+            <div class="form__container--input first">
+                <input id="matricula" class="form__input input_notIcon" type="text" minlength="14" maxlength="14" name="matricula" required>
+                <label class="form__label label_notIcon" for="matricula">Matrícula (Usuário de login)</label>
+            </div>
+            
+            <div class="form__container--input">
+                <input id="nome_aluno" class="form__input input_notIcon" type="text" name="nome" required>
+                <label class="form__label label_notIcon" for="nome_aluno">Nome completo</label>
+            </div>
+
+            <div class="form__container--input">
+                <input id="curso" class="form__input input_notIcon" type="text" name="curso" required>
+                <label class="form__label label_notIcon" for="curso">Curso</label>
+            </div>
+            <div class="form__container--input">
+                <input id="turno" class="form__input input_notIcon" type="text" name="turno" required>
+                <label class="form__label label_notIcon" for="turno">Turno</label>
+            </div>
+
+            <div class="form__container--input">
+                <input id="telefone_aluno" class="form__input input_notIcon" type="text" minlength="11" maxlength="11" name="telefone" required>
+                <label class="form__label label_notIcon" for="telefone_aluno">Telefone (Com DDD)</label>
+            </div>
+
+            <div class="form__container--input">
+                <input id="senha_aluno" class="form__input input_notIcon" type="password" name="senha" required>
+                <label class="form__label label_notIcon" for="senha_aluno">Senha</label>
+            </div>
+
+            <div class="form__container--input">
+                <input id="conf_senha_aluno" class="form__input input_notIcon" type="password" name="conf_senha" required>
+                <label class="form__label label_notIcon" for="conf_senha_aluno">Confirmar senha</label>
+            </div>
+        </form>
+
+        <form id="form_motorista" class="form__container--card no_borderY inactive" method="post" onsubmit="validationRegister('motorista', event)">
+            <div class="form__container--input first">
+                <input id="nome_motorista" class="form__input input_notIcon" type="text" name="nome" required>
+                <label class="form__label label_notIcon" for="nome_motorista">Nome (Usuário de login)</label>
+            </div>
+
+            <div class="form__container--input">
+                <input id="telefone_motorista" class="form__input input_notIcon" type="text" name="telefone" required>
+                <label class="form__label label_notIcon" for="telefone_motorista">Telefone (Com DDD)</label>
+            </div>
+
+            <div class="form__container--input">
+                <input id="email" class="form__input input_notIcon" type="text" name="email" required>
+                <label class="form__label label_notIcon" for="email">Email</label>
+            </div>
+
+            <div class="form__container--input">
+                <input id="senha_motorista" class="form__input input_notIcon" type="password" name="senha" required>
+                <label class="form__label label_notIcon" for="senha_motorista">Senha</label>
+            </div>
+
+            <div class="form__container--input">
+                <input id="conf_senha_motorista" class="form__input input_notIcon" type="password" name="conf_senha" required>
+                <label class="form__label label_notIcon" for="conf_senha_motorista">Confirmar senha</label>
+            </div>
+        </form>
+
+        <button id="button_submit" class="form__btn margin_bottom btn_scroll enter" onclick="submit()">Enviar</button>
+        <div class="form__container--text_info enter">
+            <p class="text">Já possui uma conta?</p>
+            <button class="form__btn--simple" onclick="closeInterface('register', '/', 700)">Logar</button>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/static/js/interface.js"></script>
     <script src="/static/js/validation.js"></script>

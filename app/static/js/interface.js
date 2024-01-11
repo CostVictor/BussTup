@@ -1,17 +1,8 @@
-if (window.location.href.includes('/cadastro')) {
-    let divRolagem = document.querySelectorAll('form.scroll_vertical')
-    const button_select = document.querySelector('button.form__btn--select_active')
-    const button_submit = document.getElementById('button_submit')
-    button_submit.style.marginBottom = '2.5%'
-
-    if (button_select.textContent == 'Aluno') {
-        divRolagem = divRolagem[0]
-    } else {divRolagem = divRolagem[1]}
-
-    const observer = createObserver(divRolagem)
-    const elements_animate = divRolagem.querySelectorAll('div.hidden')
-    elements_animate.forEach(element => {
-        observer.observe(element)
+function ajust_interface(interface) {
+    window.addEventListener('beforeunload', function () {
+        this.setTimeout(() => {
+            enterInterface(interface)
+        }, 50)
     })
 }
 
@@ -64,14 +55,9 @@ function extract_info(obj_click, reference, local = 'id') {
 }
 
 
-// ~~~~~ Animações do rótulo (Label) ~~~~~ //
+// ~~~~~ Animações de formulário ~~~~~ //
 
 const inputs = document.querySelectorAll('input')
-const forms = document.querySelectorAll('form')
-for (let index = 0; index < forms.length; index++) {
-    const div_alvo = forms[index].querySelector('div.form__container--input')
-    if (div_alvo) {div_alvo.style.marginTop = 0}
-}
 inputs.forEach(input => {
     const label = document.querySelector(`label[for="${input.id}"]`)
     const icon = document.getElementById(`icon_${input.id}`)
@@ -80,18 +66,18 @@ inputs.forEach(input => {
     function verify() {
         if (inFocus) {
             input.classList.remove('input_error')
-            if (label) {label.classList.add('form__label--animate')}
-            if (icon) {icon.classList.add('form__icon--animate')}
+            if (label) {label.classList.add('selected')}
+            if (icon) {icon.classList.add('selected')}
             if (input.type === 'time') { input.classList.add('visible') }
         } else {
             if (input.value.trim() === '') {
                 input.value = ''
-                if (label) {label.classList.remove('form__label--animate')}
-                if (icon) {icon.classList.remove('form__icon--animate')}
+                if (label) {label.classList.remove('selected')}
+                if (icon) {icon.classList.remove('selected')}
                 if (input.type === 'time') { input.classList.remove('visible') }
             } else {
-                if (label) {label.classList.add('form__label--animate')}
-                if (icon) {icon.classList.add('form__icon--animate')}
+                if (label) {label.classList.add('selected')}
+                if (icon) {icon.classList.add('selected')}
                 if (input.type === 'time') { input.classList.add('visible') }
             }
         }
@@ -100,6 +86,16 @@ inputs.forEach(input => {
     input.addEventListener('blur', function() {inFocus = false})
     setInterval(verify, 100)
 })
+
+
+const forms = document.querySelectorAll('form')
+forms.forEach(form => {
+    form.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {submit(form.id)}
+        });
+})
+
+set_observerScroll(document.querySelectorAll('form.scroll_vertical'))
 
 
 // ~~~~~ Animação de icone ~~~~~ //
@@ -137,29 +133,26 @@ function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_in
 
 
 function enterInterface(type) {
-    if (type === 'login' || type === 'register') {
-        var container = document.getElementById('container')
-        var elements = container.querySelectorAll('[class*="enter"]')
-    }
-
     if (type === 'login') {
+        const elements = document.querySelectorAll('[class*="enter"]')
+        animate_itens(elements, 'fadeDown', 0.6, 0.55)
+
+        const container = document.getElementById('container')
         container.style.transition = 'border-radius 0.5s ease, height 0.85s ease 0.15s'
         container.classList.remove('container_complete')
         container.classList.add('enter--radius')
-        animate_itens(elements, 'fadeDown', 0.6, 0.55)
         
     } else if (type === 'register') {
-        const content = document.getElementById('content')
-        content.style.marginTop = '4.5%'
-        animate_itens(elements, 'fadeDown', 0.8, 0.1)
+        const elements = document.querySelectorAll('[class*="enter"]')
+        animate_itens(elements, 'fadeDown', 0.8, 0, 0.1)
+
+    } else if (type === 'pag_usuario') {
+        enterPage()
     }
 }
 
 
-function closeInterface(type, redirect) {
-    let elements = document.querySelectorAll('[class*="enter"]:not(#container)')
-
-    animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
+function closeInterface(type, redirect, time = 1000) {
     if (type === 'login') {
         const container = document.getElementById('container')
         container.style.transition = 'border-radius 0.5s ease 0.4s, height 0.7s ease'
@@ -169,36 +162,28 @@ function closeInterface(type, redirect) {
             container.classList.add('container_complete')
         }, 300)
 
-        setTimeout(() => {
-            window.location.href = redirect
-        }, 1000)
-
-        setTimeout(() => {
-            enterInterface('login')
-        }, 1100)
-
     } else if (type === 'register') {
-        setTimeout(() => {
-            window.location.href = redirect
-        }, 1000)
-
-        setTimeout(() => {
-            enterInterface('register')
-        }, 1100)
+        const forms = document.querySelectorAll('form')
+        forms.forEach(form => {
+            form.classList.add('enter')
+        })
 
     } else if (type === 'pag_usuario') {
         closePage()
-        setTimeout(() => {
-            window.location.href = redirect
-        }, 1000)
-        setTimeout(() => {
-            enterPage()
-        }, 1100)
     }
+
+    let elements = document.querySelectorAll('[class*="enter"]:not(#container)')
+    animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
+
+    setTimeout(() => {
+        ajust_interface(type)
+        window.location.href = redirect
+    }, time)
 }
 
 
 function enterInterface_popup(obj_line) {
+    loadInterfaceLinha(obj_line)
     closePage()
 
     const interface = document.getElementById('interface_linha')
@@ -231,8 +216,6 @@ function enterInterface_popup(obj_line) {
         
         config_animate(0, header_interface, 'fadeDown', 0.5, 0, 0.07)
         animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0)
-
-        loadInterfaceLinha(obj_line)
     }, 900)
 }
 
@@ -333,28 +316,44 @@ function actionContainer(obj_click, container_space = false, set_limit = false) 
 
 // ~~~~~ Troca de formulário ~~~~~ //
 
-function replace_form(button_id) {
+function replace_form(obj_button) {
+    function reset_form(form) {
+        form.querySelectorAll('input').forEach(input => {
+            input.value = ''
+        })
+    }
     const buttons = document.querySelectorAll('button.form__btn--select')
     const form_aluno = document.getElementById('form_aluno')
     const form_motorista = document.getElementById('form_motorista')
-    form_aluno.scrollTop = 0
-    form_motorista.scrollTop = 0
 
-    if (button_id === 'aluno' && !buttons[0].className.includes('active')) {
-        buttons[0].classList.add('form__btn--select_active')
-        buttons[1].classList.remove('form__btn--select_active')
+    elements_aluno = form_aluno.querySelectorAll('div')
+    elements_motorista = form_motorista.querySelectorAll('div')
+
+    if (obj_button.textContent === 'Aluno' && !buttons[0].className.includes('selected')) {
+        buttons[0].classList.add('selected')
+        buttons[1].classList.remove('selected')
         form_aluno.classList.add('scroll_vertical')
         form_aluno.classList.remove('inactive')
         form_motorista.classList.add('inactive')
         form_motorista.classList.remove('scroll_vertical')
 
-    } else if (button_id === 'motorista' && !buttons[1].className.includes('active')) {
-        buttons[1].classList.add('form__btn--select_active')
-        buttons[0].classList.remove('form__btn--select_active')
+        reset_form(form_aluno)
+        animate_itens(elements_aluno, 'fadeDown', 0.6, 0, 0.07)
+        form_aluno.removeAttribute('style')
+        form_aluno.classList.remove('enter')
+        form_aluno.scrollTop = 0
+
+    } else if (obj_button.textContent === 'Motorista' && !buttons[1].className.includes('selected')) {
+        buttons[1].classList.add('selected')
+        buttons[0].classList.remove('selected')
         form_motorista.classList.add('scroll_vertical')
         form_motorista.classList.remove('inactive')
         form_aluno.classList.add('inactive')
         form_aluno.classList.remove('scroll_vertical')
+
+        reset_form(form_motorista)
+        animate_itens(elements_motorista, 'fadeDown', 0.6, 0, 0.07)
+        form_motorista.scrollTop = 0
     }
 }
 

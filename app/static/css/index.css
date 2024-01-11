@@ -121,6 +121,10 @@ body {
     width: 100%;
 }
 
+.white {
+    background-color: var(--branco_secundario);
+}
+
 
 /* Keyframes */
 

@@ -1,7 +1,7 @@
 from flask import render_template
 from flask_security import current_user, login_required
-from app.models import database
 from app import app
+
 
 @app.route("/")
 @app.route("/index")
