@@ -196,9 +196,9 @@ body {
 .page__container--line_content.info {
     display: flex;
     justify-content: center;
-    align-items: center;
     margin: 0 calc(0.2vw + 0.2vh + 1vmin);
-    width: 25%;
+    width: 18%;
+    white-space: nowrap;
 }
 
 .page__container--line_image {

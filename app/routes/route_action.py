@@ -1,7 +1,7 @@
 from flask_security import login_user, logout_user, login_required, current_user
-from app.models import db_flask, user_datastore, database, create_user_flask
+from app.database import db_flask, user_datastore, db, create_user_flask
+from app.utilities import formatData, formatTel, return_code
 from flask import request, jsonify
-from app.format import formatData, formatTelefone
 from app import app
 import bcrypt
 
@@ -14,19 +14,19 @@ def logout():
     logout_user()
 
 
-@app.route("/autenticar_usuario", methods=['POST'])
+@app.route("/authenticate_user", methods=['POST'])
 def autenticar_usuario():
     data = request.get_json()
     user = user_datastore.find_user(primary_key=data['user'])
     if user and bcrypt.checkpw(data['password'].encode('utf-8'), user.hash_senha):
         login_user(user)
-        return jsonify({'error': False, 'redirect': '/pagina-usuario'})
+        return jsonify({'error': False, 'redirect': '/page_user'})
     return jsonify({'error': True})
 
 
 # ~~ Inserts
 
-@app.route("/cadastrar_usuario", methods=['POST'])
+@app.route("/register_user", methods=['POST'])
 def cadastro_usuario():
     dados = formatData(request.get_json())
     if dados:
@@ -41,25 +41,25 @@ def cadastro_usuario():
         
         primary_key = data['matricula'] if tabela == 'aluno' else data['nome']
         create_user_flask(tabela, primary_key, hash_senha)
-        database.insert(tabela, data)
+        db.insert(tabela, data)
         return jsonify({
             'error': False,
             'title': 'Usuário cadastrado'
         })
     
 
-@app.route("/create_linha", methods=['POST'])
+@app.route("/create_line", methods=['POST'])
 @login_required
 def create_linha():
     data = request.get_json()['data']
 
     if data and current_user.roles[0].name == 'motorista':
-        if not database.select('Linha', where={'where': 'nome = %s', 'value': data['nome']}):
+        if not db.select('Linha', where={'where': 'nome = %s', 'value': data['nome']}):
             data['ferias'] = False
-            database.insert('Linha', data)
+            db.insert('Linha', data)
 
-            codigo_linha = database.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': data['nome']})
-            database.insert('Linha_has_Motorista', data={'Linha_codigo': codigo_linha['codigo'], 'Motorista_nome': current_user.primary_key, 'motorista_dono': True, 'motorista_adm': True})
+            codigo_linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': data['nome']})
+            db.insert('Linha_has_Motorista', data={'Linha_codigo': codigo_linha['codigo'], 'Motorista_nome': current_user.primary_key, 'motorista_dono': True, 'motorista_adm': True})
 
             return jsonify({'error': False, 'title': 'Linha cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado como usuário dono.'})
 
@@ -70,7 +70,7 @@ def create_linha():
 
 # ~~ Edição de dados
 
-@app.route("/edit_perfil", methods=['POST'])
+@app.route("/edit_profile", methods=['PATCH'])
 @login_required
 def edit_perfil():
     data = request.get_json()
@@ -79,7 +79,7 @@ def edit_perfil():
         new_value = data['new_value']
 
         if field == 'telefone':
-            new_value = formatTelefone(new_value)
+            new_value = formatTel(new_value)
         
         if field == 'senha':
             new_hash_password = bcrypt.hashpw(new_value.encode('utf-8'), bcrypt.gensalt())
@@ -89,10 +89,24 @@ def edit_perfil():
             return jsonify({'error': False, 'title': 'Edição concluida', 'text': 'Senha alterada com sucesso.'})
         else:
             if new_value:
-                user_db = database.return_user(current_user.primary_key)
+                user_db = db.return_user(current_user.primary_key)
                 user_db.update(field, new_value)
 
                 return jsonify({'error': False, 'title': 'Edição concluida', 'text': ''})
             return jsonify({'error': True, 'title': 'Telefone inválido', 'text': 'O telefone especificado não é válido.'})
     
     return jsonify({'error': True, 'title': 'Senha incorreta', 'text': 'A senha especificada está incorreta.'})
+
+
+@app.route("/edit_line", methods=['PATCH'])
+@login_required
+def edit_linha_valor():
+    if current_user.roles[0].name == 'motorista':
+        data = request.get_json()
+        codigo_linha = return_code(data['name_line'])
+
+        if codigo_linha:
+            db.update('Linha', data['field'], data['new_value'], where={'where': 'codigo = %s', 'value': codigo_linha})
+        
+            return jsonify({'error': False, 'title': 'Valor alterado'})
+    return 404

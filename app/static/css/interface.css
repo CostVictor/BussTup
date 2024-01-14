@@ -42,6 +42,11 @@
     display: none;
 }
 
+.interface__container--aviso {
+    margin-top: calc(2vw + 2vh + 1vmin);
+    width: 90%;
+}
+
 .interface__container--btn {
     width: 98%;
     height: 3.8vh;
@@ -88,6 +93,19 @@
     margin-top: calc(0.5vw + 0.5vh + 1vmin);
     margin-bottom: calc(0.5vw + 0.5vh + 1vmin);
     background-color: var(--vermelho_secundario);
+}
+
+.interface__aviso {
+    display: flex;
+    width: 100%;
+    border-radius: calc(0.5vw + 0.5vh + 1vmin);
+    background-color: var(--branco_terciario);
+    padding: calc(0.1vw + 0.1vh + 1vmin);
+    font-size: calc(1vw + 0.9vh + 1vmin);
+    color: var(--azul_terciario);
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .interface__icon {

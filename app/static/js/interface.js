@@ -146,7 +146,7 @@ function enterInterface(type) {
         const elements = document.querySelectorAll('[class*="enter"]')
         animate_itens(elements, 'fadeDown', 0.8, 0, 0.1)
 
-    } else if (type === 'pag_usuario') {
+    } else if (type === 'page_user') {
         enterPage()
     }
 }
@@ -168,7 +168,7 @@ function closeInterface(type, redirect, time = 1000) {
             form.classList.add('enter')
         })
 
-    } else if (type === 'pag_usuario') {
+    } else if (type === 'page_user') {
         closePage()
     }
 
@@ -192,9 +192,9 @@ function enterInterface_popup(obj_line) {
     const header_pag = document.getElementById('header_page')
     const content_page = document.getElementById('content_page')
     const nav_page = document.getElementById('nav_page')
-    const elements = Array.from(content_interface.children)
     const abas = content_interface.querySelectorAll('[id*="btn"]')
     const containers = content_interface.querySelectorAll('[id*="container"]')
+    const elements = Array.from(content_interface.children)
 
     abas.forEach(aba => {
         const icon = aba.querySelector('i')
@@ -227,7 +227,9 @@ function closeInterface_popup() {
     const header_pag = document.getElementById('header_page')
     const content_page = document.getElementById('content_page')
     const nav_page = document.getElementById('nav_page')
-    const elements = Array.from(content_interface.children)
+
+    const children = Array.from(content_interface.children)
+    const elements = children.filter(element => !element.className.includes('inactive'))
 
     header_pag.classList.remove('inactive')
     content_page.classList.remove('inactive')

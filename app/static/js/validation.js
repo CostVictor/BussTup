@@ -47,7 +47,7 @@ function validationLogin(event) {
     let usuario = form.elements.user.value
     let senha = form.elements.password.value
 
-    fetch('/autenticar_usuario', {
+    fetch('/authenticate_user', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({'user': usuario, 'password': senha})
@@ -114,7 +114,7 @@ function validationRegister(type, event) {
     }
 
     if (execute) {
-        fetch('/cadastrar_usuario', {
+        fetch('/register_user', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({'table': type, 'data': data})

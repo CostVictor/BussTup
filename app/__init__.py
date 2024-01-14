@@ -8,4 +8,4 @@ app.config['SECURITY_DEFAULT_REMEMBER_ME'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECURITY_LOGIN_USER_TEMPLATE'] = 'index.html'
 
-from app.routes import route_action, route_page
+from app.routes import route_action, route_get, route_stream, route_page

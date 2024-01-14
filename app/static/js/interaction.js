@@ -96,6 +96,19 @@ function open_popup_edit(id, obj_click=false) {
 
             case 'config_linha':
                 card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
+                card.querySelector('p#config_linha_cidade').textContent = extract_info(obj_click, 'cidade')
+                const options_ferias = document.getElementById('config_linha_options_ferias')
+                const options_gratuidade = document.getElementById('config_linha_options_gratuidade')
+                const info_ferias = document.getElementById('interface_ferias')
+                const area_precos = document.getElementById('area_precos')
+
+                if (info_ferias.className.includes('inactive')) {
+                    config_bool(options_ferias, 'Não')
+                } else {config_bool(options_ferias, 'Sim')}
+
+                if (area_precos.className.includes('inactive')) {
+                    config_bool(options_gratuidade, 'Não')
+                } else {config_bool(options_gratuidade, 'Sim')}
                 break
 
             case 'promover_motorista':
@@ -261,6 +274,14 @@ function popup_selectOption(obj_click,  open_boxOptions = false, multiple_option
             })
         }
     }
+}
+
+
+function config_bool(container_options, reference = 'Sim') {
+    const icon_selected = container_options.querySelector('i.selected')
+    const text_selected = icon_selected.parentNode.querySelector('p').textContent
+    const option = container_options.querySelector('i:not(.selected)').parentNode
+    if (text_selected !== reference) {popup_selectOption(option, true)}
 }
 
 

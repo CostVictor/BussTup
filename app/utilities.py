@@ -1,4 +1,4 @@
-from app.models import database
+from app.database import db
 from datetime import timedelta, datetime
 from flask_security import current_user
 import difflib, bcrypt, numpy as np
@@ -8,7 +8,7 @@ cursos = ['informática', 'química', 'agropecuária']
 turnos = ['matutino', 'vespertino', 'noturno']
 
 
-def capitalizar(string):
+def capitalize(string):
     nome = string.split(' ')
     for index, palavra in enumerate(nome):
         if palavra:
@@ -19,7 +19,7 @@ def capitalizar(string):
     return ' '.join(nome)
 
 
-def formatTelefone(dado):
+def formatTel(dado):
     ddd = dado[:2]
     telefone = dado[2:]
     if telefone[0] != '9':
@@ -38,14 +38,14 @@ def formatData(dadosAdquiridos):
         for campo, dado in data.items():
             if campo == 'matricula':
                 print(dado, type(dado))
-                if database.select(tabela, where={'where': 'matricula = %s', 'value': dado}):
+                if db.select(tabela, where={'where': 'matricula = %s', 'value': dado}):
                     erro_titulo = 'Usuário existente'
                     erro_texto = 'Já existe um usuário registrado na matrícula especificada.'
                     inconsistencia = True; break
             elif campo == 'nome':
-                nome = capitalizar(dado)
+                nome = capitalize(dado)
                 if tabela == 'motorista':
-                    if database.select(tabela, where={'where': 'nome = %s', 'value': nome}):
+                    if db.select(tabela, where={'where': 'nome = %s', 'value': nome}):
                         erro_titulo = 'Usuário existente'
                         erro_texto = 'Já existe um usuário registrado no nome especificado.'
                         inconsistencia = True; break
@@ -68,7 +68,7 @@ def formatData(dadosAdquiridos):
                     turnoIdentify = np.argmax(comparacoes)
                     data[campo] = turnos[turnoIdentify].capitalize()
             elif campo == 'telefone':
-                value_telefone = formatTelefone(dado)
+                value_telefone = formatTel(dado)
                 if not value_telefone:
                     erro_titulo = 'Telefone inválido'
                     erro_texto = 'O telefone especificado é inválido.'
@@ -98,14 +98,34 @@ def return_dates():
     return datas_semana
 
 
-def return_relacao(codigo_linha):
-    verify = database.select('Linha_has_Motorista', where={'where': 'Motorista_nome = %s AND Linha_codigo = %s', 'value': (current_user.primary_key, codigo_linha)})
+def return_relationship(codigo_linha):
+    if current_user.primary_key.isdigit():
+        ponto = db.select('Aluno_has_Ponto', data='Ponto_id', where={'where': 'Aluno_matricula = %s', 'value': current_user.primary_key})
 
-    if verify:
-        if verify['motorista_dono']:
-            relacao = 'dono'
-        elif verify['motorista_adm']:
-            relacao = 'adm'
-        else: relacao = 'membro'
-    else: relacao = None
+        if ponto:
+            id_ponto = ponto[0]['Ponto_id']
+            verify = db.select('Ponto', where={'where': 'id = %s AND Linha_codigo = %s', 'value': (id_ponto, codigo_linha)})
+
+            if verify: relacao = 'participante'
+            else: relacao = 'de outra linha'
+        else: relacao = None
+    else:
+        verify = db.select('Linha_has_Motorista', where={'where': 'Motorista_nome = %s AND Linha_codigo = %s', 'value': (current_user.primary_key, codigo_linha)})
+
+        if verify:
+            if verify['motorista_dono']:
+                relacao = 'dono'
+            elif verify['motorista_adm']:
+                relacao = 'adm'
+            else: relacao = 'membro'
+        else: relacao = None
     return relacao
+
+
+def return_code(name_line, permission='motorista_adm'):
+    codigo_linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': name_line})['codigo']
+    relacao = db.select('Linha_has_Motorista', where={'where': 'Linha_codigo = %s AND Motorista_nome = %s', 'value': (codigo_linha, current_user.primary_key)})
+
+    if relacao and relacao[permission]:
+        return codigo_linha
+    return False

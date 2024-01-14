@@ -7,25 +7,25 @@ from app import app
 @app.route("/index")
 @app.route("/login")
 def index():
-    return render_template('index.html')
+    return render_template('auth/login.html')
 
 
-@app.route("/cadastro")
+@app.route("/register")
 def cadastro():
-    return render_template('cadastro.html')
+    return render_template('auth/register.html')
 
 
-@app.route("/pagina-usuario")
+@app.route("/page_user")
 @login_required
 def pag_usuario():
     role = current_user.roles[0].name
     turnos = ('Matutino', 'Vespertino', 'Noturno')
     dias_semana = ('Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta')
-    return render_template('pag_usuario.html', role=role, turnos=turnos, dias_semana=dias_semana)
+    return render_template('blog/page_user.html', role=role, turnos=turnos, dias_semana=dias_semana)
 
 
-@app.route("/perfil-usuario")
+@app.route("/profile_user")
 @login_required
 def perfil_usuario():
     role = current_user.roles[0].name
-    return render_template('perfil_usuario.html', role=role)
+    return render_template('blog/profile_user.html', role=role)

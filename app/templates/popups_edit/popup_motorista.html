@@ -8,15 +8,15 @@
             <h2 id="edit_valor_msg" class="popup__text"></h2>
             <form id="formulario_edit_valor" class="form__container--card max_width" method="post">
                 <div class="form__container--input first">
-                    <input id="input_new_valor" class="form__input white input_notIcon" type="number" step="0.01">
-                    <label class="form__label intense label_notIcon" for="input_new_valor">Novo valor</label>
+                    <input id="edit_valor_new" class="form__input white input_notIcon" type="number" step="0.01">
+                    <label class="form__label intense label_notIcon" for="edit_valor_new">Novo valor</label>
                 </div>
             </form>
         </div>
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_valor')">Cancelar</button>
-            <button class="popup__btn">Salvar</button>
+            <button class="popup__btn" onclick="edit_valor(this)">Salvar</button>
         </footer>
     </div>
 </section>
@@ -312,18 +312,18 @@
         <div class="popup__container--content">
             <div class="page__container">
                 <p class="text secundario fundo">Cidade:</p>
-                <p id="config_linha_cidade" class="text secundario fundo"></p>
+                <p id="config_linha_cidade" class="text secundario content fundo"></p>
                 <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_cidade_linha')"></i>
             </div>
 
             <h3 class="popup__text question">Linha de férias?</h3>
             <div id="config_linha_options_ferias" class="popup__container--options">
-                <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                <div class="popup__input checkbox bool" onclick="edit_config_bool(this)">
                     <i class="bi bi-circle popup__icon ratio"></i>
                     <p class="popup__text content input">Sim</p>
                 </div>
 
-                <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                <div class="popup__input checkbox bool" onclick="edit_config_bool(this)">
                     <i class="bi bi-check2-circle popup__icon ratio selected"></i>
                     <p class="popup__text content input">Não</p>
                 </div>
@@ -331,12 +331,12 @@
 
             <h3 class="popup__text question">Linha paga?</h3>
             <div id="config_linha_options_gratuidade" class="popup__container--options">
-                <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                <div class="popup__input checkbox bool" onclick="edit_config_bool(this)">
                     <i class="bi bi-check2-circle popup__icon ratio selected"></i>
                     <p class="popup__text content input">Sim</p>
                 </div>
 
-                <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                <div class="popup__input checkbox bool" onclick="edit_config_bool(this)">
                     <i class="bi bi-circle popup__icon ratio"></i>
                     <p class="popup__text content input">Não</p>
                 </div>

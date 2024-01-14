@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BussTup</title>
     <link rel="icon" href="/static/data/img/icon_busstup.png">
-    <link rel="preload" href="/static/css/index.css" as="style">
-    <link rel="preload" href="/static/css/page.css" as="style">
-    <link rel="preload" href="/static/css/popup.css" as="style">
-    <link rel="preload" href="/static/css/form.css" as="style">
-    <link rel="preload" href="/static/css/interface.css" as="style">
-    <link rel="preload" href="/static/js/interface.js" as="script">
-    <link rel="preload" href="/static/js/page.js" as="script">
-    <link rel="preload" href="/static/js/validation.js" as="script">
-
     <link rel="stylesheet" href="/static/css/page.css">
     <link rel="stylesheet" href="/static/css/index.css">
     <link rel="stylesheet" href="/static/css/form.css">
@@ -29,21 +20,21 @@
 <body onload="enterPage()">
     <p class="hidden_point">.</p>
     <!-- Models -->
-    {% include "t_models_index.html" %}
+    {% include "model_index.html" %}
 
     {% if role == 'aluno' %}
 
-        {% include "t_models/model_aluno.html" %}
+        {% include "template_models/model_aluno.html" %}
 
         <!-- POPUPs edit -->
-        {% include "t_popups_edit/popup_aluno.html" %}
+        {% include "popups_edit/popup_aluno.html" %}
 
     {% elif role == 'motorista' %}
 
-        {% include "t_models/model_motorista.html" %}
+        {% include "template_models/model_motorista.html" %}
 
         <!-- POPUPs edit -->
-        {% include "t_popups_edit/popup_motorista.html" %}
+        {% include "popups_edit/popup_motorista.html" %}
 
     {% endif %}
 
@@ -51,7 +42,7 @@
     <header id="header_page" class="page__container--header header_hidden hidden">
         <h1 class="text--header">BussTup</h1>
         <div class="page__container--icon">
-            <i class="bi bi-person-circle page__icon animate first" onclick="closeInterface('pag_usuario', '/perfil-usuario')"></i>
+            <i class="bi bi-person-circle page__icon animate first" onclick="closeInterface('page_user', '/profile_user')"></i>
         </div>
     </header>
     
@@ -322,15 +313,41 @@
             <h1 id="interface_nome" class="text title no_marge no_border"></h1>
             <h1 class="text title no_marge no_border">~</h1>
             <h1 id="interface_cidade" class="text title no_marge no_border"></h1>
-            <h1 id="interface_ferias" class="text title no_marge no_border inactive">(Férias)</h1>
 
             {% if role == 'motorista' %}
-            <i id="interface_config" class="bi bi-gear interface__icon--header inactive" onclick="open_popup_edit('config_linha', this)"></i>
-            <button id="interface_btn_entrar" class="form__btn--simple small margin_right inactive">Entrar</button>            
+            <i id="interface_config" class="bi bi-gear interface__icon--header inactive" onclick="open_popup_edit('config_linha', this)"></i>         
             {% endif %}
         </header>
 
         <div id="interface_linha_content" class="interface__container--content">
+            <div id="interface_linha_entrar" class="interface__container--area">
+                <h2 class="text title">Aviso</h2>
+                <p class="text secundario emphasis">Você não participa desta linha.</p>
+                {% if role == 'motorista' %}
+                <p class="text secundario fundo margin_bottom">Solicite entrada para conseguir interagir:</p>
+                <div class="page__container justify">
+                    <div class="interface__container--btn add aba" onclick="">
+                        <p class="interface__text">Solicitar entrada</p>
+                    </div>
+                </div>
+
+                {% else %}
+                <p class="text secundario fundo margin_bottom">Cadastre-se em um ponto para participar:</p>
+                <div class="page__container justify">
+                    <div class="interface__container--btn add aba" onclick="">
+                        <p class="interface__text">Cadastrar</p>
+                    </div>
+                </div>
+
+                {% endif %}
+                <h1 class="page__division"></h1>
+            </div>
+
+            <div id="interface_ferias" class="interface__container--aviso">
+                <h1 class="interface__aviso">Linha de férias</h1>
+                <h1 class="page__division"></h1>
+            </div>
+
             <div id="area_precos" class="interface__container--area">
                 <h2 class="text title">Valores</h2>
                 <div class="page__container">
@@ -363,38 +380,7 @@
             {% if role == 'motorista' %}
             <div id="area_onibus" class="interface__container--area">
                 <h2 class="text title">Ônibus</h2>
-                <div id="area_onibus_content">
-                    <div id="teste_onibus" class="">
-                        <div id="teste_onibus_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
-                            <h3 id="teste_onibus_placa" class="text secundario fundo">1234567</h3>
-                            <h3 id="teste_onibus_motorista" class="text secundario max_width fundo">Nenhum</h3>
-                            <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-                        </div>
-
-                        <div id="teste_onibus_container" class="inactive">
-                            <div class="page__container">
-                                <p class="text secundario fundo">Capacidade:</p>
-                                <div class="text secundario fundo">
-                                    <p id="teste_onibus_capacidae" class="text secundario container content space">30</p>
-                                    <p class="text secundario container content">pessoas</p>
-                                </div>
-                                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_capacidade_veicle', this)"></i>
-                            </div>
-            
-                            <div class="page__container">
-                                <p class="text secundario fundo">Motorista:</p>
-                                <p id="teste_onibus_motorista" class="text secundario fundo content">Nenhum</p>
-                                <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_motorista_veicle', this)"></i>
-                            </div>
-                            
-                            <div class="page__container justify">
-                                <div class="interface__container--btn remove" onclick="open_popup_edit('del_veicle', this)">
-                                    <i class="bi bi-trash3 interface__icon del"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div id="area_onibus_content"></div>
 
                 <h1 class="page__division"></h1>
                 <div class="page__container justify">
@@ -518,6 +504,7 @@
     
     <script src="/static/js/validation.js"></script>
     <script src="/static/js/interface.js"></script>
+    <script src="/static/js/line.js"></script>
     <script src="/static/js/page.js"></script>
     <script src="/static/js/interaction.js"></script>
     <script>checkLine()</script>

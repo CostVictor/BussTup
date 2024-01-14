@@ -1,4 +1,4 @@
-function enterPerfil() {
+function enterProfile() {
     loadPerfil()
     const perfil = document.querySelector('section.perfil__container')
     const header = perfil.querySelector('header')
@@ -10,7 +10,7 @@ function enterPerfil() {
 }
 
 
-function closePerfil(logout = false) {
+function closeProfile(logout = false) {
     const perfil = document.querySelector('section.perfil__container')
     const header = perfil.querySelector('header')
     header.classList.add('enter')
@@ -27,15 +27,15 @@ function closePerfil(logout = false) {
         }, 1000)
     } else {
         setTimeout(() => {
-            window.location.href = "/pagina-usuario"
+            window.location.href = "/page_user"
         }, 700)
     }
-    setTimeout(() => {enterPerfil()}, 1100)
+    setTimeout(() => {enterProfile()}, 1100)
 }
 
 
 function loadPerfil() {
-    fetch('/get_perfil', {method: 'GET'})
+    fetch('/get_profile', {method: 'GET'})
     .then(response => response.json())
     .then(response => {
         for (let key in response) {
@@ -74,8 +74,8 @@ function editData_perfil(obj_click) {
     }
 
     if (execute) {
-        fetch("/edit_perfil", {
-            method: 'POST',
+        fetch("/edit_profile", {
+            method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({'field': data, 'new_value': input_newValue.value.trim(), 'password': input_password_conf.value.trim()})
         })

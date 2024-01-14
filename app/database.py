@@ -157,7 +157,7 @@ class DB:
             command = self._selecionar.format(pesquisa, tabelas)
             if where:
                 sql_where, value_where = self.format_where(where)
-                if order: command = command + f' ORDER BY {order}' + sql_where
+                if order: command = command + sql_where + f' ORDER BY {order}'
                 else: command = command + sql_where
                 self.execute(command, value_where)
             else:
@@ -242,4 +242,4 @@ class DB:
             return data
         return converter(data)
 
-database = DB()
+db = DB()

@@ -16,7 +16,7 @@ observer_header.observe(header)
 
 // ~~ Página ~~ //
 
-function loadLinha() {
+function loadLinhas() {
     function create_lines(local, list_datas, list_minha_linha = false) {
         for (index_linha in list_datas) {
             const model_linha = document.getElementById('model_line')
@@ -61,7 +61,7 @@ function loadLinha() {
         }
     }
 
-    fetch("/get_linhas", { method: "GET" })
+    fetch("/get_lines", { method: "GET" })
     .then(response => response.json())
     .then(response => {
         if (response['identify']) {
@@ -112,139 +112,6 @@ function loadLinha() {
 }
 
 
-function loadInterfaceLinha(obj_linha, nome_linha = false) {
-    if (nome_linha) {
-        name_reference = nome_linha
-    } else {
-        name_reference = obj_linha.querySelector('[id*="nome"]').textContent
-    }
-    fetch("/get_interface-linha", {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'nome_linha': name_reference})
-    })
-    .then(response => response.json())
-    .then(response => {
-        if (!response['error']) {
-            let adm = false
-
-            if (response['role'] === 'motorista') {
-                const config_linha = document.getElementById('interface_config')
-                config_linha.classList.add('inactive')
-
-                if (response['relacao'] === 'dono') {
-                    config_linha.classList.remove('inactive')
-                    adm = true
-                } else if (response['relacao'] === 'adm') {
-                    adm = true
-                }
-            }
-
-            for (dado in response['data']) {
-                if (dado === 'particular') {
-                    const area_precos = document.getElementById('area_precos')
-                    if (!response['data'][dado]) {
-                        area_precos.classList.add('inactive')
-                    } else {area_precos.classList.remove('inactive')}
-
-                } else if (dado === 'ferias') {
-                    const info_ferias = document.getElementById('interface_ferias')
-                    if (!response['data'][dado]) {
-                        info_ferias.classList.add('inactive')
-                    } else {info_ferias.classList.remove('inactive')}
-
-                } else {
-                    const info = document.getElementById(`interface_${dado}`)
-                    const edit = document.getElementById(info.id.replace('interface', 'edit'))
-                    info.textContent = response['data'][dado]
-
-                    if (edit) {
-                        if (adm) {
-                            edit.classList.remove('inactive')
-                        } else {edit.classList.add('inactive')}
-                    }
-                }
-            }
-
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
-    })
-    setTimeout(() => {
-        loadMotoristaInterface(name_reference)
-    }, 100)
-}
-
-
-function loadMotoristaInterface(nome_linha) {
-    fetch("/get_interface-motorista", {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'nome_linha': nome_linha})
-    })
-    .then(response => response.json())
-    .then(response => {
-        if (!response['error']) {
-            const data = response['data']
-            const local_motorista = document.getElementById('area_motoristas')
-            const elements_remove = Array.from(local_motorista.children)
-            elements_remove.forEach(element => {
-                if (element.id.includes('motorista')) {
-                    local_motorista.removeChild(element)
-                }
-            })
-
-            for (tipo in data) {
-                for (pos in data[tipo]) {
-                    const model_motorista = document.getElementById('model_motorista')
-                    const motorista = model_motorista.cloneNode(true)
-                    motorista.id = `motorista_${tipo}_${pos}`
-                    
-                    const elements = motorista.querySelectorAll('[id*="model_motorista"]')
-                    elements.forEach(element => {
-                        element.id = element.id.replace('model_motorista', motorista.id)
-                    })
-
-                    for (info in data[tipo][pos]) {
-                        const tag = motorista.querySelector(`[id*="${info}"]`)
-                        tag.textContent = data[tipo][pos][info]
-                    }
-
-                    const dono = motorista.querySelector('[id*="dono"]')
-                    const adm = motorista.querySelector('[id*="adm"]')
-                    if (response['role'] === 'motorista' && response['relacao'] === 'dono' && tipo !== 'dono') {
-                        const btn_config = motorista.querySelector('[id*="btn"]')
-                        btn_config.classList.remove('inactive')
-                    }
-                    if (tipo === 'dono') {
-                        dono.classList.remove('inactive')
-                        adm.classList.remove('inactive')
-                    } else if (tipo === 'adm') {
-                        adm.classList.remove('inactive')
-                    }
-
-                    motorista.classList.remove('inactive')
-                    local_motorista.appendChild(motorista)
-                }
-            }
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
-    })
-}
-
-
-function loadVeiculoInterface(nome_linha) {
-    fetch("/get_interface-veiculo", {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'nome_linha': nome_linha})
-    })
-    .then(response => response.json())
-    .then(response => {
-        if (!response['error']) {
-            
-        }
-    })
-}
-
-
 function enterPage() {
     content.classList.remove('content_noBorder')
 
@@ -258,10 +125,14 @@ function enterPage() {
     }, 500)
 
     setTimeout(() => {
-        divs.forEach(element => {
-            itens = element.querySelectorAll('[class*="enter"]')
-            animate_itens(itens, 'fadeDown', 0.7, 0)
-        })
+        if (aba_atual === 'linhas') {
+            loadLinhas()
+        } else {
+            divs.forEach(element => {
+                itens = element.querySelectorAll('[class*="enter"]')
+                animate_itens(itens, 'fadeDown', 0.7, 0)
+            })
+        }
     }, 600)
 }
 
@@ -288,7 +159,6 @@ function closePage() {
 
 // ~~ Animação de rolamento ~~ //
 
-let update_aba = false
 function ajustAba(index_atual) {
     const abas = document.querySelectorAll('[id*="area"].page__container.column')
     abas.forEach((aba, index_aba) => {
@@ -298,26 +168,23 @@ function ajustAba(index_atual) {
             aba.classList.add('inactive')
         }
     })
-    update_aba = false
 }
 
 
 let isScrolling
 content.addEventListener('scroll', function() {
-    if (update_aba) {
-        clearTimeout(isScrolling)
-        isScrolling = setTimeout(function() {
-            const larguraDiv = content.scrollWidth / divs.length;
-            const index = Math.floor(content.scrollLeft / larguraDiv)
-          
-            btns.forEach((btn) => {
-                btn.classList.remove('btn_selected')
-            })
-            btns[index].classList.add('btn_selected')
-            aba_atual = btns[index].id
-            ajustAba(index)
-        }, 40)
-    }
+    clearTimeout(isScrolling)
+    isScrolling = setTimeout(function() {
+        const larguraDiv = content.scrollWidth / divs.length;
+        const index = Math.floor(content.scrollLeft / larguraDiv)
+        
+        btns.forEach((btn) => {
+            btn.classList.remove('btn_selected')
+        })
+        btns[index].classList.add('btn_selected')
+        aba_atual = btns[index].id
+        ajustAba(index)
+    }, 40)
   })
 
 
@@ -331,7 +198,6 @@ function replaceAba(btn_click) {
             element.classList.remove('btn_selected')
         }
     })
-    update_aba = true
 }
 
 set_observerScroll(document.querySelectorAll('div.scroll_horizontal'))
@@ -341,7 +207,7 @@ set_observerScroll(document.querySelectorAll('div.scroll_vertical'))
 // ~~ Interações na aba ~~ //
 
 function checkLine() {
-    fetch("/checar_linha", { method: 'GET' })
+    fetch("/check_line", { method: 'POST' })
     .then(response => response.json())
     .then(response => {
         const aviso = document.getElementById(`not_line_${aba_atual}`)
@@ -351,7 +217,9 @@ function checkLine() {
             area.classList.add('inactive')
             aviso.classList.remove('inactive')
         } else {
-            if (area) {area.classList.remove('inactive')}
+            if (area) {
+                area.classList.remove('inactive')
+            }
             if (aviso) {aviso.classList.add('inactive')}
 
             if (aba_atual === 'agenda') {
@@ -359,7 +227,7 @@ function checkLine() {
             } else if (aba_atual === 'rota') {
                 
             } else if (aba_atual === 'linhas') {
-                loadLinha()
+                loadLinhas()
             }
         }
     })
@@ -404,7 +272,7 @@ function validationLine(obj_form, event) {
     }
 
     if (execute) {
-        fetch("/create_linha", {
+        fetch("/create_line", {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({'data': data})
@@ -415,7 +283,7 @@ function validationLine(obj_form, event) {
                 create_popup(response['title'], response['text'], 'Voltar', 'error', '', false)
             } else {
                 cancel_popup_edit('create_line')
-                loadLinha()
+                loadLinhas()
                 create_popup(response['title'], response['text'], 'Ok', 'success')
             }
         })
