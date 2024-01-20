@@ -110,6 +110,12 @@ function open_popup_edit(id, obj_click=false) {
                     config_bool(options_gratuidade, 'Não')
                 } else {config_bool(options_gratuidade, 'Sim')}
                 break
+            
+            case 'add_veicle':
+                const container_motoristas = card.querySelector('div#' + popup.id + '_options_container')
+                container_motoristas.innerHTML = ''
+                include_optionsMotorista(container_motoristas)
+                break
 
             case 'promover_motorista':
                 card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
@@ -303,6 +309,53 @@ function set_sequence(obj_child) {
     elements.forEach((element, index) => {
         const tag_sequence = element.querySelector('[id*="number"]')
         tag_sequence.textContent = index + 1
+    })
+}
+
+
+function include_optionsMotorista(container, option_nenhum = false,  model_id = 'model_option') {
+    const name_line = document.getElementById('interface_nome').textContent
+    const model = document.getElementById(model_id)
+
+    if (option_nenhum) {
+        const nenhum = model.cloneNode(true)
+        nenhum.id = `${container.id}-option_nenhum`
+        nenhum.querySelector('p').textContent = 'Nenhum'
+
+        ids = nenhum.querySelectorAll(`[id*="${model_id}"]`)
+        ids.forEach(element => {
+            element.id = element.id.replace(model_id, nenhum.id)
+        })
+
+        nenhum.classList.remove('inactive')
+        container.appendChild(nenhum)
+    }
+
+    fetch(`/get_interface-option_driver?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
+    .then(response => response.json())
+    .then(response => {
+        let data = response['data']
+        if (data) {
+            if (!Array.isArray(data)) {
+                data = [data]
+            }
+
+            for (index in data) {
+                const value = data[index]['nome']
+                const option = model.cloneNode(true)
+
+                option.id = `${container.id}-option_${index}`
+                option.querySelector('p').textContent = value
+                
+                const ids = option.querySelectorAll(`[id*="${model_id}"]`)
+                ids.forEach(element => {
+                    element.id = element.id.replace(model_id, option.id)
+                })
+
+                option.classList.remove('inactive')
+                container.appendChild(option)
+            }
+        }
     })
 }
 

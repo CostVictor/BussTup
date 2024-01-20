@@ -1,0 +1,201 @@
+<article id="interface_linha" class="interface__container scroll_vertical no_border inactive">
+    <header id="interface_linha_header" class="interface__container--header">
+        <i class="bi bi-arrow-left-short interface__icon animate" onclick="closeInterface_popup('interface_linha')"></i>
+        <h1 id="interface_nome" class="text title no_marge no_border"></h1>
+        <h1 class="text title no_marge no_border">~</h1>
+        <h1 id="interface_cidade" class="text title no_marge no_border"></h1>
+
+        {% if role == 'motorista' %}
+        <i id="interface_config" class="bi bi-gear interface__icon--header inactive" onclick="open_popup_edit('config_linha', this)"></i>         
+        {% endif %}
+    </header>
+
+    <main id="interface_linha_content" class="interface__container--content">
+        <section id="interface_linha_entrar" class="interface__container--area">
+            <h2 class="text title">Aviso</h2>
+            <p id="interface_sem_participacao" class="text secundario emphasis">Você não participa desta linha.</p>
+            {% if role == 'motorista' %}
+            <p class="text secundario fundo margin_bottom">Solicite entrada para conseguir interagir:</p>
+            <div class="page__container justify">
+                <div class="interface__container--btn add aba" onclick="">
+                    <p class="interface__text">Solicitar entrada</p>
+                </div>
+            </div>
+
+            {% else %}
+            <div id="interface_bloqueio" class="inactive">
+                <p class="text secundario fundo margin_bottom">Identificamos que você já possui registro em uma outra linha.</p>
+                <p class="text secundario emphasis">Cancele o registro para poder participar desta.</p>
+            </div>
+
+            <div id="interface_cadastrar">
+                <p class="text secundario fundo margin_bottom">Cadastre-se em um ponto para participar:</p>
+                <div class="page__container justify">
+                    <div class="interface__container--btn add aba" onclick="">
+                        <p class="interface__text">Cadastrar</p>
+                    </div>
+                </div>
+            </div>
+
+            {% endif %}
+            <h1 class="page__division"></h1>
+        </section>
+
+        <section id="interface_ferias" class="interface__container--aviso">
+            <h1 class="interface__aviso">Linha de férias</h1>
+            <h1 class="page__division"></h1>
+        </section>
+
+        <section id="area_precos" class="interface__container--area">
+            <h2 class="text title">Valores</h2>
+            <div class="page__container">
+                <p class="text secundario fundo">Valor da cartela:</p>
+                <div class="text secundario fundo">
+                    <p class="text secundario content container space">R$</p>
+                    <p id="interface_valor_cartela" class="text secundario content container"></p>
+                </div>
+                {% if role == 'motorista' %}
+                <i id="edit_valor_cartela" class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_valor', this)"></i>
+                {% endif %}
+            </div>
+
+            <div class="page__container">
+                <p class="text secundario fundo">Valor da diária:</p>
+                <div class="text secundario fundo">
+                    <p class="text secundario content container space">R$</p>
+                    <p id="interface_valor_diaria" class="text secundario content container"></p>
+                </div>
+                {% if role == 'motorista' %}
+                <i id="edit_valor_diaria" class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_valor', this)"></i>
+                {% endif %}
+            </div>
+        </section>
+
+        <section id="area_motoristas" class="interface__container--area">
+            <h2 class="text title">Motoristas</h2>
+        </section>
+
+        {% if role == 'motorista' %}
+        <section id="area_onibus" class="interface__container--area">
+            <h2 class="text title">Ônibus</h2>
+            <div id="area_onibus_content"></div>
+
+            <h1 class="page__division"></h1>
+            <div id="area_onibus_btn_add" class="page__container justify">
+                <div class="interface__container--btn add" onclick="open_popup_edit('add_veicle', this)">
+                    <i class="bi bi-plus-lg interface__icon plus"></i>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <section id="area_rotas" class="interface__container--area">
+            {% if role == 'aluno' %}
+            <h2 class="text title">Rotas</h2>
+
+            {% elif role == 'motorista' %}
+            <h2 class="text title">Pontos e Rotas</h2>
+            <div id="interface_pontos_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                <h3 class="text secundario fundo max_width">Pontos</h3>
+                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+            </div>
+
+            <div id="interface_pontos_container" class="inactive">
+                <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                    {% for index in range(1) %}
+                    <div id="interface_model_ponto" class="popup__input grow min_height" onclick="open_popup_edit('config_ponto', this)">
+                        <p id="interface_model_ponto_nome" class="popup__text input">Bacurau 1</p>
+                        <i class="bi bi-three-dots-vertical page__icon content right"></i>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <h1 class="page__division aba"></h1>
+                <div class="page__container justify">
+                    <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('add_ponto')">
+                        <i class="bi bi-plus-lg interface__icon plus"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div id="interface_rotas_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                <h3 class="text secundario fundo max_width">Rotas</h3>
+                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+            </div>
+
+            <div id="interface_rotas_container" class="inactive">
+                <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                    <div id="interface_model_rota" class="popup__input grow min_height" onclick="open_popup_edit('config_rota', this)">
+                        <p id="interface_model_rota_placa_onibus" class="popup__text input">Placa do ônibus</p>
+                        <p class="popup__text input">|</p>
+                        <p id="interface_model_rota_turno" class="popup__text input">Matutino</p>
+                        <p class="popup__text input">|</p>
+                        <p id="interface_model_quant_pessoas" class="popup__text input">30 pessoas</p>
+                        <i class="bi bi-three-dots-vertical page__icon content right"></i>
+                    </div>
+                </div>
+
+                <h1 class="page__division aba"></h1>
+                <div class="page__container justify">
+                    <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('add_rota')">
+                        <i class="bi bi-plus-lg interface__icon plus"></i>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        {% if role == 'motorista' %}
+        <section id="area_alunos" class="interface__container--area">
+            <h2 class="text title">Alunos e Tickets</h2>
+            <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                <h3 class="text secundario fundo">Alunos</h3>
+                <h3 id="interface_alunos_quant" class="text secundario fundo max_width">1 cadastrado</h3>
+                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+            </div>
+
+            <div id="interface_alunos_container" class="scroll_vertical no_borderY popup__container--scroll inactive">
+                <div id="interface_alunos_matutino_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                    <h3 class="text secundario emphasis">Matutino</h3>
+                    <h3 id="interface_alunos_matutino_quant" class="text secundario fundo max_width">1 cadastrado</h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+
+                <div id="interface_alunos_matutino_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+                    {% for index in range(1) %}
+                    <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                        <p id="interface_model_aluno_title" class="popup__text input">Victor Gabriel</p>
+                        <i class="bi bi-three-dots-vertical page__icon content right"></i>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div id="interface_alunos_vespertino_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                    <h3 class="text secundario emphasis">Vespertino</h3>
+                    <h3 id="interface_alunos_vespertino_quant" class="text secundario fundo max_width">0 cadastrados</h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+                
+                <div id="interface_alunos_vespertino_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
+
+                <div id="interface_alunos_noturno_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                    <h3 class="text secundario emphasis">Noturno</h3>
+                    <h3 id="interface_alunos_noturno_quant" class="text secundario fundo max_width">0 cadastrados</h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+                
+                <div id="interface_alunos_noturno_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
+            </div>
+
+            <div id="interface_tickets_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                <h3 class="text secundario fundo max_width">Tickets</h3>
+                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+            </div>
+
+            <div id="interface_tickets_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal inactive">
+                <h3 class="text secundario fundo">Não disponível.</h3>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+</article>

@@ -170,6 +170,7 @@
     align-items: center;
     color: var(--azul_terciario);
     font-size: calc(0.7vw + 0.7vh + 1vmin);
+    user-select: none;
 }
 
 .interface__text.white {

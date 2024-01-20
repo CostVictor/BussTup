@@ -6,7 +6,7 @@
 
         <div class="popup__container--content">
             <h2 id="edit_valor_msg" class="popup__text"></h2>
-            <form id="formulario_edit_valor" class="form__container--card max_width" method="post">
+            <form id="formulario_edit_valor" class="form__container--card max_width" onsubmit="edit_valor_linha(event)">
                 <div class="form__container--input first">
                     <input id="edit_valor_new" class="form__input white input_notIcon" type="number" step="0.01">
                     <label class="form__label intense label_notIcon" for="edit_valor_new">Novo valor</label>
@@ -16,7 +16,7 @@
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_valor')">Cancelar</button>
-            <button class="popup__btn" onclick="edit_valor(this)">Salvar</button>
+            <button class="popup__btn" onclick="submit('formulario_edit_valor')">Salvar</button>
         </footer>
     </div>
 </section>
@@ -76,9 +76,9 @@
         </header>
 
         <div class="popup__container--content">
-            <h4 class="popup__text info">Ao proseguir, você irá excluir permanentemente:</h4>
+            <h4 class="popup__text">Ao proseguir, você irá excluir permanentemente:</h4>
             <h2 id="del_veicle_placa" class="popup__text emphasis"></h2>
-            <h4 class="popup__text info">Todas as rotas relacionadas a este veículo serão apagadas e o motorista ficará sem veículo.</h4>
+            <h4 class="popup__text">Todas as rotas relacionadas a este veículo serão apagadas e o motorista ficará sem veículo.</h4>
         </div>
 
         <footer class="popup__container--footer">
@@ -125,19 +125,19 @@
 
         <div class="popup__container--content">
             <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
-                <form id="formulario_add_veicle" class="form__container--card max_width" method="post">
+                <form id="formulario_add_veicle" class="form__container--card max_width" onsubmit="create_veiculo()">
                     <div class="form__container--input first">
-                        <input id="input_veicle_placa" class="form__input white input_notIcon" type="text" required>
-                        <label class="form__label intense label_notIcon" for="input_veicle_placa">Placa</label>
+                        <input id="add_veicle_placa" class="form__input white input_notIcon" type="text" required>
+                        <label class="form__label intense label_notIcon" for="add_veicle_placa">Placa</label>
                     </div>
         
                     <div class="form__container--input">
-                        <input id="input_veicle_capacidade" class="form__input white input_notIcon" type="number" min="1" required>
-                        <label class="form__label intense label_notIcon" for="input_veicle_capacidade">Capacidade</label>
+                        <input id="add_veicle_capacidade" class="form__input white input_notIcon" type="number" min="1" required>
+                        <label class="form__label intense label_notIcon" for="add_veicle_capacidade">Capacidade</label>
                     </div>
     
                     <h3 class="popup__text question">Deseja definir um motorista agora?</h3>
-                    <div id="add_veicle_motorista" class="popup__container--options">
+                    <div id="add_veicle_options" class="popup__container--options">
                         <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
                             <i class="bi bi-circle popup__icon ratio"></i>
                             <p class="popup__text content input">Sim</p>
@@ -149,21 +149,15 @@
                         </div>
                     </div>
     
-                    <h3 id="add_veicle_motorista_title" class="popup__text info space inactive">Selecione o motorista:</h3>
-                    <div id="add_veicle_motorista_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive">
-                        {% for index in range(5) %}
-                        <div id="interface_model_option" class="popup__input checkbox inactive hidden" onclick="popup_selectOption(this, false, true)">
-                            <p id="model_option_nome" class="popup__text input">Teste</p>
-                        </div>
-                        {% endfor %}
-                    </div>
+                    <h3 id="add_veicle_options_title" class="popup__text info space inactive">Selecione o motorista:</h3>
+                    <div id="add_veicle_options_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
                 </form>
             </div>
         </div>
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('add_veicle', true)">Cancelar</button>
-            <button class="popup__btn">Adicionar</button>
+            <button class="popup__btn" onclick="submit('formulario_add_veicle')">Adicionar</button>
         </footer>
     </div>
 </section>
@@ -626,10 +620,10 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite o novo nome da linha:</h2>
-            <form id="formulario_edit_nome_linha" class="form__container--card max_width" method="post">
+            <form id="formulario_edit_nome_linha" class="form__container--card max_width" onsubmit="edit_nome_linha(event)">
                 <div class="form__container--input first">
-                    <input id="edit_new_nome_linha" class="form__input white input_notIcon" type="text" required>
-                    <label class="form__label intense label_notIcon" for="edit_new_nome_linha">Novo nome</label>
+                    <input id="edit_nome_linha_new" class="form__input white input_notIcon" type="text" required>
+                    <label class="form__label intense label_notIcon" for="edit_nome_linha_new">Novo nome</label>
                 </div>
 
                 <h1 class="page__division"></h1>
@@ -644,7 +638,7 @@
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_nome_linha')">Cancelar</button>
-            <button class="popup__btn">Alterar</button>
+            <button class="popup__btn" onclick="submit('formulario_edit_nome_linha')">Alterar</button>
         </footer>
     </div>
 </section>
@@ -658,10 +652,10 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite o nome da cidade:</h2>
-            <form id="formulario_edit_cidade_linha" class="form__container--card max_width" method="post">
+            <form id="formulario_edit_cidade_linha" class="form__container--card max_width" onsubmit="edit_cidade_linha(this)">
                 <div class="form__container--input first">
-                    <input id="edit_new_cidade_linha" class="form__input white input_notIcon" type="text" required>
-                    <label class="form__label intense label_notIcon" for="edit_new_cidade_linha">Cidade</label>
+                    <input id="edit_cidade_linha_new" class="form__input white input_notIcon" type="text" required>
+                    <label class="form__label intense label_notIcon" for="edit_cidade_linha_new">Cidade</label>
                 </div>
 
                 <h1 class="page__division"></h1>
@@ -676,7 +670,7 @@
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_cidade_linha')">Cancelar</button>
-            <button class="popup__btn">Alterar</button>
+            <button class="popup__btn" onclick="submit('formulario_edit_cidade_linha')">Alterar</button>
         </footer>
     </div>
 </section>

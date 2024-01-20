@@ -1,7 +1,7 @@
 from flask_security import login_user, logout_user, login_required, current_user
-from app.database import db_flask, user_datastore, db, create_user_flask
-from app.utilities import formatData, formatTel, return_code
-from flask import request, jsonify
+from app.database import db_security, user_datastore, create_user_security, db
+from app.utilities import formatData, formatTel, check_permission
+from flask import request, jsonify, abort
 from app import app
 import bcrypt
 
@@ -24,6 +24,11 @@ def autenticar_usuario():
     return jsonify({'error': True})
 
 
+@app.route("/create_message", methods=['POST'])
+def enviar_email():...
+
+
+
 # ~~ Inserts
 
 @app.route("/register_user", methods=['POST'])
@@ -40,7 +45,7 @@ def cadastro_usuario():
             })
         
         primary_key = data['matricula'] if tabela == 'aluno' else data['nome']
-        create_user_flask(tabela, primary_key, hash_senha)
+        create_user_security(tabela, primary_key, hash_senha)
         db.insert(tabela, data)
         return jsonify({
             'error': False,
@@ -68,6 +73,35 @@ def create_linha():
     return jsonify({'error': True, 'title': 'Erro de cadastro', 'text': 'Ocorreu um erro inesperado ao cadastrar a linha.'})
 
 
+@app.route("/create_veicle", methods=['POST'])
+@login_required
+def create_veicle():
+    data = request.get_json()
+
+    if data and current_user.roles[0].name == 'motorista':
+        result = check_permission(data)
+
+        if result == 'autorizado':
+            data['Linha_codigo'] = data.pop('code_line'); del data['name_line']
+            verify_placa = db.select('Onibus', where={'where': 'placa = %s', 'value': data['placa']})
+
+            if not verify_placa:
+                if data['Motorista_nome'] != 'Nenhum':
+                    verify_motorista = db.select('Onibus', where={'where': 'Motorista_nome = %s AND Linha_codigo = %s', 'value': (data['Motorista_nome'], data['Linha_codigo'])})
+
+                    if verify_motorista:
+                        return jsonify({'error': True, 'title': 'Motorista não disponível', 'text': 'O motorista selecionado já possui uma função.'})
+
+                else: del data['Motorista_nome']
+
+                db.insert('Onibus', data)
+                return jsonify({'error': False, 'title': 'Veículo adicionado', 'text': 'O veículo foi adicionado e está disponível para utilização.'})
+
+            return jsonify({'error': True, 'title': 'Veículo existente', 'text': 'Já há um veículo cadastrado com essas informações.'})
+        
+    return jsonify({'error': True})
+
+
 # ~~ Edição de dados
 
 @app.route("/edit_profile", methods=['PATCH'])
@@ -84,7 +118,7 @@ def edit_perfil():
         if field == 'senha':
             new_hash_password = bcrypt.hashpw(new_value.encode('utf-8'), bcrypt.gensalt())
             current_user.hash_senha = new_hash_password
-            db_flask.session.commit()
+            db_security.session.commit()
 
             return jsonify({'error': False, 'title': 'Edição concluida', 'text': 'Senha alterada com sucesso.'})
         else:
@@ -103,10 +137,23 @@ def edit_perfil():
 def edit_linha_valor():
     if current_user.roles[0].name == 'motorista':
         data = request.get_json()
-        codigo_linha = return_code(data['name_line'])
+        if data['field'] == 'nome' or data['field'] == 'cidade':
+            result = check_permission(data, permission='motorista_dono')
+        else: result = check_permission(data)
 
-        if codigo_linha:
-            db.update('Linha', data['field'], data['new_value'], where={'where': 'codigo = %s', 'value': codigo_linha})
+        if result == 'autorizado':
+            if data['field'] == 'nome':
+                verify = db.select('Linha', where={'where': 'nome = %s', 'value': data['new_value']})
+                if verify:
+                    if int(verify['codigo']) == int(data['code_line']):
+                        return jsonify({'error': True, 'title': 'Edição inválida', 'text': 'Você deve definir um nome diferente do atual.'})
+                    
+                    return jsonify({'error': True, 'title': 'Nome existente', 'text': 'Já existe uma linha cadastrada neste nome.'})
+                
+            db.update('Linha', data['field'], data['new_value'], where={'where': 'codigo = %s', 'value': data['code_line']})
+            return jsonify({'error': False, 'title': 'Alteração concluida'})
         
-            return jsonify({'error': False, 'title': 'Valor alterado'})
-    return 404
+        elif result == 'senha incorreta':
+            return jsonify({'error': True, 'title': 'Senha incorreta', 'text': 'A senha especificada está incorreta.'})
+        
+    return jsonify({'error': True, 'title': 'Erro', 'text': 'Um erro inesperado ocorreu ao tentar editar a informação.'})

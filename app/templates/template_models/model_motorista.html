@@ -47,29 +47,29 @@
 
 <div id="model_onibus" class="inactive">
     <div id="model_onibus_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
-        <h3 id="model_onibus_placa" class="text secundario fundo"></h3>
-        <h3 id="model_onibus_motorista" class="text secundario max_width fundo"></h3>
+        <h3 id="model_onibus_placa" class="text secundario fundo nowrap"></h3>
+        <h3 id="model_onibus_nome" class="text secundario max_width fundo"></h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
     </div>
 
-    <div id="model_onibus_container" class="inactive">
+    <div id="model_onibus_container" class="margin_bottom inactive">
         <div class="page__container">
             <p class="text secundario fundo">Capacidade:</p>
             <div class="text secundario fundo">
-                <p id="model_onibus_capacidae" class="text secundario container content space"></p>
+                <p id="model_onibus_capacidade_sentado" class="text secundario container content space"></p>
                 <p class="text secundario container content">pessoas</p>
             </div>
-            <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('')"></i>
+            <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_capacidade_veicle')"></i>
         </div>
 
         <div class="page__container">
             <p class="text secundario fundo">Motorista:</p>
-            <p id="model_onibus_motorista" class="text secundario fundo content">Nenhum</p>
-            <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_motorista', this)"></i>
+            <p id="model_onibus_motorista" class="text secundario fundo content"></p>
+            <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_motorista', this)"></i>
         </div>
         
-        <div class="page__container justify">
-            <div class="interface__container--btn remove">
+        <div class="page__container justify inactive">
+            <div class="interface__container--btn remove" onclick="open_popup_edit('del_veicle')">
                 <i class="bi bi-trash3 interface__icon del"></i>
             </div>
         </div>

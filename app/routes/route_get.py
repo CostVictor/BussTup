@@ -5,9 +5,22 @@ from app.utilities import return_relationship
 from app import app
 
 
+@app.route("/check_permission", methods=['GET'])
+@login_required
+def check_permission():
+    name_line = request.args.get('name_line')
+    if name_line:
+        linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': name_line})
+        if linha:
+            relacao = return_relationship(linha['codigo'])
+            return jsonify({'error': False, 'relacao': relacao, 'nome': ''})
+
+    return jsonify({'error': True, 'title': 'Erro', 'text': 'Um erro inesperado ocorreu ao verificar a permissão do usuário.'})
+
+
 @app.route("/check_line", methods=['POST'])
 @login_required
-def checkLine():
+def check_line():
     key = current_user.primary_key
     response = {'conf': True}
     if key.isdigit():
@@ -16,6 +29,7 @@ def checkLine():
     else:
         if db.select('Linha_has_Motorista', where={'where': 'Motorista_nome = %s', 'value': key}):
             response['conf'] = True
+
     return jsonify(response)
 
 
@@ -64,7 +78,7 @@ def get_linhas():
         linha_aluno = False
         ponto_id = db.select('Aluno_has_Ponto', data='Ponto_id', where={'where': 'Aluno_matricula = %s', 'value': current_user.primary_key})
         if ponto_id:
-            if isinstance(ponto_id, tuple):
+            if isinstance(ponto_id, list):
                 ponto_id = ponto_id[0]['Ponto_id']
             else: ponto_id = ponto_id['Ponto_id']
 
@@ -99,25 +113,27 @@ def get_interfaceLinha():
     name_line = request.args.get('name_line')
 
     if name_line:
-        retorno = {'role': current_user.roles[0].name}
         linha = db.select('Linha', where={'where': 'nome = %s', 'value': name_line})
-        retorno['relacao'] = return_relationship(linha['codigo'])
 
-        if not linha['particular']:
-            del linha['valor_cartela']
-            del linha['valor_diaria']
-        else:
-            if linha['valor_cartela']:
-                linha['valor_cartela'] = f'{linha["valor_cartela"]:.2f}'.replace('.', ',')
-            else: linha['valor_cartela'] = 'Não definido'
+        if linha:
+            retorno = {'role': current_user.roles[0].name}
+            retorno['relacao'] = return_relationship(linha['codigo'])
+
+            if not linha['particular']:
+                del linha['valor_cartela']
+                del linha['valor_diaria']
+            else:
+                if linha['valor_cartela']:
+                    linha['valor_cartela'] = f'{linha["valor_cartela"]:.2f}'.replace('.', ',')
+                else: linha['valor_cartela'] = 'Não definido'
+                
+                if linha['valor_diaria']:
+                    linha['valor_diaria'] = f'{linha["valor_diaria"]:.2f}'.replace('.', ',')
+                else: linha['valor_diaria'] = 'Não definido'
+            del linha['codigo']
             
-            if linha['valor_diaria']:
-                linha['valor_diaria'] = f'{linha["valor_diaria"]:.2f}'.replace('.', ',')
-            else: linha['valor_diaria'] = 'Não definido'
-        del linha['codigo']
-        
-        retorno['data'] = linha
-        return jsonify(retorno)
+            retorno['data'] = linha
+            return jsonify(retorno)
     return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
@@ -127,50 +143,86 @@ def get_interfaceMotoristas():
     name_line = request.args.get('name_line')
 
     if name_line:
-        motoristas = {}
-        codigo_linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': name_line})
-        codigo_linha = codigo_linha['codigo']
-        relacao_motoristas = db.select('Linha_has_Motorista', where={'where': 'Linha_codigo = %s', 'value': codigo_linha})
+        linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': name_line})
 
-        if not isinstance(relacao_motoristas, list):
-            relacao_motoristas = [relacao_motoristas]
+        if linha:
+            motoristas = {}
+            relacao_motoristas = db.select('Linha_has_Motorista', where={'where': 'Linha_codigo = %s', 'value': linha['codigo']})
 
-        for dados in relacao_motoristas:
-            motorista = db.select('Motorista', where={'where': 'nome = %s', 'value': dados['Motorista_nome']})
+            if not isinstance(relacao_motoristas, list):
+                relacao_motoristas = [relacao_motoristas]
 
-            if dados['motorista_dono']:
-                motoristas['dono'] = [motorista]
+            for dados in relacao_motoristas:
+                motorista = db.select('Motorista', where={'where': 'nome = %s', 'value': dados['Motorista_nome']})
 
-                if not motorista['pix']:
-                    motorista['pix'] = 'Não definido'
+                if dados['motorista_dono']:
+                    motoristas['dono'] = [motorista]
 
-            elif dados['motorista_adm']:
-                if 'adm' not in motoristas:
-                    motoristas['adm'] = []
+                    if not motorista['pix']:
+                        motorista['pix'] = 'Não definido'
 
-                motoristas['adm'].append(motorista)
-                del motorista['pix']
+                elif dados['motorista_adm']:
+                    if 'adm' not in motoristas:
+                        motoristas['adm'] = []
 
-            else:
-                if 'motoristas' not in motoristas:
-                    motoristas['membro'] = []
+                    motoristas['adm'].append(motorista)
+                    del motorista['pix']
 
-                motoristas['membro'].append(motorista)
-                del motorista['pix']
+                else:
+                    if 'motoristas' not in motoristas:
+                        motoristas['membro'] = []
 
-            del motorista['email']
+                    motoristas['membro'].append(motorista)
+                    del motorista['pix']
 
-        retorno = {
-            'error': False,
-            'role': current_user.roles[0].name,
-            'data': motoristas
-        }
+                del motorista['email']
 
-        if retorno['role'] == 'motorista':
-            retorno['relacao'] = return_relationship(codigo_linha)
+            retorno = {
+                'error': False,
+                'role': current_user.roles[0].name,
+                'data': motoristas
+            }
 
-        return jsonify(retorno)
-    return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações dos motoristas.'})
+            if retorno['role'] == 'motorista':
+                retorno['relacao'] = return_relationship(linha['codigo'])
+            return jsonify(retorno)
+    return jsonify({'error': True, 'title': 'Erro', 'text': 'Um erro inesperado ocorreu ao tentar carregar as informações da linha.'})
+
+
+@app.route("/get_interface-option_driver", methods=['GET'])
+@login_required
+def get_interfaceOpcaoMotorista():
+    name_line = request.args.get('name_line')
+
+    if name_line and current_user.roles[0].name == 'motorista':
+        linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': name_line})
+
+        if linha:
+            relacao = return_relationship(linha['codigo'])
+            if relacao:
+                if relacao == 'membro':
+                    if not db.select('Onibus', where={'where': 'Motorista_nome = %s AND Linha_codigo = %s', 'value': (current_user.primary_key, linha['codigo'])}):
+                        return jsonify({'data': current_user.primary_key})
+                    return jsonify({'data': None})
+                
+                list_name = []
+                motorista_not_dis = db.select('Onibus', data={'nome': 'Motorista_nome'}, where={'where': 'Motorista_nome is not null AND Linha_codigo = %s', 'value': linha['codigo']})
+
+                if motorista_not_dis:
+                    if not isinstance(motorista_not_dis, list):
+                        motorista_not_dis = [motorista_not_dis]
+                    
+                    for element in motorista_not_dis:
+                        list_name.append(element["nome"])
+
+                    string = ['AND Motorista_nome <> %s' for _ in list_name]
+                    motoristas_dis = db.select('Linha_has_Motorista', data={'nome': 'Motorista_nome'}, where={'where': 'Linha_codigo = %s ' + ' '.join(string), 'value': (linha['codigo'], *list_name)}, order='nome')
+                else:
+                    motoristas_dis = db.select('Linha_has_Motorista', data={'nome': 'Motorista_nome'}, where={'where': 'Linha_codigo = %s', 'value': linha['codigo']}, order='nome')
+
+                return jsonify({'data': motoristas_dis})
+        
+    return jsonify({'error': True, 'title': 'Erro', 'text': 'Um erro inesperado ocorreu ao tentar carregar as informações da linha.'})
 
 
 @app.route("/get_interface-veicle", methods=['GET'])
@@ -178,30 +230,24 @@ def get_interfaceMotoristas():
 def get_interfaceVeiculo():
     name_line = request.args.get('name_line')
 
-    if name_line:
-        retorno = {
-            'error': False,
-            'role': current_user.roles[0].name,
-            'data': None
-        }
+    if name_line and current_user.roles[0].name == 'motorista':
+        linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': name_line})
 
-        codigo_linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': name_line})
-        codigo_linha = codigo_linha['codigo']
-        veiculos = db.select('Onibus', where={'where': 'Linha_codigo = %s', 'value': codigo_linha}, order='placa')
+        if linha:
+            retorno = {'error': False,'data': None}
+            veiculos = db.select('Onibus', where={'where': 'Linha_codigo = %s', 'value': linha['codigo']}, order='placa')
+            retorno['relacao'] = return_relationship(linha['codigo'])
 
-        if retorno['role'] == 'motorista':
-            retorno['relacao'] = return_relationship(codigo_linha)
+            if veiculos:
+                if not isinstance(veiculos, list):
+                    veiculos = [veiculos]
 
-        if veiculos:
-            if not isinstance(veiculos, list):
-                veiculos = [veiculos]
+                for veiculo in veiculos:
+                    del veiculo['Linha_codigo']
+                    if not veiculo['Motorista_nome']:
+                        veiculo['Motorista_nome'] = 'Nenhum'
+                retorno['data'] = veiculos
 
-            for veiculo in veiculos:
-                del veiculo['Linha_codigo']
-                if not veiculo['Motorista_nome']:
-                    veiculo['Motorista_nome'] = 'Nenhum'
-            retorno['data'] = veiculos
-
-        return jsonify(retorno)
+            return jsonify(retorno)
     
-    return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações dos veículos.'})
+    return jsonify({'error': True, 'title': 'Erro', 'text': 'Um erro inesperado ocorreu ao tentar carregar as informações da linha.'})

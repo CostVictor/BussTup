@@ -125,6 +125,10 @@ body {
     background-color: var(--branco_secundario);
 }
 
+.margin_bottom {
+    margin-bottom: calc(0.5vw + 0.5vh + 1vmin);
+}
+
 
 /* Keyframes */
 

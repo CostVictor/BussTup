@@ -151,8 +151,8 @@
 </div>
 
 
-<div id="interface_model_option" class="popup__input checkbox inactive hidden" onclick="popup_selectOption(this, false, true)">
-    <p id="model_option_nome" class="popup__text input"></p>
+<div id="model_option" class="popup__input checkbox inactive hidden" onclick="popup_selectOption(this, false, true)">
+    <p class="popup__text input"></p>
 </div>
 
 
@@ -229,7 +229,7 @@
                 </div>
 
                 <h3 class="popup__text question">Pontos</h3>
-                <div id="config_rota_pontos_sub_btn" class="page__container interaction pos_relative" onclick="actionContainer(this, false, 50)">
+                <div id="config_rota_pontos_sub_btn" class="page__container interaction pos_relative" onclick="actionContainer(this, 50)">
                     <h3 class="text secundario fundo">Subida</h3>
                     <h3 id="config_rota_pontos_sub_qnt" class="text secundario fundo max_width">5 inseridos</h3>
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -264,7 +264,7 @@
                 </div>
 
                 {% if role == 'motorista' %}
-                <div id="config_rota_pontos_des_btn" class="page__container interaction pos_relative" onclick="actionContainer(this, false, 50)">
+                <div id="config_rota_pontos_des_btn" class="page__container interaction pos_relative" onclick="actionContainer(this, 50)">
                     <h3 class="text secundario fundo">Descida</h3>
                     <h3 id="config_rota_pontos_des_qtn" class="text secundario fundo max_width">5 inseridos</h3>
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>

@@ -19,33 +19,40 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
 
 // ~~~~~ Validações ~~~~~ //
 
-function apenas_numeros(str) {return /^[0-9]+$/.test(str)}
-function apenas_letras(str) {return /^[a-zA-ZÀ-ÖØ-öø-ÿ\s]*$/.test(str)}
-function sem_espaco(str) {return str.indexOf(' ') === -1}
-
-function validationTelefone(str_telefone) {
-    if (!apenas_numeros(str_telefone)) {
-        return false
-    }
-    return true
+const inputs_tell = document.querySelectorAll('[class*="format_tell"]')
+if (inputs_tell) {
+    inputs_tell.forEach(input => {
+        input.addEventListener('input', () => {
+            let digits = input.value.replace(/\D/g, '').substring(0, 11)
+            let num = digits.split('')
+            
+            let tell_formated = ''
+            if (num.length > 0) {tell_formated += `${num.slice(0, 2).join('')}`}
+            if (num.length > 2) {tell_formated = `(${tell_formated}) ${num.slice(2, 7).join('')}`}
+            if (num.length > 7) {tell_formated += `-${num.slice(7).join('')}`}
+            input.value = tell_formated
+        })
+    })
 }
 
-function validationEmail(str_email) {
-    if (!str_email.includes('@') || str_email.includes(',') || !sem_espaco(str_email)) {
-        return false
-    }
-    return true
+const inputs_name = document.querySelectorAll('[class*="format_name"]')
+if (inputs_name) {
+    inputs_name.forEach(input => {
+        input.addEventListener('input', () => {
+            input.value = input.value.replace(/[^a-zA-ZàáâãçéêíîóôõúüÀÁÂÃÇÉÊÍÎÓÔÕÚÜ\s]/g, '')
+        })
+    })
 }
 
 
-// ~~~~~ Validação de login ~~~~~ //
+// ~~~~~ Validação ~~~~~ //
 
 function validationLogin(event) {
     event.preventDefault()
 
     const form = document.getElementById('formulario_login')
-    let usuario = form.elements.user.value
-    let senha = form.elements.password.value
+    const usuario = form.elements.user.value.trim()
+    const senha = form.elements.password.value.trim()
 
     fetch('/authenticate_user', {
         method: 'POST',
@@ -68,49 +75,7 @@ function validationRegister(type, event) {
     let data = {}
 
     for (let index = 0; index < form.elements.length; index++) {
-        var campo = form.elements[index]
-        const campoAlvo = campo.name.charAt(0).toUpperCase() + campo.name.slice(1)
-        
-        if (campo.name) {
-            if (campoAlvo === 'Matricula' || campoAlvo === 'Telefone') {
-                if (!apenas_numeros(campo.value)) {
-                    if (campoAlvo === 'Matricula') {
-                        var erro_titulo = 'Matrícula inválida'
-                        var erro_texto = 'O campo matrícula deve conter apenas números.'
-                    } else {
-                        var erro_titulo = 'Telefone inválido'
-                        var erro_texto = 'O campo telefone deve conter apenas números.'
-                    }
-                    execute = false; break
-                }
-            } else if (campoAlvo === 'Nome' || campoAlvo === 'Curso' || campoAlvo === 'Turno') {
-                if (!apenas_letras(campo.value.trim())) {
-                    var erro_titulo = `${campoAlvo} inválido`
-                    var erro_texto = `O campo ${campo.name} deve conter apenas letras.`
-                    execute = false; break
-                }
-            } else if (campoAlvo === 'Email') {
-                if (!validationEmail(campo.value.trim())) {
-                    var erro_titulo = 'Email inválido'
-                    var erro_texto = 'O email especificado não é válido.'
-                    execute = false; break
-                }
-            } else if (campoAlvo === 'Senha') {
-                if (!sem_espaco(campo.value.trim())) {
-                    var erro_titulo = 'Formato de senha inválido'
-                    var erro_texto = 'A senha não deve conter espaços.'
-                    execute = false; break
-                }
-            }
 
-            if (campoAlvo === 'Conf_senha') {
-                if (campo.value.trim() !== data['senha']) {
-                    var erro_titulo = 'Senha inconsistente'
-                    var erro_texto = 'A senha especificada na confirmação é diferente da senha definida.'
-                    execute = false; break
-                }
-            } else {data[campo.name] = campo.value.trim()}
-        }
     }
 
     if (execute) {
@@ -138,6 +103,8 @@ function validationRegister(type, event) {
     }
 }
 
+
+// ~~~~~ Formulário ~~~~~ //
 
 function submit(form_id = false) {
     if (!form_id) {

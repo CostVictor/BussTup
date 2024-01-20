@@ -28,15 +28,15 @@
 <section id="edit_email" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
-            <h1 class="popup__title">Editar email</h1>
+            <h1 class="popup__title">Editar e-mail</h1>
         </header>
 
         <div class="popup__container--content">
-            <h2 class="popup__text">Digite o email:</h2>
-            <form id="formulario_edit_email" class="form__container--card max_width" method="post"  onsubmit="editData_perfil(this)">
+            <h2 class="popup__text">Digite o e-mail:</h2>
+            <form id="formulario_edit_email" class="form__container--card max_width"  onsubmit="editData_perfil(this)">
                 <div class="form__container--input first">
-                    <input id="edit_email_new" class="form__input white input_notIcon" type="text" required>
-                    <label class="form__label intense label_notIcon" for="edit_email_new">Email</label>
+                    <input id="edit_email_new" class="form__input white input_notIcon" type="email" required>
+                    <label class="form__label intense label_notIcon" for="edit_email_new">E-mail</label>
                 </div>
 
                 <h1 class="perfil__division"></h1>
@@ -65,10 +65,10 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite o novo telefone:</h2>
-            <form id="formulario_edit_telefone" class="form__container--card max_width" method="post"  onsubmit="editData_perfil(this)">
+            <form id="formulario_edit_telefone" class="form__container--card max_width" method="patch"  onsubmit="editData_perfil(this)">
                 <div class="form__container--input first">
-                    <input id="edit_telefone_new" class="form__input white input_notIcon" type="text" minlength="11" maxlength="11" required>
-                    <label class="form__label intense label_notIcon" for="edit_telefone_new">Telefone (Com DDD)</label>
+                    <input id="edit_telefone_new" class="form__input white input_notIcon format_tell" type="text" minlength="15" required>
+                    <label class="form__label intense label_notIcon" for="edit_telefone_new">Telefone</label>
                 </div>
 
                 <h1 class="perfil__division"></h1>

@@ -92,7 +92,7 @@ const forms = document.querySelectorAll('form')
 forms.forEach(form => {
     form.addEventListener('keyup', function(event) {
         if (event.key === 'Enter') {submit(form.id)}
-        });
+    });
 })
 
 set_observerScroll(document.querySelectorAll('form.scroll_vertical'))
@@ -182,8 +182,9 @@ function closeInterface(type, redirect, time = 1000) {
 }
 
 
-function enterInterface_popup(obj_line) {
-    loadInterfaceLinha(obj_line)
+function enterInterface_popup(obj_click) {
+    const name_line = obj_click.querySelector('[id*="nome"]').textContent
+    loadInterfaceLine(name_line)
     closePage()
 
     const interface = document.getElementById('interface_linha')
@@ -248,43 +249,38 @@ function closeInterface_popup() {
 }
 
 
-function actionContainer(obj_click, container_space = false, set_limit = false) {
+function actionContainer(obj_click, set_limit = false) {
     const icon = obj_click.querySelector('i')
     const container = document.getElementById(obj_click.id.replace('btn', 'container'))
     const elements = Array.from(container.children)
     obj_click.style.transition = '0s ease'
     container.removeAttribute('style')
 
-    if (obj_click.id.includes('onibus')) {
+    if (obj_click.id.includes('veiculo')) {
         const motorista_nome = obj_click.querySelectorAll('h3')
         motorista_nome.forEach((element, index) => {
             if (!index) {
-                icon.className.includes('open') ? element.classList.remove('max_width') : element.classList.add('max_width')
+                if (icon.className.includes('open')) {
+                    element.classList.remove('max_width')
+                } else {element.classList.add('max_width')}
             } else {
-                icon.className.includes('open') ? element.classList.remove('inactive') : element.classList.add('inactive')
+                if (icon.className.includes('open')) {
+                    element.classList.remove('inactive')
+                } else {element.classList.add('inactive')}
             }
         })
     }
 
     animate_itens(elements)
     if (icon.className.includes('open')) {
-        container.classList.remove('space')
         container.classList.add('inactive')
         icon.classList.remove('open')
-        obj_click.classList.remove('margin_bottom')
 
         elements.forEach(element => {
             element.classList.remove('selected')
         })
     } else {
         container.classList.remove('inactive')
-        if (!container_space) {
-            if (container.className.includes('scroll')) {
-                container.classList.add('space')
-            } else {
-                obj_click.classList.add('margin_bottom')
-            }
-        } else { container.classList.add('space') }
         container.scrollTop = 0
         icon.classList.add('open')
 
@@ -328,8 +324,8 @@ function replace_form(obj_button) {
     const form_aluno = document.getElementById('form_aluno')
     const form_motorista = document.getElementById('form_motorista')
 
-    elements_aluno = form_aluno.querySelectorAll('div')
-    elements_motorista = form_motorista.querySelectorAll('div')
+    const elements_aluno = Array.from(form_aluno.children)
+    const elements_motorista = Array.from(form_motorista.children)
 
     if (obj_button.textContent === 'Aluno' && !buttons[0].className.includes('selected')) {
         buttons[0].classList.add('selected')

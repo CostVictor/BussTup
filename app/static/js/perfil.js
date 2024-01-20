@@ -47,37 +47,29 @@ function loadPerfil() {
 
 
 function editData_perfil(obj_click) {
-    let execute = true
+    execute = true
     const key = obj_click.id.replace('formulario_', '')
     let data = obj_click.id.split('_')
     data = data[data.length - 1]
 
-    const input_newValue = document.getElementById(key + '_new')
+    const input_new_value = document.getElementById(key + '_new')
+    const new_value = input_new_value.value.trim()
     const input_password_conf = document.getElementById(key + '_conf')
+    const password_conf = input_password_conf.value.trim()
 
-    switch (data) {
-        case 'email':
-            if (!validationEmail(input_newValue.value.trim())) {
-                execute = false
-                var erro_titulo = 'Email inválido'
-                var erro_texto = 'O email especificado não é válido.'
-            }
-            break
-
-        case 'telefone':
-            if (!validationTelefone(input_newValue.value.trim())) {
-                execute = false
-                var erro_titulo = 'Telefone inválido'
-                var erro_texto = 'O campo telefone deve conter apenas números.'
-            }
-            break
+    if (data == 'telefone') {
+        if (new_value.length !== 15) {
+            execute = false
+            input_new_value.setCustomValidity('Digite o telefone completo.')
+            input_new_value.reportValidity()
+        }
     }
 
     if (execute) {
         fetch("/edit_profile", {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({'field': data, 'new_value': input_newValue.value.trim(), 'password': input_password_conf.value.trim()})
+            body: JSON.stringify({'field': data, 'new_value': new_value, 'password': password_conf})
         })
         .then(response => response.json())
         .then(response => {
@@ -87,15 +79,10 @@ function editData_perfil(obj_click) {
                 loadPerfil()
             } else {
                 if (response['title'].includes('Telefone')) {
-                    input_newValue.classList.add('input_error')
-                } else {
-                    input_password_conf.classList.add('input_error')
-                }
+                    input_new_value.classList.add('input_error')
+                } else {input_password_conf.classList.add('input_error')}
                 create_popup(response['title'], response['text'], 'Voltar', 'error', '', false)
             }
         })
-    } else {
-        input_newValue.classList.add('input_error')
-        create_popup(erro_titulo, erro_texto, 'Voltar', 'error', '', false)
     }
 }

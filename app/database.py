@@ -1,245 +1,195 @@
 from flask_security import Security, UserMixin, RoleMixin, SQLAlchemyUserDatastore
-from flask_sqlalchemy import SQLAlchemy
-from pymysql import cursors
+from flask_sqlalchemy import SQLAlchemy, PrimaryKeyConstraint
 from app import app
-import pymysql
+import numpy as np
 
 
-# ~~ Flask Security ~~ #
+# ~~ DB Security ~~ #
 
-db_flask = SQLAlchemy(app)
+db_security = SQLAlchemy(app)
     
-class User_flask(db_flask.Model, UserMixin):
+class User(db_security.Model, UserMixin):
+    __bind_key__ = 'security_db'
     __tablename__ = 'User'
-    id = db_flask.Column(db_flask.BigInteger, primary_key=True, autoincrement=True)
-    primary_key = db_flask.Column(db_flask.String(100), nullable=False)
-    hash_senha = db_flask.Column(db_flask.LargeBinary(60), nullable=False)
-    fs_uniquifier = db_flask.Column(db_flask.String(64), nullable=False)
-    active = db_flask.Column(db_flask.Boolean, nullable=False, default=True)
-    aceitou_termos = db_flask.Column(db_flask.Boolean, nullable=False, default=True)
+    id = db_security.Column(db_security.BigInteger, primary_key=True, autoincrement=True)
+    active = db_security.Column(db_security.Boolean, nullable=False, default=True)
+    primary_key = db_security.Column(db_security.String(100), nullable=False)
+    hash_senha = db_security.Column(db_security.LargeBinary(60), nullable=False)
+    fs_uniquifier = db_security.Column(db_security.String(64), nullable=False)
+    aceitou_termo_uso = db_security.Column(db_security.Boolean, nullable=False, default=True)
 
-class Role_flask(db_flask.Model, RoleMixin):
+
+class Role(db_security.Model, RoleMixin):
+    __bind_key__ = 'security_db'
     __tablename__ = 'Role'
-    id = db_flask.Column(db_flask.BigInteger, primary_key=True, autoincrement=True)
-    name = db_flask.Column(db_flask.String(15), nullable=False)
-    User_id = db_flask.Column(db_flask.BigInteger, db_flask.ForeignKey('User.id'), nullable=False)
-    user = db_flask.relationship('User_flask', backref=db_flask.backref('roles', lazy=True))
+    id = db_security.Column(db_security.BigInteger, primary_key=True, autoincrement=True)
+    name = db_security.Column(db_security.String(15), nullable=False)
+    User_id = db_security.Column(db_security.BigInteger, db_security.ForeignKey('User.id'), nullable=False)
+    user = db_security.relationship('User', backref=db_security.backref('roles', lazy=True))
 
-user_datastore = SQLAlchemyUserDatastore(db_flask, User_flask, Role_flask)
+
+user_datastore = SQLAlchemyUserDatastore(db_security, User, Role)
 security = Security(app, user_datastore)
 
-with app.app_context():
-    db_flask.create_all()
 
-def create_user_flask(tabela, primary_key, hash_senha):
+# ~~ DB Principal ~~ #
+
+db_primary = SQLAlchemy(app)
+
+class Linha(db_primary.Model):
+    __tablename__ = 'Linha'
+    codigo = db_primary.Column(db_primary.BigInteger, primary_key=True, autoincrement=True)
+    nome = db_primary.Column(db_primary.String(100), nullable=False)
+    cidade = db_primary.Column(db_primary.String(100), nullable=False)
+    paga = db_primary.Column(db_security.Boolean, nullable=False)
+    ferias = db_primary.Column(db_security.Boolean, nullable=False, default=0)
+    valor_cartela = db_primary.Column(db_primary.Float)
+    valor_diaria = db_primary.Column(db_primary.Float)
+
+
+class Motorista(db_primary.Model):
+    __tablename__ = 'Motorista'
+    login = db_primary.Column(db_primary.String(100), primary_key=True)
+    nome = db_primary.Column(db_primary.String(100), nullable=False)
+    telefone = db_primary.Column(db_primary.String(15), nullable=False)
+    pix = db_primary.Column(db_primary.String(100))
+
+
+class Onibus(db_primary.Model):
+    __tablename__ = 'Onibus'
+    placa = db_primary.Column(db_primary.String(7), primary_key=True)
+    capacidade = db_primary.Column(db_primary.Integer, nullable=False)
+    Linha_codigo = db_primary.Column(db_primary.BigInteger, db_primary.ForeignKey('Linha.codigo'), nullable=False)
+    Motorista_login = db_primary.Column(db_primary.String(100), db_primary.ForeignKey('Motorista.login'))
+    linha = db_primary.relationship('Linha', backref=db_primary.backref('onibus', lazy=True))
+    motorista = db_primary.relationship('Motorista', backref=db_primary.backref('onibus', lazy=True))
+
+
+class Rota(db_primary.Model):
+    __tablename__ = 'Rota'
+    codigo = db_primary.Column(db_primary.BigInteger, primary_key=True, autoincrement=True)
+    turno = db_primary.Column(db_primary.String(10), nullable=False)
+    tipo = db_primary.Column(db_primary.String(5), nullable=False)
+    em_atividade = db_primary.Column(db_security.Boolean, nullable=False, default=0)
+    horario = db_primary.Column(db_primary.Time)
+    Onibus_placa = db_primary.Column(db_primary.String(7), db_primary.ForeignKey('Onibus.placa'), nullable=False)
+    onibus = db_primary.relationship('Onibus', backref=db_primary.backref('rotas', lazy=True))
+
+
+class Aluno(db_primary.Model):
+    __tablename__ = 'Aluno'
+    login = db_primary.Column(db_primary.String(100), primary_key=True)
+    nome = db_primary.Column(db_primary.String(100), nullable=False)
+    curso = db_primary.Column(db_primary.String(50), nullable=False)
+    turno = db_primary.Column(db_primary.String(10), nullable=False)
+    telefone = db_primary.Column(db_primary.String(15), nullable=False)
+    email = db_primary.Column(db_primary.String(100), nullable=False)
+
+
+class Registro_Aluno(db_primary.Model):
+    __tablename__ = 'Registro_Aluno'
+    codigo = db_primary.Column(db_primary.BigInteger, primary_key=True, autoincrement=True)
+    data = db_primary.Column(db_primary.Date, nullable=False)
+    ida = db_primary.Column(db_security.Boolean, nullable=False, default=1)
+    contraturno = db_primary.Column(db_security.Boolean, nullable=False, default=0)
+    presente_ida = db_primary.Column(db_security.Boolean, nullable=False, default=0)
+    presente_volta = db_primary.Column(db_security.Boolean, nullable=False, default=0)
+    Aluno_login = db_primary.Column(db_primary.String(100), db_primary.ForeignKey('Aluno.login'), nullable=False)
+    aluno = db_primary.relationship('Aluno', backref=db_primary.backref('registros', lazy=True))
+
+
+class Ponto(db_primary.Model):
+    __tablename__ = 'Ponto'
+    id = db_primary.Column(db_primary.BigInteger, primary_key=True, autoincrement=True)
+    nome = db_primary.Column(db_primary.String(100), nullable=False)
+    tempo_tolerancia = db_primary.Column(db_primary.String(1))
+    linkGPS = db_primary.Column(db_primary.String(200))
+    Linha_codigo = db_primary.Column(db_primary.BigInteger, db_primary.ForeignKey('Linha.codigo'), nullable=False)
+    linha = db_primary.relationship('Linha', backref=db_primary.backref('pontos', lazy=True))
+
+
+class Rota_has_Ponto(db_primary.Model):
+    __tablename__ = 'Rota_has_Ponto'
+    Rota_codigo = db_primary.Column(db_primary.BigInteger, db_primary.ForeignKey('Rota.codigo'), nullable=False)
+    Ponto_id = db_primary.Column(db_primary.BigInteger, db_primary.ForeignKey('Ponto.id'), nullable=False)
+    ordem = db_primary.Column(db_primary.String(2), nullable=False)
+    hora_passagem = db_primary.Column(db_primary.TIME, nullable=False)
+    rota = db_primary.relationship('Rota', backref=db_primary.backref('pontos', lazy=True))
+    ponto = db_primary.relationship('Ponto', backref=db_primary.backref('rotas', lazy=True))
+    PrimaryKeyConstraint('Rota_codigo', 'Ponto_id')
+
+
+class Cartela_Ticket(db_primary.Model):
+    __tablename__ = 'Cartela_Ticket'
+    id = db_primary.Column(db_primary.BigInteger, primary_key=True, autoincrement=True)
+    estado = db_primary.Column(db_primary.String(8), nullable=False)
+    validade = db_primary.Column(db_primary.Integer, nullable=False)
+    dt_inicial = db_primary.Column(db_primary.Date, nullable=False)
+    quant_tickets = db_primary.Column(db_primary.Integer, nullable=False)
+    dt_ultimo_registro = db_primary.Column(db_primary.Date)
+    Linha_codigo = db_primary.Column(db_primary.BigInteger, db_primary.ForeignKey('Linha.codigo'), nullable=False)
+    Aluno_login = db_primary.Column(db_primary.String(100), db_primary.ForeignKey('Aluno.login'), nullable=False)
+    linha = db_primary.relationship('Linha', backref='cartelas')
+    aluno = db_primary.relationship('Aluno', backref='cartelas')
+
+
+class Aluno_has_Ponto(db_primary.Model):
+    __tablename__ = 'Aluno_has_Ponto'
+    Ponto_id = db_primary.Column(db_primary.BigInteger, db_primary.ForeignKey('Ponto.id'), nullable=False)
+    Aluno_login = db_primary.Column(db_primary.String(100), db_primary.ForeignKey('Aluno.login'), nullable=False)
+    acao = db_primary.Column(db_primary.String(6), nullable=False)
+    esperar = db_primary.Column(db_primary.Boolean, nullable=False, default=False)
+    tipo = db_primary.Column(db_primary.String(10), nullable=False)
+    dt_validade_temporario = db_primary.Column(db_primary.Date)
+    dt_validade_espera = db_primary.Column(db_primary.Date)
+    ponto = db_primary.relationship('Ponto', backref='alunos_associados')
+    aluno = db_primary.relationship('Aluno', backref='pontos_associados')
+
+
+class Contraturno_Fixo(db_primary.Model):
+    __tablename__ = 'Contraturno_Fixo'
+    id = db_primary.Column(db_primary.BigInteger, primary_key=True, autoincrement=True)
+    numero_do_dia = db_primary.Column(db_primary.String(1), nullable=False)
+    Aluno_login = db_primary.Column(db_primary.String(100), db_primary.ForeignKey('Aluno.login'), nullable=False)
+    aluno = db_primary.relationship('Aluno', backref='contraturnos_fixos')
+
+
+class Linha_has_Motorista(db_primary.Model):
+    __tablename__ = 'Linha_has_Motorista'
+    Linha_codigo = db_primary.Column(db_primary.BigInteger, db_primary.ForeignKey('Linha.codigo'), nullable=False)
+    Motorista_login = db_primary.Column(db_primary.String(100), db_primary.ForeignKey('Motorista.login'), nullable=False)
+    motorista_dono = db_primary.Column(db_primary.Boolean, nullable=False, default=False)
+    motorista_adm = db_primary.Column(db_primary.Boolean, nullable=False, default=False)
+    linha = db_primary.relationship('Linha', backref='motoristas_associados')
+    motorista = db_primary.relationship('Motorista', backref='linhas_associadas')
+
+
+class Registro_Passagem(db_primary.Model):
+    __tablename__ = 'Registro_Passagem'
+    codigo = db_primary.Column(db_primary.BigInteger, primary_key=True, autoincrement=True)
+    data = db_primary.Column(db_primary.Date, nullable=False)
+    passou = db_primary.Column(db_primary.Boolean, nullable=False, default=False)
+    Rota_has_Ponto_Rota_codigo = db_primary.Column(db_primary.BigInteger, nullable=False)
+    Rota_has_Ponto_Ponto_id = db_primary.Column(db_primary.BigInteger, nullable=False)
+    rota_ponto = db_primary.relationship('Rota_has_Ponto', backref='registros_passagem')
+
+
+class Registro_Rota(db_primary.Model):
+    __tablename__ = 'Registro_Rota'
+    codigo = db_primary.Column(db_primary.BigInteger, primary_key=True, autoincrement=True)
+    data = db_primary.Column(db_primary.Date, nullable=False)
+    quantidade_pessoas = db_primary.Column(db_primary.Integer, nullable=False)
+    previsao_pessoas = db_primary.Column(db_primary.Integer, nullable=False)
+    Rota_codigo = db_primary.Column(db_primary.BigInteger, db_primary.ForeignKey('Rota.codigo'), nullable=False)
+    rota = db_primary.relationship('Rota', backref='registros_rota')
+
+
+with app.app_context():
+    db_security.create_all()
+    db_primary.create_all()
+
+def create_user(tabela, primary_key, hash_senha):
     user = user_datastore.create_user(primary_key=primary_key, hash_senha=hash_senha)
     role = user_datastore.create_role(name=tabela)
     user_datastore.add_role_to_user(user, role)
-    db_flask.session.commit()
-
-
-# ~~ Modelos personalizados ~~ #
-
-conf_db = {
-    'host': 'localhost',
-    'port': 3306,
-    'user': 'root',
-    'password': '',
-    'database': 'busstup',
-    'autocommit': True,
-    'cursorclass': cursors.DictCursor
-}
-
-class DB:
-    def __init__(self) -> None:
-        self._inserir = 'INSERT INTO {} ({}) VALUES ({})'
-        self._selecionar = 'SELECT {} FROM {}'
-        self._atualizar = 'UPDATE {} SET {} = %s'
-        self._deletar = 'DELETE FROM {}'
-        self._condicao = ' WHERE {}'
-
-    class User_db:
-        def __init__(self, db: object, data: dict) -> None:
-            self.db = db
-            for key, value in data.items():
-                setattr(self, key, value)
-
-        def update(self, field: str, new_value):
-            if hasattr(self, field):
-                table, where = DB.where_user(self.get_PrimaryKey(), return_table=True)
-                self.db.update(table, field, new_value, where)
-                setattr(self, field, new_value)
-                return True
-            return False
-        
-        def get_PrimaryKey(self):
-            if hasattr(self, 'matricula'):
-                return self.matricula
-            return self.nome
-
-    @classmethod
-    def execute(self, command: str, placeholders=False):
-        self.open_connect()
-        if placeholders:
-            if not isinstance(placeholders, tuple) and not isinstance(placeholders, list):
-                placeholders = (placeholders)
-            self._cursor.execute(command, placeholders)
-        else: self._cursor.execute(command)
-
-    @classmethod
-    def open_connect(self):
-        self._conect = pymysql.connect(**conf_db)
-        self._cursor = self._conect.cursor()
-    
-    def close_connect(self):
-        self._cursor.close()
-        self._conect.close()
-    
-    def return_user(self, primary_key):
-        table, where = self.where_user(primary_key, return_table=True)
-        user_consult = self.select(table, where=where)
-        return self.User_db(self, user_consult)
-    
-    def format_where(self, condiction: dict):
-        if 'where' in condiction:
-            condict = self._condicao.format(condiction['where'])
-            if 'value' in condiction:
-                return condict, condiction['value']
-            return condict
-        return False
-    
-    def insert(self, table: str, data: dict):
-        # INFO: "data" --> {campo da tabela: dado a ser preenchido}
-        # EX: {nome: "Victor", idade: 19, ...}
-        
-        campos = ', '.join(data)
-        valores = ', '.join('%s' for _ in data.values())
-        command = self._inserir.format(table.capitalize(), campos, valores)
-        self.execute(command, [value for value in data.values()])
-        self.close_connect()
-
-    def select(self, table: str, data=None, where=None, order=''):
-        # INFO: "data" --> texto OU {nome desejado à pesquisa: item OU (item, tabela do item)}
-        # EX: "nome, idade" OU {nome do aluno: "nome" OU ("nome", "aluno")}
-        # Os valores só devem ser tuplas quando a pesquisa envolver mais de uma tabela
-
-        executar = True
-        pesquisa = '*'; formatar = True
-        tabelas = [tabela.capitalize() for tabela in table.split(', ')]
-
-        if data:
-            if isinstance(data, str):
-                pesquisa = data
-                formatar = False
-            else:
-                campos = [campo for campo in data.keys()]
-                valores = [valor for valor in data.values()]
-
-                pesquisa = []
-                if len(campos) > 1:
-                    for index, valor in enumerate(valores):
-                        if isinstance(valor, tuple):
-                            item, tabelaAlvo = valor
-                            pesquisa.append(f'{tabelaAlvo.capitalize()}.{item} AS {campos[index]}')
-                        elif len(tabelas) == 1:
-                            pesquisa.append(f'{valor} AS {campos[index]}')
-                        else: executar = False
-                else:
-                    if isinstance(valores[0], tuple):
-                        item, tabelaAlvo = valores[0]
-                        pesquisa.append(f'{tabelaAlvo.capitalize()}.{item} AS {campos[0]}')
-                    else: pesquisa.append(f'{valores[0]} AS {campos[0]}')
-        
-        if executar:
-            tabelas = ', '.join(tabelas)
-            pesquisa = ', '.join(pesquisa) if pesquisa != '*' and formatar else pesquisa
-
-            command = self._selecionar.format(pesquisa, tabelas)
-            if where:
-                sql_where, value_where = self.format_where(where)
-                if order: command = command + sql_where + f' ORDER BY {order}'
-                else: command = command + sql_where
-                self.execute(command, value_where)
-            else:
-                if order: self.execute(command + f' ORDER BY {order}')
-                else: self.execute(command)
-
-            retorno = self._cursor.fetchall()
-            self.close_connect()
-
-            if retorno:
-                if len(retorno) > 1: return retorno
-                return retorno[0]
-
-        else: print('ERROR: Tabelas não referênciadas nos campos de pesquisa do dicionário.')
-
-    def update(self, table: str, set: str, new_value, where):
-        command = self._atualizar.format(table, set)
-        sql_where, value_where = self.format_where(where)
-
-        self.execute(command + sql_where, (new_value, value_where))
-        self.close_connect()
-
-    def delete(self, table: str, where: str):
-        command = self._deletar.format(table.capitalize())
-        sql_where, value_where = self.format_where(where)
-
-        self.execute(command + sql_where, (value_where))
-        self.close_connect()
-    
-    @staticmethod
-    def where_user(primary_key, return_table=False):
-        reference = 'nome'
-        table = 'motorista'
-        if primary_key.isdigit():
-            reference = 'matricula'
-            table = 'aluno'
-        where = {'where': f'{reference} = %s', 'value': primary_key}
-
-        if return_table:
-            return table, where
-        return where
-    
-    @staticmethod
-    def format_listDate(list_date, camp_name='data', operator='OR'):
-        dates = f' {operator} {camp_name} = '.join(list_date)
-        return f'({camp_name} = {dates})'
-
-    @staticmethod
-    def format_time(data):
-        def converter(value):
-            horas = value.seconds // 3600
-            minutos = (value.seconds % 3600) // 60
-            segundos = value.seconds % 60
-            return {'hora': horas, 'minuto': minutos, 'segundo': segundos}
-        
-        if isinstance(data, list):
-            for index, element in enumerate(data):
-                if isinstance(element, dict):
-                    data[index]['horario'] = converter(element['horario'])
-                else: data[index] = converter(element)
-            return data
-        elif isinstance(data, dict):
-            data['horario'] = converter(data['horario'])
-            return data
-        return converter(data)
-
-    @staticmethod
-    def format_date(data):
-        def converter(value):
-            value = value.strftime("%Y-%m-%d")
-            value = value.split('-')
-            return {'dia': value[2], 'mes': value[1], 'ano': value[0]}
-        
-        if isinstance(data, list):
-            for index, element in enumerate(data):
-                if isinstance(element, dict):
-                    data[index]['data'] = converter(element['data'])
-                else: data[index] = converter(element)
-            return data
-        elif isinstance(data, dict):
-            data['data'] = converter(data['data'])
-            return data
-        return converter(data)
-
-db = DB()
+    db_security.session.commit()

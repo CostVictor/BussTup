@@ -20,6 +20,7 @@ body {
     box-sizing: border-box;
     border-radius: 0 0 calc(2.5vw + 2.5vh + 1vmin) calc(2.5vw + 2.5vh + 1vmin);
     cursor: pointer;
+    user-select: none;
 }
 
 .perfil__container--content {

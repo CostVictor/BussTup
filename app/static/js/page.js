@@ -16,10 +16,10 @@ observer_header.observe(header)
 
 // ~~ Página ~~ //
 
-function loadLinhas() {
+function loadLines() {
     function create_lines(local, list_datas, list_minha_linha = false) {
+        const model_linha = document.getElementById('model_line')
         for (index_linha in list_datas) {
-            const model_linha = document.getElementById('model_line')
             const linha = model_linha.cloneNode(true)
             linha.id = `${local.id}-linha_${index_linha}`
 
@@ -32,16 +32,16 @@ function loadLinhas() {
                     const gratuito = linha.querySelector('h1#model_line_gratuito')
                     pago.id = pago.id.replace('model_line', linha.id)
                     gratuito.id = gratuito.id.replace('model_line', linha.id)
-
                     if (!value) {
                         pago.classList.add('inactive')
                         gratuito.classList.remove('inactive')
                     }
+
                 } else if (data === 'ferias') {
                     const ferias = linha.querySelector('h1#model_line_ferias')
                     ferias.id = ferias.id.replace('model_line', linha.id)
-
                     if (value) {ferias.classList.remove('inactive')}
+
                 } else {
                     const info = linha.querySelector(`[id*="${data}"]`)
                     info.id = linha.id + '_' + data
@@ -126,7 +126,7 @@ function enterPage() {
 
     setTimeout(() => {
         if (aba_atual === 'linhas') {
-            loadLinhas()
+            loadLines()
         } else {
             divs.forEach(element => {
                 itens = element.querySelectorAll('[class*="enter"]')
@@ -227,7 +227,7 @@ function checkLine() {
             } else if (aba_atual === 'rota') {
                 
             } else if (aba_atual === 'linhas') {
-                loadLinhas()
+                loadLines()
             }
         }
     })
@@ -283,7 +283,7 @@ function validationLine(obj_form, event) {
                 create_popup(response['title'], response['text'], 'Voltar', 'error', '', false)
             } else {
                 cancel_popup_edit('create_line')
-                loadLinhas()
+                loadLines()
                 create_popup(response['title'], response['text'], 'Ok', 'success')
             }
         })

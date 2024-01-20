@@ -203,7 +203,8 @@
     border-radius: calc(0.1vw + 0.1vh + 1vmin);
     padding: calc(0.1vw + 0.1vh + 1vmin) 0 calc(0.1vw + 0.1vh + 1vmin) 0;
     margin: calc(0.2vw + 0.2vh + 1vmin) 0 calc(0.2vw + 0.2vh + 1vmin) 0;
-    cursor: pointer
+    cursor: pointer;
+    user-select: none;
 }
 
 .popup__input.move {

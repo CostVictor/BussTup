@@ -35,6 +35,7 @@ def formatData(dadosAdquiridos):
 
         tabela = dadosAdquiridos['table']
         data = dadosAdquiridos['data']
+
         for campo, dado in data.items():
             if campo == 'matricula':
                 print(dado, type(dado))
@@ -122,10 +123,16 @@ def return_relationship(codigo_linha):
     return relacao
 
 
-def return_code(name_line, permission='motorista_adm'):
-    codigo_linha = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': name_line})['codigo']
-    relacao = db.select('Linha_has_Motorista', where={'where': 'Linha_codigo = %s AND Motorista_nome = %s', 'value': (codigo_linha, current_user.primary_key)})
+def check_permission(data, permission='motorista_adm'):
+    code_line = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': data['name_line']})
+    if code_line:
+        relacao = db.select('Linha_has_Motorista', where={'where': 'Linha_codigo = %s AND Motorista_nome = %s', 'value': (code_line['codigo'], current_user.primary_key)})
 
-    if relacao and relacao[permission]:
-        return codigo_linha
-    return False
+        if relacao and relacao[permission]:
+            data['code_line'] = code_line['codigo']
+            if permission == 'motorista_dono':
+                if bcrypt.checkpw(data['password'].encode('utf-8'), current_user.hash_senha):
+                    return 'autorizado'
+                return 'senha incorreta'
+            return 'autorizado'
+    return 'nao autorizado'
