@@ -45,6 +45,50 @@ if (inputs_name) {
 }
 
 
+const inputs_options = document.querySelectorAll('[class*="format_options"]')
+if (inputs_options) {
+    function ajust_text(list, input) {
+        const value = input.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+        list.forEach(element => {
+            const text = element.textContent.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+            element.classList.toggle('inactive', !text.includes(value));
+        })
+    }
+
+    inputs_options.forEach(input => {
+        const list_options = input.parentNode.parentNode.querySelector('ul')
+        const elements = list_options.querySelectorAll('li')
+        animate_itens(elements)
+
+        elements.forEach(li => {
+            li.addEventListener('mouseenter', () => {
+                input.value = li.textContent
+            })
+        })
+
+        input.addEventListener('input', () => {
+            ajust_text(elements, input)
+        })
+
+        input.addEventListener('focus', () => {
+            input.classList.add('option_focus')
+            list_options.classList.remove('inactive')
+            list_options.scrollTop = 0
+            ajust_text(elements, input)
+        })
+
+        input.addEventListener('blur', () => {
+            input.classList.remove('option_focus')
+            list_options.classList.add('inactive')
+
+            elements.forEach(element => {
+                element.classList.remove('inactive')
+            })
+        })
+    })
+}
+
+
 // ~~~~~ Validação ~~~~~ //
 
 function validationLogin(event) {

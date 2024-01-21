@@ -66,6 +66,30 @@
     width: 100%;
 }
 
+.form__container--input_options {
+    box-sizing: border-box;
+    position: relative;
+    width: 100%;
+}
+
+.form__container--ul {
+    box-sizing: border-box;
+    overflow-y: auto;
+    list-style-type: none;
+    user-select: none;
+    background-color: var(--branco_primario);
+    border: var(--azul_primario) solid 0.06rem;
+    border-top: 0;
+    border-radius: 0 0 calc(0.5vw + 0.5vh + 1vmin) calc(0.5vw + 0.5vh + 1vmin);
+    max-height: 22vh;
+    z-index: 1;
+    width: 100%;
+}
+
+.form__container--ul.inactive {
+    display: none;
+}
+
 .form__container--input {
     display: flex;
     position: relative;
@@ -137,6 +161,10 @@
     box-sizing: border-box;
     height: calc(4vw + 3vh + 1vmin);
     width: 100%;
+}
+
+.form__input.option_focus {
+    border-radius: calc(0.5vw + 0.5vh + 1vmin) calc(0.5vw + 0.5vh + 1vmin) 0 0;
 }
 
 .form__input.time {
@@ -337,4 +365,17 @@
 .form__btn--select.selected {
     background-color: var(--azul_primario);
     color: var(--branco_secundario);
+}
+
+.form__option {
+    width: 100%;
+    box-sizing: border-box;
+    color: var(--azul_terciario);
+    padding: calc(0.2vw + 0.3vh + 1vmin);
+    font-size: calc(1vw + 0.75vh + 1vmin);
+    cursor: pointer;
+}
+
+.form__option:hover {
+    background-color: var(--branco_quaternario);
 }

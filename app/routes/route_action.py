@@ -1,8 +1,8 @@
 from flask_security import login_user, logout_user, login_required, current_user
-from app.database import db_security, user_datastore, create_user_security, db
-from app.utilities import formatData, formatTel, check_permission
-from flask import request, jsonify, abort
-from app import app
+from app.utilities import formatData, check_permission
+from app.database import db, user_datastore, create_user
+from flask import request, jsonify
+from app import app, limiter
 import bcrypt
 
 
@@ -15,9 +15,10 @@ def logout():
 
 
 @app.route("/authenticate_user", methods=['POST'])
+@limiter.limit('5 per minute')
 def autenticar_usuario():
     data = request.get_json()
-    user = user_datastore.find_user(primary_key=data['user'])
+    user = user_datastore.find_user(primary_key=data['login'])
     if user and bcrypt.checkpw(data['password'].encode('utf-8'), user.hash_senha):
         login_user(user)
         return jsonify({'error': False, 'redirect': '/page_user'})
@@ -28,10 +29,10 @@ def autenticar_usuario():
 def enviar_email():...
 
 
-
 # ~~ Inserts
 
 @app.route("/register_user", methods=['POST'])
+@limiter.limit('5 per minute')
 def cadastro_usuario():
     dados = formatData(request.get_json())
     if dados:
@@ -44,13 +45,9 @@ def cadastro_usuario():
                 'text': erro_texto
             })
         
-        primary_key = data['matricula'] if tabela == 'aluno' else data['nome']
-        create_user_security(tabela, primary_key, hash_senha)
-        db.insert(tabela, data)
-        return jsonify({
-            'error': False,
-            'title': 'Usuário cadastrado'
-        })
+        create_user()
+        return jsonify({'error': False, 'title': 'Usuário cadastrado'})
+
     
 
 @app.route("/create_line", methods=['POST'])
@@ -111,14 +108,11 @@ def edit_perfil():
     if bcrypt.checkpw(data['password'].encode('utf-8'), current_user.hash_senha):
         field = data['field']
         new_value = data['new_value']
-
-        if field == 'telefone':
-            new_value = formatTel(new_value)
         
         if field == 'senha':
             new_hash_password = bcrypt.hashpw(new_value.encode('utf-8'), bcrypt.gensalt())
             current_user.hash_senha = new_hash_password
-            db_security.session.commit()
+            db.session.commit()
 
             return jsonify({'error': False, 'title': 'Edição concluida', 'text': 'Senha alterada com sucesso.'})
         else:

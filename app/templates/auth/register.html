@@ -11,15 +11,15 @@
 </head>
 <body onload="enterInterface('register')" style="background-color: var(--branco_secundario);">
     <p class="hidden_point">.</p>
-    <div id="content" class="form__container--content register">
+    <main id="content" class="form__container--content register">
         <h1 class="form__text_title enter">Cadastro</h1>
-        <div id="select_register" class="form__container--card enter">
+        <section id="select_register" class="form__container--card enter">
             <h2 class="text--select">Cadastrar como:</h2>
             <div class="form__container--btn_select">
                 <button onclick="replace_form(this)" class="form__btn--select selected">Aluno</button>
                 <button onclick="replace_form(this)" class="form__btn--select">Motorista</button>
             </div>
-        </div>
+        </section>
 
         <form id="form_aluno" class="form__container--card scroll_vertical no_borderY enter" method="post" onsubmit="validationRegister('aluno', event)">
             <div class="form__container--input first">
@@ -30,6 +30,32 @@
             <div class="form__container--input">
                 <input id="nome_aluno" class="form__input input_notIcon format_name" type="text" name="nome" required>
                 <label class="form__label label_notIcon" for="nome_aluno">Nome completo</label>
+            </div>
+
+            <div class="form__container--input_options">
+                <div class="form__container--input">
+                    <input id="curso" class="form__input input_notIcon format_options format_name" type="text" name="curso" required>
+                    <label class="form__label label_notIcon" for="curso">Curso</label>
+                </div>
+                
+                <ul class="form__container--ul inactive">
+                    {% for curso in cursos %}
+                    <li class="form__option">{{ curso }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="form__container--input_options">
+                <div class="form__container--input">
+                    <input id="turno" class="form__input input_notIcon format_options format_name" type="text" name="turno" required>
+                    <label class="form__label label_notIcon" for="turno">Turno</label>
+                </div>
+                
+                <ul class="form__container--ul inactive">
+                    {% for turno in turnos %}
+                    <li class="form__option">{{ turno }}</li>
+                    {% endfor %}
+                </ul>
             </div>
 
             <div class="form__container--input">
@@ -94,7 +120,7 @@
             <p class="text">Já possui uma conta?</p>
             <button class="form__btn--simple" onclick="closeInterface('register', '/', 700)">Logar</button>
         </div>
-    </div>
+    </main>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/static/js/interface.js"></script>
     <script src="/static/js/validation.js"></script>

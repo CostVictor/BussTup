@@ -1,7 +1,7 @@
 from app.database import db
 from datetime import timedelta, datetime
 from flask_security import current_user
-import difflib, bcrypt, numpy as np
+import bcrypt, numpy as np
 
 # ~~ Cursos e turnos
 cursos = ['informática', 'química', 'agropecuária']
@@ -19,14 +19,6 @@ def capitalize(string):
     return ' '.join(nome)
 
 
-def formatTel(dado):
-    ddd = dado[:2]
-    telefone = dado[2:]
-    if telefone[0] != '9':
-        return False
-    return f'({ddd}) {telefone[:5]}-{telefone[5:]}'
-
-
 def formatData(dadosAdquiridos):
     if dadosAdquiridos:
         inconsistencia = False
@@ -37,25 +29,10 @@ def formatData(dadosAdquiridos):
         data = dadosAdquiridos['data']
 
         for campo, dado in data.items():
-            if campo == 'matricula':
-                print(dado, type(dado))
-                if db.select(tabela, where={'where': 'matricula = %s', 'value': dado}):
-                    erro_titulo = 'Usuário existente'
-                    erro_texto = 'Já existe um usuário registrado na matrícula especificada.'
-                    inconsistencia = True; break
-            elif campo == 'nome':
-                nome = capitalize(dado)
-                if tabela == 'motorista':
-                    if db.select(tabela, where={'where': 'nome = %s', 'value': nome}):
-                        erro_titulo = 'Usuário existente'
-                        erro_texto = 'Já existe um usuário registrado no nome especificado.'
-                        inconsistencia = True; break
-                data[campo] = nome
-            elif campo == 'curso':
-                cursoDefinido = dado.lower()
-                comparacoes = np.array([difflib.SequenceMatcher(None, curso, cursoDefinido).ratio() for curso in cursos])
-                cursoIdentify = np.argmax(comparacoes)
-                data[campo] = cursos[cursoIdentify].capitalize()
+            if campo == 'login':...
+
+            elif campo == 'nome':...
+
             elif campo == 'turno':
                 turnoDefinido = dado.lower()
                 if turnoDefinido == 'manha' or turnoDefinido == 'manhã':
