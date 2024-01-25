@@ -74,12 +74,20 @@ function open_popup_edit(id, obj_click=false) {
                 card.querySelector('h2').textContent = `Digite o novo valor da ${obj_click.id.includes('cartela') ? 'cartela' : 'diária'}:`
                 break
             
-            case 'edit_capacidade_veicle':
-                card.querySelector('h2').textContent = `Digite a capacidade de ${extract_info(obj_click, 'placa')}:`
+            case 'edit_veicle_capacidade':
+                const placa_capacidade = extract_info(obj_click, 'placa')
+                popup.querySelector('span').textContent = placa_capacidade
+                card.querySelector('h2').textContent = `Digite a capacidade de ${placa_capacidade}:`
                 break
 
-            case 'edit_motorista_veicle':
-                card.querySelector('h2').textContent = `Selecione o motorista de ${extract_info(obj_click, 'placa')}:`
+            case 'edit_veicle_motorista':
+                const placa_motorista = extract_info(obj_click, 'placa')
+                popup.querySelector('span').textContent = placa_motorista
+                card.querySelector('h2').textContent = `Selecione o motorista de ${placa_motorista}:`
+
+                const container_veicle_motoristas = document.getElementById('edit_veicle_motorista_container')
+                container_veicle_motoristas.innerHTML = ''
+                include_optionsMotorista(container_veicle_motoristas, true)
                 break
 
             case 'config_motorista':
@@ -334,28 +342,30 @@ function include_optionsMotorista(container, option_nenhum = false,  model_id = 
     fetch(`/get_interface-option_driver?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
     .then(response => response.json())
     .then(response => {
-        let data = response['data']
-        if (data) {
-            if (!Array.isArray(data)) {
-                data = [data]
+        if (!response['error']) {
+            let data = response['data']
+            if (data) {
+                if (!Array.isArray(data)) {
+                    data = [data]
+                }
+        
+                for (index in data) {
+                    const value = data[index]
+                    const option = model.cloneNode(true)
+        
+                    option.id = `${container.id}-option_${index}`
+                    option.querySelector('p').textContent = value
+                    
+                    const ids = option.querySelectorAll(`[id*="${model_id}"]`)
+                    ids.forEach(element => {
+                        element.id = element.id.replace(model_id, option.id)
+                    })
+        
+                    option.classList.remove('inactive')
+                    container.appendChild(option)
+                }
             }
-
-            for (index in data) {
-                const value = data[index]['nome']
-                const option = model.cloneNode(true)
-
-                option.id = `${container.id}-option_${index}`
-                option.querySelector('p').textContent = value
-                
-                const ids = option.querySelectorAll(`[id*="${model_id}"]`)
-                ids.forEach(element => {
-                    element.id = element.id.replace(model_id, option.id)
-                })
-
-                option.classList.remove('inactive')
-                container.appendChild(option)
-            }
-        }
+        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
     })
 }
 

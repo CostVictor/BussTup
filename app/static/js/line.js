@@ -15,10 +15,10 @@ function edit_nome_linha() {
         if (!response['error']) {
             cancel_popup_edit('edit_nome_linha')
             loadInterfaceLine(new_name, false)
-            create_popup(response['title'], '', 'Ok', 'success')
+            create_popup(response['title'], response['text'], 'Ok', 'success')
             document.getElementById('config_linha_nome').textContent = new_name
 
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
 
@@ -38,10 +38,10 @@ function edit_cidade_linha() {
         if (!response['error']) {
             cancel_popup_edit('edit_cidade_linha')
             loadInterfaceLine(name_line, false)
-            create_popup(response['title'], '', 'Ok', 'success')
+            create_popup(response['title'], response['text'], 'Ok', 'success')
             document.getElementById('config_linha_cidade').textContent = new_cidade
 
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
 
@@ -51,7 +51,7 @@ function edit_config_bool(obj_click) {
         const name_line = document.getElementById('interface_nome').textContent
         const opcao = obj_click.querySelector('p').textContent
 
-        let field = 'particular'
+        let field = 'paga'
         let new_value = false
     
         if (obj_click.parentNode.id.includes('ferias')) {field = 'ferias'}
@@ -69,7 +69,7 @@ function edit_config_bool(obj_click) {
         .then(response => {
             if (!response['error']) {
                 loadInterfaceLine(name_line, false)
-            }
+            } else {create_popup(response['title'], response['text'], 'Voltar')}
         })
     }
 }
@@ -104,11 +104,61 @@ function edit_valor_linha(event) {
         })
         .then(response => response.json())
         .then(response => {
-            cancel_popup_edit('edit_valor')
             if (!response['error']) {
+                cancel_popup_edit('edit_valor')
+                create_popup(response['title'], response['text'], 'Ok', 'success')
                 loadInterfaceLine(name_line, false)
-                create_popup(response['title'], '', 'Ok', 'success')
-            }
+            } else {create_popup(response['title'], response['text'], 'Voltar')}
+        })
+    }
+}
+
+
+function edit_capacidade_veiculo(event) {
+    event.preventDefault()
+
+    const name_line = document.getElementById('interface_nome').textContent
+    const veicle_plate = document.getElementById('edit_veicle_capacidade').querySelector('span').textContent
+    const new_value = document.getElementById('edit_veicle_capacidade_new').value.trim()
+
+    fetch("/edit_veicle", {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({'field': 'capacidade', 'new_value': new_value, 'name_line': name_line, 'plate': veicle_plate})
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            cancel_popup_edit('edit_veicle_capacidade')
+            create_popup(response['title'], response['text'], 'Ok', 'success')
+            loadInterfaceVeicle(name_line)
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
+    })
+}
+
+
+function edit_motorista_veiculo() {
+    const name_line = document.getElementById('interface_nome').textContent
+    const veicle_plate = document.getElementById('edit_veicle_motorista').querySelector('span').textContent
+    const options = document.getElementById('edit_veicle_motorista_container')
+    const option_selected = options.querySelector('[class*="selected"]')
+
+    if (!option_selected) {
+        create_popup('Nenhuma opção selecionada', 'Por favor, selecione uma opção disponível.', 'Voltar')
+    } else {
+        const new_value = option_selected.querySelector('p').textContent
+        fetch("/edit_veicle", {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({'field': 'motorista', 'new_value': new_value, 'name_line': name_line, 'plate': veicle_plate})
+        })
+        .then(response => response.json())
+        .then(response => {
+            if (!response['error']) {
+                cancel_popup_edit('edit_veicle_motorista')
+                create_popup(response['title'], response['text'], 'Ok', 'success')
+                loadInterfaceVeicle(name_line)
+            } else {create_popup(response['title'], response['text'], 'Voltar')}
         })
     }
 }
@@ -116,7 +166,7 @@ function edit_valor_linha(event) {
 
 // ~~ Criação ~~ //
 
-function create_veiculo() {
+function create_veicle() {
     const name_line = document.getElementById('interface_nome').textContent
     const placa = document.getElementById('add_veicle_placa').value
     const capacidade = document.getElementById('add_veicle_capacidade').value
@@ -138,13 +188,14 @@ function create_veiculo() {
     fetch("/create_veicle", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'placa': placa, 'capacidade_sentado': capacidade, 'Motorista_nome': motorista_nome, 'name_line': name_line})
+        body: JSON.stringify({'placa': placa, 'capacidade': capacidade, 'motorista_nome': motorista_nome, 'name_line': name_line})
     })
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
             cancel_popup_edit('add_veicle')
             create_popup(response['title'], response['text'], 'Ok', 'success')
+            loadInterfaceVeicle(name_line)
         } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
     })
 }
@@ -172,17 +223,17 @@ function loadInterfaceLine(name_line, load_complete = true) {
                     } else if (response['relacao'] === 'adm') {adm = true}
                 } else {aviso_entrada.classList.remove('inactive')}
             } else {
-                const sem_participacao = document.getElementById('interface_sem_participacao')
+                const sem_relacao = document.getElementById('interface_sem_participacao')
                 const cadastrar = document.getElementById('interface_cadastrar')
                 const bloqueio = document.getElementById('interface_bloqueio')
 
-                sem_participacao.classList.remove('inactive')
+                sem_relacao.classList.remove('inactive')
                 cadastrar.classList.remove('inactive')
                 bloqueio.classList.add('inactive')
 
                 if (response['relacao']) {
-                    if (response['relacao'] === 'de outra linha') {
-                        sem_participacao.classList.add('inactive')
+                    if (response['relacao'] === 'não participante') {
+                        sem_relacao.classList.add('inactive')
                         cadastrar.classList.add('inactive')
                         bloqueio.classList.remove('inactive')
                     }
@@ -190,7 +241,7 @@ function loadInterfaceLine(name_line, load_complete = true) {
             }
 
             for (dado in response['data']) {
-                if (dado === 'particular') {
+                if (dado === 'paga') {
                     const area_precos = document.getElementById('area_precos')
                     if (!response['data'][dado]) {
                         area_precos.classList.add('inactive')
@@ -242,17 +293,16 @@ function loadInterfaceDriver(name_line) {
                 }
             })
 
+            const model_motorista = document.getElementById('model_motorista')
             for (tipo in data) {
                 for (pos in data[tipo]) {
-                    const model_motorista = document.getElementById('model_motorista')
                     const motorista = model_motorista.cloneNode(true)
-                    motorista.id = `motorista_${tipo}_${pos}`
+                    motorista.id = `motorista_${tipo}-${pos}`
                     
-                    const elements = motorista.querySelectorAll('[id*="model_motorista"]')
-                    elements.forEach(element => {
+                    const ids = motorista.querySelectorAll('[id*="model_motorista"]')
+                    ids.forEach(element => {
                         element.id = element.id.replace('model_motorista', motorista.id)
                     })
-
                     for (info in data[tipo][pos]) {
                         const tag = motorista.querySelector(`[id*="${info}"]`)
                         tag.textContent = data[tipo][pos][info]
@@ -292,14 +342,14 @@ function loadInterfaceVeicle(name_line) {
             const division = area_onibus.querySelector('h1.page__division')
             const btn_add = document.getElementById('area_onibus_btn_add')
             
-            data = response['data']
+            const data = response['data']
             container_veicles.innerHTML = ''
             division.classList.add('inactive')
             btn_add.classList.add('inactive')
             
             if (response['relacao'] === 'dono' || response['relacao'] === 'adm') {
                 btn_add.classList.remove('inactive')
-                if (data) {division.classList.remove('inactive')}
+                if (data.length) {division.classList.remove('inactive')}
             }
 
             const model_veicle = document.getElementById('model_onibus')    
@@ -310,18 +360,37 @@ function loadInterfaceVeicle(name_line) {
                 const ids = element.querySelectorAll('[id*="model_onibus"]')
                 ids.forEach(item => {
                     item.id = item.id.replace('model_onibus', element.id)
+                    if (item.id.includes('delete') && (response['relacao'] === 'dono' || response['relacao'] == 'adm')) {
+                        item.classList.remove('inactive')
+                    }
                 })
 
                 for (dado in data[veicle]) {
                     const value = data[veicle][dado]
 
-                    if (dado === 'Motorista_nome') {
+                    if (dado === 'motorista_nome') {
                         const motorista_nome = element.querySelector('[id*="motorista"]')
                         motorista_nome.textContent = value
+                        if (response['relacao']) {
+                            if (response['relacao'] === 'membro') {
+                                if (value === 'Nenhum' || value === response['meu_nome']) {
+                                    const icon = motorista_nome.parentNode.querySelector('i')
+                                    icon.classList.remove('inactive')
+                                }
+                            } else {
+                                const icon = motorista_nome.parentNode.querySelector('i')
+                                icon.classList.remove('inactive')
+                            }
+                        }
                         dado = 'nome'
                     }
                     const tag_info = element.querySelector(`[id*="${dado}"]`)
                     tag_info.textContent = value
+                    if (dado !== 'nome' && (response['relacao'] === 'dono' || response['relacao'] == 'adm')) {
+                        let icon = tag_info.parentNode.querySelector('i')
+                        if (!icon) {icon = tag_info.parentNode.parentNode.querySelector('i')}
+                        icon.classList.remove('inactive')
+                    }
                 }
 
                 element.classList.remove('inactive')

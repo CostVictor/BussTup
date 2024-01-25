@@ -2,7 +2,7 @@ const header = document.getElementById('header_page')
 const content = document.getElementById('content_page')
 const nav = document.getElementById('nav_page')
 
-const divs = content.querySelectorAll('div.page__container--aba')
+const divs = content.querySelectorAll('section.page__container--aba')
 const btns = nav.querySelectorAll('i.page__icon--btn')
 let aba_atual = nav.querySelector('i.btn_selected').id
 
@@ -17,7 +17,7 @@ observer_header.observe(header)
 // ~~ Página ~~ //
 
 function loadLines() {
-    function create_lines(local, list_datas, list_minha_linha = false) {
+    function create_lines(local, list_datas, minha_linha = false) {
         const model_linha = document.getElementById('model_line')
         for (index_linha in list_datas) {
             const linha = model_linha.cloneNode(true)
@@ -27,9 +27,9 @@ function loadLines() {
             for (data in dados) {
                 const value = dados[data]
 
-                if (data === 'particular') {
-                    const pago = linha.querySelector('h1#model_line_pago')
-                    const gratuito = linha.querySelector('h1#model_line_gratuito')
+                if (data === 'paga') {
+                    const pago = linha.querySelector('h1#model_line_paga')
+                    const gratuito = linha.querySelector('h1#model_line_gratuita')
                     pago.id = pago.id.replace('model_line', linha.id)
                     gratuito.id = gratuito.id.replace('model_line', linha.id)
                     if (!value) {
@@ -49,9 +49,15 @@ function loadLines() {
                 }
                 linha.classList.remove('inactive')
 
-                if (list_minha_linha) {
-                    for (minha_linha in list_minha_linha) {
-                        if (list_minha_linha[minha_linha]['nome'] === dados['nome']) {
+                if (minha_linha) {
+                    if (Array.isArray(minha_linha)) {
+                        for (element in minha_linha) {
+                            if (minha_linha[element]['nome'] === dados['nome']) {
+                                linha.classList.add('selected')
+                            }
+                        }
+                    } else {
+                        if (dados['nome'] === minha_linha) {
                             linha.classList.add('selected')
                         }
                     }
@@ -70,9 +76,9 @@ function loadLines() {
             if (minha_linha_area) {minha_linha_area.innerHTML = ''}
             local_linhas.innerHTML = ''
 
+            const model_regiao = document.getElementById('model_regiao')
             for (cidade in response['cidades']) {
                 if (!local_linhas.querySelector(`div#${cidade}`)) {
-                    const model_regiao = document.getElementById('model_regiao')
                     var regiao = model_regiao.cloneNode(true)
                     regiao.id = cidade
 
@@ -207,7 +213,7 @@ set_observerScroll(document.querySelectorAll('div.scroll_vertical'))
 // ~~ Interações na aba ~~ //
 
 function checkLine() {
-    fetch("/check_line", { method: 'POST' })
+    fetch("/get_association", { method: 'GET' })
     .then(response => response.json())
     .then(response => {
         const aviso = document.getElementById(`not_line_${aba_atual}`)
@@ -237,7 +243,7 @@ function checkLine() {
 function validationLine(obj_form, event) {
     event.preventDefault()
     let execute = true
-    let data = {'particular': true}
+    let data = {'paga': true}
     
     const options_gratuidade = document.getElementById('options_gratuidade').querySelectorAll('div')
     options_gratuidade.forEach(element => {
@@ -246,7 +252,7 @@ function validationLine(obj_form, event) {
 
         if (text === 'Sim') {
             if (!icon.className.includes('selected')) {
-                data['particular'] = false
+                data['paga'] = false
             }
         }
     })
@@ -255,11 +261,11 @@ function validationLine(obj_form, event) {
         var campo = obj_form.elements[index]
 
         if (campo.name) {
-            if (data['particular'] && !campo.name.includes('nome') && !campo.name.includes('cidade')) {
+            if (data['paga'] && !campo.name.includes('nome') && !campo.name.includes('cidade')) {
                 const value = parseFloat(campo.value)
                 if (!value || value <= 0) {
-                    var erro_titulo = 'Valor inválido'
-                    var erro_texto = `O ${campo.name} deve ser maior que 0.`
+                    var erro_title = 'Valor inválido'
+                    var erro_text = `O ${campo.name} deve ser maior que 0.`
                     execute = false; break
                 } else {
                     const nome_campo = `${campo.name.includes('cartela')? 'valor_cartela' : 'valor_diaria'}`
@@ -283,12 +289,12 @@ function validationLine(obj_form, event) {
                 create_popup(response['title'], response['text'], 'Voltar', 'error', '', false)
             } else {
                 cancel_popup_edit('create_line')
-                loadLines()
                 create_popup(response['title'], response['text'], 'Ok', 'success')
+                loadLines()
             }
         })
     } else {
         campo.classList.add('input_error')
-        create_popup(erro_titulo, erro_texto, 'Voltar', 'error', '', false)
+        create_popup(erro_title, erro_text, 'Voltar', 'error', '', false)
     }
 }

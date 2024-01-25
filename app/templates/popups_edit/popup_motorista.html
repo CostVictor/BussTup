@@ -22,7 +22,8 @@
 </section>
 
 
-<section id="edit_capacidade_veicle" class="popup__container--shadow inactive">
+<section id="edit_veicle_capacidade" class="popup__container--shadow inactive">
+    <span class="inactive"></span>
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Editar capacidade</h1>
@@ -30,40 +31,37 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text"></h2>
-            <form id="formulario_edit_capacidade_veicle" class="form__container--card max_width" method="post">
+            <form id="formulario_edit_veicle_capacidade" class="form__container--card max_width" onsubmit="edit_capacidade_veiculo(event)">
                 <div class="form__container--input first">
-                    <input id="input_new_capacidade_veicle" class="form__input white input_notIcon" type="number" min="1">
-                    <label class="form__label intense label_notIcon" for="input_new_capacidade_veicle">Capacidade</label>
+                    <input id="edit_veicle_capacidade_new" class="form__input white input_notIcon" type="number" min="1" required>
+                    <label class="form__label intense label_notIcon" for="edit_veicle_capacidade_new">Capacidade</label>
                 </div>
             </form>
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_capacidade_veicle')">Cancelar</button>
-            <button class="popup__btn">Salvar</button>
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_veicle_capacidade')">Cancelar</button>
+            <button class="popup__btn" onclick="submit('formulario_edit_veicle_capacidade')">Salvar</button>
         </footer>
     </div>
 </section>
 
 
-<section id="edit_motorista_veicle" class="popup__container--shadow inactive">
+<section id="edit_veicle_motorista" class="popup__container--shadow inactive">
+    <span class="inactive"></span>
     <div class="popup__container">
         <header class="popup__container--header">
             <h1 class="popup__title">Definir motorista</h1>
         </header>
 
         <div class="popup__container--content">
-            <h2 id="edit_motorista_veicle_title" class="popup__text"></h2>
-            <div id="edit_motorista_veicle_container" class="scroll_vertical init_top no_borderY popup__container--scroll">
-                <div id="edit_motorista_veicle_nenhum" class="popup__input checkbox hidden" onclick="popup_selectOption(this, false, true)">
-                    <p id="edit_motorista_veicle_opNenhum" class="popup__text input">Nenhum</p>
-                </div>
-            </div>
+            <h2 class="popup__text"></h2>
+            <div id="edit_veicle_motorista_container" class="scroll_vertical init_top no_borderY popup__container--scroll"></div>
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_motorista_veicle')">Cancelar</button>
-            <button class="popup__btn">Salvar</button>
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_veicle_motorista')">Cancelar</button>
+            <button class="popup__btn" onclick="edit_motorista_veiculo()">Salvar</button>
         </footer>
     </div>
 </section>
@@ -125,7 +123,7 @@
 
         <div class="popup__container--content">
             <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
-                <form id="formulario_add_veicle" class="form__container--card max_width" onsubmit="create_veiculo()">
+                <form id="formulario_add_veicle" class="form__container--card max_width" onsubmit="create_veicle()">
                     <div class="form__container--input first">
                         <input id="add_veicle_placa" class="form__input white input_notIcon" type="text" required>
                         <label class="form__label intense label_notIcon" for="add_veicle_placa">Placa</label>
@@ -509,9 +507,17 @@
                         <label class="form__label intense label_notIcon" for="nome_create_line">Nome da linha</label>
                     </div>
                     
-                    <div class="form__container--input">
-                        <input id="cidade_create_line" class="form__input white input_notIcon" type="text" name="cidade" required>
-                        <label class="form__label intense label_notIcon" for="cidade_create_line">Cidade de atuação</label>
+                    <div class="form__container--input_options">
+                        <div class="form__container--input">
+                            <input id="cidade_create_line" class="form__input input_notIcon white format_options format_name" type="text" name="cidade" required>
+                            <label class="form__label label_notIcon intense" for="cidade_create_line">Cidade</label>
+                        </div>
+                        
+                        <ul id="lista_cidades" class="form__container--ul white inactive">
+                            {% for cidade in cidades %}
+                            <li class="form__option">{{ cidade }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
                     
                     <h3 class="popup__text question">Esta linha será paga?</h3>
@@ -653,9 +659,17 @@
         <div class="popup__container--content">
             <h2 class="popup__text">Digite o nome da cidade:</h2>
             <form id="formulario_edit_cidade_linha" class="form__container--card max_width" onsubmit="edit_cidade_linha(this)">
-                <div class="form__container--input first">
-                    <input id="edit_cidade_linha_new" class="form__input white input_notIcon" type="text" required>
-                    <label class="form__label intense label_notIcon" for="edit_cidade_linha_new">Cidade</label>
+                <div class="form__container--input_options">
+                    <div class="form__container--input">
+                        <input id="edit_cidade_linha_new" class="form__input input_notIcon white format_options format_name" type="text" name="cidade" required>
+                        <label class="form__label label_notIcon intense" for="edit_cidade_linha_new">Cidade</label>
+                    </div>
+                    
+                    <ul class="form__container--ul white inactive">
+                        {% for cidade in cidades %}
+                        <li class="form__option">{{ cidade }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
 
                 <h1 class="page__division"></h1>

@@ -1,115 +1,129 @@
-from app.database import db
 from datetime import timedelta, datetime
 from flask_security import current_user
-import bcrypt, numpy as np
-
-# ~~ Cursos e turnos
-cursos = ['informática', 'química', 'agropecuária']
-turnos = ['matutino', 'vespertino', 'noturno']
+from app import cursos, turnos
+from app.database import *
+import bcrypt
 
 
-def capitalize(string):
-    nome = string.split(' ')
-    for index, palavra in enumerate(nome):
+def format_money(value):
+    if value: return f'{value:.2f}'.replace('.', ',')
+    return '--'
+
+
+def capitalize(name, role):
+    name = name.split(' ')
+    if len(name) < 3 and role != 'motorista':
+        return False
+
+    for index, palavra in enumerate(name):
         if palavra:
             palavra = palavra.lower()
             if palavra != 'da' and palavra != 'do' and palavra != 'de':
                 palavra = palavra.capitalize()
-            nome[index] = palavra
-    return ' '.join(nome)
+            name[index] = palavra
+            
+    return ' '.join(name)
 
 
 def formatData(dadosAdquiridos):
-    if dadosAdquiridos:
-        inconsistencia = False
-        erro_titulo = ''
-        erro_texto = ''
+    inconsistencia = False
+    erro_title = 'Cadastro interrompido'
+    erro_text = ''
 
-        tabela = dadosAdquiridos['table']
+    if 'data' in dadosAdquiridos:
         data = dadosAdquiridos['data']
 
-        for campo, dado in data.items():
-            if campo == 'login':...
+        if 'curso' in data or 'turno' in data:
+            data['role'] = 'aluno'
+        else: data['role'] = 'motorista'
 
-            elif campo == 'nome':...
+        if 'login' in data and len(data['login']) >= 10 and 'password' in data and len(data['password']) >= 10:
+            senha = data.pop('password').encode('utf-8')
+            data['hash_senha'] = bcrypt.hashpw(senha, bcrypt.gensalt())
+        else:
+            erro_text = 'Ocorreu um erro inesperado ao realizar o cadastro. Por favor, revise os dados e tente novamente.'
+            inconsistencia = True
 
-            elif campo == 'turno':
-                turnoDefinido = dado.lower()
-                if turnoDefinido == 'manha' or turnoDefinido == 'manhã':
-                    data[campo] = 'Matutino'
-                elif turnoDefinido == 'tarde':
-                    data[campo] = 'Vespertino'
-                elif turnoDefinido == 'noite':
-                    data[campo] = 'Noturno'
-                else:
-                    comparacoes = np.array([difflib.SequenceMatcher(None, turno, turnoDefinido).ratio() for turno in turnos])
-                    turnoIdentify = np.argmax(comparacoes)
-                    data[campo] = turnos[turnoIdentify].capitalize()
-            elif campo == 'telefone':
-                value_telefone = formatTel(dado)
-                if not value_telefone:
-                    erro_titulo = 'Telefone inválido'
-                    erro_texto = 'O telefone especificado é inválido.'
-                    inconsistencia = True; break
-                data[campo] = value_telefone
+        if not inconsistencia:
+            for campo, dado in data.items():
+                if campo == 'login':
+                    user = return_user(dado)
 
-        senha = data['senha'].encode('utf-8'); del data['senha']
-        hash_senha = bcrypt.hashpw(senha, bcrypt.gensalt())
-        return tabela, data, hash_senha, inconsistencia, erro_titulo, erro_texto
+                    if user:
+                        erro_text = 'O nome de usuário definido não atende aos critérios de cadastro para ser utilizado como login. Por favor, escolha outro nome.'
+                        inconsistencia = True
+                        break
 
+                elif campo == 'nome':
+                    name = capitalize(dado, data['role'])
 
-def return_dates():
-    hoje = datetime.now()
-    dia_semana = hoje.weekday()
-    dias_ate_segunda = (dia_semana + 1) % 7
-    if dia_semana == 5 or dia_semana == 6:
-        dias_ate_segunda = 7 - dia_semana
-        segunda = hoje + timedelta(days=dias_ate_segunda)
-    else: segunda = hoje - timedelta(days=dias_ate_segunda)
+                    if not name:
+                        erro_text = 'O nome definido não atende aos critérios de cadastro do aluno. Por favor, defina seu nome completo.'
+                        inconsistencia = True
+                        break
+                
+                    data[campo] = name
+                
+                elif campo == 'curso':
+                    if not dado in cursos:
+                        erro_text = 'O curso definido não está presente entre as opções disponíveis.'
+                        inconsistencia = True
+                        break
+                        
+                elif campo == 'turno':
+                    if not dado in turnos:
+                        erro_text = 'O turno definido não está presente entre as opções disponíveis.'
+                        inconsistencia = True
+                        break
+    else: return None
 
-    datas_semana = []
-    for index in range(5):
-        data_dia = segunda + timedelta(days=index)
-        data_dia = f'"{data_dia.strftime("%Y-%m-%d")}"'
-        datas_semana.append(data_dia)
-        
-    return datas_semana
+    return inconsistencia, erro_title, erro_text, data
 
 
-def return_relationship(codigo_linha):
-    if current_user.primary_key.isdigit():
-        ponto = db.select('Aluno_has_Ponto', data='Ponto_id', where={'where': 'Aluno_matricula = %s', 'value': current_user.primary_key})
+def return_dict(obj, not_includes=[]):
+    return {name: value for name, value in vars(obj).items() if name not in not_includes and not name.startswith('_')}
 
-        if ponto:
-            id_ponto = ponto[0]['Ponto_id']
-            verify = db.select('Ponto', where={'where': 'id = %s AND Linha_codigo = %s', 'value': (id_ponto, codigo_linha)})
 
-            if verify: relacao = 'participante'
-            else: relacao = 'de outra linha'
-        else: relacao = None
-    else:
-        verify = db.select('Linha_has_Motorista', where={'where': 'Motorista_nome = %s AND Linha_codigo = %s', 'value': (current_user.primary_key, codigo_linha)})
-
-        if verify:
-            if verify['motorista_dono']:
-                relacao = 'dono'
-            elif verify['motorista_adm']:
-                relacao = 'adm'
-            else: relacao = 'membro'
-        else: relacao = None
-    return relacao
+def return_relationship(code_line):
+    if code_line:
+        user = return_user(current_user.primary_key)
+        if current_user.roles[0].name == 'aluno':
+            if user.associacao:
+                line = user.associacao[0].ponto.linha
+                if line.codigo == code_line:
+                    relationship = 'participante'
+                else: relationship = 'não participante'
+            else: relationship = None
+        else:
+            relationship = Linha_has_Motorista.query.filter_by(Motorista_login=user.login, Linha_codigo=code_line).first()
+            if relationship:
+                if relationship.motorista_dono:
+                    relationship = 'dono'
+                elif relationship.motorista_adm:
+                    relationship = 'adm'
+                else: relationship = 'membro'
+            else: relationship = None
+        return relationship
+    return None
 
 
 def check_permission(data, permission='motorista_adm'):
-    code_line = db.select('Linha', data='codigo', where={'where': 'nome = %s', 'value': data['name_line']})
-    if code_line:
-        relacao = db.select('Linha_has_Motorista', where={'where': 'Linha_codigo = %s AND Motorista_nome = %s', 'value': (code_line['codigo'], current_user.primary_key)})
-
-        if relacao and relacao[permission]:
-            data['code_line'] = code_line['codigo']
-            if permission == 'motorista_dono':
-                if bcrypt.checkpw(data['password'].encode('utf-8'), current_user.hash_senha):
-                    return 'autorizado'
-                return 'senha incorreta'
-            return 'autorizado'
-    return 'nao autorizado'
+    if data and 'name_line' in data:
+        code_line = Linha.query.filter_by(nome=data['name_line']).first()
+        if code_line:
+            code_line = code_line.codigo
+            relationship = Linha_has_Motorista.query.filter_by(Motorista_login=current_user.primary_key, Linha_codigo=code_line).first()
+            if relationship:
+                if permission == 'motorista_dono':
+                    if relationship.motorista_dono and 'password' in data:
+                        if bcrypt.checkpw(data['password'].encode('utf-8'), current_user.hash_senha):
+                            data['code_line'] = code_line
+                            del data['name_line']
+                            return 'autorizado'
+                        return 'senha incorreta'
+                else:
+                    if relationship.motorista_adm:
+                        data['code_line'] = code_line
+                        del data['name_line']
+                        return 'autorizado'
+    return 'não autorizado'

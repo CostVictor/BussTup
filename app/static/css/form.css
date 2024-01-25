@@ -86,6 +86,10 @@
     width: 100%;
 }
 
+.form__container--ul.white {
+    background-color: var(--branco_terciario);
+}
+
 .form__container--ul.inactive {
     display: none;
 }

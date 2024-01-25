@@ -48,6 +48,7 @@ class Motorista(db.Model):
     __tablename__ = 'Motorista'
     login = db.Column(db.String(100), primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
     telefone = db.Column(db.String(15), nullable=False)
     pix = db.Column(db.String(100))
 
@@ -125,8 +126,8 @@ class Cartela_Ticket(db.Model):
     dt_ultimo_registro = db.Column(db.Date)
     Linha_codigo = db.Column(db.BigInteger, db.ForeignKey('Linha.codigo'), nullable=False)
     Aluno_login = db.Column(db.String(100), db.ForeignKey('Aluno.login'), nullable=False)
-    linha = db.relationship('Linha', backref='cartelas')
-    aluno = db.relationship('Aluno', backref='cartelas')
+    linha = db.relationship('Linha', backref=db.backref('cartelas', lazy=True))
+    aluno = db.relationship('Aluno', backref=db.backref('cartelas', lazy=True))
 
 
 class Aluno_has_Ponto(db.Model):
@@ -138,8 +139,8 @@ class Aluno_has_Ponto(db.Model):
     tipo = db.Column(db.String(10), nullable=False)
     dt_validade_temporario = db.Column(db.Date)
     dt_validade_espera = db.Column(db.Date)
-    ponto = db.relationship('Ponto', backref='alunos_associados')
-    aluno = db.relationship('Aluno', backref='pontos_associados')
+    ponto = db.relationship('Ponto', backref=db.backref('associados', lazy=True))
+    aluno = db.relationship('Aluno', backref=db.backref('associacao', lazy=True))
 
 
 class Contraturno_Fixo(db.Model):
@@ -147,7 +148,7 @@ class Contraturno_Fixo(db.Model):
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     numero_do_dia = db.Column(db.String(1), nullable=False)
     Aluno_login = db.Column(db.String(100), db.ForeignKey('Aluno.login'), nullable=False)
-    aluno = db.relationship('Aluno', backref='contraturnos_fixos')
+    aluno = db.relationship('Aluno', backref=db.backref('contraturnos_fixos', lazy=True))
 
 
 class Linha_has_Motorista(db.Model):
@@ -156,8 +157,8 @@ class Linha_has_Motorista(db.Model):
     Motorista_login = db.Column(db.String(100), db.ForeignKey('Motorista.login'), primary_key=True, nullable=False)
     motorista_dono = db.Column(db.Boolean, nullable=False, default=False)
     motorista_adm = db.Column(db.Boolean, nullable=False, default=False)
-    linha = db.relationship('Linha', backref='motoristas_associados')
-    motorista = db.relationship('Motorista', backref='linhas_associadas')
+    linha = db.relationship('Linha', backref=db.backref('motoristas_associados', lazy=True))
+    motorista = db.relationship('Motorista', backref=db.backref('linhas', lazy=True))
 
 
 class Registro_Passagem(db.Model):
@@ -167,7 +168,12 @@ class Registro_Passagem(db.Model):
     passou = db.Column(db.Boolean, nullable=False, default=False)
     Rota_has_Ponto_Rota_codigo = db.Column(db.BigInteger, nullable=False)
     Rota_has_Ponto_Ponto_id = db.Column(db.BigInteger, nullable=False)
-    rota_ponto = db.relationship('Rota_has_Ponto', backref='registros_passagem')
+    rota_ponto = db.relationship(
+        'Rota_has_Ponto', 
+        primaryjoin='and_(Registro_Passagem.Rota_has_Ponto_Rota_codigo == Rota_has_Ponto.Rota_codigo, Registro_Passagem.Rota_has_Ponto_Ponto_id == Rota_has_Ponto.Ponto_id)', 
+        foreign_keys="[Registro_Passagem.Rota_has_Ponto_Rota_codigo, Registro_Passagem.Rota_has_Ponto_Ponto_id]", 
+        backref=db.backref('registros', lazy=True)
+    )
 
 
 class Registro_Rota(db.Model):
@@ -177,11 +183,34 @@ class Registro_Rota(db.Model):
     quantidade_pessoas = db.Column(db.Integer, nullable=False)
     previsao_pessoas = db.Column(db.Integer, nullable=False)
     Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), nullable=False)
-    rota = db.relationship('Rota', backref='registros_rota')
+    rota = db.relationship('Rota', backref=db.backref('registros', lazy=True))
 
 
 with app.app_context():
     db.create_all()
 
 
-def create_user(data):...
+def create_user(data):
+    hash_senha = data.pop('hash_senha')
+    role = data.pop('role')
+
+    if role == 'aluno':
+        user = Aluno(**data)
+    else: user = Motorista(**data)
+    db.session.add(user)
+
+    user_security = user_datastore.create_user(primary_key=data['login'], hash_senha=hash_senha)
+    role_user = user_datastore.create_role(name=role)
+    user_datastore.add_role_to_user(user_security, role_user)
+    
+    db.session.commit()
+
+
+def return_user(str_login):
+    motorista = Motorista.query.filter_by(login = str_login).first()
+    if motorista: return motorista
+
+    aluno = Aluno.query.filter_by(login = str_login).first()
+    if aluno: return aluno
+
+    return None

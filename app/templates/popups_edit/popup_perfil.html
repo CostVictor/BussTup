@@ -6,6 +6,12 @@
 
         <div class="popup__container--content">
             <div class="perfil__container--justify margin_top">
+                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('trocar_nome')">
+                    <p class="interface__text">Trocar meu nome de exibição</p>
+                </div>
+            </div>
+
+            <div class="perfil__container--justify">
                 <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('trocar_senha')">
                     <p class="interface__text">Trocar minha senha</p>
                 </div>
@@ -33,7 +39,7 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite o e-mail:</h2>
-            <form id="formulario_edit_email" class="form__container--card max_width"  onsubmit="editData_perfil(this)">
+            <form id="formulario_edit_email" class="form__container--card max_width"  onsubmit="editData_profile(this)">
                 <div class="form__container--input first">
                     <input id="edit_email_new" class="form__input white input_notIcon" type="email" required>
                     <label class="form__label intense label_notIcon" for="edit_email_new">E-mail</label>
@@ -65,7 +71,7 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite o novo telefone:</h2>
-            <form id="formulario_edit_telefone" class="form__container--card max_width" method="patch"  onsubmit="editData_perfil(this)">
+            <form id="formulario_edit_telefone" class="form__container--card max_width" method="patch"  onsubmit="editData_profile(this)">
                 <div class="form__container--input first">
                     <input id="edit_telefone_new" class="form__input white input_notIcon format_tell" type="text" minlength="15" required>
                     <label class="form__label intense label_notIcon" for="edit_telefone_new">Telefone</label>
@@ -98,7 +104,7 @@
 
         <div class="popup__container--content">
             <h2 class="popup__text">Digite a chave do pix:</h2>
-            <form id="formulario_edit_pix" class="form__container--card max_width" method="post" onsubmit="editData_perfil(this)">
+            <form id="formulario_edit_pix" class="form__container--card max_width" method="post" onsubmit="editData_profile(this)">
                 <div class="form__container--input first">
                     <input id="edit_pix_new" class="form__input white input_notIcon" type="text" required>
                     <label class="form__label intense label_notIcon" for="edit_pix_new">Chave pix</label>
@@ -123,6 +129,37 @@
 {% endif %}
 
 
+<section id="trocar_nome" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Trocar meu nome</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <form id="formulario_trocar_nome" class="form__container--card max_width" method="post" onsubmit="editData_profile(this)">
+                <div class="form__container--input first">
+                    <input id="trocar_nome_new" class="form__input white input_notIcon format_name" type="text" required>
+                    <label class="form__label intense label_notIcon" for="trocar_nome_new">Novo nome</label>
+                </div>
+    
+                <h1 class="perfil__division"></h1>
+                <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
+                <div class="form__container--input first">
+                    <input id="trocar_nome_conf" class="form__input input_password white input_notIcon" type="password" required>
+                    <i id="trocar_nome_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
+                    <label class="form__label intense label_notIcon" for="trocar_nome_conf">Senha de confirmação</label>
+                </div>
+            </form>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('trocar_nome')">Cancelar</button>
+            <button class="popup__btn" onclick="submit('formulario_trocar_nome')">Alterar</button>
+        </footer>
+    </div>
+</section>
+
+
 <section id="trocar_senha" class="popup__container--shadow inactive">
     <div class="popup__container">
         <header class="popup__container--header">
@@ -130,7 +167,7 @@
         </header>
 
         <div class="popup__container--content">
-            <form id="formulario_trocar_senha" class="form__container--card max_width" method="post" onsubmit="editData_perfil(this)">
+            <form id="formulario_trocar_senha" class="form__container--card max_width" method="post" onsubmit="editData_profile(this)">
                 <div class="form__container--input first">
                     <input id="trocar_senha_new" class="form__input input_password white input_notIcon" type="password" required>
                     <i id="trocar_senha_new_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>

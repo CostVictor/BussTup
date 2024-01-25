@@ -21,9 +21,9 @@
             </div>
         </section>
 
-        <form id="form_aluno" class="form__container--card scroll_vertical no_borderY enter" method="post" onsubmit="validationRegister('aluno', event)">
+        <form id="form_aluno" class="form__container--card scroll_vertical no_borderY enter" method="post" onsubmit="validationRegister(this, event)">
             <div class="form__container--input first">
-                <input id="user_login_aluno" class="form__input input_notIcon" type="text" name="user_login" minlength="10" required>
+                <input id="user_login_aluno" class="form__input input_notIcon" type="text" name="login" minlength="10" required>
                 <label class="form__label label_notIcon" for="user_login_aluno">Usuário de login</label>
             </div>
             
@@ -38,7 +38,7 @@
                     <label class="form__label label_notIcon" for="curso">Curso</label>
                 </div>
                 
-                <ul class="form__container--ul inactive">
+                <ul id="lista_cursos" class="form__container--ul inactive">
                     {% for curso in cursos %}
                     <li class="form__option">{{ curso }}</li>
                     {% endfor %}
@@ -51,7 +51,7 @@
                     <label class="form__label label_notIcon" for="turno">Turno</label>
                 </div>
                 
-                <ul class="form__container--ul inactive">
+                <ul id="lista_turnos" class="form__container--ul inactive">
                     {% for turno in turnos %}
                     <li class="form__option">{{ turno }}</li>
                     {% endfor %}
@@ -59,7 +59,7 @@
             </div>
 
             <div class="form__container--input">
-                <input id="email_aluno" class="form__input input_notIcon" type="email" name="email_aluno" required>
+                <input id="email_aluno" class="form__input input_notIcon" type="email" name="email" required>
                 <label class="form__label label_notIcon" for="email_aluno">E-mail</label>
             </div>
 
@@ -70,7 +70,7 @@
 
             <div class="form__container--input_double">
                 <div class="form__container--input max_width first">
-                    <input id="senha_aluno" class="form__input input_notIcon double" type="password" name="password" required>
+                    <input id="senha_aluno" class="form__input input_notIcon double" type="password" name="password" minlength="10" required>
                     <label class="form__label label_notIcon" for="senha_aluno">Senha</label>
                 </div>
 
@@ -81,9 +81,9 @@
             </div>
         </form>
 
-        <form id="form_motorista" class="form__container--card no_borderY inactive" method="post" onsubmit="validationRegister('motorista', event)">
+        <form id="form_motorista" class="form__container--card no_borderY inactive" method="post" onsubmit="validationRegister(this, event)">
             <div class="form__container--input first">
-                <input id="user_login_motorista" class="form__input input_notIcon" type="text" name="user_login" minlength="10" required>
+                <input id="user_login_motorista" class="form__input input_notIcon" type="text" name="login" minlength="10" required>
                 <label class="form__label label_notIcon" for="user_login_motorista">Usuário de login</label>
             </div>
 
@@ -104,7 +104,7 @@
 
             <div class="form__container--input_double">
                 <div class="form__container--input max_width first">
-                    <input id="senha_motorista" class="form__input input_notIcon double" type="password" name="password" required>
+                    <input id="senha_motorista" class="form__input input_notIcon double" type="password" name="password" minlength="10" required>
                     <label class="form__label label_notIcon" for="senha_motorista">Senha</label>
                 </div>
 
@@ -116,6 +116,7 @@
         </form>
 
         <button id="button_submit" class="form__btn margin_bottom btn_scroll enter" onclick="submit()">Enviar</button>
+
         <div class="form__container--text_info enter">
             <p class="text">Já possui uma conta?</p>
             <button class="form__btn--simple" onclick="closeInterface('register', '/', 700)">Logar</button>

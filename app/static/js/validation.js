@@ -4,7 +4,7 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
     document.body.classList.add('no-scroll')
     Swal.fire({
         title: title,
-        text: text,
+        html: `<p${text.split(' ').length > 12 ? ' style="text-align: justify;"' : ''}>${text}</p>`,
         icon: icon,
         width: '80%',
         confirmButtonText: text_buttom,
@@ -17,7 +17,7 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
 }
 
 
-// ~~~~~ Validações ~~~~~ //
+// ~~~~~ Validações de input ~~~~~ //
 
 const inputs_tell = document.querySelectorAll('[class*="format_tell"]')
 if (inputs_tell) {
@@ -89,7 +89,33 @@ if (inputs_options) {
 }
 
 
-// ~~~~~ Validação ~~~~~ //
+// ~~~~~ Validação Geral ~~~~~ //
+
+function check_policy_password(password) {
+    let msg = 'A senha deve possuir pelo menos'
+    let list_exi = []
+
+    let caractere_maisculo = /[A-Z]/.test(password)
+    if (!caractere_maisculo) {
+        list_exi.push('1 (um) caractere em maiúsculo')
+    }
+    
+    let caractere_numero = /\d/.test(password)
+    if (!caractere_numero) {
+        list_exi.push('1 (um) caractere número')
+    }
+
+    let caractere_simbolo = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(password)
+    if (!caractere_simbolo) {
+        list_exi.push('1 (um) caractere símbolo')
+    } 
+
+    if (list_exi.length) {
+        return `${msg} ${list_exi.join(', ')}.`
+    }
+    return false
+}
+
 
 function validationLogin(event) {
     event.preventDefault()
@@ -101,49 +127,63 @@ function validationLogin(event) {
     fetch('/authenticate_user', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'user': usuario, 'password': senha})
+        body: JSON.stringify({'login': usuario, 'password': senha})
     })
     .then(response => response.json())
     .then(response => {
         if (response['error']) {
-            create_popup('Não foi possível fazer login', 'Verifique suas credenciais e tente novamente.', 'Ok', 'info')
+            create_popup(response['title'], response['text'], 'Ok', 'info')
         } else {closeInterface('login', response['redirect'])}
     })
 }
 
-function validationRegister(type, event) {
+function validationRegister(form_submit, event) {
     event.preventDefault()
-
-    const form = document.getElementById(`form_${type}`)
+    
     let execute = true
     let data = {}
 
-    for (let index = 0; index < form.elements.length; index++) {
+    const list_input = form_submit.querySelectorAll('input')
+    for (let index = 0; index < list_input.length; index++) {
+        var input = list_input[index]
 
+        if (input.name === 'password') {
+            var check = check_policy_password(input.value.trim())
+            if (check) {
+                execute = false
+                var erro_title = 'Senha inválida'
+                var erro_text = check
+                break
+            }
+        }
+        
+        if (input.name === 'password_conf') {
+            if (input.value.trim() !== data['password']) {
+                execute = false
+                var erro_title = 'Falha de confirmação'
+                var erro_text = 'A senha especificada na confirmação é diferente da senha definida.'
+                break
+            }
+        } else {data[input.name] = input.value.trim()}
     }
 
     if (execute) {
         fetch('/register_user', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({'table': type, 'data': data})
+            body: JSON.stringify({'data': data})
         })
         .then(response => response.json())
         .then(retorno => {
-            let text = ''; let icon = 'success'
-            let text_buttom = 'Logar'; let redirect = '/'
-
             if (retorno['error']) {
-                icon = 'info'
-                text = `Já existe um usuário cadastrado ${type === "aluno" ? "na matrícula especificada." : "no nome especificado."}`
-                text_buttom = 'Voltar'
-                redirect = false
+                create_popup(retorno['title'], retorno['text'], 'Voltar', 'info')
+            } else {
+                create_popup(retorno['title'], retorno['text'], 'Acessar login', 'success', '/') 
             }
-            create_popup(retorno['title'], text, text_buttom, icon, redirect)
         })
     } else {
-        campo.classList.add('input_error')
-        create_popup(erro_titulo, erro_texto, 'Voltar', 'error')
+        input.classList.add('input_error')
+        create_popup(erro_title, erro_text, 'Voltar', 'error')
     }
 }
 
@@ -155,7 +195,18 @@ function submit(form_id = false) {
         const buttom = document.querySelector('button.form__btn--select.selected')
         var form = document.getElementById(`form_${buttom.textContent.toLowerCase()}`)
     } else {var form = document.getElementById(form_id)}
-    if (form.checkValidity()) {
-        form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
-    } else {form.reportValidity()}
+
+    let execute = true
+    const inputs = form.querySelectorAll('input')
+    inputs.forEach(input => {
+        if (input.type === 'submit') {
+            execute = false
+        }
+    })
+
+    if (execute) {
+        if (form.checkValidity()) {
+            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+        } else {form.reportValidity()}
+    }
 }

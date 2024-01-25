@@ -1,5 +1,5 @@
 function enterProfile() {
-    loadPerfil()
+    loadProfile()
     const perfil = document.querySelector('section.perfil__container')
     const header = perfil.querySelector('header')
     header.classList.remove('enter')
@@ -34,7 +34,7 @@ function closeProfile(logout = false) {
 }
 
 
-function loadPerfil() {
+function loadProfile() {
     fetch('/get_profile', {method: 'GET'})
     .then(response => response.json())
     .then(response => {
@@ -46,7 +46,7 @@ function loadPerfil() {
 }
 
 
-function editData_perfil(obj_click) {
+function editData_profile(obj_click) {
     execute = true
     const key = obj_click.id.replace('formulario_', '')
     let data = obj_click.id.split('_')
@@ -76,7 +76,7 @@ function editData_perfil(obj_click) {
             if (!response['error']) {
                 cancel_popup_edit(key)
                 create_popup(response['title'], response['text'], 'Ok', 'success')
-                loadPerfil()
+                loadProfile()
             } else {
                 if (response['title'].includes('Telefone')) {
                     input_new_value.classList.add('input_error')
