@@ -1,0 +1,125 @@
+<section id="config_rota" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header pos_relative">
+            <h1 class="popup__title">Rota</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
+                <div class="page__container">
+                    <p class="text secundario emphasis">Motorista</p>
+                    <div class="scroll_horizontal">
+                        <p id="config_rota_motorista" class="text secundario content fundo nowrap"></p>
+                    </div>
+                </div>
+
+                <div class="page__container">
+                    <p class="text secundario emphasis">Ônibus</p>
+                    <div class="scroll_horizontal">
+                        <p id="config_rota_motorista" class="text secundario content fundo nowrap"></p>
+                    </div>
+                    {% if role == 'motorista' %}
+                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_onibus_rota')"></i>
+                    {% endif %}
+                </div>
+
+                <div class="page__container">
+                    <p class="text secundario emphasis">Turno</p>
+                    <p id="config_rota_turno" class="text secundario content fundo"></p>
+                    {% if role == 'motorista' %}
+                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_turno_rota')"></i>
+                    {% endif %}
+                </div>
+    
+                <div class="page__container">
+                    <p class="text secundario emphasis">Horário</p>
+                    <p id="config_aluno_telefone" class="text secundario content fundo"></p>
+
+                    {% if role == 'motorista' %}
+                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_horario_rota')"></i>
+                    {% endif %}
+                </div>
+
+                <div class="page__container justify">
+                    <div class="interface__container--btn add margin_top" onclick="">
+                        <p class="interface__text">Ver estatística</p>
+                    </div>
+                </div>
+
+                <h3 class="popup__text question">Pontos</h3>
+                <div id="config_rota_pontos_sub_btn" class="page__container interaction pos_relative" onclick="actionContainer(this, 50)">
+                    <h3 class="text secundario fundo">Partida</h3>
+                    <h3 id="config_rota_pontos_sub_qnt" class="text secundario fundo max_width"></h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+                
+                <div id="config_rota_pontos_sub_container" class="page__container column inactive">
+                    {% if role == 'aluno' %}
+                    <h3 id="config_rota_pontos_sub_title" class="popup__text info">Selecione o ponto de subida:</h3>
+                    {% endif %}
+                    
+                    <div id="config_rota_pontos_sub_area" class="scroll_vertical init_top no_borderY popup__container--scroll sortable margin_top"></div>
+                    
+                    {% if role == 'motorista' %}
+                    <h1 class="page__division"></h1>
+                    <div class="page__container justify">
+                        <div class="interface__container--btn add margin_bottom" onclick="open_popup_edit('add_ponto_rota')">
+                            <i class="bi bi-plus-lg interface__icon plus"></i>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if role == 'motorista' %}
+                <div id="config_rota_pontos_des_btn" class="page__container interaction pos_relative" onclick="actionContainer(this, 50)">
+                    <h3 class="text secundario fundo">Retorno</h3>
+                    <h3 id="config_rota_pontos_des_qtn" class="text secundario fundo max_width"></h3>
+                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+                </div>
+                
+                <div id="config_rota_pontos_des_container" class="inactive">
+                    <div id="config_rota_pontos_des_area" class="scroll_vertical init_top no_borderY popup__container--scroll principal sortable margin_top"></div>
+                    
+                    <h1 class="page__division"></h1>
+                    <div class="page__container justify">
+                        <div class="interface__container--btn add margin_bottom" onclick="open_popup_edit('add_ponto_rota')">
+                            <i class="bi bi-plus-lg interface__icon plus"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <h1 class="page__division"></h1>
+                <div class="page__container justify">
+                    <div class="interface__container--btn no_margin remove" onclick="open_popup_edit('del_rota', this)">
+                        <i class="bi bi-trash3 interface__icon del"></i>
+                    </div>
+                </div>
+
+                {% else %}
+
+                <h3 class="popup__text question">Deseja descer em um ponto diferente?</h3>
+                <div id="config_rota_options_retorno" class="popup__container--options">
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-circle popup__icon ratio"></i>
+                        <p class="popup__text content input">Sim</p>
+                    </div>
+
+                    <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+                        <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+                        <p class="popup__text content input">Não</p>
+                    </div>
+                </div>
+
+                <h3 id="config_rota_options_retorno_title" class="popup__text info space inactive">Selecione o ponto de descida:</h3>
+                <div id="config_rota_options_retorno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive">
+                    <h3 class="text secundario fundo">Não disponível.</h3>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn" onclick="cancel_popup_edit('config_rota', true)">Fechar</button>
+        </footer>
+    </div>
+</section>

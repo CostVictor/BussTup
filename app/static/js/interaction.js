@@ -87,7 +87,7 @@ function open_popup_edit(id, obj_click=false) {
 
                 const container_veicle_motoristas = document.getElementById('edit_veicle_motorista_container')
                 container_veicle_motoristas.innerHTML = ''
-                include_optionsMotorista(container_veicle_motoristas, true)
+                include_options_container(container_veicle_motoristas, 'option_driver', true)
                 break
 
             case 'config_motorista':
@@ -99,7 +99,19 @@ function open_popup_edit(id, obj_click=false) {
                 break
             
             case 'config_ponto':
-                card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
+                config_popup_point(extract_info(obj_click, 'nome'))
+                break
+            
+            case ('edit_ponto_nome'):
+                popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
+                break
+            
+            case 'edit_ponto_tempo_tolerancia':
+                popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
+                break
+            
+            case 'edit_ponto_linkGPS':
+                popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
                 break
 
             case 'config_linha':
@@ -122,7 +134,13 @@ function open_popup_edit(id, obj_click=false) {
             case 'add_veicle':
                 const container_motoristas = card.querySelector('div#' + popup.id + '_options_container')
                 container_motoristas.innerHTML = ''
-                include_optionsMotorista(container_motoristas)
+                include_options_container(container_motoristas, 'option_driver')
+                break
+            
+            case 'add_route':
+                const container_veicles = card.querySelector('div#' + popup.id + '_options_container')
+                container_veicles.innerHTML = ''
+                include_options_container(container_veicles, 'option_veicle')
                 break
 
             case 'promover_motorista':
@@ -130,10 +148,6 @@ function open_popup_edit(id, obj_click=false) {
                 break
             
             case 'rebaixar_motorista':
-                card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-                break
-            
-            case 'remover_motorista':
                 card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
                 break
             
@@ -321,7 +335,7 @@ function set_sequence(obj_child) {
 }
 
 
-function include_optionsMotorista(container, option_nenhum = false,  model_id = 'model_option') {
+function include_options_container(container, option, option_nenhum = false,  model_id = 'model_option') {
     const name_line = document.getElementById('interface_nome').textContent
     const model = document.getElementById(model_id)
 
@@ -339,7 +353,7 @@ function include_optionsMotorista(container, option_nenhum = false,  model_id = 
         container.appendChild(nenhum)
     }
 
-    fetch(`/get_interface-option_driver?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
+    fetch(`/get_interface-${option}?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
@@ -370,7 +384,100 @@ function include_optionsMotorista(container, option_nenhum = false,  model_id = 
 }
 
 
-if (window.location.href.includes('/pagina-usuario')) {
+function config_popup_point(name_point) {
+    const name_line = document.getElementById('interface_nome').textContent
+
+    fetch(`/get_point?name_line=${encodeURIComponent(name_line)}&name_point=${encodeURIComponent(name_point)}`, { method: 'GET' })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            const data = response['info']
+            const utilizacao = response['utilizacao']
+            const turnos = response['turnos']
+
+            for (info in data) {
+                const local = document.getElementById('config_ponto_' + info)
+                local.textContent = data[info]
+
+                if (response['relacao'] !== 'membro') {
+                    document.getElementById(local.id + '_edit').classList.remove('inactive')
+                }
+            }
+
+            document.getElementById('config_ponto_utilizacao_btn').querySelector('p').textContent = utilizacao['quantidade']
+            const model_rota = document.getElementById('interface_model_rota')
+            const utilizacao_container = document.getElementById('config_ponto_utilizacao_container')
+            utilizacao_container.innerHTML = ''
+            for (index in utilizacao['rotas']) {
+              const rota = model_rota.cloneNode(true)
+              rota.id = `${utilizacao_container.id}-rota_${index}`
+
+              ids = rota.querySelectorAll('[id*="interface_model_rota"]')
+              ids.forEach(value => {
+                value.id = value.id.replace(model_rota.id, rota.id)
+              })
+
+              const dados = utilizacao['rotas'][index]
+              for (dado in dados) {
+                rota.querySelector(`[id*="${dado}"]`).textContent = dados[dado]
+              }
+
+              rota.classList.remove('inactive')
+              utilizacao_container.appendChild(rota)
+            }
+
+            const model_aluno = document.getElementById('interface_model_aluno')
+            for (turno in turnos) {
+                document.getElementById(`config_ponto_${turno}_btn`).querySelector('p').textContent = turnos[turno]['quantidade']
+                const container = document.getElementById(`config_ponto_${turno}_container`)
+                container.innerHTML = ''
+
+                const alunos = turnos[turno]['alunos']
+                for (index in alunos) {
+                    const aluno = model_aluno.cloneNode(true)
+                    aluno.id = `${container.id}-aluno_${index}`
+                    const nome = aluno.querySelector('p')
+                    nome.textContent = alunos[index]
+                    nome.id = aluno.id + '_nome'
+
+                    let ant = container.querySelectorAll('div')
+                    if (ant) {
+                        ant = ant[ant.length - 1]
+                        if (ant.querySelector('p').textContent === nome.textContent) {
+                            span_ant = ant.querySelector('span')
+                            span = aluno.querySelector('span')
+
+                            if (!span_ant.textContent === null) {
+                                span_ant.textContent = 0
+                            }
+                            span.textContent = span_ant.textContent + 1
+                        }
+                    }
+
+                    if (response['relacao'] !== 'membro') {
+                        aluno.classList.add('grow')
+                        aluno.querySelector('i').classList.remove('inactive')
+                        aluno.onclick = function() {
+                            open_popup_edit('config_aluno', this)
+                        }
+                    }
+
+                    aluno.classList.remove('inactive')
+                    container.appendChild(aluno)
+                }
+            }
+        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+    })
+}
+
+
+function config_popup_route(name_route) {
+
+}
+
+
+
+if (window.location.href.includes('/page_user')) {
     $(function() {
         $(".sortable").sortable({
             handle: '.icon_move',

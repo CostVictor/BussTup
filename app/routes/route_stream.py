@@ -25,7 +25,9 @@ def extract_agenda():...
 def extract_rota():...
 
 
-# ~~ SSE
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~~~~ SSE ~~~~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
 @app.route("/stream_agenda")
 @login_required

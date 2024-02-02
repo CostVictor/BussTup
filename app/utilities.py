@@ -1,6 +1,6 @@
-from datetime import timedelta, datetime
 from flask_security import current_user
 from app import cursos, turnos
+from sqlalchemy import func
 from app.database import *
 import bcrypt
 
@@ -8,6 +8,18 @@ import bcrypt
 def format_money(value):
     if value: return f'{value:.2f}'.replace('.', ',')
     return '--'
+
+
+def format_time(time):
+    hr = time.strftime('%H')
+    mn = time.strftime('%M')
+
+    if int(mn) != 0:
+        return f'{hr}:{mn} h'
+    return f'{hr} h'
+
+
+def format_data():...
 
 
 def capitalize(name, role):
@@ -25,7 +37,7 @@ def capitalize(name, role):
     return ' '.join(name)
 
 
-def formatData(dadosAdquiridos):
+def format_register(dadosAdquiridos):
     inconsistencia = False
     erro_title = 'Cadastro interrompido'
     erro_text = ''
@@ -127,3 +139,12 @@ def check_permission(data, permission='motorista_adm'):
                         del data['name_line']
                         return 'autorizado'
     return 'não autorizado'
+
+
+def count_part_route(rota):
+    quantidade = (db.session.query(func.count(func.distinct(Aluno_has_Ponto.Aluno_login)))
+        .filter(Aluno_has_Ponto.Ponto_id.in_([ponto.id for ponto in rota.pontos]))
+        .scalar()
+    )
+    if not quantidade: quantidade = 0
+    return quantidade

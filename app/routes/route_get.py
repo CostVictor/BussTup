@@ -1,27 +1,13 @@
 from flask_security import login_required, roles_required, current_user
 from flask import request, jsonify
-from app.utilities import return_dict, return_relationship, format_money
-from sqlalchemy.orm import aliased
+from app.utilities import *
 from app.database import *
 from app import app
 
 
-@app.route("/get_association", methods=['GET'])
-@login_required
-def get_association():
-    response = {'conf': True}
-
-    user = return_user(current_user.primary_key)
-    if user:
-        if current_user.roles[0].name == 'aluno':
-            if user.associacao:
-                response['conf'] = True
-        else:
-            if user.linhas:
-                response['conf'] = True
-
-    return jsonify(response)
-
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~ GET Profile ~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
 @app.route("/get_profile", methods=['GET'])
 @login_required
@@ -44,6 +30,27 @@ def get_perfil():
             data['pix'] = 'Não definido'
 
     return jsonify(data)
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~ GET Page user ~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/get_association", methods=['GET'])
+@login_required
+def get_association():
+    response = {'conf': True}
+
+    user = return_user(current_user.primary_key)
+    if user:
+        if current_user.roles[0].name == 'aluno':
+            if user.associacao:
+                response['conf'] = True
+        else:
+            if user.linhas:
+                response['conf'] = True
+
+    return jsonify(response)
 
 
 @app.route("/get_lines", methods=['GET'])
@@ -75,6 +82,10 @@ def get_lines():
     else: data['identify'] = False
     return jsonify(data)
 
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~ GET Interface Line ~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
 @app.route("/get_interface-line", methods=['GET'])
 @login_required
@@ -140,6 +151,100 @@ def get_interface_driver():
     return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
+@app.route("/get_interface-veicle", methods=['GET'])
+@login_required
+@roles_required("motorista")
+def get_interface_veicle():
+    name_line = request.args.get('name_line')
+    if name_line:
+        linha = Linha.query.filter_by(nome=name_line).first()
+        user = return_user(current_user.primary_key)
+        if linha and user:
+            retorno = {
+                'error': False, 
+                'relacao': return_relationship(linha.codigo),
+                'meu_nome': user.nome,
+                'data': []
+            }
+            veicles = Onibus.query.filter_by(Linha_codigo=linha.codigo).order_by(Onibus.placa).all()
+            for veicle in veicles:
+                dict_veicle = return_dict(veicle, not_includes=['Linha_codigo', 'Motorista_login'])
+                dict_veicle['motorista_nome'] = veicle.motorista.nome if veicle.motorista else 'Nenhum'
+                retorno['data'].append(dict_veicle)
+            
+            return jsonify(retorno)
+
+    return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
+
+
+@app.route("/get_interface-points", methods=['GET'])
+@login_required
+@roles_required("motorista")
+def get_interface_points():
+    name_line = request.args.get('name_line')
+    if name_line:
+        linha = Linha.query.filter_by(nome=name_line).first()
+        if linha:
+            retorno = {'error': False, 'relacao': return_relationship(linha.codigo)}
+            pontos = Ponto.query.filter_by(Linha_codigo=linha.codigo).order_by(Ponto.nome).all()
+            data = [ponto.nome for ponto in pontos]
+            quantidade = len(data)
+
+            retorno['quantidade'] = f"{quantidade} {'cadastrado' if quantidade == 1 else 'cadastrados'}"
+            retorno['data'] = data
+            return retorno
+    return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
+
+
+@app.route("/get_interface-routes", methods=['GET'])
+@login_required
+def get_interface_route():
+    name_line = request.args.get('name_line')
+    if name_line:
+        linha = Linha.query.filter_by(nome=name_line).first()
+        if linha:
+            rotas = Rota.query.filter_by(Linha_codigo=linha.codigo).order_by(Rota.horario_partida).all()
+            retorno = {'error': False, 'relacao': return_relationship(linha.codigo)}
+            retorno['ativas'] = []; retorno['desativas'] = []
+            retorno['role'] = current_user.roles[0].name
+
+            for rota in rotas:
+                quantidade_alunos = count_part_route(rota)
+                quantidade_alunos = f"{quantidade_alunos} {'pessoa' if quantidade_alunos == 1 else 'pessoas'}"
+                info = {
+                    'turno': rota.turno,
+                    'horario_partida': format_time(rota.horario_partida),
+                    'horario_retorno': format_time(rota.horario_retorno),
+                    'quantidade': quantidade_alunos
+                }
+
+                veiculo = rota.onibus
+                placa = 'Sem veículo'
+                motorista = 'Desativada'
+
+                if veiculo:
+                    placa = veiculo.placa
+                    motorista = 'Nenhum'
+                    if veiculo.motorista:
+                        motorista = veiculo.motorista.nome
+                    retorno['ativas'].append(info)
+                else: retorno['desativas'].append(info)
+
+                info['placa'] = placa
+                info['motorista'] = motorista
+
+            quantidade_rotas = len(retorno['ativas']) + len(retorno['desativas'])
+            retorno['quantidade'] = f"{quantidade_rotas} {'cadastrada' if quantidade_rotas == 1 else 'cadastradas'}"
+
+            return jsonify(retorno)
+
+    return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~ GET Options ~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
 @app.route("/get_interface-option_driver", methods=['GET'])
 @login_required
 @roles_required("motorista")
@@ -173,26 +278,90 @@ def get_options_driver():
     return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
-@app.route("/get_interface-veicle", methods=['GET'])
+@app.route("/get_interface-option_veicle", methods=['GET'])
 @login_required
-def get_interface_veicle():
+@roles_required("motorista")
+def get_options_veicle():
     name_line = request.args.get('name_line')
     if name_line:
         linha = Linha.query.filter_by(nome=name_line).first()
-        user = return_user(current_user.primary_key)
-        if linha and user:
-            retorno = {
-                'error': False, 
-                'relacao': return_relationship(linha.codigo),
-                'meu_nome': user.nome,
-                'data': []
-            }
-            veicles = Onibus.query.filter_by(Linha_codigo=linha.codigo).order_by(Onibus.placa).all()
-            for veicle in veicles:
-                dict_veicle = return_dict(veicle, not_includes=['Linha_codigo', 'Motorista_login'])
-                dict_veicle['motorista_nome'] = veicle.motorista.nome if veicle.motorista else 'Nenhum'
-                retorno['data'].append(dict_veicle)
-            
-            return jsonify(retorno)
+        if linha:
+            relacao = return_relationship(linha.codigo)
+            if relacao and relacao != 'membro':
+                retorno = {'error': False, 'data': []}
 
+                for onibus in linha.onibus:
+                    motorista = onibus.motorista.nome if onibus.motorista else 'Nenhum'
+                    retorno['data'].append(f"{onibus.placa} > {motorista}")
+                
+                return jsonify(retorno)
+    
     return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ GET Config ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/get_point", methods=['GET'])
+@login_required
+@roles_required("motorista")
+def get_point():
+    name_line = request.args.get('name_line')
+    name_point = request.args.get('name_point')
+
+    if name_line and name_point:
+        linha = Linha.query.filter_by(nome=name_line).first()
+        if linha:
+            relationship = return_relationship(linha.codigo)
+            if relationship:
+                ponto = Ponto.query.filter_by(nome=name_point, Linha_codigo=linha.codigo).first()
+                if ponto:
+                    retorno = {'error': False, 'relacao': relationship, 'turnos': {}}
+                    dict_ponto = return_dict(ponto, not_includes=['id', 'Linha_codigo'])
+                    retorno['info'] = dict_ponto
+                    retorno['utilizacao'] = {'rotas': []}
+                    retorno['turnos']['Matutino'] = {'alunos': []}
+                    retorno['turnos']['Vespertino'] = {'alunos': []}
+                    retorno['turnos']['Noturno'] = {'alunos': []}
+
+                    if not dict_ponto['tempo_tolerancia']:
+                        dict_ponto['tempo_tolerancia'] = 5
+                    
+                    if not dict_ponto['linkGPS']:
+                        dict_ponto['linkGPS'] = 'Não definido'
+                    
+                    for relacao_rotas in ponto.rotas:
+                        rota = relacao_rotas.rota
+                        dados = {}
+
+                        if rota.tipo == 'partida':
+                            dados['placa'] = rota.Onibus_placa
+                            dados['turno'] = rota.turno
+                            dados['horario'] = f"{rota.horario} h"
+                            retorno['utilizacao']['rotas'].append(dados)
+
+                    quantidade_utilizacao = len(retorno['utilizacao']['rotas'])
+                    retorno['utilizacao']['quantidade'] = f"{quantidade_utilizacao} {'rota' if quantidade_utilizacao == 1 else 'rotas'}"
+
+                    alunos = db.session.query(Aluno).join(Aluno_has_Ponto).filter(
+                        db.and_(
+                            Aluno.login == Aluno_has_Ponto.Aluno_login,
+                            Aluno_has_Ponto.Ponto_id == ponto.id
+                        )
+                    ).order_by(Aluno.nome).all()
+
+                    for aluno in alunos:
+                        retorno['turnos'][aluno.turno].append(aluno.nome)
+                    
+                    quantidade_matutino = len(retorno['turnos']['Matutino']['alunos'])
+                    quantidade_vespertino = len(retorno['turnos']['Vespertino']['alunos'])
+                    quantidade_noturno = len(retorno['turnos']['Noturno']['alunos'])
+
+                    retorno['turnos']['Matutino']['quantidade'] = f"{quantidade_matutino} {'cadastrado' if quantidade_matutino == 1 else 'cadastrados'}"
+                    retorno['turnos']['Vespertino']['quantidade'] = f"{quantidade_vespertino} {'cadastrado' if quantidade_vespertino == 1 else 'cadastrados'}"
+                    retorno['turnos']['Noturno']['quantidade'] = f"{quantidade_noturno} {'cadastrado' if quantidade_noturno == 1 else 'cadastrados'}"
+
+                    return jsonify(retorno)
+
+    return jsonify({'error': True, 'title': 'Erro de carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações do ponto.'})

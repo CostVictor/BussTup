@@ -10,6 +10,7 @@
     --cinza_secundario: #454545;
     --cinca_terciario: #b3b3b3;
     --cinza_quaternario: #b3b3b345;
+    --cinza_inativo: #b3b3b32f;
     --azul_primario: #004aad;
     --azul_secundario: #003f93;
     --azul_terciario: #013983;
@@ -178,6 +179,14 @@ body {
 .scroll_vertical.no_borderY {
     padding-top: 0;
     padding-bottom: 0;
+}
+
+.scroll_vertical.margin_bottom {
+    margin-bottom: calc(0.5vw + 0.5vh + 1vmin);
+}
+
+.scroll_vertical.margin_top {
+    margin-top: calc(0.5vw + 0.5vh + 1vmin);
 }
 
 .scroll_horizontal {

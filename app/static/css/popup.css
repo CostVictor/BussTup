@@ -93,6 +93,24 @@
     justify-content: space-around;
 }
 
+.popup__container--input {
+    background-color: var(--branco_terciario);
+    border-radius: calc(0.4vw + 0.4vh + 1vmin);
+    margin: calc(0.1vw + 0.1vh + 0.8vmin) 0 calc(0.1vw + 0.1vh + 0.8vmin) 0;
+    transition: scale 0.2s ease-in-out;
+    cursor: pointer;
+    display: flex;
+    width: 100%;
+}
+
+.popup__container--input.inactive {
+    display: none;
+}
+
+.popup__container--input:hover {
+    scale: 1.03;
+}
+
 .popup__title {
     width: 100%;
     display: flex;
@@ -104,8 +122,28 @@
     text-align: center;
 }
 
+.popup__text_local {
+    font-size: calc(0.85vw + 0.9vh + 1vmin);
+    margin-left: calc(0.5vw + 0.5vh + 1vmin);
+    color: var(--azul_terciario);
+    text-wrap: nowrap;
+    user-select: none;
+    overflow: hidden;
+}
+
+.popup__text_local.display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 calc(0.3vw + 0.3vh + 1vmin) 0 calc(0.2vw + 0.2vh + 1vmin);
+    padding-left: calc(0.2vw + 0.2vh + 1vmin);
+    border-left: var(--cinza_quaternario) solid 0.06rem;
+    border-radius: calc(0.5vw + 0.5vh + 1vmin);
+    width: 27%;
+}
+
 .popup__text {
-    font-size: calc(0.8vw + 0.8vh + 1vmin);
+    font-size: calc(0.85vw + 0.9vh + 1vmin);
     margin-right: calc(0.5vw + 0.5vh + 1vmin);
     margin-bottom: calc(0.1vw + 0.1vh + 1vmin);
     pointer-events: none;
@@ -201,10 +239,17 @@
     align-items: center;
     background-color: var(--branco_terciario);
     border-radius: calc(0.1vw + 0.1vh + 1vmin);
-    padding: calc(0.1vw + 0.1vh + 1vmin) 0 calc(0.1vw + 0.1vh + 1vmin) 0;
-    margin: calc(0.2vw + 0.2vh + 1vmin) 0 calc(0.2vw + 0.2vh + 1vmin) 0;
-    cursor: pointer;
+    padding: calc(0.2vw + 0.2vh + 1vmin) 0 calc(0.2vw + 0.2vh + 1vmin) 0;
+    margin: calc(0.1vw + 0.1vh + 0.8vmin) 0 calc(0.1vw + 0.1vh + 0.8vmin) 0;
     user-select: none;
+}
+
+.popup__input_big {
+    display: flex;
+    flex-direction: column;
+    transition: scale 0.2s ease-in-out;
+    padding: calc(0.2vw + 0.2vh + 1vmin) 0 calc(0.2vw + 0.2vh + 1vmin) 0;
+    width: 73%;
 }
 
 .popup__input.move {
@@ -216,6 +261,7 @@
 
 .popup__input.grow {
     transition: scale 0.2s ease-in-out;
+    cursor: pointer;
 }
 
 .popup__input.grow:hover {
@@ -235,8 +281,9 @@
 }
 
 .popup__input.checkbox {
+    transition: opacity 0.2s ease, background-color 0.25s ease, scale 0.2s ease-in-out;
     width: 100%;
-    transition: opacity 0.2s ease, background-color 0.25s ease;
+    cursor: pointer;
 }
 
 .popup__input.checkbox.bool {
@@ -265,4 +312,9 @@
 
 .popup__icon.hidden {
     opacity: 0;
+}
+
+.popup__local {
+    display: flex;
+    width: 100%;
 }

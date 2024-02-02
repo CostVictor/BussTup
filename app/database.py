@@ -67,10 +67,13 @@ class Rota(db.Model):
     __tablename__ = 'Rota'
     codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     turno = db.Column(db.String(10), nullable=False)
-    tipo = db.Column(db.String(5), nullable=False)
-    em_atividade = db.Column(db.Boolean, nullable=False, default=0)
-    horario = db.Column(db.Time)
-    Onibus_placa = db.Column(db.String(7), db.ForeignKey('Onibus.placa'), nullable=False)
+    em_partida = db.Column(db.Boolean, nullable=False, default=0)
+    em_retorno = db.Column(db.Boolean, nullable=False, default=0)
+    horario_partida = db.Column(db.Time, nullable=False)
+    horario_retorno = db.Column(db.Time, nullable=False)
+    Linha_codigo = db.Column(db.BigInteger, db.ForeignKey('Linha.codigo'), nullable=False)
+    Onibus_placa = db.Column(db.String(7), db.ForeignKey('Onibus.placa'))
+    linha = db.relationship('Linha', backref=db.backref('rotas', lazy=True))
     onibus = db.relationship('Onibus', backref=db.backref('rotas', lazy=True))
 
 
@@ -100,7 +103,7 @@ class Ponto(db.Model):
     __tablename__ = 'Ponto'
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     nome = db.Column(db.String(100), nullable=False)
-    tempo_tolerancia = db.Column(db.String(1))
+    tempo_tolerancia = db.Column(db.String(2))
     linkGPS = db.Column(db.String(200))
     Linha_codigo = db.Column(db.BigInteger, db.ForeignKey('Linha.codigo'), nullable=False)
     linha = db.relationship('Linha', backref=db.backref('pontos', lazy=True))
@@ -110,8 +113,9 @@ class Rota_has_Ponto(db.Model):
     __tablename__ = 'Rota_has_Ponto'
     Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), primary_key=True, nullable=False)
     Ponto_id = db.Column(db.BigInteger, db.ForeignKey('Ponto.id'), primary_key=True, nullable=False)
+    tipo = db.Column(db.String(7), nullable=False)
     ordem = db.Column(db.String(2), nullable=False)
-    hora_passagem = db.Column(db.TIME, nullable=False)
+    hora_passagem = db.Column(db.Time, nullable=False)
     rota = db.relationship('Rota', backref=db.backref('pontos', lazy=True))
     ponto = db.relationship('Ponto', backref=db.backref('rotas', lazy=True))
 
@@ -136,7 +140,7 @@ class Aluno_has_Ponto(db.Model):
     Aluno_login = db.Column(db.String(100), db.ForeignKey('Aluno.login'), primary_key=True, nullable=False)
     acao = db.Column(db.String(6), nullable=False)
     esperar = db.Column(db.Boolean, nullable=False, default=False)
-    tipo = db.Column(db.String(10), nullable=False)
+    tipo = db.Column(db.String(7), nullable=False)
     dt_validade_temporario = db.Column(db.Date)
     dt_validade_espera = db.Column(db.Date)
     ponto = db.relationship('Ponto', backref=db.backref('associados', lazy=True))
@@ -180,6 +184,7 @@ class Registro_Rota(db.Model):
     __tablename__ = 'Registro_Rota'
     codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     data = db.Column(db.Date, nullable=False)
+    tipo = db.Column(db.String(7), nullable=False)
     quantidade_pessoas = db.Column(db.Integer, nullable=False)
     previsao_pessoas = db.Column(db.Integer, nullable=False)
     Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), nullable=False)

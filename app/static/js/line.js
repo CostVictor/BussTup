@@ -164,6 +164,34 @@ function edit_motorista_veiculo() {
 }
 
 
+function edit_point(form_submit, event) {
+    event.preventDefault()
+
+    let field = form_submit.id.split('_')
+    field = field[field.length - 1]
+    if (field === 'tolerancia') {field = 'tempo_tolerancia'}
+
+    const new_value = form_submit.querySelector('input').value.trim()
+    const name_line = document.getElementById('interface_nome').textContent
+    const name_point = document.getElementById('edit_ponto_' + field).querySelector('span').textContent
+
+    fetch("/edit_point", {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({'field': field, 'new_value': new_value, 'name_line': name_line, 'name_point': name_point})
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            cancel_popup_edit('edit_ponto_' + field)
+            create_popup(response['title'], response['text'], 'Ok', 'success')
+            loadInterfacePoints(name_line)
+            document.getElementById('config_ponto_' + field).textContent = new_value
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
+    })
+}
+
+
 // ~~ Criação ~~ //
 
 function create_veicle() {
@@ -196,7 +224,88 @@ function create_veicle() {
             cancel_popup_edit('add_veicle')
             create_popup(response['title'], response['text'], 'Ok', 'success')
             loadInterfaceVeicle(name_line)
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
+    })
+}
+
+
+function create_point(event) {
+    event.preventDefault()
+
+    const name_line = document.getElementById('interface_nome').textContent
+    const name_point = document.getElementById('add_point_nome').value.trim()
+    const tolerance_point = document.getElementById('add_point_tolerancia').value.trim()
+    const gps_point = document.getElementById('add_point_gps').value.trim()
+
+    let data = {
+        'name_point': name_point,
+        'tempo_tolerancia': tolerance_point,
+        'linkGPS': gps_point,
+        'name_line': name_line
+    }
+    if (!gps_point) {
+        delete data.linkGPS
+    }
+    if (!tolerance_point) {
+        delete data.tempo_tolerancia
+    }
+
+    fetch("/create_point", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            cancel_popup_edit('add_point')
+            create_popup(response['title'], response['text'], 'Ok', 'success')
+            loadInterfacePoints(name_line)
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
+    })
+}
+
+function create_route(event) {
+    event.preventDefault()
+
+    const name_line = document.getElementById('interface_nome').textContent
+    const turno = document.getElementById('add_route_turno').value.trim()
+    const hr_partida = document.getElementById('add_route_horario_partida').value.trim()
+    const ht_retorno = document.getElementById('add_route_horario_retorno').value.trim()
+
+    const options = document.getElementById('add_route_options')
+    let option_selected = options.querySelector('[class*="selected"]')
+    option_selected = option_selected.parentNode.querySelector('p').textContent
+
+    let veicle = 'Nenhum'
+    if (option_selected == 'Sim') {
+        const plate_selected = document.getElementById('add_route_options_container').querySelector('[class*="selected"]')
+
+        if (plate_selected) {
+            veicle = plate_selected.textContent.trim().split(' ')[0]
+        }
+    }
+
+    const data = {
+        'turno': turno, 
+        'horario_partida': hr_partida,
+        'horario_retorno': ht_retorno,
+        'plate': veicle,
+        'name_line': name_line
+    }
+    
+    fetch("/create_route", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            cancel_popup_edit('add_route')
+            create_popup(response['title'], response['text'], 'Ok', 'success')
+            loadInterfaceRoutes(name_line)
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
 
@@ -268,13 +377,13 @@ function loadInterfaceLine(name_line, load_complete = true) {
 
             if (load_complete) {
                 loadInterfaceDriver(name_line)
-            
                 if (response['role'] === 'motorista') {
                     loadInterfaceVeicle(name_line)
+                    loadInterfacePoints(name_line)
                 }
+                loadInterfaceRoutes(name_line)
             }
-
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
 
@@ -327,7 +436,7 @@ function loadInterfaceDriver(name_line) {
                     local_motorista.appendChild(motorista)
                 }
             }
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
 
@@ -397,6 +506,118 @@ function loadInterfaceVeicle(name_line) {
                 container_veicles.appendChild(element)
             }
 
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
+    })
+}
+
+
+function loadInterfacePoints(name_line) {
+    fetch(`/get_interface-points?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            const model = document.getElementById('interface_model_ponto')
+            const local_pontos = document.getElementById('interface_pontos_local')
+            const division = document.getElementById('interface_pontos_division')
+            const add_ponto = document.getElementById('interface_pontos_add')
+
+            const relacao = response['relacao']
+            const data = response['data']
+            
+            local_pontos.innerHTML = ''
+            document.getElementById('interface_pontos_quantidade').textContent = response['quantidade']
+            division.classList.add('inactive')
+            add_ponto.classList.add('inactive')
+            if (data.length) {
+                if (relacao && relacao !== 'membro') {
+                    division.classList.remove('inactive')
+                    add_ponto.classList.remove('inactive')
+                }
+
+                for (index in data) {
+                    const ponto = model.cloneNode(true)
+                    ponto.id = `${local_pontos.id}-ponto_${index}`
+                    const text = ponto.querySelector('p')
+                    text.textContent = data[index]
+                    text.id = ponto.id + '_nome'
+    
+                    if (relacao) {
+                        ponto.onclick = function() {
+                            open_popup_edit('config_ponto', this)
+                        }
+                        ponto.querySelector('i').classList.remove('inactive')
+                        ponto.classList.add('grow')
+                    }
+                    
+                    ponto.classList.remove('inactive')
+                    local_pontos.appendChild(ponto)
+                }
+            } else {
+                if (relacao && relacao !== 'membro') {
+                    add_ponto.classList.remove('inactive')
+                }
+            }
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
+    })
+}
+
+
+function loadInterfaceRoutes(name_line) {
+    const model_route = document.getElementById('model_interface_rota')
+    function load_route(list_itens, container_include) {
+        for (index in list_itens) {
+            const route = model_route.cloneNode(true)
+            route.id = `${container_include.id}-rota_${index}`
+
+            ids = route.querySelectorAll(`[id*="${model_route.id}"]`)
+            ids.forEach(element => {
+                element.id = element.id.replace(model_route.id, route.id)
+            })
+
+            const dados = list_itens[index]
+            for (dado in dados) {
+                const info = route.querySelector(`[id*="${dado}"]`)
+                info.textContent = dados[dado]
+            }
+            route.classList.remove('inactive')
+            container_include.appendChild(route)
+        }
+    }
+
+    fetch(`/get_interface-routes?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            const local_ativas = document.getElementById('interface_rotas_ativas')
+            const ativas = response['ativas']
+
+            local_ativas.innerHTML = ''
+            if (response['role'] == 'motorista') {
+                const container_desativas = document.getElementById('interface_rotas_desativas')
+                const local_desativas = container_desativas.querySelector('div')
+                const desativas = response['desativas']
+
+                local_desativas.innerHTML = ''
+                container_desativas.classList.add('inactive')
+
+                document.getElementById('interface_rotas_quantidade').textContent = response['quantidade']
+                const route_division = document.getElementById('interface_rotas_division')
+                const route_add = document.getElementById('interface_rotas_add')
+
+                route_division.classList.add('inactive')
+                route_add.classList.add('inactive')
+                if (response['relacao'] && response['relacao'] !== 'membro') {
+                    route_add.classList.remove('inactive')
+                    if (ativas.length || desativas.length) {
+                        route_division.classList.remove('inactive')
+                        if (desativas.length) {
+                            container_desativas.classList.remove('inactive')
+                        }
+                    }
+                }
+                load_route(desativas, local_desativas)
+            }
+            load_route(ativas, local_ativas)
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }

@@ -19,26 +19,22 @@
 </head>
 <body onload="enterPage()">
     <p class="hidden_point">.</p>
-    <!-- Models -->
+    
     {% include "model_index.html" %}
+    {% include "popup_index.html" %}
 
     {% if role == 'aluno' %}
 
-        {% include "template_models/model_aluno.html" %}
+        {% include "template_models/model_student.html" %}
+        {% include "popups_edit/popup_student.html" %}
 
-        <!-- POPUPs edit -->
-        {% include "popups_edit/popup_aluno.html" %}
+    {% else %}
 
-    {% elif role == 'motorista' %}
-
-        {% include "template_models/model_motorista.html" %}
-
-        <!-- POPUPs edit -->
-        {% include "popups_edit/popup_motorista.html" %}
+        {% include "template_models/model_driver.html" %}
+        {% include "popups_edit/popup_driver.html" %}
 
     {% endif %}
 
-    <!-- ----- -->
     <header id="header_page" class="page__container--header header_hidden hidden">
         <h1 class="text--header">BussTup</h1>
         <div class="page__container--icon">
