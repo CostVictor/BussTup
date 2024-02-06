@@ -158,6 +158,7 @@ function edit_motorista_veiculo() {
                 cancel_popup_edit('edit_veicle_motorista')
                 create_popup(response['title'], response['text'], 'Ok', 'success')
                 loadInterfaceVeicle(name_line)
+                loadInterfaceRoutes(name_line)
             } else {create_popup(response['title'], response['text'], 'Voltar')}
         })
     }
@@ -332,21 +333,9 @@ function loadInterfaceLine(name_line, load_complete = true) {
                     } else if (response['relacao'] === 'adm') {adm = true}
                 } else {aviso_entrada.classList.remove('inactive')}
             } else {
-                const sem_relacao = document.getElementById('interface_sem_participacao')
-                const cadastrar = document.getElementById('interface_cadastrar')
-                const bloqueio = document.getElementById('interface_bloqueio')
-
-                sem_relacao.classList.remove('inactive')
-                cadastrar.classList.remove('inactive')
-                bloqueio.classList.add('inactive')
-
-                if (response['relacao']) {
-                    if (response['relacao'] === 'não participante') {
-                        sem_relacao.classList.add('inactive')
-                        cadastrar.classList.add('inactive')
-                        bloqueio.classList.remove('inactive')
-                    }
-                } else {aviso_entrada.classList.remove('inactive')}
+                if (!response['relacao'] || response['relacao'] === 'não participante') {
+                    aviso_entrada.classList.remove('inactive')
+                }
             }
 
             for (dado in response['data']) {
@@ -580,6 +569,21 @@ function loadInterfaceRoutes(name_line) {
                 info.textContent = dados[dado]
             }
             route.classList.remove('inactive')
+
+            if (index) {
+                let qnt = 0
+                const dados_ant = list_itens[index - 1]
+                for (num in dados_ant) {
+                    if (dados_ant[num] === dados[num]) {qnt++}
+                }
+
+                if (qnt === Object.keys(dados).length) {
+                    const route_ant = document.getElementById(`${container_include.id}-rota_${index - 1}`)
+                    const span_ant = route_ant.querySelector('span')
+                    if (!span_ant.textContent) {span_ant.textContent = 0}
+                    route.querySelector('span').textContent = parseInt(span_ant.textContent) + 1
+                }
+            }
             container_include.appendChild(route)
         }
     }
@@ -593,12 +597,15 @@ function loadInterfaceRoutes(name_line) {
 
             local_ativas.innerHTML = ''
             if (response['role'] == 'motorista') {
-                const container_desativas = document.getElementById('interface_rotas_desativas')
-                const local_desativas = container_desativas.querySelector('div')
+                const local_desativas = document.getElementById('interface_rotas_desativas')
+                const division_desativas = document.getElementById('interface_rotas_desativas_division')
+                const title_desativas = document.getElementById('interface_rotas_desativas_title')
                 const desativas = response['desativas']
 
                 local_desativas.innerHTML = ''
-                container_desativas.classList.add('inactive')
+                local_desativas.classList.add('inactive')
+                division_desativas.classList.add('inactive')
+                title_desativas.classList.add('inactive')
 
                 document.getElementById('interface_rotas_quantidade').textContent = response['quantidade']
                 const route_division = document.getElementById('interface_rotas_division')
@@ -606,14 +613,17 @@ function loadInterfaceRoutes(name_line) {
 
                 route_division.classList.add('inactive')
                 route_add.classList.add('inactive')
+
                 if (response['relacao'] && response['relacao'] !== 'membro') {
                     route_add.classList.remove('inactive')
                     if (ativas.length || desativas.length) {
                         route_division.classList.remove('inactive')
-                        if (desativas.length) {
-                            container_desativas.classList.remove('inactive')
-                        }
                     }
+                }
+                if (desativas.length) {
+                    local_desativas.classList.remove('inactive')
+                    division_desativas.classList.remove('inactive')
+                    title_desativas.classList.remove('inactive')
                 }
                 load_route(desativas, local_desativas)
             }

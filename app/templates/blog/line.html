@@ -13,7 +13,8 @@
     <main id="interface_linha_content" class="interface__container--content">
         <section id="interface_linha_entrar" class="interface__container--area">
             <h2 class="text title">Aviso</h2>
-            <p id="interface_sem_participacao" class="text secundario emphasis">Você não participa desta linha.</p>
+            <p class="text secundario fundo cinza">Você não participa desta linha.</p>
+
             {% if role == 'motorista' %}
             <p class="text secundario fundo margin_bottom">Solicite entrada para conseguir interagir:</p>
             <div class="page__container justify">
@@ -23,17 +24,10 @@
             </div>
 
             {% else %}
-            <div id="interface_bloqueio" class="inactive">
-                <p class="text secundario fundo margin_bottom">Identificamos que você já possui registro em uma outra linha.</p>
-                <p class="text secundario emphasis">Cancele o registro para poder participar desta.</p>
-            </div>
-
-            <div id="interface_cadastrar">
-                <p class="text secundario fundo margin_bottom">Cadastre-se em um ponto para participar:</p>
-                <div class="page__container justify">
-                    <div class="interface__container--btn add aba" onclick="">
-                        <p class="interface__text">Cadastrar</p>
-                    </div>
+            <p class="text secundario fundo margin_bottom">Cadastre-se em uma rota para participar:</p>
+            <div class="page__container justify">
+                <div class="interface__container--btn add aba" onclick="">
+                    <p class="interface__text">Cadastrar</p>
                 </div>
             </div>
 
@@ -92,7 +86,7 @@
         <section id="area_rotas" class="interface__container--area">
             {% if role == 'aluno' %}
             <h2 class="text title">Rotas</h2>
-            <div id="interface_rotas_ativas" class="scroll_vertical init_top no_borderY popup__container--scroll principal space"></div>
+            <div id="interface_rotas_ativas" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
 
             {% elif role == 'motorista' %}
             <h2 class="text title">Pontos e Rotas</h2>
@@ -122,11 +116,9 @@
             <div id="interface_rotas_container" class="space inactive">
                 <div id="interface_rotas_ativas" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
 
-                <div id="interface_rotas_desativas" class="scroll_vertical init_top no_borderY popup__container--scroll principal inactive">
-                    <h1 id="interface_rotas_division" class="page__division aba"></h1>
-                    <h3 class="text info center fundo cinza margin_bottom">Rotas desativadas</h3>
-                    <div id="interface_rotas_local_desativas"></div>
-                </div>
+                <h1 id="interface_rotas_desativas_division" class="page__division aba"></h1>
+                <h3 id="interface_rotas_desativas_title" class="text info center fundo cinza margin_bottom">Rotas desativadas</h3>
+                <div id="interface_rotas_desativas" class="scroll_vertical init_top no_borderY popup__container--scroll principal inactive"></div>
 
                 <h1 id="interface_rotas_division" class="page__division aba"></h1>
                 <div id="interface_rotas_add" class="page__container justify">

@@ -94,3 +94,7 @@ body {
     margin: calc(1vw + 1vh + 1vmin) 0;
     width: 100%;
 }
+
+.perfil__division.popup {
+    width: 90%;
+}

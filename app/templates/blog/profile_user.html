@@ -16,9 +16,7 @@
 </head>
 <body onload="enterProfile()">
     <p class="hidden_point">.</p>
-    <!-- POPUPs edit -->
     {% include "popups_edit/popup_profile.html" %}
-    <!-- ----- -->
 
     <section class="perfil__container">
         <header class="perfil__container--header pos_relative hidden" onclick="open_popup_edit('config_usuario')">
@@ -29,21 +27,25 @@
         <div class="perfil__container--content">
             <h1 class="text title first enter">Meus dados</h1>
             <div class="perfil__item enter">
-                <p class="text secundario emphasis">E-mail</p>
-                <p id="perfil_email" class="text secundario fundo content"></p>
+                <p class="text secundario emphasis nowrap">E-mail</p>
+                <div class="scroll_horizontal">
+                    <p id="perfil_email" class="text secundario fundo content"></p>
+                </div>
                 <i class="bi bi-pencil-square perfil__icon" onclick="open_popup_edit('edit_email')"></i>
             </div>
 
             <div class="perfil__item enter">
-                <p class="text secundario emphasis">Telefone</p>
+                <p class="text secundario emphasis nowrap">Telefone</p>
                 <p id="perfil_telefone" class="text secundario fundo content"></p>
                 <i class="bi bi-pencil-square perfil__icon" onclick="open_popup_edit('edit_telefone')"></i>
             </div>
 
             {% if role == 'motorista' %}
             <div class="perfil__item enter">
-                <p class="text secundario emphasis">Pix</p>
-                <p id="perfil_pix" class="text secundario fundo content"></p>
+                <p class="text secundario emphasis nowrap">Chave Pix</p>
+                <div class="scroll_horizontal">
+                    <p id="perfil_pix" class="text secundario fundo content"></p>
+                </div>
                 <i class="bi bi-pencil-square perfil__icon" onclick="open_popup_edit('edit_pix')"></i>
             </div>
 

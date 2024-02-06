@@ -9,7 +9,7 @@ app = Flask(__name__)
 # ~~ Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/busstup'
 app.config['SQLALCHEMY_BINDS'] = {
-    'security_db': 'mysql+pymysql://root@localhost/busstup_security'
+    'db_session': 'mysql+pymysql://root@localhost/busstup_session'
 }
 
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
@@ -18,7 +18,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 }
 
 app.config['SQLALCHEMY_BINDS_OPTIONS'] = {
-    'security_db': {
+    'db_session': {
         'pool_size': 5,
         'max_overflow': 2
     }

@@ -166,7 +166,7 @@ body {
 
 .scroll_vertical {
     display: flex;
-    padding: calc(0.8vw + 0.8vh + 1vmin);
+    padding: calc(0.3vw + 0.3vh + 1vmin);
     flex-direction: column;
     overflow-y: auto;
     position: relative;

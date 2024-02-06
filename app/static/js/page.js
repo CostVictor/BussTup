@@ -286,7 +286,7 @@ function validationLine(obj_form, event) {
         .then(response => response.json())
         .then(response => {
             if (response['error']) {
-                create_popup(response['title'], response['text'], 'Voltar', 'error', '', false)
+                create_popup(response['title'], response['text'], 'Voltar', 'info', '', false)
             } else {
                 cancel_popup_edit('create_line')
                 create_popup(response['title'], response['text'], 'Ok', 'success')

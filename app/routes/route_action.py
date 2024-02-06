@@ -10,6 +10,14 @@ import bcrypt
 ''' ~~~~~~~ Session ~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
+@app.errorhandler(429)
+def return_limitacao(e):
+    route = request.endpoint
+    if route == 'cadastrar_usuario':
+        return jsonify({'error': True, 'title': 'Excesso de Cadastro', 'text': 'Identificamos que você realizou várias tentativas de cadastro em um curto período de tempo. Por questões de segurança, bloqueamos temporariamente o seu acesso.'})
+    return jsonify({'error': True, 'title': 'Limite de Tentativas Excedido', 'text': 'Parece que você atingiu o limite de tentativas de login. Por questões de segurança, sua conta foi temporariamente bloqueada. Por favor, tente novamente mais tarde.'}), 429
+
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -22,23 +30,18 @@ def autenticar_usuario():
     data = request.get_json()
 
     if data and 'login' in data and 'password' in data:
-        user = user_datastore.find_user(primary_key=data['login'])
+        user = user_datastore.find_user(login=data['login'])
 
-        if user and bcrypt.checkpw(data['password'].encode('utf-8'), user.hash_senha):
+        if user and bcrypt.checkpw(data['password'].encode('utf-8'), user.password_hash):
+            if not user.active:
+                role = user.roles[0].name
+                if role == 'motorista' and user.analysis:
+                    return jsonify({'error': True, 'title': 'Conta em Avaliação', 'text': 'A análise da sua conta de motorista está em andamento por nossa equipe. Destacamos que esse procedimento não envolve a visualização de suas informações de login. Esse protocolo é adotado para novos usuários motoristas, visando garantir a autenticidade do usuário e fortalecer a segurança do site. Assim que a análise for concluída, enviaremos um e-mail para notificá-lo sobre a liberação do acesso.'})
+                return jsonify({'error': True, 'title': 'Conta Desativada', 'text': 'Esta conta foi desativada por tempo indefinido.'})
             login_user(user)
-
             return jsonify({'error': False, 'redirect': '/page_user'})
         
-    return jsonify({'error': True, 'title': 'Falha de login', 'text': 'Verifique suas credenciais e tente novamente.'})
-
-
-'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
-''' ~~~~~~~ Message ~~~~~~~ '''
-'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
-
-@app.route("/create_message", methods=['POST'])
-@roles_required('motorista')
-def enviar_email():...
+    return jsonify({'error': True, 'title': 'Falha de Login', 'text': 'Verifique suas credenciais e tente novamente.'})
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -47,18 +50,17 @@ def enviar_email():...
 
 @app.route("/register_user", methods=['POST'])
 @limiter.limit('5 per minute')
-def cadastro_usuario():
+def cadastrar_usuario():
     info = format_register(request.get_json())
     if info:
         inconsistencia, title, text, data = info
         if inconsistencia:
             return jsonify({'error': True, 'title': title, 'text': text})
+
+        if create_user(data):
+            return jsonify({'error': False, 'title': 'Usuário Cadastrado', 'text': ''})
     
-        create_user(data)
-        if return_user(data['login']):
-            return jsonify({'error': False, 'title': 'Usuário cadastrado', 'text': ''})
-    
-    return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Ocorreu um erro inesperado ao tentar realizar o cadastro.'})
+    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar realizar o cadastro.'})
     
 
 @app.route("/create_line", methods=['POST'])
@@ -72,31 +74,26 @@ def create_line():
 
         if 'nome' in data and 'cidade' in data:
             if not data['cidade'] in cidades:
-                return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'A cidade definida não está presente entre as opções disponíveis.'})
+                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'A cidade definida não está presente entre as opções disponíveis.'})
 
             if not Linha.query.filter_by(nome=data['nome']).first():
                 data['ferias'] = False
                 linha = Linha(**data)
-                db.session.add(linha)
-                db.session.commit()
+                try:
+                    db.session.add(linha)
+                    with db.session.begin_nested():
+                        relacao = Membro(Linha_codigo=linha.codigo, Motorista_id=current_user.primary_key, dono=True, adm=True)
+                        db.session.add(relacao)
+                    db.session.commit()
+                    return jsonify({'error': False, 'title': 'Linha Cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado como usuário dono.'})
 
-                relacao = Linha_has_Motorista(Linha_codigo=linha.codigo, Motorista_login=current_user.primary_key, motorista_dono=True, motorista_adm=True)
-                db.session.add(relacao)
-                db.session.commit()
-
-                query = db.session.query(Linha_has_Motorista).filter(
-                    db.and_(
-                        Linha_has_Motorista.Motorista_login == current_user.primary_key,
-                        Linha_has_Motorista.Linha_codigo == linha.codigo
-                    )
-                ).first()
-
-                if query:
-                    return jsonify({'error': False, 'title': 'Linha cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado como usuário dono.'})
+                except Exception as e:
+                    db.session.rollback()
+                    print(f'Erro na criação da linha: {str(e)}')
             else:
-                return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Já existe uma linha com o nome especificado.'}) 
+                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Já existe uma linha com o nome especificado.'}) 
 
-    return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a linha.'})
+    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a linha.'})
 
 
 @app.route("/create_veicle", methods=['POST'])
@@ -106,54 +103,60 @@ def create_veicle():
     data = request.get_json()
     permission = check_permission(data)
     if permission == 'autorizado' and 'placa' in data and 'motorista_nome' in data:
-        data['Linha_codigo'] = data.pop('code_line')
         motorista_nome = data.pop('motorista_nome')
         verify_placa = Onibus.query.filter_by(placa=data['placa']).first()
         
         if motorista_nome != 'Nenhum':
-            subquery = db.session.query(Linha_has_Motorista.Motorista_login).filter(Linha_has_Motorista.Linha_codigo == data['Linha_codigo']).subquery()
-            motoria_login = db.session.query(Motorista.login).filter(
+            subquery = db.session.query(Membro.Motorista_id).filter(Membro.Linha_codigo == data['Linha_codigo']).subquery()
+            motoria_id = db.session.query(Motorista.id).filter(
                 db.and_(
                     Motorista.nome == motorista_nome,
-                    Motorista.login.in_(subquery.select())
+                    Motorista.id.in_(subquery.select())
                 )
             ).all()
             
             if not verify_placa:
-                if motoria_login and len(motoria_login) == 1:
-                    data['Motorista_login'] = motoria_login[0].login
-                    verify_not_dis = Onibus.query.filter_by(Motorista_login=data['Motorista_login'], Linha_codigo=data['Linha_codigo']).first()
+                if motoria_id and len(motoria_id) == 1:
+                    data['Motorista_id'] = motoria_id[0].id
+                    check_not_dis = Onibus.query.filter_by(Motorista_id=data['Motorista_id'], Linha_codigo=data['Linha_codigo']).first()
 
                     report = False
-                    if verify_not_dis:
-                        del data['Motorista_login']
+                    if check_not_dis:
+                        del data['Motorista_id']
                         report = True
                     
                     onibus = Onibus(**data)
-                    db.session.add(onibus)
-                    db.session.commit()
+                    try:
+                        db.session.add(onibus)
+                        db.session.commit()
 
-                    if Onibus.query.filter_by(placa=onibus.placa).first():
                         if report:
-                            return jsonify({'error': False, 'title': 'Veículo adicionado', 'text': f'Ao realizar o cadastro, identificamos que o(a) motorista {motorista_nome} já possui vínculo com outro veículo. O condutor deste veículo foi definido como: Nenhum.'})
+                            return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'Ao realizar o cadastro, identificamos que o(a) motorista {motorista_nome} já possui vínculo com outro veículo. O condutor deste veículo foi definido como: Nenhum.'})
                         
-                        return jsonify({'error': False, 'title': 'Veículo adicionado', 'text': f'O veículo foi adicionado e está disponível para utilização. {motorista_nome} foi definido(a) como condutor(a).'})
-
-                return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'O cadastro não pôde ser concluído devido à existência de mais de um usuário motorista com o mesmo nome na linha.'})
+                        return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'O veículo foi adicionado e está disponível para utilização. {motorista_nome} foi definido(a) como condutor(a).'})
+                        
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f'Erro ao criar o veículo: {str(e)}')
+                else:
+                    return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'O cadastro não pôde ser concluído devido à existência de mais de um usuário motorista com o mesmo nome na linha.'})
         else:
             if not verify_placa:
                 onibus = Onibus(**data)
-                db.session.add(onibus)
-                db.session.commit()
 
-                if Onibus.query.filter_by(placa=onibus.placa).first():
-                    return jsonify({'error': False, 'title': 'Veículo adicionado', 'text': 'O veículo foi adicionado e está disponível para utilização. O condutor deste veículo foi definido como: Nenhum.'})
+                try:
+                    db.session.add(onibus)
+                    db.session.commit()
+
+                    return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': 'O veículo foi adicionado e está disponível para utilização. O condutor deste veículo foi definido como: Nenhum.'})
                 
-                return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Ocorreu um erro inesperado ao realizar o cadastro do veículo.'}) 
+                except Exception as e:
+                    db.session.rollback()
+                    print(f'Erro ao criar o veículo: {str(e)}')
+            else:
+                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Identificamos a existência de um veículo cadastrado com a mesma placa em nosso banco de dados. Por favor, revise as informações e tente novamente.'})
 
-        return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Identificamos a existência de um veículo cadastrado com a mesma placa em nosso banco de dados. Por favor, revise as informações e tente novamente.'})
-
-    return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar o veículo.'})    
+    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar o veículo.'})    
 
 
 @app.route("/create_point", methods=['POST'])
@@ -164,20 +167,21 @@ def create_point():
     if data and 'name_point' in data and 'name_line' in data and 'id' not in data and 'nome' not in data:
         permission = check_permission(data)
         if permission == 'autorizado':
-            data['Linha_codigo'] = data.pop('code_line')
             data['nome'] = data.pop('name_point').lower().capitalize()
-
             if not Ponto.query.filter_by(nome=data['nome'], Linha_codigo=data['Linha_codigo']).first():
                 ponto = Ponto(**data)
-                db.session.add(ponto)
-                db.session.commit()
+                try:
+                    db.session.add(ponto)
+                    db.session.commit()
 
-                if Ponto.query.filter_by(nome=ponto.nome, Linha_codigo=ponto.Linha_codigo).first():
-                    return jsonify({'error': False, 'title': 'Ponto cadastrado', 'text': f'{ponto.nome} foi cadastrado com sucesso.'})
+                    return jsonify({'error': False, 'title': 'Ponto Cadastrado', 'text': f'{ponto.nome} foi cadastrado com sucesso.'})
+                except Exception as e:
+                    db.session.rollback()
+                    print(f'Erro ao criar o ponto: {str(e)}')
             else:
-                return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Identificamos que já existe um ponto com esse nome em sua linha. A ação não pôde ser concluída.'})
+                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Identificamos que já existe um ponto com esse nome em sua linha. A ação não pôde ser concluída.'})
 
-    return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar o ponto.'})
+    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar o ponto.'})
 
 
 @app.route("/create_route", methods=['POST'])
@@ -188,31 +192,35 @@ def create_route():
     if data and 'name_line' in data and 'plate' in data and 'turno' in data and 'codigo' not in data:
         permission = check_permission(data)
         if permission == 'autorizado' and 'horario_partida' in data and 'horario_retorno' in data:
-            data['Linha_codigo'] = data.pop('code_line')
             data['Onibus_placa'] = data.pop('plate')
-
             if data['turno'] not in turnos:
-                return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'O turno definido não está presente entre as opções disponíveis.'})
+                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'O turno definido não está presente entre as opções disponíveis.'})
 
             if data['Onibus_placa'] != 'Nenhum':
                 veiculo = Onibus.query.filter_by(Linha_codigo=data['Linha_codigo'], placa=data['Onibus_placa']).first()
                 if veiculo:
                     rota = Rota(**data)
-                    db.session.add(rota)
-                    db.session.commit()
+                    try:
+                        db.session.add(rota)
+                        db.session.commit()
 
-                    if Rota.query.filter_by(codigo=rota.codigo).first():
-                        return jsonify({'error': False, 'title': 'Rota cadastrada', 'text': f'A rota foi adicionada para {veiculo.placa}.'})
+                        return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada para {veiculo.placa}.'})
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f'Erro ao criar a rota: {str(e)}')
             else:
                 del data['Onibus_placa']
                 rota = Rota(**data)
-                db.session.add(rota)
-                db.session.commit()
+                try:
+                    db.session.add(rota)
+                    db.session.commit()
 
-                if Rota.query.filter_by(codigo=rota.codigo).first():
-                    return jsonify({'error': False, 'title': 'Rota cadastrada', 'text': f'A rota foi adicionada à sua linha como desativada e não está disponível para utilização. Configure o veículo da rota para que ela possa entrar em uso.'})
+                    return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada à sua linha como desativada e não está disponível para utilização. Configure o veículo da rota para que ela possa entrar em uso.'})
+                except Exception as e:
+                    db.session.rollback()
+                    print(f'Erro ao criar a rota: {str(e)}')
 
-    return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a rota.'})
+    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a rota.'})
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -224,36 +232,56 @@ def create_route():
 def edit_perfil():
     data = request.get_json()
     if data and 'field' in data and 'new_value' in data and 'password' in data:
-        if bcrypt.checkpw(data['password'].encode('utf-8'), current_user.hash_senha):
+        if bcrypt.checkpw(data['password'].encode('utf-8'), current_user.password_hash):
+            not_modify = ['id', 'curso', 'turno', 'primary_key', 'fs_uniquifier', 'active', 'analysis', 'aceitou_termo_uso_dados']
             field = data['field']
             new_value = data['new_value']
-            not_modify = ['login', 'curso', 'turno']
 
             if field and field not in not_modify and new_value:
-                if field == 'senha':
-                    new_hash_password = bcrypt.hashpw(new_value.encode('utf-8'), bcrypt.gensalt())
-                    current_user.hash_senha = new_hash_password
-                    db.session.commit()
+                if field == 'login':
+                    if not User.query.filter_by(login=new_value).first():
+                        try:
+                            current_user.login = new_value
+                            db.session.commit()
+                            return jsonify({'error': False, 'title': 'Edição Concluída', 'text': 'Seu login foi alterada com sucesso.'})
+                        
+                        except Exception as e:
+                            db.session.rollback()
+                            print(f'Erro ao modificar o perfil: {str(e)}')
+                            
+                    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'O nome de usuário definido não atende aos critérios de cadastro para ser utilizado como login. Por favor, escolha outro nome.'})
 
-                    if current_user.hash_senha == new_hash_password:
-                        return jsonify({'error': False, 'title': 'Edição concluida', 'text': 'Sua senha foi alterada com sucesso.'})
+                elif field == 'senha':
+                    if isinstance(new_value, str):
+                        new_password_hash = bcrypt.hashpw(new_value.encode('utf-8'), bcrypt.gensalt())
+                        try:
+                            current_user.password_hash = new_password_hash
+                            db.session.commit()
+                            return jsonify({'error': False, 'title': 'Edição Concluída', 'text': 'Sua senha foi alterada com sucesso.'})
+                        
+                        except Exception as e:
+                            db.session.rollback()
+                            print(f'Erro ao modificar o perfil: {str(e)}')
                 else:
-                    user = return_user(current_user.primary_key)
-                    if user and hasattr(user, field) and field != 'login':
+                    my_user = return_my_user()
+                    if my_user and hasattr(my_user, field) and field != 'id':
                         if field == 'nome':
                             new_value = capitalize(new_value, current_user.roles[0].name)
                             if not new_value:
-                                return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'O nome definido não atende aos critérios de cadastro do aluno. Por favor, defina seu nome completo para prosseguir.'})
+                                return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'O nome definido não atende aos critérios de cadastro do aluno. Por favor, defina seu nome completo para prosseguir.'})
 
-                        setattr(user, field, new_value)
-                        db.session.commit()
-
-                        if getattr(user, field) == new_value:
-                            return jsonify({'error': False, 'title': 'Edição concluida', 'text': ''})
+                        try:
+                            setattr(my_user, field, new_value)
+                            db.session.commit()
+                            return jsonify({'error': False, 'title': 'Edição Concluída', 'text': ''})
+                        
+                        except Exception as e:
+                            db.session.rollback()
+                            print(f'Erro ao modificar o perfil: {str(e)}')
         else:
-            return jsonify({'error': True, 'title': 'Senha incorreta', 'text': 'A senha especificada está incorreta. A edição não pôde ser concluída.'})
+            return jsonify({'error': True, 'title': 'Senha Incorreta', 'text': 'A senha especificada está incorreta. A edição não pôde ser concluída.'})
 
-    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'}) 
+    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'}) 
 
 
 @app.route("/edit_line", methods=['PATCH'])
@@ -262,33 +290,37 @@ def edit_perfil():
 def edit_linha_valor():
     data = request.get_json()
     if data and 'field' in data and 'new_value' in data and 'name_line' in data:
-        reference = 'motorista_dono' if data['field'] == 'nome' or data['field'] == 'cidade' else 'motorista_adm'
+        reference = 'dono' if data['field'] == 'nome' or data['field'] == 'cidade' else 'adm'
         permission = check_permission(data, reference)
 
         if permission == 'autorizado':
             if data['field'] == 'nome':
                 check = Linha.query.filter_by(nome=data['new_value']).first()
                 if check:
-                    if check.codigo == data['code_line']:
-                        return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Você deve definir um nome diferente do atual.'})
-                    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Já existe uma linha cadastrada com este nome. Por favor, escolha um nome diferente para prosseguir.'})
+                    if check.codigo == data['Linha_codigo']:
+                        return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Você deve definir um nome diferente do atual.'})
+                    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Já existe uma linha cadastrada com este nome. Por favor, escolha um nome diferente para prosseguir.'})
                 
             elif data['field'] == 'cidade':
                 if not data['new_value'] in cidades:
-                    return jsonify({'error': True, 'title': 'Edição interrompido', 'text': 'A cidade definida não está presente entre as opções disponíveis.'})
+                    return jsonify({'error': True, 'title': 'Edição Interrompido', 'text': 'A cidade definida não está presente entre as opções disponíveis.'})
             
-            linha = Linha.query.filter_by(codigo=data['code_line']).first()
+            linha = Linha.query.filter_by(codigo=data['Linha_codigo']).first()
             if linha and hasattr(linha, data['field']):
                 if data['field'] != 'codigo':
-                    setattr(linha, data['field'], data['new_value'])
-                    db.session.commit()
-
-                    return jsonify({'error': False, 'title': 'Alteração concluida', 'text': ''})
+                    try:
+                        setattr(linha, data['field'], data['new_value'])
+                        db.session.commit()
+                        return jsonify({'error': False, 'title': 'Alteração Concluída', 'text': ''})
+                    
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f'Erro ao modificar a linha: {str(e)}')
         
         elif permission == 'senha incorreta':
-            return jsonify({'error': True, 'title': 'Senha incorreta', 'text': 'A senha especificada está incorreta. A edição não pôde ser concluída.'})
+            return jsonify({'error': True, 'title': 'Senha Incorreta', 'text': 'A senha especificada está incorreta. A edição não pôde ser concluída.'})
 
-    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'}) 
+    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'}) 
 
 
 @app.route("/edit_veicle", methods=['PATCH'])
@@ -298,7 +330,7 @@ def edit_veicle():
     data = request.get_json()
     if data and 'field' in data and 'new_value' in data and 'name_line' in data and 'plate' in data:
         field = data['field']; new_value = data['new_value']
-        not_modify = ['placa', 'Linha_codigo', 'Motorista_login']
+        not_modify = ['placa', 'Linha_codigo', 'Motorista_id']
 
         if field and field not in not_modify and new_value and data['plate']:
             linha = Linha.query.filter_by(nome=data['name_line']).first()
@@ -310,75 +342,88 @@ def edit_veicle():
             if veicle:
                 if relationship == 'membro':
                     if field == 'motorista':
-                        if veicle.Motorista_login:
-                            if veicle.Motorista_login == current_user.primary_key and new_value == 'Nenhum':
-                                veicle.Motorista_login = None
-                                db.session.commit()
-
-                                if not veicle.Motorista_login:
-                                    return jsonify({'error': False, 'title': 'Edição concluida', 'text': f'Você não possui mais relação com {veicle.placa}.'}) 
-                        else:
-                            user = return_user(current_user.primary_key)
-                            if user and new_value == user.nome:
-                                if Onibus.query.filter_by(Linha_codigo=code_line, Motorista_login=current_user.primary_key).first():
-                                    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Você não pode possuir mais de uma relação com um veículo em uma mesma linha.'})
+                        if veicle.Motorista_id:
+                            if veicle.Motorista_id == current_user.primary_key and new_value == 'Nenhum':
+                                try:
+                                    veicle.Motorista_id = None
+                                    db.session.commit()
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você não possui mais relação com {veicle.placa}.'}) 
                                 
-                                veicle.Motorista_login = current_user.primary_key
-                                db.session.commit()
-
-                                if veicle.Motorista_login == current_user.primary_key:
-                                    return jsonify({'error': False, 'title': 'Edição concluida', 'text': f'Você foi definido como condutor de {veicle.placa}.'})   
+                                except Exception as e:
+                                    db.session.rollback()
+                                    print(f'Erro ao editar o veículo: {str(e)}')
+                        else:
+                            user = return_my_user()
+                            if user and new_value == user.nome:
+                                if Onibus.query.filter_by(Linha_codigo=code_line, Motorista_id=current_user.primary_key).first():
+                                    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Você não pode possuir mais de uma relação com um veículo em uma mesma linha.'})
+                                
+                                try:
+                                    veicle.Motorista_id = current_user.primary_key
+                                    db.session.commit()
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido como condutor de {veicle.placa}.'})
+                                
+                                except Exception as e:
+                                    db.session.rollback()
+                                    print(f'Erro ao editar o veículo: {str(e)}')
                 else:
-                    user = return_user(current_user.primary_key)
+                    user = return_my_user()
                     if user:
                         if field == 'motorista':
                             motorista = None
                             if new_value != 'Nenhum':
-                                subquery = db.session.query(Linha_has_Motorista.Motorista_login).filter(
-                                    Linha_has_Motorista.Linha_codigo == code_line
+                                subquery = db.session.query(Membro.Motorista_id).filter(
+                                    Membro.Linha_codigo == code_line
                                 ).subquery()
 
                                 motorista = db.session.query(Motorista).filter(
                                     db.and_(
                                         Motorista.nome == new_value,
-                                        Motorista.login.in_(subquery.select())
+                                        Motorista.id.in_(subquery.select())
                                     )
                                 ).all()
 
                                 if not motorista:
-                                    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
+                                    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
 
                                 if len(motorista) != 1:
-                                    return jsonify({'error': True, 'title': 'Cadastro interrompido', 'text': 'A edição não pôde ser concluída devido à existência de mais de um usuário motorista com o mesmo nome na linha.'})
+                                    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'A edição não pôde ser concluída devido à existência de mais de um usuário motorista com o mesmo nome na linha.'})
                                 motorista = motorista[0]
 
-                                if Onibus.query.filter_by(Motorista_login=motorista.login, Linha_codigo=code_line).first():
-                                    if new_value == user.name:
+                                if Onibus.query.filter_by(Motorista_id=motorista.id, Linha_codigo=code_line).first():
+                                    if new_value == user.nome:
                                         return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Você não pode possuir mais de uma relação com um veículo em uma mesma linha.'})
                                     return jsonify({'error': True, 'title': 'Edição interrompida', 'text': f'Identificamos que o(a) motorista selecionado(a) já possui vínculo com outro veículo.'})
                                 
-                                new_value = motorista.login
+                                new_value = motorista.id
                             else: new_value = None
 
-                            veicle.Motorista_login = new_value
-                            db.session.commit()
+                            try:
+                                veicle.Motorista_id = new_value
+                                db.session.commit()
                             
-                            if veicle.Motorista_login == new_value:
                                 if new_value:
-                                    if motorista.login == current_user.primary_key:
-                                        return jsonify({'error': False, 'title': 'Edição concluida', 'text': f'Você foi definido(a) como condutor(a) de {veicle.placa}.'})
-                                    return jsonify({'error': False, 'title': 'Edição concluida', 'text': f'{motorista.nome} foi definido(a) como condutor(a) de {veicle.placa}.'}) 
-                                return jsonify({'error': False, 'title': 'Edição concluida', 'text': f'O condutor de {veicle.placa} foi definido como: Nenhum.'}) 
+                                    if Motorista.id == current_user.primary_key:
+                                        return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido(a) como condutor(a) de {veicle.placa}.'})
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'{motorista.nome} foi definido(a) como condutor(a) de {veicle.placa}.'}) 
+                                return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'O condutor de {veicle.placa} foi definido como: Nenhum.'}) 
+                            
+                            except Exception as e:
+                                db.session.rollback()
+                                print(f'Erro ao editar o veículo: {str(e)}')
                         else:
                             if new_value.isdigit():
                                 new_value = int(new_value)
-                                veicle.capacidade = new_value
-                                db.session.commit()
+                                try:
+                                    veicle.capacidade = new_value
+                                    db.session.commit()
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': ''})
+                                
+                                except Exception as e:
+                                    db.session.rollback()
+                                    print(f'Erro ao editar o veículo: {str(e)}')
 
-                                if veicle.capacidade == new_value:
-                                    return jsonify({'error': False, 'title': 'Edição concluída', 'text': ''})
-
-    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
+    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
 
 
 @app.route("/edit_point", methods=['PATCH'])
@@ -393,15 +438,18 @@ def edit_point():
             if permission == 'autorizado':
                 if data['field'] == 'nome':
                     data['new_value'] = data['new_value'].lower().capitalize()
-                    if Ponto.query.filter_by(Linha_codigo=data['code_line'], nome=data['new_value']).first():
-                        return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Identificamos a existência de um ponto com o mesmo nome já cadastrado em sua linha. A ação não pôde ser concluída.'})
+                    if Ponto.query.filter_by(Linha_codigo=data['Linha_codigo'], nome=data['new_value']).first():
+                        return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Identificamos a existência de um ponto com o mesmo nome já cadastrado em sua linha. A ação não pôde ser concluída.'})
 
-                ponto = Ponto.query.filter_by(Linha_codigo=data['code_line'], nome=data['name_point']).first()
+                ponto = Ponto.query.filter_by(Linha_codigo=data['Linha_codigo'], nome=data['name_point']).first()
                 if ponto and hasattr(ponto, data['field']):
-                    setattr(ponto, data['field'], data['new_value'])
-                    db.session.commit()
-
-                    if getattr(ponto, data['field']) == data['new_value']:
-                        return jsonify({'error': False, 'title': 'Edição concluida', 'text': ''}) 
+                    try:
+                        setattr(ponto, data['field'], data['new_value'])
+                        db.session.commit()
+                        return jsonify({'error': False, 'title': 'Edição Concluída', 'text': ''})
+                    
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f'Erro ao editar o ponto: {str(e)}')
     
-    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
+    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})

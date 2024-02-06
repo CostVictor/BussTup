@@ -176,7 +176,7 @@
                     </div>
                     
                     <div class="form__container--input">
-                        <input id="add_point_tolerancia" class="form__input white input_notIcon" type="number" min="1" max="9">
+                        <input id="add_point_tolerancia" class="form__input white input_notIcon" type="number" min="1" max="15">
                         <label class="form__label intense label_notIcon" for="add_point_tolerancia">Tolerância (Opcional)</label>
                     </div>
 
@@ -356,7 +356,7 @@
 
             <h1 class="page__division"></h1>
             <div class="page__container justify">
-                <div class="interface__container--btn no_margin remove" onclick="open_popup_edit('del_linha', this)">
+                <div class="interface__container--btn remove" onclick="open_popup_edit('del_linha', this)">
                     <i class="bi bi-trash3 interface__icon del"></i>
                 </div>
             </div>
@@ -377,7 +377,7 @@
         </header>
 
         <div class="popup__container--content">
-            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
+            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
                 <div class="page__container">
                     <p class="text secundario fundo">Tempo tolerância:</p>
                     <div class="text secundario fundo">
@@ -416,7 +416,7 @@
 
                 <h1 class="page__division"></h1>
                 <div class="page__container justify">
-                    <div class="interface__container--btn no_margin remove" onclick="open_popup_edit('del_ponto', this)">
+                    <div class="interface__container--btn remove" onclick="open_popup_edit('del_ponto', this)">
                         <i class="bi bi-trash3 interface__icon del"></i>
                     </div>
                 </div>
@@ -756,7 +756,7 @@
             <h2 class="popup__text">Digite o novo tempo de tolerância:</h2>
             <form id="formulario_edit_ponto_tempo_tolerancia" class="form__container--card max_width" onsubmit="edit_point(this, event)">
                 <div class="form__container--input first">
-                    <input id="edit_new_tolerancia_ponto" class="form__input white input_notIcon" type="number" min="1" max="9" required>
+                    <input id="edit_new_tolerancia_ponto" class="form__input white input_notIcon" type="number" min="1" max="15" required>
                     <label class="form__label intense label_notIcon" for="edit_new_tolerancia_ponto">Tempo tolerância</label>
                 </div>
             </form>

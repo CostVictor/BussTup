@@ -136,7 +136,7 @@
     </div>
     
     <div class="page__container">
-        <p class="text secundario fundo">Pix:</p>
+        <p class="text secundario fundo">Chave Pix:</p>
         <div class="scroll_horizontal">
             <p id="model_motorista_pix" class="text secundario fundo content"></p>
         </div>
@@ -184,7 +184,8 @@
 {% endif %}
 
 
-<div id="model_interface_rota" class="popup__container--input inactive" onclick="open_popup_edit('config_rota', this)">
+<div id="model_interface_rota" class="popup__container--input inactive" onclick="open_popup_edit('config_route', this)">
+    <span id="model_interface_rota_number" class="inactive"></span>
     <div class="popup__input_big">
         <div class="popup__local">
             <p id="model_interface_rota_placa" class="popup__text_local"></p>

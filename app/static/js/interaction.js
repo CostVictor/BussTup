@@ -81,13 +81,19 @@ function open_popup_edit(id, obj_click=false) {
                 break
 
             case 'edit_veicle_motorista':
-                const placa_motorista = extract_info(obj_click, 'placa')
-                popup.querySelector('span').textContent = placa_motorista
-                card.querySelector('h2').textContent = `Selecione o motorista de ${placa_motorista}:`
+                const placa_veicle = extract_info(obj_click, 'placa')
+                const info_atual = extract_info(obj_click, 'motorista')
+                popup.querySelector('span').textContent = placa_veicle
+                card.querySelector('h2').textContent = `Selecione o motorista de ${placa_veicle}:`
 
                 const container_veicle_motoristas = document.getElementById('edit_veicle_motorista_container')
                 container_veicle_motoristas.innerHTML = ''
-                include_options_container(container_veicle_motoristas, 'option_driver', true)
+
+                let option_nenhum = true
+                if (info_atual === 'Nenhum') {
+                    option_nenhum = false
+                }
+                include_options_container(container_veicle_motoristas, 'option_driver', option_nenhum)
                 break
 
             case 'config_motorista':
@@ -100,6 +106,15 @@ function open_popup_edit(id, obj_click=false) {
             
             case 'config_ponto':
                 config_popup_point(extract_info(obj_click, 'nome'))
+                break
+            
+            case 'config_route':
+                let plate = extract_info(obj_click, 'placa').trim()
+                let shift = extract_info(obj_click, 'turno').trim()
+                let hr_par = extract_info(obj_click, 'horario_partida').trim()
+                let hr_ret = extract_info(obj_click, 'horario_retorno').trim()
+                let pos = obj_click.querySelector('span').textContent
+                config_popup_route(plate, shift, hr_par, hr_ret, pos)
                 break
             
             case ('edit_ponto_nome'):
@@ -379,7 +394,7 @@ function include_options_container(container, option, option_nenhum = false,  mo
                     container.appendChild(option)
                 }
             }
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+        } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
 
@@ -440,17 +455,17 @@ function config_popup_point(name_point) {
                     nome.textContent = alunos[index]
                     nome.id = aluno.id + '_nome'
 
-                    let ant = container.querySelectorAll('div')
-                    if (ant) {
-                        ant = ant[ant.length - 1]
-                        if (ant.querySelector('p').textContent === nome.textContent) {
-                            span_ant = ant.querySelector('span')
-                            span = aluno.querySelector('span')
-
-                            if (!span_ant.textContent === null) {
-                                span_ant.textContent = 0
-                            }
-                            span.textContent = span_ant.textContent + 1
+                    if (index) {
+                        let qnt = 0
+                        const dados_ant = alunos[index - 1]
+                        for (num in dados_ant) {
+                            if (dados_ant[num] === nome.textContent) {qnt++}
+                        }
+                        if (qnt) {
+                            const name_ant = document.getElementById(`${container.id}-aluno_${index - 1}`)
+                            const span_ant = name_ant.querySelector('span')
+                            if (!span_ant.textContent) {span_ant.textContent = 0}
+                            aluno.querySelector('span').textContent = parseInt(span_ant.textContent) + 1
                         }
                     }
 
@@ -466,15 +481,34 @@ function config_popup_point(name_point) {
                     container.appendChild(aluno)
                 }
             }
-        } else {create_popup(response['title'], response['text'], 'Voltar', 'error')}
+        } else {
+            cancel_popup_edit('config_ponto')
+            create_popup(response['title'], response['text'], 'Voltar')
+        }
     })
 }
 
 
-function config_popup_route(name_route) {
+function config_popup_route(plate, shift, hr_par, hr_ret, pos) {
+    let name_line = document.getElementById('interface_nome').textContent
+    name_line = `?name_line=${encodeURIComponent(name_line)}`
+    plate = `&plate=${encodeURIComponent(plate)}`
+    shift = `&shift=${encodeURIComponent(shift)}`
+    hr_par = `&time_par=${encodeURIComponent(hr_par)}`
+    hr_ret = `&time_ret=${encodeURIComponent(hr_ret)}`
+    pos = `&pos=${encodeURIComponent(pos)}`
 
+    fetch('/get_route' + name_line + plate + shift + hr_par + hr_ret + pos, { method: 'GET' })
+    .then(response => response.json())
+    .then(response => {
+        if (!response['error']) {
+            console.log(response)
+        } else {
+            cancel_popup_edit('config_route')
+            create_popup(response['title'], response['text'], 'Voltar')
+        }
+    })
 }
-
 
 
 if (window.location.href.includes('/page_user')) {

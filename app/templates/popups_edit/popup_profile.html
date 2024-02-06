@@ -12,10 +12,20 @@
             </div>
 
             <div class="perfil__container--justify">
-                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('trocar_senha')">
+                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('trocar_login')">
+                    <p class="interface__text">Trocar meu usuário de login</p>
+                </div>
+            </div>
+
+            <div class="perfil__container--justify">
+                <div class="interface__container--btn add aba" onclick="open_popup_edit('trocar_senha')">
                     <p class="interface__text">Trocar minha senha</p>
                 </div>
             </div>
+
+            <span style="display: flex; justify-content: center;">
+                <h1 class="perfil__division popup"></h1>
+            </span>
 
             <div class="perfil__container--justify">
                 <div class="interface__container--btn del margin_bottom aba" onclick="open_popup_edit('deletar_conta')">
@@ -155,6 +165,37 @@
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="cancel_popup_edit('trocar_nome')">Cancelar</button>
             <button class="popup__btn" onclick="submit('formulario_trocar_nome')">Alterar</button>
+        </footer>
+    </div>
+</section>
+
+
+<section id="trocar_login" class="popup__container--shadow inactive">
+    <div class="popup__container">
+        <header class="popup__container--header">
+            <h1 class="popup__title">Trocar meu login</h1>
+        </header>
+
+        <div class="popup__container--content">
+            <form id="formulario_trocar_login" class="form__container--card max_width" method="post" onsubmit="editData_profile(this)">
+                <div class="form__container--input first">
+                    <input id="trocar_login_new" class="form__input white input_notIcon format_name" type="text" required>
+                    <label class="form__label intense label_notIcon" for="trocar_login_new">Novo login</label>
+                </div>
+    
+                <h1 class="perfil__division"></h1>
+                <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
+                <div class="form__container--input first">
+                    <input id="trocar_login_conf" class="form__input input_password white input_notIcon" type="password" required>
+                    <i id="trocar_login_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
+                    <label class="form__label intense label_notIcon" for="trocar_login_conf">Senha de confirmação</label>
+                </div>
+            </form>
+        </div>
+
+        <footer class="popup__container--footer">
+            <button class="popup__btn cancel" onclick="cancel_popup_edit('trocar_login')">Cancelar</button>
+            <button class="popup__btn" onclick="submit('formulario_trocar_login')">Alterar</button>
         </footer>
     </div>
 </section>

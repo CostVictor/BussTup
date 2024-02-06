@@ -78,10 +78,10 @@ function editData_profile(obj_click) {
                 create_popup(response['title'], response['text'], 'Ok', 'success')
                 loadProfile()
             } else {
-                if (response['title'].includes('Telefone')) {
-                    input_new_value.classList.add('input_error')
-                } else {input_password_conf.classList.add('input_error')}
-                create_popup(response['title'], response['text'], 'Voltar', 'error', '', false)
+                if (response['title'].includes('Senha')) {
+                    input_password_conf.classList.add('input_error')
+                } else {input_new_value.classList.add('input_error')}
+                create_popup(response['title'], response['text'], 'Voltar', 'info', '', false)
             }
         })
     }
