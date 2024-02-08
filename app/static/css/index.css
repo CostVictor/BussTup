@@ -196,6 +196,10 @@ body {
     scroll-snap-type: x mandatory;
 }
 
+.scroll_horizontal.not_overflow {
+    overflow-x: hidden;
+}
+
 .btn_scroll {
     width: 80%;
 }

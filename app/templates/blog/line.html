@@ -1,12 +1,12 @@
 <article id="interface_linha" class="interface__container scroll_vertical no_border inactive">
     <header id="interface_linha_header" class="interface__container--header">
-        <i class="bi bi-arrow-left-short interface__icon animate" onclick="closeInterface_popup('interface_linha')"></i>
+        <i class="bi bi-arrow-left-short interface__icon animate" onclick="close_interface_line()"></i>
         <h1 id="interface_nome" class="text title no_marge no_border"></h1>
         <h1 class="text title no_marge no_border">~</h1>
         <h1 id="interface_cidade" class="text title no_marge no_border"></h1>
 
         {% if role == 'motorista' %}
-        <i id="interface_config" class="bi bi-gear interface__icon--header inactive" onclick="open_popup_edit('config_linha', this)"></i>         
+        <i id="interface_config" class="bi bi-gear interface__icon--header inactive" onclick="open_popup('config_line', this)"></i>         
         {% endif %}
     </header>
 
@@ -40,7 +40,7 @@
             <h1 class="page__division"></h1>
         </section>
 
-        <section id="area_precos" class="interface__container--area">
+        <section id="area_paga" class="interface__container--area">
             <h2 class="text title">Valores</h2>
             <div class="page__container">
                 <p class="text secundario fundo">Valor da cartela:</p>
@@ -49,7 +49,7 @@
                     <p id="interface_valor_cartela" class="text secundario content container"></p>
                 </div>
                 {% if role == 'motorista' %}
-                <i id="edit_valor_cartela" class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_valor', this)"></i>
+                <i id="edit_valor_cartela" class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_valor', this)"></i>
                 {% endif %}
             </div>
 
@@ -60,7 +60,7 @@
                     <p id="interface_valor_diaria" class="text secundario content container"></p>
                 </div>
                 {% if role == 'motorista' %}
-                <i id="edit_valor_diaria" class="bi bi-pencil-square page__icon content inactive" onclick="open_popup_edit('edit_valor', this)"></i>
+                <i id="edit_valor_diaria" class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_valor', this)"></i>
                 {% endif %}
             </div>
         </section>
@@ -76,7 +76,7 @@
 
             <h1 class="page__division"></h1>
             <div id="area_onibus_btn_add" class="page__container justify">
-                <div class="interface__container--btn add" onclick="open_popup_edit('add_veicle', this)">
+                <div class="interface__container--btn add" onclick="open_popup('add_vehicle', this)">
                     <i class="bi bi-plus-lg interface__icon plus"></i>
                 </div>
             </div>
@@ -85,12 +85,12 @@
 
         <section id="area_rotas" class="interface__container--area">
             {% if role == 'aluno' %}
-            <h2 class="text title">Rotas</h2>
+            <h2 class="text title big_space">Rotas</h2>
             <div id="interface_rotas_ativas" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
 
             {% elif role == 'motorista' %}
             <h2 class="text title">Pontos e Rotas</h2>
-            <div id="interface_pontos_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+            <div id="interface_pontos_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                 <h3 class="text secundario emphasis">Pontos</h3>
                 <h3 id="interface_pontos_quantidade" class="text secundario fundo max_width"></h3>
                 <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -101,13 +101,13 @@
 
                 <h1 id="interface_pontos_division" class="page__division aba"></h1>
                 <div id="interface_pontos_add" class="page__container justify">
-                    <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('add_point')">
+                    <div class="interface__container--btn margin_bottom add aba" onclick="open_popup('add_point')">
                         <i class="bi bi-plus-lg interface__icon plus"></i>
                     </div>
                 </div>
             </div>
 
-            <div id="interface_rotas_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+            <div id="interface_rotas_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                 <h3 class="text secundario emphasis">Rotas</h3>
                 <h3 id="interface_rotas_quantidade" class="text secundario fundo max_width"></h3>
                 <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -122,7 +122,7 @@
 
                 <h1 id="interface_rotas_division" class="page__division aba"></h1>
                 <div id="interface_rotas_add" class="page__container justify">
-                    <div class="interface__container--btn add aba" onclick="open_popup_edit('add_route', this)">
+                    <div class="interface__container--btn add aba" onclick="open_popup('add_route', this)">
                         <i class="bi bi-plus-lg interface__icon plus"></i>
                     </div>
                 </div>
@@ -133,14 +133,14 @@
         {% if role == 'motorista' %}
         <section id="area_alunos" class="interface__container--area">
             <h2 class="text title">Alunos e Tickets</h2>
-            <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+            <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                 <h3 class="text secundario fundo">Alunos</h3>
                 <h3 id="interface_alunos_quant" class="text secundario fundo max_width">1 cadastrado</h3>
                 <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
             </div>
 
             <div id="interface_alunos_container" class="scroll_vertical no_borderY popup__container--scroll inactive">
-                <div id="interface_alunos_matutino_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                <div id="interface_alunos_matutino_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                     <h3 class="text secundario emphasis">Matutino</h3>
                     <h3 id="interface_alunos_matutino_quant" class="text secundario fundo max_width">1 cadastrado</h3>
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -148,14 +148,14 @@
 
                 <div id="interface_alunos_matutino_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal">
                     {% for index in range(1) %}
-                    <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup_edit('config_aluno', this)">
+                    <div id="interface_model_aluno" class="popup__input grow min_height" onclick="open_popup('config_aluno', this)">
                         <p id="interface_model_aluno_title" class="popup__text input">Victor Gabriel</p>
                         <i class="bi bi-three-dots-vertical page__icon content right"></i>
                     </div>
                     {% endfor %}
                 </div>
 
-                <div id="interface_alunos_vespertino_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                <div id="interface_alunos_vespertino_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                     <h3 class="text secundario emphasis">Vespertino</h3>
                     <h3 id="interface_alunos_vespertino_quant" class="text secundario fundo max_width">0 cadastrados</h3>
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -163,7 +163,7 @@
                 
                 <div id="interface_alunos_vespertino_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
 
-                <div id="interface_alunos_noturno_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                <div id="interface_alunos_noturno_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                     <h3 class="text secundario emphasis">Noturno</h3>
                     <h3 id="interface_alunos_noturno_quant" class="text secundario fundo max_width">0 cadastrados</h3>
                     <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -172,7 +172,7 @@
                 <div id="interface_alunos_noturno_container" class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
             </div>
 
-            <div id="interface_tickets_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+            <div id="interface_tickets_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                 <h3 class="text secundario fundo max_width">Tickets</h3>
                 <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
             </div>

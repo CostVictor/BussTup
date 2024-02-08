@@ -39,23 +39,17 @@ function set_observerScroll(list_obj) {
 }
 
 
-function extract_info(obj_click, reference, local = 'id') {
-    const verify = obj_click.querySelector(`[${local}*="${reference}"]`)
-    if (verify) {return verify.textContent}
+function set_limitScroll(element_scroll, size_limit = 30) {
+    const maxHeight = size_limit * window.innerHeight / 100
+    const size_element = element_scroll.scrollHeight
 
-    let tag = obj_click.parentNode
-    while (true) {
-        var identify_nome = tag.querySelector(`[${local}*="${reference}"]`)
-        if (identify_nome) {
-            return identify_nome.textContent
-        } else {
-            tag = tag.parentNode
-        }
-    }
+    if (element_scroll.childElementCount) {
+        if (size_element > maxHeight) {
+            element_scroll.style.minHeight = `${maxHeight}px`
+        } else {element_scroll.style.minHeight = `${size_element}px`}
+    } else {element_scroll.style.minHeight = '0px'}
 }
 
-
-// ~~~~~ Animações de formulário ~~~~~ //
 
 const inputs = document.querySelectorAll('input')
 inputs.forEach(input => {
@@ -98,8 +92,6 @@ forms.forEach(form => {
 set_observerScroll(document.querySelectorAll('form.scroll_vertical'))
 
 
-// ~~~~~ Animação de icone ~~~~~ //
-
 function animateIconPassword(obj_click) {
     const container_password = obj_click.parentNode
     const iconPassword = container_password.querySelector('[id*="btn"]')
@@ -115,16 +107,27 @@ function animateIconPassword(obj_click) {
 }
 
 
-// ~~~~~ Animação de interface ~~~~~ //
-
 function config_animate(index, item, name, duraction, value_initial, sum) {
     item.style.animation = `${name} ${duraction}s forwards ${value_initial + (index * sum)}s`
 }
 
 
-function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_init = 0, interval_itens = 0.06, opacity = 0) {
+function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_init = 0, interval_itens = 0.06, opacity = 0, exception = false) {
     if (list_itens) {
-        list_itens.forEach((item, index) => {
+        list_execute = []
+        list_itens.forEach(item => {
+            if (exception) {
+                if (!item.className.includes('inactive') || item.id.includes(exception)) {
+                    list_execute.push(item)
+                }
+            } else {
+                if (!item.className.includes('inactive')) {
+                    list_execute.push(item)
+                }
+            }
+        })
+
+        list_execute.forEach((item, index) => {
             item.style.opacity = opacity
             config_animate(index, item, animate, duraction, dalay_init, interval_itens)
         })
@@ -182,7 +185,7 @@ function closeInterface(type, redirect, time = 1000) {
 }
 
 
-function enterInterface_popup(obj_click) {
+function enter_interface_line(obj_click) {
     const name_line = obj_click.querySelector('[id*="nome"]').textContent
     loadInterfaceLine(name_line)
     closePage()
@@ -221,7 +224,7 @@ function enterInterface_popup(obj_click) {
 }
 
 
-function closeInterface_popup() {
+function close_interface_line() {
     const interface = document.getElementById('interface_linha')
     const header_interface = document.getElementById('interface_linha_header')
     const content_interface = document.getElementById('interface_linha_content')
@@ -248,71 +251,6 @@ function closeInterface_popup() {
     }, 650)
 }
 
-
-function actionContainer(obj_click, set_limit = false) {
-    const icon = obj_click.querySelector('i')
-    const container = document.getElementById(obj_click.id.replace('btn', 'container'))
-    const elements = Array.from(container.children)
-    obj_click.style.transition = '0s ease'
-    container.removeAttribute('style')
-
-    if (obj_click.id.includes('veiculo')) {
-        const motorista_nome = obj_click.querySelectorAll('h3')
-        motorista_nome.forEach((element, index) => {
-            if (!index) {
-                if (icon.className.includes('open')) {
-                    element.classList.remove('max_width')
-                } else {element.classList.add('max_width')}
-            } else {
-                if (icon.className.includes('open')) {
-                    element.classList.remove('inactive')
-                } else {element.classList.add('inactive')}
-            }
-        })
-    }
-
-    animate_itens(elements)
-    if (icon.className.includes('open')) {
-        container.classList.add('inactive')
-        icon.classList.remove('open')
-
-        elements.forEach(element => {
-            element.classList.remove('selected')
-        })
-    } else {
-        container.classList.remove('inactive')
-        container.scrollTop = 0
-        icon.classList.add('open')
-
-        if (set_limit) {
-            set_limitScroll(container, set_limit)
-        } else {
-            set_limitScroll(container)
-        }
-    }
-
-    const btn_children = container.querySelectorAll('[id*="btn"]')
-    if (btn_children) {
-        btn_children.forEach(btn => {
-            const icon = btn.querySelector('i')
-            if (icon.className.includes('open')) {
-                actionContainer(btn)
-            }
-        })
-    }
-
-    const rolament = container.querySelector('div.scroll_vertical')
-    if (rolament) { rolament.scrollTop = 0 }
-
-    elements.forEach(element => {
-        if (element.className.includes('scroll')) {
-            set_limitScroll(element)
-        }
-    })
-}
-
-
-// ~~~~~ Troca de formulário ~~~~~ //
 
 function replace_form(obj_button) {
     function reset_form(form) {
@@ -353,22 +291,4 @@ function replace_form(obj_button) {
         animate_itens(elements_motorista, 'fadeDown', 0.6, 0, 0.07)
         form_motorista.scrollTop = 0
     }
-}
-
-
-// ~~~~~ Ação de icone ~~~~~ //
-
-function copy_text(obj_click = null) {
-    const icons = document.querySelectorAll('[class*="copy"]')
-    
-    icons.forEach(icon => {
-        if (icon === obj_click) {
-            icon.classList.replace('bi-clipboard', 'bi-check-lg')
-            const div_pai = icon.parentNode
-            const element_text = div_pai.querySelector('p.content')
-            navigator.clipboard.writeText(element_text.innerText)
-        } else {
-            icon.classList.replace('bi-check-lg', 'bi-clipboard')
-        }
-    })
 }

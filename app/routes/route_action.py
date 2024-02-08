@@ -85,7 +85,7 @@ def create_line():
                         relacao = Membro(Linha_codigo=linha.codigo, Motorista_id=current_user.primary_key, dono=True, adm=True)
                         db.session.add(relacao)
                     db.session.commit()
-                    return jsonify({'error': False, 'title': 'Linha Cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado como usuário dono.'})
+                    return jsonify({'error': False, 'title': 'Linha Cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado(a) como usuário dono.'})
 
                 except Exception as e:
                     db.session.rollback()
@@ -96,10 +96,10 @@ def create_line():
     return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a linha.'})
 
 
-@app.route("/create_veicle", methods=['POST'])
+@app.route("/create_vehicle", methods=['POST'])
 @login_required
 @roles_required("motorista")
-def create_veicle():
+def create_vehicle():
     data = request.get_json()
     permission = check_permission(data)
     if permission == 'autorizado' and 'placa' in data and 'motorista_nome' in data:
@@ -131,9 +131,9 @@ def create_veicle():
                         db.session.commit()
 
                         if report:
-                            return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'Ao realizar o cadastro, identificamos que o(a) motorista {motorista_nome} já possui vínculo com outro veículo. O condutor deste veículo foi definido como: Nenhum.'})
+                            return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'Ao realizar o cadastro, identificamos que o(a) motorista <strong>{motorista_nome}</strong> já possui vínculo com outro veículo. O condutor deste veículo foi definido como: Nenhum.'})
                         
-                        return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'O veículo foi adicionado e está disponível para utilização. {motorista_nome} foi definido(a) como condutor(a).'})
+                        return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'O veículo foi adicionado e está disponível para utilização. <strong>{motorista_nome}</strong> foi definido(a) como condutor(a).'})
                         
                     except Exception as e:
                         db.session.rollback()
@@ -174,7 +174,7 @@ def create_point():
                     db.session.add(ponto)
                     db.session.commit()
 
-                    return jsonify({'error': False, 'title': 'Ponto Cadastrado', 'text': f'{ponto.nome} foi cadastrado com sucesso.'})
+                    return jsonify({'error': False, 'title': 'Ponto Cadastrado', 'text': f'<strong>{ponto.nome}</strong> foi cadastrado com sucesso.'})
                 except Exception as e:
                     db.session.rollback()
                     print(f'Erro ao criar o ponto: {str(e)}')
@@ -197,6 +197,7 @@ def create_route():
                 return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'O turno definido não está presente entre as opções disponíveis.'})
 
             if data['Onibus_placa'] != 'Nenhum':
+                
                 veiculo = Onibus.query.filter_by(Linha_codigo=data['Linha_codigo'], placa=data['Onibus_placa']).first()
                 if veiculo:
                     rota = Rota(**data)
@@ -204,7 +205,7 @@ def create_route():
                         db.session.add(rota)
                         db.session.commit()
 
-                        return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada para {veiculo.placa}.'})
+                        return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada para <strong>{veiculo.placa}</strong>.'})
                     except Exception as e:
                         db.session.rollback()
                         print(f'Erro ao criar a rota: {str(e)}')
@@ -215,7 +216,7 @@ def create_route():
                     db.session.add(rota)
                     db.session.commit()
 
-                    return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada à sua linha como desativada e não está disponível para utilização. Configure o veículo da rota para que ela possa entrar em uso.'})
+                    return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': 'A rota foi adicionada à sua linha como desativada e não estará visível para os alunos até que um veículo seja definido. Manteremos esta rota em um local reservado para que você possa configurá-la.'})
                 except Exception as e:
                     db.session.rollback()
                     print(f'Erro ao criar a rota: {str(e)}')
@@ -323,10 +324,10 @@ def edit_linha_valor():
     return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'}) 
 
 
-@app.route("/edit_veicle", methods=['PATCH'])
+@app.route("/edit_vehicle", methods=['PATCH'])
 @login_required
 @roles_required("motorista")
-def edit_veicle():
+def edit_vehicle():
     data = request.get_json()
     if data and 'field' in data and 'new_value' in data and 'name_line' in data and 'plate' in data:
         field = data['field']; new_value = data['new_value']
@@ -337,17 +338,17 @@ def edit_veicle():
             code_line = linha.codigo if linha else None
 
             relationship = return_relationship(code_line)
-            veicle = Onibus.query.filter_by(Linha_codigo=code_line, placa=data['plate']).first() if relationship else False
+            vehicle = Onibus.query.filter_by(Linha_codigo=code_line, placa=data['plate']).first() if relationship else False
 
-            if veicle:
+            if vehicle:
                 if relationship == 'membro':
                     if field == 'motorista':
-                        if veicle.Motorista_id:
-                            if veicle.Motorista_id == current_user.primary_key and new_value == 'Nenhum':
+                        if vehicle.Motorista_id:
+                            if vehicle.Motorista_id == current_user.primary_key and new_value == 'Nenhum':
                                 try:
-                                    veicle.Motorista_id = None
+                                    vehicle.Motorista_id = None
                                     db.session.commit()
-                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você não possui mais relação com {veicle.placa}.'}) 
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você não possui mais relação com <strong>{vehicle.placa}</strong>.'}) 
                                 
                                 except Exception as e:
                                     db.session.rollback()
@@ -359,9 +360,9 @@ def edit_veicle():
                                     return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Você não pode possuir mais de uma relação com um veículo em uma mesma linha.'})
                                 
                                 try:
-                                    veicle.Motorista_id = current_user.primary_key
+                                    vehicle.Motorista_id = current_user.primary_key
                                     db.session.commit()
-                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido como condutor de {veicle.placa}.'})
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido como condutor de <strong>{vehicle.placa}</strong>.'})
                                 
                                 except Exception as e:
                                     db.session.rollback()
@@ -393,20 +394,20 @@ def edit_veicle():
                                 if Onibus.query.filter_by(Motorista_id=motorista.id, Linha_codigo=code_line).first():
                                     if new_value == user.nome:
                                         return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Você não pode possuir mais de uma relação com um veículo em uma mesma linha.'})
-                                    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': f'Identificamos que o(a) motorista selecionado(a) já possui vínculo com outro veículo.'})
+                                    return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Identificamos que o(a) motorista selecionado(a) já possui vínculo com outro veículo.'})
                                 
                                 new_value = motorista.id
                             else: new_value = None
 
                             try:
-                                veicle.Motorista_id = new_value
+                                vehicle.Motorista_id = new_value
                                 db.session.commit()
                             
                                 if new_value:
-                                    if Motorista.id == current_user.primary_key:
-                                        return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido(a) como condutor(a) de {veicle.placa}.'})
-                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'{motorista.nome} foi definido(a) como condutor(a) de {veicle.placa}.'}) 
-                                return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'O condutor de {veicle.placa} foi definido como: Nenhum.'}) 
+                                    if motorista.id == current_user.primary_key:
+                                        return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido(a) como condutor(a) de <strong>{vehicle.placa}</strong>.'})
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'{motorista.nome} foi definido(a) como condutor(a) de <strong>{vehicle.placa}</strong>.'}) 
+                                return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'O condutor de <strong>{vehicle.placa}</strong> foi definido como: Nenhum.'}) 
                             
                             except Exception as e:
                                 db.session.rollback()
@@ -415,7 +416,7 @@ def edit_veicle():
                             if new_value.isdigit():
                                 new_value = int(new_value)
                                 try:
-                                    veicle.capacidade = new_value
+                                    vehicle.capacidade = new_value
                                     db.session.commit()
                                     return jsonify({'error': False, 'title': 'Edição Concluída', 'text': ''})
                                 

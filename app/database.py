@@ -3,7 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from app import app, turnos, dias_semana
 
 
-# ~~ DB Security ~~ #
+'''~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~ DB Session ~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~'''
 
 db = SQLAlchemy(app)
 
@@ -50,7 +52,9 @@ user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
 
-# ~~ DB Principal ~~ #
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~ DB Principal ~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
 class Motorista(db.Model):
     __tablename__ = 'Motorista'
@@ -219,6 +223,10 @@ class Passagem(db.Model):
 with app.app_context():
     db.create_all()
 
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~~ Action ~~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~'''
 
 def create_user(data):
     login = data.pop('login')

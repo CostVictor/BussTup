@@ -177,6 +177,10 @@ body {
     user-select: none;
 }
 
+.page__container--line.first {
+    margin-top: 0;
+}
+
 .page__container--line:hover {
     scale: 1.02;
 }

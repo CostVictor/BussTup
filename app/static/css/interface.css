@@ -32,6 +32,10 @@
     padding-bottom: 3vh;
 }
 
+.interface__container--content.inactive {
+    display: none;
+}
+
 .interface__container--area {
     display: flex;
     flex-direction: column;

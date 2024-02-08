@@ -159,10 +159,10 @@ def get_interface_driver():
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
-@app.route("/get_interface-veicle", methods=['GET'])
+@app.route("/get_interface-vehicle", methods=['GET'])
 @login_required
 @roles_required("motorista")
-def get_interface_veicle():
+def get_interface_vehicle():
     name_line = request.args.get('name_line')
     if name_line:
         linha = Linha.query.filter_by(nome=name_line).first()
@@ -174,11 +174,11 @@ def get_interface_veicle():
                 'meu_nome': user.nome,
                 'data': []
             }
-            veicles = Onibus.query.filter_by(Linha_codigo=linha.codigo).order_by(Onibus.placa).all()
-            for veicle in veicles:
-                dict_veicle = return_dict(veicle, not_includes=['Linha_codigo', 'Motorista_id'])
-                dict_veicle['motorista_nome'] = veicle.motorista.nome if veicle.motorista else 'Nenhum'
-                retorno['data'].append(dict_veicle)
+            vehicles = Onibus.query.filter_by(Linha_codigo=linha.codigo).order_by(Onibus.placa).all()
+            for vehicle in vehicles:
+                dict_vehicle = return_dict(vehicle, not_includes=['Linha_codigo', 'Motorista_id'])
+                dict_vehicle['motorista_nome'] = vehicle.motorista.nome if vehicle.motorista else 'Nenhum'
+                retorno['data'].append(dict_vehicle)
             
             return jsonify(retorno)
 
@@ -290,11 +290,16 @@ def get_options_driver():
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
-@app.route("/get_interface-option_veicle", methods=['GET'])
+@app.route("/get_interface-option_vehicle", methods=['GET'])
 @login_required
 @roles_required("motorista")
-def get_options_veicle():
+def get_options_vehicle():
     name_line = request.args.get('name_line')
+    plate = request.args.get('plate')
+
+    if plate == 'Sem veículo':
+        plate = None
+
     if name_line:
         linha = Linha.query.filter_by(nome=name_line).first()
         if linha:
@@ -303,11 +308,27 @@ def get_options_veicle():
                 retorno = {'error': False, 'data': []}
 
                 for onibus in linha.onibus:
-                    motorista = onibus.motorista.nome if onibus.motorista else 'Nenhum'
-                    retorno['data'].append(f"{onibus.placa} > {motorista}")
+                    if plate != onibus.placa:
+                        motorista = onibus.motorista.nome if onibus.motorista else 'Nenhum'
+                        retorno['data'].append(f"{onibus.placa} > {motorista}")
                 
                 return jsonify(retorno)
     
+    return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
+
+
+@app.route("/get_interface-option_point", methods=['GET'])
+@login_required
+@roles_required("motorista")
+def get_options_point():
+    name_line = request.args.get('name_line')
+    plate = request.args.get('plate')
+    shift = request.args.get('shift')
+    hora_partida = request.args.get('time_par')
+    hora_retorno = request.args.get('time_ret')
+    tipo = request.args.get('type')
+    pos = request.args.get('pos')
+
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
@@ -429,7 +450,8 @@ def get_route():
 
             if rota and user:  
                 if len(rota) > 1:
-                    if pos: rota = rota[int(pos)]
+                    if pos and isinstance(pos, str) and pos.isdigit():
+                        rota = rota[int(pos)]
                     else: return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
                 else: rota = rota[0]
 
@@ -445,9 +467,9 @@ def get_route():
                 retorno['info'] = {
                     'motorista': motorista,
                     'onibus': placa,
-                    'turno': rota.turno,
-                    'partida': format_time(rota.horario_partida),
-                    'retorno': format_time(rota.horario_retorno)
+                    'turno_rota': rota.turno,
+                    'horario_partida': format_time(rota.horario_partida),
+                    'horario_retorno': format_time(rota.horario_retorno)
                 }
 
                 if role == 'aluno':
@@ -485,25 +507,29 @@ def get_route():
                             retorno['meu_contraturno'] = nome
                         else: retorno['msg_contraturno'] = True
 
-                paradas_partida = db.session.query(Ponto.nome).join(Parada).filter(
-                    db.and_(
-                        Ponto.id == Parada.Ponto_id,
-                        Parada.Rota_codigo == rota.codigo,
-                        Parada.tipo == 'partida'
-                    )
-                ).order_by(Parada.ordem).all()
-                retorno['data']['partida']['paradas'] = paradas_partida
-                retorno['data']['partida']['quantidade'] = f"{len(paradas_partida)} {'definido' if len(paradas_partida) == 1 else 'definidos'}"
+                partidas = Parada.query.filter_by(Rota_codigo=rota.codigo, tipo='partida').order_by(Parada.ordem).all()
 
-                paradas_retorno = db.session.query(Ponto.nome).join(Parada).filter(
-                    db.and_(
-                        Ponto.id == Parada.Ponto_id,
-                        Parada.Rota_codigo == rota.codigo,
-                        Parada.tipo == 'retorno'
-                    )
-                ).order_by(Parada.ordem).all()
-                retorno['data']['retorno']['paradas'] = paradas_partida
-                retorno['data']['retorno']['quantidade'] = f"{len(paradas_retorno)} {'definido' if len(paradas_retorno) == 1 else 'definidos'}"
+                for parada in partidas:
+                    info = {
+                        'number': parada.ordem,
+                        'nome': parada.ponto.nome,
+                        'horario': parada.horario_passagem
+                    }
+                    retorno['data']['partida']['paradas'].append(info)
+
+                retorno['data']['partida']['quantidade'] = f"{len(partidas)} {'definido' if len(partidas) == 1 else 'definidos'}"
+
+                retornos = Parada.query.filter_by(Rota_codigo=rota.codigo, tipo='retorno').order_by(Parada.ordem).all()
+
+                for parada in retornos:
+                    info = {
+                        'number': parada.ordem,
+                        'nome': parada.ponto.nome,
+                        'horario': parada.horario_passagem
+                    }
+                    retorno['data']['retorno']['paradas'].append(info)
+                    
+                retorno['data']['retorno']['quantidade'] = f"{len(retornos)} {'definido' if len(retornos) == 1 else 'definidos'}"
 
                 return jsonify(retorno)
     

@@ -17,6 +17,7 @@
     display: flex;
     transition: opacity 0.2s ease;
     background-color: rgba(0, 0, 0, 0.2);
+    user-select: none;
     justify-content: center;
     align-items: center;
     position: fixed;
@@ -170,12 +171,12 @@
 
 .popup__text.info {
     text-align: justify;
-    font-size: calc(0.8vh + 1vmin);
+    font-size: calc(1vh + 1vmin);
     margin-right: 0;
 }
 
 .popup__text.info.space {
-    margin: calc(0.4vh + 1vmin) 0;
+    margin: calc(0.4vh + 1vmin);
 }
 
 .popup__text.format_label {

@@ -1,6 +1,182 @@
-// ~~ Interações popup edit ~~ //
+function action_popup(popup, card, id, obj_click) {
+    switch (id) {
+        case 'edit_valor':
+            card.querySelector('h2').textContent = `Digite o novo valor da ${obj_click.id.includes('cartela') ? 'cartela' : 'diária'}:`
+            break
+        
+        case 'edit_vehicle_capacidade':
+            const placa_capacidade = extract_info(obj_click, 'placa')
+            popup.querySelector('span').textContent = placa_capacidade
+            card.querySelector('h2').textContent = `Digite a capacidade de ${placa_capacidade}:`
+            break
 
-function open_popup_edit(id, obj_click=false) {
+        case 'edit_vehicle_motorista':
+            const name_line = {'name_line': document.getElementById('interface_nome').textContent}
+            const placa_vehicle = extract_info(obj_click, 'placa')
+            const info_atual = extract_info(obj_click, 'motorista')
+            popup.querySelector('span').textContent = placa_vehicle
+            card.querySelector('h2').textContent = `Selecione o motorista de ${placa_vehicle}:`
+
+            const container_vehicle_motoristas = document.getElementById('edit_vehicle_motorista_container')
+            container_vehicle_motoristas.innerHTML = ''
+
+            let option_nenhum = true
+            if (info_atual === 'Nenhum') {
+                option_nenhum = false
+            }
+            include_options_container(container_vehicle_motoristas, 'option_driver', name_line, option_nenhum)
+            break
+
+        case 'config_motorista':
+            card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
+            break
+
+        case 'config_aluno':
+            card.querySelector(`p#${popup.id}_nome`).textContent = extract_info(obj_click, 'title')
+            break
+        
+        case 'config_point':
+            config_popup_point(extract_info(obj_click, 'nome'))
+            break
+        
+        case 'config_route':
+            config_popup_route(obj_click)
+            break
+        
+        case ('edit_ponto_nome'):
+            popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
+            break
+        
+        case 'edit_ponto_tempo_tolerancia':
+            popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
+            break
+        
+        case 'edit_ponto_linkGPS':
+            popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
+            break
+
+        case 'config_line':
+            card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
+            card.querySelector('p#config_line_cidade').textContent = extract_info(obj_click, 'cidade')
+            const options_ferias = document.getElementById('config_line_options_ferias')
+            const options_gratuidade = document.getElementById('config_line_options_gratuidade')
+            const info_ferias = document.getElementById('interface_ferias')
+            const area_paga = document.getElementById('area_paga')
+
+            if (info_ferias.className.includes('inactive')) {
+                config_bool(options_ferias, 'Não')
+            } else {config_bool(options_ferias, 'Sim')}
+
+            if (area_paga.className.includes('inactive')) {
+                config_bool(options_gratuidade, 'Não')
+            } else {config_bool(options_gratuidade, 'Sim')}
+            break
+        
+        case 'add_vehicle':
+            const container_motoristas = card.querySelector('div#' + popup.id + '_options_container')
+            container_motoristas.innerHTML = ''
+            include_options_container(container_motoristas, 'option_driver')
+            break
+        
+        case 'add_route':
+            const container_vehicles = card.querySelector('div#' + popup.id + '_options_container')
+            container_vehicles.innerHTML = ''
+            include_options_container(container_vehicles, 'option_vehicle')
+            break
+
+        case 'promover_motorista':
+            card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
+            break
+        
+        case 'rebaixar_motorista':
+            card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
+            break
+        
+        case 'del_ponto':
+            card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
+            break
+        
+        case 'del_linha':
+            card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
+            break
+        
+        case 'del_vehicle':
+            card.querySelector(`h2#${id}_placa`).textContent = extract_info(obj_click, 'placa')
+            break
+
+        case 'config_relacao_ponto_rota':
+            card.querySelector(`p#${popup.id}_nome`).textContent = extract_info(obj_click, 'nome')
+            card.querySelector(`p#${popup.id}_ordem`).textContent = extract_info(obj_click, 'number')
+            card.querySelector(`p#${popup.id}_horario`).textContent = extract_info(obj_click, 'horario')
+            break
+    }
+}
+
+
+function action_container(obj_click, set_limit = false) {
+    const icon = obj_click.querySelector('i')
+    const container = document.getElementById(obj_click.id.replace('btn', 'container'))
+    const elements = Array.from(container.children)
+    obj_click.style.transition = '0s ease'
+    container.removeAttribute('style')
+
+    if (obj_click.id.includes('veiculo')) {
+        const motorista_nome = obj_click.querySelectorAll('h3')
+        motorista_nome.forEach((element, index) => {
+            if (!index) {
+                if (icon.className.includes('open')) {
+                    element.classList.remove('max_width')
+                } else {element.classList.add('max_width')}
+            } else {
+                if (icon.className.includes('open')) {
+                    element.classList.remove('inactive')
+                } else {element.classList.add('inactive')}
+            }
+        })
+    }
+
+    animate_itens(elements)
+    if (icon.className.includes('open')) {
+        container.classList.add('inactive')
+        icon.classList.remove('open')
+
+        elements.forEach(element => {
+            element.classList.remove('selected')
+        })
+    } else {
+        container.classList.remove('inactive')
+        container.scrollTop = 0
+        icon.classList.add('open')
+
+        if (set_limit) {
+            set_limitScroll(container, set_limit)
+        } else {
+            set_limitScroll(container)
+        }
+    }
+
+    const btn_children = container.querySelectorAll('[id*="btn"]')
+    if (btn_children) {
+        btn_children.forEach(btn => {
+            const icon = btn.querySelector('i')
+            if (icon.className.includes('open')) {
+                action_container(btn)
+            }
+        })
+    }
+
+    const rolament = container.querySelector('div.scroll_vertical')
+    if (rolament) { rolament.scrollTop = 0 }
+
+    elements.forEach(element => {
+        if (element.className.includes('scroll')) {
+            set_limitScroll(element)
+        }
+    })
+}
+
+
+function open_popup(id, obj_click=false) {
     document.body.classList.add('no-scroll')
     const popup = document.getElementById(id)
     const card = popup.querySelector('div.popup__container')
@@ -9,186 +185,12 @@ function open_popup_edit(id, obj_click=false) {
     card.classList.remove('close')
 
     if (obj_click) {
-        function define_checkbox(item, text_reference) {
-            const text = item.querySelector('p')
-            const icon = item.querySelector('i')
-            if (text.textContent === text_reference) {
-                icon.className = 'bi bi-check2-circle popup__icon ratio selected'
-            } else {icon.className = 'bi bi-circle popup__icon ratio'}
-        }
-        function correct_options(condiction, options, title, container, list_itens) {
-            if (condiction) {
-                options.forEach(item => {define_checkbox(item, 'Sim')})
-                title.classList.remove('inactive')
-                container.classList.remove('inactive')
-                animate_itens(list_itens)
-                list_itens.forEach((item, index) => {
-                    if (index === parseInt(condiction)) {
-                        item.classList.add('selected')
-                    } else {
-                        item.classList.remove('selected')
-                    }
-                })
-            } else {
-                options.forEach(item => {define_checkbox(item, 'Não')})
-                title.classList.add('inactive')
-                container.classList.add('inactive')
-                list_itens.forEach(item => {
-                    item.classList.remove('selected')
-                })
-            }
-        }
-
-        switch (id) {
-            case 'edit_dia':
-                const dia = document.getElementById('dia')
-                const data = document.getElementById('data_dia')
-                const options_falta = document.getElementById('options_falta').querySelectorAll('div')
-                const options_contraturno = document.getElementById('options_contraturno').querySelectorAll('div')
-                const options_subida = document.getElementById('options_subida').querySelectorAll('div')
-                const options_descer = document.getElementById('options_retorno').querySelectorAll('div')
-                
-                const text_dia = obj_click.querySelector('h1').textContent
-                const text_falta = obj_click.querySelector(`p#falta_${text_dia}`).textContent
-                const text_contraturno = obj_click.querySelector(`p#contraturno_${text_dia}`).textContent
-                const text_subir = obj_click.querySelector(`p#pSubida_${text_dia}`).textContent
-                const text_descer = obj_click.querySelector(`p#pDescida_${text_dia}`).textContent
-        
-                dia.textContent = `Editar ${text_dia}`
-                data.textContent = obj_click.querySelector(`p#data_${text_dia}`).textContent
-                options_falta.forEach(item => {define_checkbox(item, text_falta)})
-                options_contraturno.forEach(item => {define_checkbox(item, text_contraturno)})
-                
-                const title_subir = document.getElementById('options_subida_title')
-                const container_subir = document.getElementById('options_subida_container')
-                const list_itens_subir = container_subir.querySelectorAll('div')
-                correct_options(text_subir, options_subida, title_subir, container_subir, list_itens_subir)
-        
-                const title_descer = document.getElementById('options_retorno_title')
-                const container_descer = document.getElementById('options_retorno_container')
-                const list_itens_descer = container_descer.querySelectorAll('div')
-                correct_options(text_descer, options_descer, title_descer, container_descer, list_itens_descer)
-                break
-
-            case 'edit_valor':
-                card.querySelector('h2').textContent = `Digite o novo valor da ${obj_click.id.includes('cartela') ? 'cartela' : 'diária'}:`
-                break
-            
-            case 'edit_veicle_capacidade':
-                const placa_capacidade = extract_info(obj_click, 'placa')
-                popup.querySelector('span').textContent = placa_capacidade
-                card.querySelector('h2').textContent = `Digite a capacidade de ${placa_capacidade}:`
-                break
-
-            case 'edit_veicle_motorista':
-                const placa_veicle = extract_info(obj_click, 'placa')
-                const info_atual = extract_info(obj_click, 'motorista')
-                popup.querySelector('span').textContent = placa_veicle
-                card.querySelector('h2').textContent = `Selecione o motorista de ${placa_veicle}:`
-
-                const container_veicle_motoristas = document.getElementById('edit_veicle_motorista_container')
-                container_veicle_motoristas.innerHTML = ''
-
-                let option_nenhum = true
-                if (info_atual === 'Nenhum') {
-                    option_nenhum = false
-                }
-                include_options_container(container_veicle_motoristas, 'option_driver', option_nenhum)
-                break
-
-            case 'config_motorista':
-                card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
-                break
-
-            case 'config_aluno':
-                card.querySelector(`p#${popup.id}_nome`).textContent = extract_info(obj_click, 'title')
-                break
-            
-            case 'config_ponto':
-                config_popup_point(extract_info(obj_click, 'nome'))
-                break
-            
-            case 'config_route':
-                let plate = extract_info(obj_click, 'placa').trim()
-                let shift = extract_info(obj_click, 'turno').trim()
-                let hr_par = extract_info(obj_click, 'horario_partida').trim()
-                let hr_ret = extract_info(obj_click, 'horario_retorno').trim()
-                let pos = obj_click.querySelector('span').textContent
-                config_popup_route(plate, shift, hr_par, hr_ret, pos)
-                break
-            
-            case ('edit_ponto_nome'):
-                popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
-                break
-            
-            case 'edit_ponto_tempo_tolerancia':
-                popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
-                break
-            
-            case 'edit_ponto_linkGPS':
-                popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
-                break
-
-            case 'config_linha':
-                card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
-                card.querySelector('p#config_linha_cidade').textContent = extract_info(obj_click, 'cidade')
-                const options_ferias = document.getElementById('config_linha_options_ferias')
-                const options_gratuidade = document.getElementById('config_linha_options_gratuidade')
-                const info_ferias = document.getElementById('interface_ferias')
-                const area_precos = document.getElementById('area_precos')
-
-                if (info_ferias.className.includes('inactive')) {
-                    config_bool(options_ferias, 'Não')
-                } else {config_bool(options_ferias, 'Sim')}
-
-                if (area_precos.className.includes('inactive')) {
-                    config_bool(options_gratuidade, 'Não')
-                } else {config_bool(options_gratuidade, 'Sim')}
-                break
-            
-            case 'add_veicle':
-                const container_motoristas = card.querySelector('div#' + popup.id + '_options_container')
-                container_motoristas.innerHTML = ''
-                include_options_container(container_motoristas, 'option_driver')
-                break
-            
-            case 'add_route':
-                const container_veicles = card.querySelector('div#' + popup.id + '_options_container')
-                container_veicles.innerHTML = ''
-                include_options_container(container_veicles, 'option_veicle')
-                break
-
-            case 'promover_motorista':
-                card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-                break
-            
-            case 'rebaixar_motorista':
-                card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-                break
-            
-            case 'del_ponto':
-                card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-                break
-            
-            case 'del_linha':
-                card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-                break
-            
-            case 'del_veicle':
-                card.querySelector(`h2#${id}_placa`).textContent = extract_info(obj_click, 'placa')
-                break
-
-            case 'config_relacao_ponto_rota':
-                card.querySelector(`p#${popup.id}_nome`).textContent = extract_info(obj_click, 'nome')
-                card.querySelector(`p#${popup.id}_ordem`).textContent = extract_info(obj_click, 'number')
-                card.querySelector(`p#${popup.id}_horario`).textContent = extract_info(obj_click, 'horario')
-                break
-        }
+        action_popup(popup, card, id, obj_click)
     }
 }
 
 
-function cancel_popup_edit(id, reset_bool = false, reference_bool = 'Não') {
+function close_popup(id, reset_bool = false, reference_bool = 'Não') {
     const popup = document.getElementById(id)
     const card = popup.querySelector('div.popup__container')
     const scrolls = popup.querySelectorAll('div.scroll_vertical')
@@ -249,7 +251,7 @@ function cancel_popup_edit(id, reset_bool = false, reference_bool = 'Não') {
             btns.forEach(btn => {
                 const icon = btn.querySelector('i')
                 if (icon && icon.className.includes('open')) {
-                    actionContainer(btn)
+                    action_container(btn)
                 }
             })
         }
@@ -262,15 +264,23 @@ function cancel_popup_edit(id, reset_bool = false, reference_bool = 'Não') {
 }
 
 
-function set_limitScroll(element_scroll, size_limit = 30) {
-    const maxHeight = size_limit * window.innerHeight / 100
-    const size_element = element_scroll.scrollHeight
+function config_bool(container_options, reference = 'Sim') {
+    const icon_selected = container_options.querySelector('i.selected')
+    const text_selected = icon_selected.parentNode.querySelector('p').textContent
+    const option = container_options.querySelector('i:not(.selected)').parentNode
+    if (text_selected !== reference) {popup_selectOption(option, true)}
+}
 
-    if (element_scroll.childElementCount) {
-        if (size_element > maxHeight) {
-            element_scroll.style.minHeight = `${maxHeight}px`
-        } else {element_scroll.style.minHeight = `${size_element}px`}
-    } else {element_scroll.style.minHeight = '0px'}
+
+function popup_confirmBox(item) {
+    icon = item.querySelector('i')
+    if (icon.className.includes('selected')) {
+        icon.classList.replace('bi-check2-circle', 'bi-circle')
+        icon.classList.remove('selected')
+    } else {
+        icon.classList.replace('bi-circle', 'bi-check2-circle')
+        icon.classList.add('selected')
+    }
 }
 
 
@@ -320,85 +330,6 @@ function popup_selectOption(obj_click,  open_boxOptions = false, multiple_option
 }
 
 
-function config_bool(container_options, reference = 'Sim') {
-    const icon_selected = container_options.querySelector('i.selected')
-    const text_selected = icon_selected.parentNode.querySelector('p').textContent
-    const option = container_options.querySelector('i:not(.selected)').parentNode
-    if (text_selected !== reference) {popup_selectOption(option, true)}
-}
-
-
-function popup_confirmBox(item) {
-    icon = item.querySelector('i')
-    if (icon.className.includes('selected')) {
-        icon.classList.replace('bi-check2-circle', 'bi-circle')
-        icon.classList.remove('selected')
-    } else {
-        icon.classList.replace('bi-circle', 'bi-check2-circle')
-        icon.classList.add('selected')
-    }
-}
-
-
-function set_sequence(obj_child) {
-    const container = obj_child.parentNode
-    elements = Array.from(container.children)
-    elements.forEach((element, index) => {
-        const tag_sequence = element.querySelector('[id*="number"]')
-        tag_sequence.textContent = index + 1
-    })
-}
-
-
-function include_options_container(container, option, option_nenhum = false,  model_id = 'model_option') {
-    const name_line = document.getElementById('interface_nome').textContent
-    const model = document.getElementById(model_id)
-
-    if (option_nenhum) {
-        const nenhum = model.cloneNode(true)
-        nenhum.id = `${container.id}-option_nenhum`
-        nenhum.querySelector('p').textContent = 'Nenhum'
-
-        ids = nenhum.querySelectorAll(`[id*="${model_id}"]`)
-        ids.forEach(element => {
-            element.id = element.id.replace(model_id, nenhum.id)
-        })
-
-        nenhum.classList.remove('inactive')
-        container.appendChild(nenhum)
-    }
-
-    fetch(`/get_interface-${option}?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
-    .then(response => response.json())
-    .then(response => {
-        if (!response['error']) {
-            let data = response['data']
-            if (data) {
-                if (!Array.isArray(data)) {
-                    data = [data]
-                }
-        
-                for (index in data) {
-                    const value = data[index]
-                    const option = model.cloneNode(true)
-        
-                    option.id = `${container.id}-option_${index}`
-                    option.querySelector('p').textContent = value
-                    
-                    const ids = option.querySelectorAll(`[id*="${model_id}"]`)
-                    ids.forEach(element => {
-                        element.id = element.id.replace(model_id, option.id)
-                    })
-        
-                    option.classList.remove('inactive')
-                    container.appendChild(option)
-                }
-            }
-        } else {create_popup(response['title'], response['text'], 'Voltar')}
-    })
-}
-
-
 function config_popup_point(name_point) {
     const name_line = document.getElementById('interface_nome').textContent
 
@@ -411,7 +342,7 @@ function config_popup_point(name_point) {
             const turnos = response['turnos']
 
             for (info in data) {
-                const local = document.getElementById('config_ponto_' + info)
+                const local = document.getElementById('config_point_' + info)
                 local.textContent = data[info]
 
                 if (response['relacao'] !== 'membro') {
@@ -419,9 +350,9 @@ function config_popup_point(name_point) {
                 }
             }
 
-            document.getElementById('config_ponto_utilizacao_btn').querySelector('p').textContent = utilizacao['quantidade']
+            document.getElementById('config_point_utilizacao_btn').querySelector('p').textContent = utilizacao['quantidade']
             const model_rota = document.getElementById('interface_model_rota')
-            const utilizacao_container = document.getElementById('config_ponto_utilizacao_container')
+            const utilizacao_container = document.getElementById('config_point_utilizacao_container')
             utilizacao_container.innerHTML = ''
             for (index in utilizacao['rotas']) {
               const rota = model_rota.cloneNode(true)
@@ -443,8 +374,8 @@ function config_popup_point(name_point) {
 
             const model_aluno = document.getElementById('interface_model_aluno')
             for (turno in turnos) {
-                document.getElementById(`config_ponto_${turno}_btn`).querySelector('p').textContent = turnos[turno]['quantidade']
-                const container = document.getElementById(`config_ponto_${turno}_container`)
+                document.getElementById(`config_point_${turno}_btn`).querySelector('p').textContent = turnos[turno]['quantidade']
+                const container = document.getElementById(`config_point_${turno}_container`)
                 container.innerHTML = ''
 
                 const alunos = turnos[turno]['alunos']
@@ -473,7 +404,7 @@ function config_popup_point(name_point) {
                         aluno.classList.add('grow')
                         aluno.querySelector('i').classList.remove('inactive')
                         aluno.onclick = function() {
-                            open_popup_edit('config_aluno', this)
+                            open_popup('config_aluno', this)
                         }
                     }
 
@@ -482,29 +413,125 @@ function config_popup_point(name_point) {
                 }
             }
         } else {
-            cancel_popup_edit('config_ponto')
+            close_popup('config_point')
             create_popup(response['title'], response['text'], 'Voltar')
         }
     })
 }
 
 
-function config_popup_route(plate, shift, hr_par, hr_ret, pos) {
-    let name_line = document.getElementById('interface_nome').textContent
-    name_line = `?name_line=${encodeURIComponent(name_line)}`
-    plate = `&plate=${encodeURIComponent(plate)}`
-    shift = `&shift=${encodeURIComponent(shift)}`
-    hr_par = `&time_par=${encodeURIComponent(hr_par)}`
-    hr_ret = `&time_ret=${encodeURIComponent(hr_ret)}`
-    pos = `&pos=${encodeURIComponent(pos)}`
+function config_popup_route(obj_click) {
+    const data = return_data_route(obj_click)
+    document.getElementById('config_route_pos').textContent = data['pos']
+    
 
-    fetch('/get_route' + name_line + plate + shift + hr_par + hr_ret + pos, { method: 'GET' })
+    fetch('/get_route?' + generate_url_dict(data), { method: 'GET' })
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            console.log(response)
+            const msg_desativada = document.getElementById('config_route_desativada')
+            const data = response['data']
+            const information = response['info']
+            const role = response['role']
+            const relacao = response['relacao']
+
+            msg_desativada.classList.add('inactive')
+            if (response['msg_desativada']) {
+                msg_desativada.classList.remove('inactive')
+            }
+
+            if (role === 'aluno') {
+                const msg_cadastrar = document.getElementById('config_route_aviso_cadastrar')
+                const msg_contraturno = document.getElementById('config_route_aviso_contraturno')
+                const btn_contraturno = document.getElementById('config_route_btn_contraturno')
+
+                msg_cadastrar.classList.add('inactive')
+                msg_contraturno.classList.add('inactive')
+                btn_contraturno.classList.add('inactive')
+                if (response['msg_cadastrar']) {
+                    msg_cadastrar.classList.remove('inactive')
+                }
+
+                if (response['msg_contraturno']) {
+                    msg_contraturno.classList.remove('inactive')
+                    btn_contraturno.classList.remove('inactive')
+                }
+            } else {
+                const route_division = document.getElementById('route_division')
+                const route_del = document.getElementById('route_del')
+
+                if (relacao && relacao !== 'membro') {
+                    route_division.classList.remove('inactive')
+                    route_del.classList.remove('inactive')  
+                } else {
+                    route_division.classList.add('inactive')
+                    route_del.classList.add('inactive')
+                }
+            }
+
+            const popup = document.getElementById('config_route')
+            for (nome in information) {
+                const value = information[nome]
+                const info = popup.querySelector(`[id*="${nome}"]`)
+                info.textContent = value
+                if (role == 'motorista') {
+                    const icon = info.parentNode.querySelector('i')
+                    if (icon) {
+                        if (relacao && relacao !== 'membro') {
+                            icon.classList.remove('inactive')
+                        } else {icon.classList.add('inactive')}
+                    }
+                }
+            }
+
+            const model_relacao = document.getElementById('interface_model_option_headli')
+            for (nome in data) {
+                const tipo = data[nome]
+                const paradas = tipo['paradas']
+                const container = popup.querySelector(`[id*="${nome}_area"]`)
+
+                if (role === 'motorista') {
+                    const area_division = container.parentNode.querySelector('h1')
+                    const area_add = container.parentNode.querySelector('div.justify')
+    
+                    area_division.classList.add('inactive')
+                    area_add.classList.add('inactive')
+                    if (relacao && relacao !== 'membro') {
+                        area_add.classList.remove('inactive')
+                        if (paradas) {
+                            area_division.classList.remove('inactive')
+                        }
+                    }
+                }
+
+                popup.querySelector(`[id*="quantidade_${nome}"]`).textContent = tipo['quantidade']
+                for (index in paradas) {
+                    relacao = model_relacao.cloneNode(true)
+                    relacao.id = `${container.id}-relacao_${index}`
+                    
+                    ids = relacao.querySelectorAll(`[id*="${model_relacao.id}"]`)
+                    ids.forEach(element => {
+                        element.id = element.id.replace(model_relacao.id, relacao.id)
+                    })
+
+                    dados = paradas[index]
+                    for (dado in dados) {
+                        const value = dados[dado]
+                        relacao.querySelector(`[id*="${dado}"]`).textContent = value
+                    }
+                    
+                    if (role === 'motorista') {
+                        icon = relacao.querySelector('i')
+                        icon.classList.add('inactive')
+                        if (relacao && relacao !== 'membro') {
+                            icon.classList.remove('inactive')
+                        }
+                    }
+                }
+            }
+
         } else {
-            cancel_popup_edit('config_route')
+            close_popup('config_route')
             create_popup(response['title'], response['text'], 'Voltar')
         }
     })

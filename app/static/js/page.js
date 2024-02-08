@@ -14,14 +14,13 @@ observer_header.observe(header)
 // ~~ SSE ~~ //
 
 
-// ~~ Página ~~ //
-
 function loadLines() {
     function create_lines(local, list_datas, minha_linha = false) {
         const model_linha = document.getElementById('model_line')
         for (index_linha in list_datas) {
             const linha = model_linha.cloneNode(true)
             linha.id = `${local.id}-linha_${index_linha}`
+            if (!parseInt(index_linha)) {linha.classList.add('first')}
 
             const dados = list_datas[index_linha]
             for (data in dados) {
@@ -163,8 +162,6 @@ function closePage() {
 }
 
 
-// ~~ Animação de rolamento ~~ //
-
 function ajustAba(index_atual) {
     const abas = document.querySelectorAll('[id*="area"].page__container.column')
     abas.forEach((aba, index_aba) => {
@@ -177,29 +174,14 @@ function ajustAba(index_atual) {
 }
 
 
-let isScrolling
-content.addEventListener('scroll', function() {
-    clearTimeout(isScrolling)
-    isScrolling = setTimeout(function() {
-        const larguraDiv = content.scrollWidth / divs.length;
-        const index = Math.floor(content.scrollLeft / larguraDiv)
-        
-        btns.forEach((btn) => {
-            btn.classList.remove('btn_selected')
-        })
-        btns[index].classList.add('btn_selected')
-        aba_atual = btns[index].id
-        ajustAba(index)
-    }, 40)
-  })
-
-
 function replaceAba(btn_click) {
+    aba_atual = btn_click.id
     btns.forEach((element, index) => {
         if (element === btn_click) {
             const divAlvo = divs[index]
             content.scrollLeft = divAlvo.offsetLeft
             element.classList.add('btn_selected')
+            ajustAba(index)
         } else {
             element.classList.remove('btn_selected')
         }
@@ -209,8 +191,6 @@ function replaceAba(btn_click) {
 set_observerScroll(document.querySelectorAll('div.scroll_horizontal'))
 set_observerScroll(document.querySelectorAll('div.scroll_vertical'))
 
-
-// ~~ Interações na aba ~~ //
 
 function checkLine() {
     fetch("/get_association", { method: 'GET' })
@@ -288,7 +268,7 @@ function validationLine(obj_form, event) {
             if (response['error']) {
                 create_popup(response['title'], response['text'], 'Voltar', 'info', '', false)
             } else {
-                cancel_popup_edit('create_line')
+                close_popup('create_line')
                 create_popup(response['title'], response['text'], 'Ok', 'success')
                 loadLines()
             }

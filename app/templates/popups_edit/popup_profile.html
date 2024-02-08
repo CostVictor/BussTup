@@ -6,19 +6,19 @@
 
         <div class="popup__container--content">
             <div class="perfil__container--justify margin_top">
-                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('trocar_nome')">
+                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup('trocar_nome')">
                     <p class="interface__text">Trocar meu nome de exibição</p>
                 </div>
             </div>
 
             <div class="perfil__container--justify">
-                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('trocar_login')">
+                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup('trocar_login')">
                     <p class="interface__text">Trocar meu usuário de login</p>
                 </div>
             </div>
 
             <div class="perfil__container--justify">
-                <div class="interface__container--btn add aba" onclick="open_popup_edit('trocar_senha')">
+                <div class="interface__container--btn add aba" onclick="open_popup('trocar_senha')">
                     <p class="interface__text">Trocar minha senha</p>
                 </div>
             </div>
@@ -28,14 +28,14 @@
             </span>
 
             <div class="perfil__container--justify">
-                <div class="interface__container--btn del margin_bottom aba" onclick="open_popup_edit('deletar_conta')">
+                <div class="interface__container--btn del margin_bottom aba" onclick="open_popup('deletar_conta')">
                     <p class="interface__text remove">Deletar minha conta</p>
                 </div>
             </div>
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn" onclick="cancel_popup_edit('config_usuario')">Fechar</button>
+            <button class="popup__btn" onclick="close_popup('config_usuario')">Fechar</button>
         </footer>
     </div>
 </section>
@@ -66,7 +66,7 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_email')">Cancelar</button>
+            <button class="popup__btn cancel" onclick="close_popup('edit_email')">Cancelar</button>
             <button class="popup__btn" onclick="submit('formulario_edit_email')">Alterar</button>
         </footer>
     </div>
@@ -98,7 +98,7 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_telefone')">Cancelar</button>
+            <button class="popup__btn cancel" onclick="close_popup('edit_telefone')">Cancelar</button>
             <button class="popup__btn" onclick="submit('formulario_edit_telefone')">Alterar</button>
         </footer>
     </div>
@@ -131,7 +131,7 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('edit_pix')">Cancelar</button>
+            <button class="popup__btn cancel" onclick="close_popup('edit_pix')">Cancelar</button>
             <button class="popup__btn" onclick="submit('formulario_edit_pix')">Alterar</button>
         </footer>
     </div>
@@ -163,7 +163,7 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('trocar_nome')">Cancelar</button>
+            <button class="popup__btn cancel" onclick="close_popup('trocar_nome')">Cancelar</button>
             <button class="popup__btn" onclick="submit('formulario_trocar_nome')">Alterar</button>
         </footer>
     </div>
@@ -194,7 +194,7 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('trocar_login')">Cancelar</button>
+            <button class="popup__btn cancel" onclick="close_popup('trocar_login')">Cancelar</button>
             <button class="popup__btn" onclick="submit('formulario_trocar_login')">Alterar</button>
         </footer>
     </div>
@@ -226,7 +226,7 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('trocar_senha')">Cancelar</button>
+            <button class="popup__btn cancel" onclick="close_popup('trocar_senha')">Cancelar</button>
             <button class="popup__btn" onclick="submit('formulario_trocar_senha')">Alterar</button>
         </footer>
     </div>
@@ -244,7 +244,7 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('confirm_logout')">Cancelar</button>
+            <button class="popup__btn cancel" onclick="close_popup('confirm_logout')">Cancelar</button>
             <button class="popup__btn" onclick="closeProfile(true)">Sair</button>
         </footer>
     </div>
@@ -262,8 +262,8 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('deletar_conta')">Cancelar</button>
-            <button class="popup__btn" onclick="open_popup_edit('termo_concordancia_excusao')">Proseguir</button>
+            <button class="popup__btn cancel" onclick="close_popup('deletar_conta')">Cancelar</button>
+            <button class="popup__btn" onclick="open_popup('termo_concordancia_excusao')">Proseguir</button>
         </footer>
     </div>
 </section>
@@ -290,7 +290,7 @@
         </div>
 
         <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="cancel_popup_edit('termo_concordancia_excusao')">Cancelar</button>
+            <button class="popup__btn cancel" onclick="close_popup('termo_concordancia_excusao')">Cancelar</button>
             <button class="popup__btn">Excluir</button>
         </footer>
     </div>

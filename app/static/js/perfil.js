@@ -19,7 +19,7 @@ function closeProfile(logout = false) {
     animate_itens(elements, 'outUp', 0.5, 0, 0.03, 1)
 
     if (logout) {
-        cancel_popup_edit('confirm_logout')
+        close_popup('confirm_logout')
         fetch('/logout', {method: 'GET'})
         setTimeout(() => {
             history.pushState(null, null, '/'); 
@@ -74,7 +74,7 @@ function editData_profile(obj_click) {
         .then(response => response.json())
         .then(response => {
             if (!response['error']) {
-                cancel_popup_edit(key)
+                close_popup(key)
                 create_popup(response['title'], response['text'], 'Ok', 'success')
                 loadProfile()
             } else {

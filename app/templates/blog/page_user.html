@@ -42,7 +42,7 @@
         </div>
     </header>
     
-    <main id="content_page" class="page__container--content scroll_horizontal content_noBorder">
+    <main id="content_page" class="page__container--content scroll_horizontal not_overflow content_noBorder">
         <section id="aba_agenda" class="page__container--aba">
             <div id="not_line_agenda" class="inactive">
                 Você não possui uma linha
@@ -66,7 +66,7 @@
                     <div class="page__container pos_relative">
                         <p class="text secundario emphasis">Ponto</p>
                         <p id="nome_ponto" class="text secundario emphasis max_width">Nome do ponto</p>
-                        <i class="bi bi-pencil-square page__icon content absolute" onclick="open_popup_edit('edit_ponto')"></i>
+                        <i class="bi bi-pencil-square page__icon content absolute" onclick="open_popup('edit_ponto')"></i>
                     </div>
 
                     <div class="page__container space_itens">
@@ -89,12 +89,12 @@
                     <div class="page__container enter">
                         <p class="text secundario fundo">Contraturno fixo:</p>
                         <p id="contaturnos_fixos" class="text secundario content fundo">Nenhum</p>
-                        <i class="bi bi-pencil-square page__icon content" onclick="open_popup_edit('edit_contraturno')"></i>
+                        <i class="bi bi-pencil-square page__icon content" onclick="open_popup('edit_contraturno')"></i>
                     </div>
 
                     <div class="page__container scroll_horizontal enter">
                         {% for index in range(5) %}
-                        <div class="page__container--card hidden" onclick="open_popup_edit('edit_dia', this)">
+                        <div class="page__container--card hidden" onclick="open_popup('edit_dia', this)">
                             <div class="page__container--card_title pos_relative">
                                 <h1 class="text terciario">{{ dias_semana[index] }}</h1>
                                 <i class="bi bi-pencil-square page__icon card"></i>
@@ -150,7 +150,7 @@
 
                     {% for index_previsao in range(3) %}
                     <div id="previsao_{{ turnos[index_previsao] }}" class="enter">
-                        <div id="{{ turnos[index_previsao] }}_btn" class="page__container interaction pos_relative" onclick="actionContainer(this)">
+                        <div id="{{ turnos[index_previsao] }}_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                             <h2 class="text secundario fundo max_width">{{ turnos[index_previsao] }}</h2>
                             <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
                         </div>
@@ -244,14 +244,14 @@
                 </div>
 
                 {% if role == 'motorista' %}
-                <h2 class="text title enter">Minhas linhas</h2>
+                <h2 class="text title big_space enter">Minhas linhas</h2>
                 <div id="minha_linha_area" class="enter"></div>
 
                 <div id="msg_criar_linha" class="enter">
                     <p class="text secundario emphasis">Você ainda não está relacionado a nenhuma linha.</p>
                     <p class="text secundario fundo">Solicite entrada em alguma linha ou crie a sua:</p>
                     <div class="page__container--line selected">
-                        <i class="bi bi-plus-lg page__icon--box plus" onclick="open_popup_edit('create_line')"></i>
+                        <i class="bi bi-plus-lg page__icon--box plus" onclick="open_popup('create_line')"></i>
                     </div>
                 </div>
                 <h1 class="page__division enter"></h1>
@@ -301,6 +301,7 @@
         </div>
     </nav>
     
+    <script src="/static/js/utilities.js"></script>
     <script src="/static/js/interface.js"></script>
     <script src="/static/js/validation.js"></script>
     <script src="/static/js/line.js"></script>

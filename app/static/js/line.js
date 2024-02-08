@@ -1,5 +1,3 @@
-// ~~ Edição ~~ //
-
 function edit_nome_linha() {
     const new_name = document.getElementById('edit_nome_linha_new').value
     const password = document.getElementById('edit_nome_linha_conf').value
@@ -13,7 +11,7 @@ function edit_nome_linha() {
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            cancel_popup_edit('edit_nome_linha')
+            close_popup('edit_nome_linha')
             loadInterfaceLine(new_name, false)
             create_popup(response['title'], response['text'], 'Ok', 'success')
             document.getElementById('config_linha_nome').textContent = new_name
@@ -36,7 +34,7 @@ function edit_cidade_linha() {
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            cancel_popup_edit('edit_cidade_linha')
+            close_popup('edit_cidade_linha')
             loadInterfaceLine(name_line, false)
             create_popup(response['title'], response['text'], 'Ok', 'success')
             document.getElementById('config_linha_cidade').textContent = new_cidade
@@ -50,6 +48,9 @@ function edit_config_bool(obj_click) {
     if (!obj_click.querySelector('i').className.includes('selected')) {
         const name_line = document.getElementById('interface_nome').textContent
         const opcao = obj_click.querySelector('p').textContent
+        const content = document.getElementById('interface_linha_content')
+        const elements = Array.from(content.children)
+        content.classList.add('inactive')
 
         let field = 'paga'
         let new_value = false
@@ -69,6 +70,10 @@ function edit_config_bool(obj_click) {
         .then(response => {
             if (!response['error']) {
                 loadInterfaceLine(name_line, false)
+                if (opcao === 'Sim') {
+                    animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0, field)
+                } else (animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0))
+                content.classList.remove('inactive')
             } else {create_popup(response['title'], response['text'], 'Voltar')}
         })
     }
@@ -105,7 +110,7 @@ function edit_valor_linha(event) {
         .then(response => response.json())
         .then(response => {
             if (!response['error']) {
-                cancel_popup_edit('edit_valor')
+                close_popup('edit_valor')
                 create_popup(response['title'], response['text'], 'Ok', 'success')
                 loadInterfaceLine(name_line, false)
             } else {create_popup(response['title'], response['text'], 'Voltar')}
@@ -118,20 +123,20 @@ function edit_capacidade_veiculo(event) {
     event.preventDefault()
 
     const name_line = document.getElementById('interface_nome').textContent
-    const veicle_plate = document.getElementById('edit_veicle_capacidade').querySelector('span').textContent
-    const new_value = document.getElementById('edit_veicle_capacidade_new').value.trim()
+    const vehicle_plate = document.getElementById('edit_vehicle_capacidade').querySelector('span').textContent
+    const new_value = document.getElementById('edit_vehicle_capacidade_new').value.trim()
 
-    fetch("/edit_veicle", {
+    fetch("/edit_vehicle", {
         method: 'PATCH',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({'field': 'capacidade', 'new_value': new_value, 'name_line': name_line, 'plate': veicle_plate})
+        body: JSON.stringify({'field': 'capacidade', 'new_value': new_value, 'name_line': name_line, 'plate': vehicle_plate})
     })
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            cancel_popup_edit('edit_veicle_capacidade')
+            close_popup('edit_vehicle_capacidade')
             create_popup(response['title'], response['text'], 'Ok', 'success')
-            loadInterfaceVeicle(name_line)
+            loadInterfaceVehicle(name_line)
         } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
@@ -139,25 +144,25 @@ function edit_capacidade_veiculo(event) {
 
 function edit_motorista_veiculo() {
     const name_line = document.getElementById('interface_nome').textContent
-    const veicle_plate = document.getElementById('edit_veicle_motorista').querySelector('span').textContent
-    const options = document.getElementById('edit_veicle_motorista_container')
+    const vehicle_plate = document.getElementById('edit_vehicle_motorista').querySelector('span').textContent
+    const options = document.getElementById('edit_vehicle_motorista_container')
     const option_selected = options.querySelector('[class*="selected"]')
 
     if (!option_selected) {
         create_popup('Nenhuma opção selecionada', 'Por favor, selecione uma opção disponível.', 'Voltar')
     } else {
         const new_value = option_selected.querySelector('p').textContent
-        fetch("/edit_veicle", {
+        fetch("/edit_vehicle", {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({'field': 'motorista', 'new_value': new_value, 'name_line': name_line, 'plate': veicle_plate})
+            body: JSON.stringify({'field': 'motorista', 'new_value': new_value, 'name_line': name_line, 'plate': vehicle_plate})
         })
         .then(response => response.json())
         .then(response => {
             if (!response['error']) {
-                cancel_popup_edit('edit_veicle_motorista')
+                close_popup('edit_vehicle_motorista')
                 create_popup(response['title'], response['text'], 'Ok', 'success')
-                loadInterfaceVeicle(name_line)
+                loadInterfaceVehicle(name_line)
                 loadInterfaceRoutes(name_line)
             } else {create_popup(response['title'], response['text'], 'Voltar')}
         })
@@ -184,29 +189,27 @@ function edit_point(form_submit, event) {
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            cancel_popup_edit('edit_ponto_' + field)
+            close_popup('edit_ponto_' + field)
             create_popup(response['title'], response['text'], 'Ok', 'success')
             loadInterfacePoints(name_line)
-            document.getElementById('config_ponto_' + field).textContent = new_value
+            document.getElementById('config_point_' + field).textContent = new_value
         } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
 
 
-// ~~ Criação ~~ //
-
-function create_veicle() {
+function create_vehicle() {
     const name_line = document.getElementById('interface_nome').textContent
-    const placa = document.getElementById('add_veicle_placa').value
-    const capacidade = document.getElementById('add_veicle_capacidade').value
-    const options = document.getElementById('add_veicle_options')
+    const placa = document.getElementById('add_vehicle_placa').value
+    const capacidade = document.getElementById('add_vehicle_capacidade').value
+    const options = document.getElementById('add_vehicle_options')
     let motorista_nome = 'Nenhum'
 
     icon_selected = options.querySelector('i.selected')
     text_selected = icon_selected.parentNode.querySelector('p').textContent
 
     if (text_selected === 'Sim') {
-        const container = document.getElementById('add_veicle_options_container')
+        const container = document.getElementById('add_vehicle_options_container')
         const motorista_selected = container.querySelector('div.selected')
 
         if (motorista_selected) {
@@ -214,7 +217,7 @@ function create_veicle() {
         }
     }
 
-    fetch("/create_veicle", {
+    fetch("/create_vehicle", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({'placa': placa, 'capacidade': capacidade, 'motorista_nome': motorista_nome, 'name_line': name_line})
@@ -222,9 +225,9 @@ function create_veicle() {
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            cancel_popup_edit('add_veicle')
+            close_popup('add_vehicle')
             create_popup(response['title'], response['text'], 'Ok', 'success')
-            loadInterfaceVeicle(name_line)
+            loadInterfaceVehicle(name_line)
         } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
@@ -259,7 +262,7 @@ function create_point(event) {
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            cancel_popup_edit('add_point')
+            close_popup('add_point')
             create_popup(response['title'], response['text'], 'Ok', 'success')
             loadInterfacePoints(name_line)
         } else {create_popup(response['title'], response['text'], 'Voltar')}
@@ -278,12 +281,12 @@ function create_route(event) {
     let option_selected = options.querySelector('[class*="selected"]')
     option_selected = option_selected.parentNode.querySelector('p').textContent
 
-    let veicle = 'Nenhum'
+    let vehicle = 'Nenhum'
     if (option_selected == 'Sim') {
         const plate_selected = document.getElementById('add_route_options_container').querySelector('[class*="selected"]')
 
         if (plate_selected) {
-            veicle = plate_selected.textContent.trim().split(' ')[0]
+            vehicle = plate_selected.textContent.trim().split(' ')[0]
         }
     }
 
@@ -291,7 +294,7 @@ function create_route(event) {
         'turno': turno, 
         'horario_partida': hr_partida,
         'horario_retorno': ht_retorno,
-        'plate': veicle,
+        'plate': vehicle,
         'name_line': name_line
     }
     
@@ -303,15 +306,13 @@ function create_route(event) {
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
-            cancel_popup_edit('add_route')
+            close_popup('add_route')
             create_popup(response['title'], response['text'], 'Ok', 'success')
             loadInterfaceRoutes(name_line)
         } else {create_popup(response['title'], response['text'], 'Voltar')}
     })
 }
 
-
-// ~~ Carregamento ~~ //
 
 function loadInterfaceLine(name_line, load_complete = true) {
     fetch(`/get_interface-line?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
@@ -340,10 +341,10 @@ function loadInterfaceLine(name_line, load_complete = true) {
 
             for (dado in response['data']) {
                 if (dado === 'paga') {
-                    const area_precos = document.getElementById('area_precos')
+                    const area_paga = document.getElementById('area_paga')
                     if (!response['data'][dado]) {
-                        area_precos.classList.add('inactive')
-                    } else {area_precos.classList.remove('inactive')}
+                        area_paga.classList.add('inactive')
+                    } else {area_paga.classList.remove('inactive')}
 
                 } else if (dado === 'ferias') {
                     const info_ferias = document.getElementById('interface_ferias')
@@ -367,7 +368,7 @@ function loadInterfaceLine(name_line, load_complete = true) {
             if (load_complete) {
                 loadInterfaceDriver(name_line)
                 if (response['role'] === 'motorista') {
-                    loadInterfaceVeicle(name_line)
+                    loadInterfaceVehicle(name_line)
                     loadInterfacePoints(name_line)
                 }
                 loadInterfaceRoutes(name_line)
@@ -430,18 +431,18 @@ function loadInterfaceDriver(name_line) {
 }
 
 
-function loadInterfaceVeicle(name_line) {
-    fetch(`/get_interface-veicle?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
+function loadInterfaceVehicle(name_line) {
+    fetch(`/get_interface-vehicle?name_line=${encodeURIComponent(name_line)}`, { method: 'GET' })
     .then(response => response.json())
     .then(response => {
         if (!response['error']) {
             const area_onibus = document.getElementById('area_onibus')
-            const container_veicles = document.getElementById('area_onibus_content')
+            const container_vehicles = document.getElementById('area_onibus_content')
             const division = area_onibus.querySelector('h1.page__division')
             const btn_add = document.getElementById('area_onibus_btn_add')
             
             const data = response['data']
-            container_veicles.innerHTML = ''
+            container_vehicles.innerHTML = ''
             division.classList.add('inactive')
             btn_add.classList.add('inactive')
             
@@ -450,10 +451,10 @@ function loadInterfaceVeicle(name_line) {
                 if (data.length) {division.classList.remove('inactive')}
             }
 
-            const model_veicle = document.getElementById('model_onibus')    
-            for (veicle in data) {
-                const element = model_veicle.cloneNode(true)
-                element.id = `veiculo_${veicle}`
+            const model_vehicle = document.getElementById('model_onibus')    
+            for (vehicle in data) {
+                const element = model_vehicle.cloneNode(true)
+                element.id = `veiculo_${vehicle}`
 
                 const ids = element.querySelectorAll('[id*="model_onibus"]')
                 ids.forEach(item => {
@@ -463,8 +464,8 @@ function loadInterfaceVeicle(name_line) {
                     }
                 })
 
-                for (dado in data[veicle]) {
-                    const value = data[veicle][dado]
+                for (dado in data[vehicle]) {
+                    const value = data[vehicle][dado]
 
                     if (dado === 'motorista_nome') {
                         const motorista_nome = element.querySelector('[id*="motorista"]')
@@ -492,7 +493,7 @@ function loadInterfaceVeicle(name_line) {
                 }
 
                 element.classList.remove('inactive')
-                container_veicles.appendChild(element)
+                container_vehicles.appendChild(element)
             }
 
         } else {create_popup(response['title'], response['text'], 'Voltar')}
@@ -532,7 +533,7 @@ function loadInterfacePoints(name_line) {
     
                     if (relacao) {
                         ponto.onclick = function() {
-                            open_popup_edit('config_ponto', this)
+                            open_popup('config_point', this)
                         }
                         ponto.querySelector('i').classList.remove('inactive')
                         ponto.classList.add('grow')

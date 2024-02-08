@@ -19,7 +19,7 @@
     {% include "popups_edit/popup_profile.html" %}
 
     <section class="perfil__container">
-        <header class="perfil__container--header pos_relative hidden" onclick="open_popup_edit('config_usuario')">
+        <header class="perfil__container--header pos_relative hidden" onclick="open_popup('config_usuario')">
             <p id="perfil_nome" class="perfil__title"></p>
             <i class="bi bi-three-dots-vertical perfil__icon title"></i>
         </header>
@@ -31,13 +31,13 @@
                 <div class="scroll_horizontal">
                     <p id="perfil_email" class="text secundario fundo content"></p>
                 </div>
-                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup_edit('edit_email')"></i>
+                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_email')"></i>
             </div>
 
             <div class="perfil__item enter">
                 <p class="text secundario emphasis nowrap">Telefone</p>
                 <p id="perfil_telefone" class="text secundario fundo content"></p>
-                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup_edit('edit_telefone')"></i>
+                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_telefone')"></i>
             </div>
 
             {% if role == 'motorista' %}
@@ -46,7 +46,7 @@
                 <div class="scroll_horizontal">
                     <p id="perfil_pix" class="text secundario fundo content"></p>
                 </div>
-                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup_edit('edit_pix')"></i>
+                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_pix')"></i>
             </div>
 
             {% else %}
@@ -67,7 +67,7 @@
         <div class="perfil__container--footer">
             <h1 class="perfil__division enter"></h1>
             <div class="perfil__container--justify enter">
-                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup_edit('confirm_logout')">
+                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup('confirm_logout')">
                     <p class="interface__text">Sair da conta</p>
                 </div>
             </div>
@@ -79,6 +79,7 @@
             </div>
         </div>
     </section>
+    <script src="/static/js/utilities.js"></script>
     <script src="/static/js/validation.js"></script>
     <script src="/static/js/interface.js"></script>
     <script src="/static/js/interaction.js"></script>

@@ -72,7 +72,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Busstup`.`Rota` (
   `codigo` BIGINT NOT NULL AUTO_INCREMENT,
-  `turno` ENUM('Matutino', 'Vespertino', 'Norturno') NOT NULL,
+  `turno` ENUM('Matutino', 'Vespertino', 'Noturno') NOT NULL,
   `em_partida` TINYINT NOT NULL DEFAULT 0,
   `em_retorno` TINYINT NOT NULL DEFAULT 0,
   `horario_partida` TIME NOT NULL,
