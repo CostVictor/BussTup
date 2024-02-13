@@ -153,20 +153,21 @@ ENGINE = InnoDB;
 -- Table `Busstup`.`Parada`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Busstup`.`Parada` (
-  `Rota_codigo` BIGINT NOT NULL,
-  `Ponto_id` BIGINT NOT NULL,
+  `codigo` BIGINT NOT NULL AUTO_INCREMENT,
   `tipo` ENUM('partida', 'retorno') NOT NULL,
   `ordem` INT NOT NULL,
   `horario_passagem` TIME NOT NULL,
-  PRIMARY KEY (`Rota_codigo`, `Ponto_id`),
-  INDEX `fk_Rota_has_Ponto_Ponto1_idx` (`Ponto_id` ASC),
-  INDEX `fk_Rota_has_Ponto_Rota1_idx` (`Rota_codigo` ASC),
-  CONSTRAINT `fk_Rota_has_Ponto_Rota1`
+  `Rota_codigo` BIGINT NOT NULL,
+  `Ponto_id` BIGINT NOT NULL,
+  PRIMARY KEY (`codigo`),
+  INDEX `fk_Parada_Rota1_idx` (`Rota_codigo` ASC),
+  INDEX `fk_Parada_Ponto1_idx` (`Ponto_id` ASC),
+  CONSTRAINT `fk_Parada_Rota1`
     FOREIGN KEY (`Rota_codigo`)
     REFERENCES `Busstup`.`Rota` (`codigo`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Rota_has_Ponto_Ponto1`
+  CONSTRAINT `fk_Parada_Ponto1`
     FOREIGN KEY (`Ponto_id`)
     REFERENCES `Busstup`.`Ponto` (`id`)
     ON DELETE NO ACTION
@@ -251,13 +252,12 @@ CREATE TABLE IF NOT EXISTS `Busstup`.`Registro_Parada` (
   `data` DATE NOT NULL,
   `veiculo_passou` TINYINT NOT NULL DEFAULT 0,
   `quantidade_no_veiculo` INT NOT NULL,
-  `Parada_Rota_codigo` BIGINT NOT NULL,
-  `Parada_Ponto_id` BIGINT NOT NULL,
+  `Parada_codigo` BIGINT NOT NULL,
   PRIMARY KEY (`codigo`),
-  INDEX `fk_Registro_Parada_Parada1_idx` (`Parada_Rota_codigo` ASC, `Parada_Ponto_id` ASC),
+  INDEX `fk_Registro_Parada_Parada1_idx` (`Parada_codigo` ASC),
   CONSTRAINT `fk_Registro_Parada_Parada1`
-    FOREIGN KEY (`Parada_Rota_codigo` , `Parada_Ponto_id`)
-    REFERENCES `Busstup`.`Parada` (`Rota_codigo` , `Ponto_id`)
+    FOREIGN KEY (`Parada_codigo`)
+    REFERENCES `Busstup`.`Parada` (`codigo`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -287,19 +287,19 @@ ENGINE = InnoDB;
 -- Table `Busstup`.`Passagem`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Busstup`.`Passagem` (
-  `Parada_Rota_codigo` BIGINT NOT NULL,
-  `Parada_Ponto_id` BIGINT NOT NULL,
-  `Aluno_id` BIGINT NOT NULL,
+  `codigo` BIGINT NOT NULL AUTO_INCREMENT,
   `passagem_fixa` TINYINT NOT NULL,
   `passagem_contraturno` TINYINT NOT NULL,
   `pediu_espera` TINYINT NOT NULL DEFAULT 0,
   `data` DATE NULL,
-  PRIMARY KEY (`Parada_Rota_codigo`, `Parada_Ponto_id`, `Aluno_id`),
-  INDEX `fk_Parada_has_Aluno_Parada1_idx` (`Parada_Rota_codigo` ASC, `Parada_Ponto_id` ASC),
+  `Parada_codigo` BIGINT NOT NULL,
+  `Aluno_id` BIGINT NOT NULL,
+  PRIMARY KEY (`codigo`),
+  INDEX `fk_Passagem_Parada1_idx` (`Parada_codigo` ASC),
   INDEX `fk_Passagem_Aluno1_idx` (`Aluno_id` ASC),
-  CONSTRAINT `fk_Parada_has_Aluno_Parada1`
-    FOREIGN KEY (`Parada_Rota_codigo` , `Parada_Ponto_id`)
-    REFERENCES `Busstup`.`Parada` (`Rota_codigo` , `Ponto_id`)
+  CONSTRAINT `fk_Passagem_Parada1`
+    FOREIGN KEY (`Parada_codigo`)
+    REFERENCES `Busstup`.`Parada` (`codigo`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Passagem_Aluno1`

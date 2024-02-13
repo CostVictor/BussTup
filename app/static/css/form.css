@@ -244,6 +244,7 @@
     display: flex;
     align-items: center;
     position: absolute;
+    user-select: none;
     transition: 0.2s ease;
     color: var(--azul_terciario);
     border-right: var(--azul_terciario) solid 0.06rem;
@@ -292,6 +293,7 @@
     color: var(--azul_terciario);
     font-size: calc(1vw + 1vh + 1vmin);
     cursor: pointer;
+    user-select: none;
 }
 
 .form__btn--password.white {

@@ -1,20 +1,8 @@
-.interface__container {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    flex-grow: 1;
+body {
     background-color: var(--branco_secundario);
 }
 
-.interface__container.inactive {
-    display: none;
-}
-
-.interface__container--header {
+.line__container--header {
     width: 100%;
     height: 6vh;
     display: flex;
@@ -24,34 +12,31 @@
     z-index: 2;
 }
 
-.interface__container--content {
+.line__container--content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
     padding-top: 5vh;
     padding-bottom: 3vh;
 }
 
-.interface__container--content.inactive {
-    display: none;
-}
-
-.interface__container--area {
+.line__container--area {
     display: flex;
     flex-direction: column;
     width: 90%;
 }
 
-.interface__container--area.inactive {
+.line__container--area.inactive {
     display: none;
 }
 
-.interface__container--aviso {
+.line__container--aviso {
     margin-top: calc(2vw + 2vh + 1vmin);
     width: 90%;
 }
 
-.interface__container--btn {
+.line__container--btn {
     width: 98%;
     height: 4.3vh;
     cursor: pointer;
@@ -60,46 +45,46 @@
     transition: scale 0.2s ease-in-out;
 }
 
-.interface__container--btn.no_margin {
+.line__container--btn.no_margin {
     margin: 0;
 }
 
-.interface__container--btn:hover {
+.line__container--btn:hover {
     scale: 1.02;
 }
 
-.interface__container--btn.aba {
+.line__container--btn.aba {
     width: 92%;
 }
 
-.interface__container--btn.margin_bottom {
+.line__container--btn.margin_bottom {
     margin-bottom: calc(0.5vw + 0.5vh + 1vmin);
 }
 
-.interface__container--btn.margin_top {
+.line__container--btn.margin_top {
     margin-top: calc(0.5vw + 0.5vh + 1vmin);
 }
 
-.interface__container--btn.margin_top.big {
+.line__container--btn.margin_top.big {
     margin-top: calc(1vw + 1vh + 1vmin);
 }
 
-.interface__container--btn.add {
+.line__container--btn.add {
     background-color: var(--branco_primario);
 }
 
-.interface__container--btn.del {
+.line__container--btn.del {
     background-color: var(--vermelho_secundario);
 }
 
-.interface__container--btn.remove {
+.line__container--btn.remove {
     width: 98%;
     margin-top: calc(0.5vw + 0.5vh + 1vmin);
     margin-bottom: calc(0.5vw + 0.5vh + 1vmin);
     background-color: var(--vermelho_secundario);
 }
 
-.interface__aviso {
+.line__aviso {
     display: flex;
     width: 100%;
     border-radius: calc(0.5vw + 0.5vh + 1vmin);
@@ -112,22 +97,22 @@
     box-sizing: border-box;
 }
 
-.interface__icon {
+.line__icon {
     font-size: calc(1vw + 2.5vh + 1vmin);
     margin-left: calc(0.2vw + 0.2vh + 1vmin);
     color: var(--azul_terciario);
     cursor: pointer;
 }
 
-.interface__icon.animate {
+.line__icon.animate {
     transition: scale 0.2s ease-in-out;
 }
 
-.interface__icon.animate:hover {
+.line__icon.animate:hover {
     scale: 1.2;
 }
 
-.interface__icon.del {
+.line__icon.del {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -138,7 +123,7 @@
     font-size: calc(0.5vw + 1vh + 1vmin);
 }
 
-.interface__icon.plus {
+.line__icon.plus {
     margin: 0;
     width: 100%;
     height: 100%;
@@ -148,7 +133,7 @@
     font-size: calc(1vw + 1.3vh + 1vmin);
 }
 
-.interface__icon.redirect {
+.line__icon.redirect {
     margin: 0;
     width: 100%;
     height: 100%;
@@ -158,7 +143,7 @@
     font-size: calc(0.9vw + 0.9vh + 1vmin);
 }
 
-.interface__icon--header {
+.line__icon--header {
     font-size: calc(1vw + 1vh + 1vmin);
     color: var(--azul_terciario);
     cursor: pointer;
@@ -166,7 +151,7 @@
     margin-right: calc(1vw + 1vh + 1vmin);
 }
 
-.interface__text {
+.line__text {
     width: 100%;
     height: 100%;
     display: flex;
@@ -177,15 +162,15 @@
     user-select: none;
 }
 
-.interface__text.white {
+.line__text.white {
     background-color: var(--branco_terciario);
     border-radius: calc(0.5vw + 0.5vh + 1vmin);
 }
 
-.interface__text.inactive {
+.line__text.inactive {
     display: none;
 }
 
-.interface__text.remove {
+.line__text.remove {
     color: var(--vermelho_terciario);
 }

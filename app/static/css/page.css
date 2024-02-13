@@ -230,6 +230,21 @@ body {
     justify-content: center;
 }
 
+.page__btn_redirect {
+    width: 98%;
+    height: 4.3vh;
+    cursor: pointer;
+    border-radius: calc(0.5vw + 0.5vh + 1vmin);
+    box-sizing: border-box;
+    transition: scale 0.2s ease-in-out;
+    margin-top: calc(1vw + 1vh + 1vmin);
+    background-color: var(--branco_primario);
+}
+
+.page__btn_redirect:hover {
+    scale: 1.03;
+}
+
 .page__icon--btn {
     transition: ease 0.2s;
     font-size: calc(1.5vw + 2vh + 1vmin);
@@ -240,7 +255,7 @@ body {
 }
 
 
-.btn_selected {
+.page__icon--btn.selected {
     background-color: var(--azul_primario);
     color: var(--branco_secundario);
     padding: calc(0.1vw + 0.1vh + 0.3vmin) calc(1.5vw + 1.5vh + 1vmin);
@@ -254,6 +269,21 @@ body {
     display: flex;
     align-items: center;
     cursor: pointer;
+}
+
+.page__icon.inactive {
+    display: none;
+}
+
+.page__icon_redirect {
+    display: flex;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    color: var(--azul_terciario);
+    font-size: calc(0.9vw + 0.9vh + 1vmin);
 }
 
 .page__icon.animate {

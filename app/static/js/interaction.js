@@ -1,114 +1,173 @@
-function action_popup(popup, card, id, obj_click) {
-    switch (id) {
-        case 'edit_valor':
-            card.querySelector('h2').textContent = `Digite o novo valor da ${obj_click.id.includes('cartela') ? 'cartela' : 'diária'}:`
-            break
-        
-        case 'edit_vehicle_capacidade':
-            const placa_capacidade = extract_info(obj_click, 'placa')
-            popup.querySelector('span').textContent = placa_capacidade
-            card.querySelector('h2').textContent = `Digite a capacidade de ${placa_capacidade}:`
-            break
+const list_inputs = document.querySelectorAll('input')
+function set_animate_label(list_inputs, local = false) {
+    list_inputs.forEach(input => {
+        let label = document.querySelector(`label[for="${input.id}"]`)
+        let icon = document.getElementById(`icon_${input.id}`)
 
-        case 'edit_vehicle_motorista':
-            const name_line = {'name_line': document.getElementById('interface_nome').textContent}
-            const placa_vehicle = extract_info(obj_click, 'placa')
-            const info_atual = extract_info(obj_click, 'motorista')
-            popup.querySelector('span').textContent = placa_vehicle
-            card.querySelector('h2').textContent = `Selecione o motorista de ${placa_vehicle}:`
-
-            const container_vehicle_motoristas = document.getElementById('edit_vehicle_motorista_container')
-            container_vehicle_motoristas.innerHTML = ''
-
-            let option_nenhum = true
-            if (info_atual === 'Nenhum') {
-                option_nenhum = false
+        if (local) {
+            label = local.querySelector(`label[for="${input.id}"]`)
+            icon = local.querySelector((`#icon_${input.id}`))
+        }
+        let inFocus = false
+    
+        function verify() {
+            if (inFocus) {
+                input.classList.remove('input_error')
+                if (label) {label.classList.add('selected')}
+                if (icon) {icon.classList.add('selected')}
+                if (input.type === 'time') { input.classList.add('visible') }
+            } else {
+                if (input.value.trim() === '') {
+                    input.value = ''
+                    if (label) {label.classList.remove('selected')}
+                    if (icon) {icon.classList.remove('selected')}
+                    if (input.type === 'time') { input.classList.remove('visible') }
+                } else {
+                    if (label) {label.classList.add('selected')}
+                    if (icon) {icon.classList.add('selected')}
+                    if (input.type === 'time') { input.classList.add('visible') }
+                }
             }
-            include_options_container(container_vehicle_motoristas, 'option_driver', name_line, option_nenhum)
-            break
+        }
+        input.addEventListener('focus', function() {inFocus = true})
+        input.addEventListener('blur', function() {inFocus = false})
+        setInterval(verify, 100)
+    })
+}
+set_animate_label(list_inputs)
 
-        case 'config_motorista':
-            card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
-            break
 
-        case 'config_aluno':
-            card.querySelector(`p#${popup.id}_nome`).textContent = extract_info(obj_click, 'title')
-            break
-        
-        case 'config_point':
-            config_popup_point(extract_info(obj_click, 'nome'))
-            break
-        
-        case 'config_route':
-            config_popup_route(obj_click)
-            break
-        
-        case ('edit_ponto_nome'):
-            popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
-            break
-        
-        case 'edit_ponto_tempo_tolerancia':
-            popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
-            break
-        
-        case 'edit_ponto_linkGPS':
-            popup.querySelector('span').textContent = extract_info(obj_click, 'nome')
-            break
+const inputs_tell = document.querySelectorAll('[class*="format_tell"]')
+function set_valid_tell(inputs_tell) {
+    inputs_tell.forEach(input => {
+        input.addEventListener('input', () => {
+            let digits = input.value.replace(/\D/g, '').substring(0, 11)
+            let num = digits.split('')
+            
+            let tell_formated = ''
+            if (num.length > 0) {tell_formated += `${num.slice(0, 2).join('')}`}
+            if (num.length > 2) {tell_formated = `(${tell_formated}) ${num.slice(2, 7).join('')}`}
+            if (num.length > 7) {tell_formated += `-${num.slice(7).join('')}`}
+            input.value = tell_formated
+        })
+    })
+}
+set_valid_tell(inputs_tell)
 
-        case 'config_line':
-            card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
-            card.querySelector('p#config_line_cidade').textContent = extract_info(obj_click, 'cidade')
-            const options_ferias = document.getElementById('config_line_options_ferias')
-            const options_gratuidade = document.getElementById('config_line_options_gratuidade')
-            const info_ferias = document.getElementById('interface_ferias')
-            const area_paga = document.getElementById('area_paga')
 
-            if (info_ferias.className.includes('inactive')) {
-                config_bool(options_ferias, 'Não')
-            } else {config_bool(options_ferias, 'Sim')}
+const inputs_name = document.querySelectorAll('[class*="format_name"]')
+function set_valid_name(inputs_name) {
+    inputs_name.forEach(input => {
+        input.addEventListener('input', () => {
+            input.value = input.value.replace(/[^a-zA-ZàáâãçéêíîóôõúüÀÁÂÃÇÉÊÍÎÓÔÕÚÜ\s]/g, '')
+        })
+    })
+}
+set_valid_name(inputs_name)
 
-            if (area_paga.className.includes('inactive')) {
-                config_bool(options_gratuidade, 'Não')
-            } else {config_bool(options_gratuidade, 'Sim')}
-            break
-        
-        case 'add_vehicle':
-            const container_motoristas = card.querySelector('div#' + popup.id + '_options_container')
-            container_motoristas.innerHTML = ''
-            include_options_container(container_motoristas, 'option_driver')
-            break
-        
-        case 'add_route':
-            const container_vehicles = card.querySelector('div#' + popup.id + '_options_container')
-            container_vehicles.innerHTML = ''
-            include_options_container(container_vehicles, 'option_vehicle')
-            break
 
-        case 'promover_motorista':
-            card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-            break
-        
-        case 'rebaixar_motorista':
-            card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-            break
-        
-        case 'del_ponto':
-            card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-            break
-        
-        case 'del_linha':
-            card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
-            break
-        
-        case 'del_vehicle':
-            card.querySelector(`h2#${id}_placa`).textContent = extract_info(obj_click, 'placa')
-            break
+const inputs_options = document.querySelectorAll('[class*="format_options"]')
+function set_input_options(inputs_options) {
+    function ajust_text(list, input) {
+        const value = input.value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+        list.forEach(element => {
+            const text = element.textContent.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+            element.classList.toggle('inactive', !text.includes(value));
+        })
+    }
 
-        case 'config_relacao_ponto_rota':
-            card.querySelector(`p#${popup.id}_nome`).textContent = extract_info(obj_click, 'nome')
-            card.querySelector(`p#${popup.id}_ordem`).textContent = extract_info(obj_click, 'number')
-            card.querySelector(`p#${popup.id}_horario`).textContent = extract_info(obj_click, 'horario')
-            break
+    inputs_options.forEach(input => {
+        const list_options = input.parentNode.parentNode.querySelector('ul')
+        const elements = list_options.querySelectorAll('li')
+        animate_itens(elements)
+
+        elements.forEach(li => {
+            li.addEventListener('mouseenter', () => {
+                input.value = li.textContent
+            })
+        })
+
+        input.addEventListener('input', () => {
+            ajust_text(elements, input)
+        })
+
+        input.addEventListener('focus', () => {
+            input.classList.add('option_focus')
+            list_options.classList.remove('inactive')
+            list_options.scrollTop = 0
+            ajust_text(elements, input)
+        })
+
+        input.addEventListener('blur', () => {
+            input.classList.remove('option_focus')
+            list_options.classList.add('inactive')
+
+            elements.forEach(element => {
+                element.classList.remove('inactive')
+            })
+        })
+    })
+}
+set_input_options(inputs_options)
+
+
+const forms = document.querySelectorAll('form')
+function set_submit_form(forms) {
+    forms.forEach(form => {
+        form.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {submit(form.id)}
+        });
+    })
+}
+set_submit_form(forms)
+set_observerScroll(document.querySelectorAll('form.scroll_vertical'))
+
+
+function createObserver(root = null, range_visibility = 0.2) {
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                entry.target.classList.remove('hidden')
+            } else {
+                entry.target.classList.remove('visible');
+                entry.target.classList.add('hidden');
+            }
+        });
+    }, {
+        root: root,
+        rootMargin: '0px',
+        threshold: range_visibility
+    });
+    return observer
+}
+
+
+function create_popup(title, text='', text_buttom='Ok', icon='info', redirect='', open_scroll = true) {
+    document.body.classList.add('no-scroll')
+    Swal.fire({
+        title: title,
+        html: `<p${text.split(' ').length > 12 ? ' style="text-align: justify;"' : ''}>${text}</p>`,
+        icon: icon,
+        width: '80%',
+        confirmButtonText: text_buttom,
+        confirmButtonColor: '#004aad',
+        iconColor: `${icon === 'info' ? "#ffe646" : icon === 'success'? "#0aa999" : "#ff7272"}`
+    }).then(() => {
+        if (open_scroll) {document.body.classList.remove('no-scroll')}
+        if (redirect) {window.location.href = '/' + redirect}
+    })
+}
+
+
+function set_observerScroll(list_obj) {
+    for (let index = 0; index < list_obj.length; index++) {
+        const observer = createObserver(list_obj[index], 0.15)
+        let elements_animate = list_obj[index]
+        elements_animate = elements_animate.querySelectorAll('div.hidden')
+        elements_animate.forEach(element => {
+            observer.observe(element)
+        })
     }
 }
 
@@ -176,13 +235,56 @@ function action_container(obj_click, set_limit = false) {
 }
 
 
+function animateIconPassword(obj_click) {
+    const container_password = obj_click.parentNode
+    const iconPassword = container_password.querySelector('[id*="btn"]')
+    const inputPassword = container_password.querySelector('input')
+
+    if (inputPassword.type === 'password') {
+        iconPassword.className = inputPassword.className.includes('white') ? "bi bi-eye-slash-fill form__btn--password white" : "bi bi-eye-slash-fill form__btn--password"
+        inputPassword.type = 'text'
+    } else {
+        iconPassword.className = inputPassword.className.includes('white') ? "bi bi-eye-fill form__btn--password white" : "bi bi-eye-fill form__btn--password"
+        inputPassword.type = 'password'
+    }
+}
+
+
+const templates_popup = document.getElementById('templates_popup')
+const local_popup = document.getElementById('popup_local')
+
 function open_popup(id, obj_click=false) {
-    document.body.classList.add('no-scroll')
-    const popup = document.getElementById(id)
+    const popups = document.importNode(templates_popup.content, true)
+    const popup = popups.querySelector(`#${id}`)
     const card = popup.querySelector('div.popup__container')
+
+    const inputs = popup.querySelectorAll('input')
+    set_animate_label(inputs, popup)
+
+    const inputs_tell = popup.querySelectorAll('[class*="format_tell"]')
+    set_valid_tell(inputs_tell)
+
+    const inputs_name = popup.querySelectorAll('[class*="format_name"]')
+    set_valid_name(inputs_name)
+    
+    const inputs_options = popup.querySelectorAll('[class*="format_options"]')
+    set_input_options(inputs_options)
+
+    const forms = popup.querySelectorAll('form')
+    set_submit_form(forms)
+
+    local_popup.appendChild(popup)
+    document.body.classList.add('no-scroll')
+
     popup.classList.remove('inactive')
     popup.classList.remove('close')
     card.classList.remove('close')
+
+    $(function() {
+        $(".sortable").each(function() {
+            setSortable($(this))
+        })
+    })
 
     if (obj_click) {
         action_popup(popup, card, id, obj_click)
@@ -190,76 +292,26 @@ function open_popup(id, obj_click=false) {
 }
 
 
-function close_popup(id, reset_bool = false, reference_bool = 'Não') {
-    const popup = document.getElementById(id)
+function close_popup(id) {
+    const popup = local_popup.querySelector(`#${id}`)
     const card = popup.querySelector('div.popup__container')
-    const scrolls = popup.querySelectorAll('div.scroll_vertical')
 
     card.classList.add('close')
     popup.classList.add('close')
+
+    $(function() {
+        $(".sortable").each(function() {
+            destroySortable($(this))
+        })
+    })
+
     setTimeout(() => {
         popup.classList.add('inactive')
         document.body.classList.remove('no-scroll')
-        
-        if (popup.querySelector('form')) {
-            const inputs = popup.querySelectorAll('input')
-            inputs.forEach(element => {
-                element.classList.remove('input_error')
-                element.value = ''
-            })
-        }
-        if (reset_bool) {
-            const options = card.querySelectorAll('div.popup__input.bool')
-            options.forEach(element => {
-                const icon = element.querySelector('i')
-                const text = element.querySelector('p')
-                if (text.textContent !== reference_bool) {
-                    icon.className = 'bi bi-circle popup__icon ratio'
-                } else {
-                    const titles = popup.querySelectorAll('h3.popup__text.info.space')
-                    const containers = popup.querySelectorAll('[id*="container"]')
-
-                    icon.className = 'bi bi-check2-circle popup__icon ratio selected'
-                    if (titles && containers) {
-                        titles.forEach(element => {
-                            text.textContent == 'Não' ? element.classList.add('inactive') : element.classList.remove('inactive')
-                        })
-                        containers.forEach(element => {
-                            if (element.id !== 'scroll_principal') {
-                                text.textContent == 'Não' ? element.classList.add('inactive') : element.classList.remove('inactive')
-
-                                Array.from(element.children).forEach(item => {
-                                    item.classList.remove('selected')
-                                })
-                            }
-                        })
-                    }
-                }
-            })
-        } else {
-            const containers = popup.querySelectorAll('[id*="container"]')
-            if (containers) {
-                containers.forEach(element => {
-                    Array.from(element.children).forEach(item => {
-                        item.classList.remove('selected')
-                    })
-                })
-            }
-        }
-        const btns = popup.querySelectorAll('[id*="btn"]')
-        if (btns) {
-            btns.forEach(btn => {
-                const icon = btn.querySelector('i')
-                if (icon && icon.className.includes('open')) {
-                    action_container(btn)
-                }
-            })
-        }
-
-    }, 100)
-    scrolls.forEach(element => {
-        element.scrollTop = 0
-    })
+    }, 150)
+    setTimeout(() => {
+        local_popup.removeChild(popup)
+    }, 160)
     copy_text()
 }
 
@@ -330,244 +382,23 @@ function popup_selectOption(obj_click,  open_boxOptions = false, multiple_option
 }
 
 
-function config_popup_point(name_point) {
-    const name_line = document.getElementById('interface_nome').textContent
+function submit(form_id = false) {
+    if (!form_id) {
+        const buttom = document.querySelector('button.form__btn--select.selected')
+        var form = document.getElementById(`form_${buttom.textContent.toLowerCase()}`)
+    } else {var form = document.getElementById(form_id)}
 
-    fetch(`/get_point?name_line=${encodeURIComponent(name_line)}&name_point=${encodeURIComponent(name_point)}`, { method: 'GET' })
-    .then(response => response.json())
-    .then(response => {
-        if (!response['error']) {
-            const data = response['info']
-            const utilizacao = response['utilizacao']
-            const turnos = response['turnos']
-
-            for (info in data) {
-                const local = document.getElementById('config_point_' + info)
-                local.textContent = data[info]
-
-                if (response['relacao'] !== 'membro') {
-                    document.getElementById(local.id + '_edit').classList.remove('inactive')
-                }
-            }
-
-            document.getElementById('config_point_utilizacao_btn').querySelector('p').textContent = utilizacao['quantidade']
-            const model_rota = document.getElementById('interface_model_rota')
-            const utilizacao_container = document.getElementById('config_point_utilizacao_container')
-            utilizacao_container.innerHTML = ''
-            for (index in utilizacao['rotas']) {
-              const rota = model_rota.cloneNode(true)
-              rota.id = `${utilizacao_container.id}-rota_${index}`
-
-              ids = rota.querySelectorAll('[id*="interface_model_rota"]')
-              ids.forEach(value => {
-                value.id = value.id.replace(model_rota.id, rota.id)
-              })
-
-              const dados = utilizacao['rotas'][index]
-              for (dado in dados) {
-                rota.querySelector(`[id*="${dado}"]`).textContent = dados[dado]
-              }
-
-              rota.classList.remove('inactive')
-              utilizacao_container.appendChild(rota)
-            }
-
-            const model_aluno = document.getElementById('interface_model_aluno')
-            for (turno in turnos) {
-                document.getElementById(`config_point_${turno}_btn`).querySelector('p').textContent = turnos[turno]['quantidade']
-                const container = document.getElementById(`config_point_${turno}_container`)
-                container.innerHTML = ''
-
-                const alunos = turnos[turno]['alunos']
-                for (index in alunos) {
-                    const aluno = model_aluno.cloneNode(true)
-                    aluno.id = `${container.id}-aluno_${index}`
-                    const nome = aluno.querySelector('p')
-                    nome.textContent = alunos[index]
-                    nome.id = aluno.id + '_nome'
-
-                    if (index) {
-                        let qnt = 0
-                        const dados_ant = alunos[index - 1]
-                        for (num in dados_ant) {
-                            if (dados_ant[num] === nome.textContent) {qnt++}
-                        }
-                        if (qnt) {
-                            const name_ant = document.getElementById(`${container.id}-aluno_${index - 1}`)
-                            const span_ant = name_ant.querySelector('span')
-                            if (!span_ant.textContent) {span_ant.textContent = 0}
-                            aluno.querySelector('span').textContent = parseInt(span_ant.textContent) + 1
-                        }
-                    }
-
-                    if (response['relacao'] !== 'membro') {
-                        aluno.classList.add('grow')
-                        aluno.querySelector('i').classList.remove('inactive')
-                        aluno.onclick = function() {
-                            open_popup('config_aluno', this)
-                        }
-                    }
-
-                    aluno.classList.remove('inactive')
-                    container.appendChild(aluno)
-                }
-            }
-        } else {
-            close_popup('config_point')
-            create_popup(response['title'], response['text'], 'Voltar')
+    let execute = true
+    const inputs = form.querySelectorAll('input')
+    inputs.forEach(input => {
+        if (input.type === 'submit') {
+            execute = false
         }
     })
-}
 
-
-function config_popup_route(obj_click) {
-    const data = return_data_route(obj_click)
-    document.getElementById('config_route_pos').textContent = data['pos']
-    
-
-    fetch('/get_route?' + generate_url_dict(data), { method: 'GET' })
-    .then(response => response.json())
-    .then(response => {
-        if (!response['error']) {
-            const msg_desativada = document.getElementById('config_route_desativada')
-            const data = response['data']
-            const information = response['info']
-            const role = response['role']
-            const relacao = response['relacao']
-
-            msg_desativada.classList.add('inactive')
-            if (response['msg_desativada']) {
-                msg_desativada.classList.remove('inactive')
-            }
-
-            if (role === 'aluno') {
-                const msg_cadastrar = document.getElementById('config_route_aviso_cadastrar')
-                const msg_contraturno = document.getElementById('config_route_aviso_contraturno')
-                const btn_contraturno = document.getElementById('config_route_btn_contraturno')
-
-                msg_cadastrar.classList.add('inactive')
-                msg_contraturno.classList.add('inactive')
-                btn_contraturno.classList.add('inactive')
-                if (response['msg_cadastrar']) {
-                    msg_cadastrar.classList.remove('inactive')
-                }
-
-                if (response['msg_contraturno']) {
-                    msg_contraturno.classList.remove('inactive')
-                    btn_contraturno.classList.remove('inactive')
-                }
-            } else {
-                const route_division = document.getElementById('route_division')
-                const route_del = document.getElementById('route_del')
-
-                if (relacao && relacao !== 'membro') {
-                    route_division.classList.remove('inactive')
-                    route_del.classList.remove('inactive')  
-                } else {
-                    route_division.classList.add('inactive')
-                    route_del.classList.add('inactive')
-                }
-            }
-
-            const popup = document.getElementById('config_route')
-            for (nome in information) {
-                const value = information[nome]
-                const info = popup.querySelector(`[id*="${nome}"]`)
-                info.textContent = value
-                if (role == 'motorista') {
-                    const icon = info.parentNode.querySelector('i')
-                    if (icon) {
-                        if (relacao && relacao !== 'membro') {
-                            icon.classList.remove('inactive')
-                        } else {icon.classList.add('inactive')}
-                    }
-                }
-            }
-
-            const model_relacao = document.getElementById('interface_model_option_headli')
-            for (nome in data) {
-                const tipo = data[nome]
-                const paradas = tipo['paradas']
-                const container = popup.querySelector(`[id*="${nome}_area"]`)
-
-                if (role === 'motorista') {
-                    const area_division = container.parentNode.querySelector('h1')
-                    const area_add = container.parentNode.querySelector('div.justify')
-    
-                    area_division.classList.add('inactive')
-                    area_add.classList.add('inactive')
-                    if (relacao && relacao !== 'membro') {
-                        area_add.classList.remove('inactive')
-                        if (paradas) {
-                            area_division.classList.remove('inactive')
-                        }
-                    }
-                }
-
-                popup.querySelector(`[id*="quantidade_${nome}"]`).textContent = tipo['quantidade']
-                for (index in paradas) {
-                    relacao = model_relacao.cloneNode(true)
-                    relacao.id = `${container.id}-relacao_${index}`
-                    
-                    ids = relacao.querySelectorAll(`[id*="${model_relacao.id}"]`)
-                    ids.forEach(element => {
-                        element.id = element.id.replace(model_relacao.id, relacao.id)
-                    })
-
-                    dados = paradas[index]
-                    for (dado in dados) {
-                        const value = dados[dado]
-                        relacao.querySelector(`[id*="${dado}"]`).textContent = value
-                    }
-                    
-                    if (role === 'motorista') {
-                        icon = relacao.querySelector('i')
-                        icon.classList.add('inactive')
-                        if (relacao && relacao !== 'membro') {
-                            icon.classList.remove('inactive')
-                        }
-                    }
-                }
-            }
-
-        } else {
-            close_popup('config_route')
-            create_popup(response['title'], response['text'], 'Voltar')
-        }
-    })
-}
-
-
-if (window.location.href.includes('/page_user')) {
-    $(function() {
-        $(".sortable").sortable({
-            handle: '.icon_move',
-            tolerance: 'pointer',
-            forcePlaceholderSize: true,
-    
-            start: function(event, ui) {
-                var icon = ui.item.find('i')
-                var number = ui.item.find('h4')
-                var text = ui.item.find('p')
-    
-                icon.addClass('shadow')
-                icon.addClass('grabbing')
-                number.addClass('shadow')
-                text.addClass('shadow')
-            },
-            stop: function(event, ui) {
-                var icon = ui.item.find('i')
-                var number = ui.item.find('h4')
-                var text = ui.item.find('p')
-                
-                set_sequence(ui.item[0])
-                icon.removeClass('grabbing')
-                setTimeout(() => {
-                    icon.removeClass('shadow')
-                    number.removeClass('shadow')
-                    text.removeClass('shadow')
-                }, 400)
-            },
-        });
-    });
+    if (execute) {
+        if (form.checkValidity()) {
+            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+        } else {form.reportValidity()}
+    }
 }

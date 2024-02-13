@@ -5,6 +5,11 @@ from app.database import *
 import bcrypt
 
 
+'''~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~~~ Edit ~~~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~~ Format ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -137,6 +142,36 @@ def return_relationship(code_line):
     return None
 
 
+def return_route(code_line, plate, shift, time_par, time_ret, pos):
+    if plate == 'Não definido' or plate == 'Nenhum' or plate == 'Sem veículo':
+        plate = None
+
+    if plate:
+        rota = Rota.query.filter_by(
+            Onibus_placa=plate,
+            Linha_codigo=code_line,
+            horario_partida=format_time(time_par, reverse=True),
+            horario_retorno=format_time(time_ret, reverse=True),
+            turno=shift
+        ).all()
+    else:
+        rota = Rota.query.filter(
+            Rota.Onibus_placa.is_(None),
+            Rota.Linha_codigo == code_line,
+            Rota.horario_partida == format_time(time_par, reverse=True),
+            Rota.horario_retorno == format_time(time_ret, reverse=True),
+            Rota.turno == shift
+        ).all()
+    
+    if rota:
+        if len(rota) > 1:
+            if pos and isinstance(pos, str) and pos.isdigit():
+                return rota[int(pos)]
+            return False
+        return rota[0]
+    return None
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~~ Check ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -163,15 +198,49 @@ def check_permission(data, permission='adm'):
     return 'não autorizado'
 
 
-def count_part_route(route):
+def check_times(plate, time=[]):
+    if Rota.query.filter(
+        db.and_(
+            Rota.Onibus_placa == plate,
+            db.or_(
+                Rota.horario_partida.in_(time),
+                Rota.horario_retorno.in_(time)
+            )
+        )
+    ).first():
+        return True
+    return False
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~~~ Count ~~~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+def count_list(list: list, name_format: str, list_unique=True):
+    quantidade = 0
+    if not list_unique:
+        for value in list:
+            quantidade += len(value)
+    else: quantidade = len(list)
+
+    if quantidade != 1:
+        name_format += 's'
+    return f'{quantidade} {name_format}'
+
+
+def count_part_route(route, formated=True):
     quantidade = (db.session.query(func.count(func.distinct(Passagem.Aluno_id)))
+        .join(Parada)
         .filter(
             db.and_(
-                Passagem.Parada_Ponto_id.in_([ponto.id for ponto in route.pontos]),
-                Passagem.passagem_fixa == True
+                Passagem.passagem_fixa == True,
+                Passagem.Parada_codigo == Parada.codigo,
+                Parada.Ponto_id.in_([parada.ponto.id for parada in route.paradas])
             )
         )
         .scalar()
     )
     if not quantidade: quantidade = 0
+    if formated:
+        return f"{quantidade} {'pessoa' if quantidade == 1 else 'pessoas'}"
     return quantidade

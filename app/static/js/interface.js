@@ -1,41 +1,140 @@
-function ajust_interface(interface) {
-    window.addEventListener('beforeunload', function () {
-        this.setTimeout(() => {
-            enterInterface(interface)
-        }, 50)
+function extract_info(obj_click, reference, local = 'id') {
+    const verify = obj_click.querySelector(`[${local}*="${reference}"]`)
+    if (verify) {return verify.textContent}
+
+    let tag = obj_click.parentNode
+    while (true) {
+        var identify_nome = tag.querySelector(`[${local}*="${reference}"]`)
+        if (identify_nome) {
+            return identify_nome.textContent
+        } else {
+            tag = tag.parentNode
+        }
+    }
+}
+
+
+function copy_text(obj_click = null) {
+    const icons = document.querySelectorAll('[class*="copy"]')
+    
+    icons.forEach(icon => {
+        if (icon === obj_click) {
+            icon.classList.replace('bi-clipboard', 'bi-check-lg')
+            const div_pai = icon.parentNode
+            const element_text = div_pai.querySelector('p.content')
+            navigator.clipboard.writeText(element_text.innerText)
+        } else {
+            icon.classList.replace('bi-check-lg', 'bi-clipboard')
+        }
     })
 }
 
 
-function createObserver(root = null, range_visibility = 0.2) {
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                entry.target.classList.remove('hidden')
-            } else {
-                entry.target.classList.remove('visible');
-                entry.target.classList.add('hidden');
-            }
-        });
-    }, {
-        root: root,
-        rootMargin: '0px',
-        threshold: range_visibility
-    });
-    return observer
+function generate_url_dict(dict_reference) {
+    let url = ''
+
+    console.log(dict_reference)
+    if (dict_reference.principal.length) {
+        let principal = []
+        for (index in dict_reference.principal) {
+            let value = dict_reference.principal[index]
+            principal.push(encodeURIComponent(value))
+        }
+        url = '/' + principal.join('/')
+    }
+
+    if (dict_reference.secondary) {
+        let results = []
+        const keys_secondary = Object.keys(dict_reference.secondary)
+        keys_secondary.forEach(key => {
+            results.push(`${key}=${encodeURIComponent(dict_reference.secondary[key])}`)
+        })
+        if (results.length) {
+            url += `?${results.join('&')}`
+        }
+    }
+    return url
 }
 
 
-function set_observerScroll(list_obj) {
-    for (let index = 0; index < list_obj.length; index++) {
-        const observer = createObserver(list_obj[index], 0.15)
-        let elements_animate = list_obj[index]
-        elements_animate = elements_animate.querySelectorAll('div.hidden')
-        elements_animate.forEach(element => {
-            observer.observe(element)
-        })
+function return_option_selected(container_options) {
+    let option_selected = container_options.querySelector('[class*="selected"]')
+    if (option_selected) {
+        return option_selected.textContent.trim()
     }
+    return false
+}
+
+
+function return_bool_selected(container_options) {
+    let option_selected = container_options.querySelector('i.selected').parentNode
+    option_selected = option_selected.querySelector('p').textContent
+    if (option_selected === 'Sim') {
+        return true
+    }
+    return false
+}
+
+
+function return_btn_open(btn) {
+    const icon = btn.querySelector('i')
+    if (icon.className.includes('open')) {
+        return true
+    }
+    return false
+}
+
+
+function include_options_container(container, option, dict, option_nenhum = false, set_limit = false,  model_id = 'model_option') {
+    const model = document.getElementById(model_id)
+
+    if (option_nenhum) {
+        const nenhum = model.cloneNode(true)
+        nenhum.id = `${container.id}-option_nenhum`
+        nenhum.querySelector('p').textContent = 'Nenhum'
+
+        ids = nenhum.querySelectorAll(`[id*="${model_id}"]`)
+        ids.forEach(element => {
+            element.id = element.id.replace(model_id, nenhum.id)
+        })
+
+        nenhum.classList.remove('inactive')
+        container.appendChild(nenhum)
+    }
+
+    fetch(`/get_interface-${option}` + generate_url_dict(dict), { method: 'GET' })
+    .then(response => response.json())
+    .then(response => {
+        if (!response.error) {
+            let data = response.data
+
+            if (data.length) {
+                for (index in data) {
+                    const value = data[index]
+                    const option = model.cloneNode(true)
+        
+                    option.id = `${container.id}-option_${index}`
+                    option.querySelector('p').textContent = value
+                    
+                    const ids = option.querySelectorAll(`[id*="${model_id}"]`)
+                    ids.forEach(element => {
+                        element.id = element.id.replace(model_id, option.id)
+                    })
+        
+                    option.classList.remove('inactive')
+                    container.appendChild(option)
+                }
+
+                if (set_limit) {set_limitScroll(container)}
+
+            } else if (!option_nenhum) {
+                const text = document.createElement('p')
+                text.className = 'text info center fundo cinza'
+                text.textContent = 'Nenhuma Opção Disponível'
+                container.appendChild(text)
+            }
+        } else {create_popup(response.title, response.text, 'Voltar')}
+    })
 }
 
 
@@ -51,59 +150,41 @@ function set_limitScroll(element_scroll, size_limit = 30) {
 }
 
 
-const inputs = document.querySelectorAll('input')
-inputs.forEach(input => {
-    const label = document.querySelector(`label[for="${input.id}"]`)
-    const icon = document.getElementById(`icon_${input.id}`)
-    let inFocus = false
+function setSortable(element) {
+    element.sortable({
+        handle: '.icon_move',
+        tolerance: 'pointer',
+        forcePlaceholderSize: true,
 
-    function verify() {
-        if (inFocus) {
-            input.classList.remove('input_error')
-            if (label) {label.classList.add('selected')}
-            if (icon) {icon.classList.add('selected')}
-            if (input.type === 'time') { input.classList.add('visible') }
-        } else {
-            if (input.value.trim() === '') {
-                input.value = ''
-                if (label) {label.classList.remove('selected')}
-                if (icon) {icon.classList.remove('selected')}
-                if (input.type === 'time') { input.classList.remove('visible') }
-            } else {
-                if (label) {label.classList.add('selected')}
-                if (icon) {icon.classList.add('selected')}
-                if (input.type === 'time') { input.classList.add('visible') }
-            }
+        start: function(event, ui) {
+            var icon = ui.item.find('i')
+            var number = ui.item.find('h4')
+            var text = ui.item.find('p')
+
+            icon.addClass('shadow')
+            icon.addClass('grabbing')
+            number.addClass('shadow')
+            text.addClass('shadow')
+        },
+        stop: function(event, ui) {
+            var icon = ui.item.find('i')
+            var number = ui.item.find('h4')
+            var text = ui.item.find('p')
+
+            set_sequence(ui.item[0])
+            icon.removeClass('grabbing')
+            setTimeout(() => {
+                icon.removeClass('shadow')
+                number.removeClass('shadow')
+                text.removeClass('shadow')
+            }, 400);
         }
-    }
-    input.addEventListener('focus', function() {inFocus = true})
-    input.addEventListener('blur', function() {inFocus = false})
-    setInterval(verify, 100)
-})
-
-
-const forms = document.querySelectorAll('form')
-forms.forEach(form => {
-    form.addEventListener('keyup', function(event) {
-        if (event.key === 'Enter') {submit(form.id)}
     });
-})
-
-set_observerScroll(document.querySelectorAll('form.scroll_vertical'))
+}
 
 
-function animateIconPassword(obj_click) {
-    const container_password = obj_click.parentNode
-    const iconPassword = container_password.querySelector('[id*="btn"]')
-    const inputPassword = container_password.querySelector('input')
-
-    if (inputPassword.type === 'password') {
-        iconPassword.className = inputPassword.className.includes('white') ? "bi bi-eye-slash-fill form__btn--password white" : "bi bi-eye-slash-fill form__btn--password"
-        inputPassword.type = 'text'
-    } else {
-        iconPassword.className = inputPassword.className.includes('white') ? "bi bi-eye-fill form__btn--password white" : "bi bi-eye-fill form__btn--password"
-        inputPassword.type = 'password'
-    }
+function destroySortable(element) {
+    element.sortable("destroy")
 }
 
 
@@ -135,160 +216,174 @@ function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_in
 }
 
 
-function enterInterface(type) {
-    if (type === 'login') {
-        const elements = document.querySelectorAll('[class*="enter"]')
-        animate_itens(elements, 'fadeDown', 0.6, 0.55)
-
-        const container = document.getElementById('container')
-        container.style.transition = 'border-radius 0.5s ease, height 0.85s ease 0.15s'
-        container.classList.remove('container_complete')
-        container.classList.add('enter--radius')
-        
-    } else if (type === 'register') {
-        const elements = document.querySelectorAll('[class*="enter"]')
-        animate_itens(elements, 'fadeDown', 0.8, 0, 0.1)
-
-    } else if (type === 'page_user') {
-        enterPage()
-    }
-}
-
-
-function closeInterface(type, redirect, time = 1000) {
-    if (type === 'login') {
-        const container = document.getElementById('container')
-        container.style.transition = 'border-radius 0.5s ease 0.4s, height 0.7s ease'
-        
-        setTimeout(() => {
-            container.classList.remove('enter--radius')
-            container.classList.add('container_complete')
-        }, 300)
-
-    } else if (type === 'register') {
-        const forms = document.querySelectorAll('form')
-        forms.forEach(form => {
-            form.classList.add('enter')
-        })
-
-    } else if (type === 'page_user') {
-        closePage()
-    }
-
-    let elements = document.querySelectorAll('[class*="enter"]:not(#container)')
-    animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
+function enterInterface(type, args = null, dalay = 0) {
+    let elements = null
 
     setTimeout(() => {
-        ajust_interface(type)
-        window.location.href = redirect
-    }, time)
-}
-
-
-function enter_interface_line(obj_click) {
-    const name_line = obj_click.querySelector('[id*="nome"]').textContent
-    loadInterfaceLine(name_line)
-    closePage()
-
-    const interface = document.getElementById('interface_linha')
-    const header_interface = document.getElementById('interface_linha_header')
-    const content_interface = document.getElementById('interface_linha_content')
-    const header_pag = document.getElementById('header_page')
-    const content_page = document.getElementById('content_page')
-    const nav_page = document.getElementById('nav_page')
-    const abas = content_interface.querySelectorAll('[id*="btn"]')
-    const containers = content_interface.querySelectorAll('[id*="container"]')
-    const elements = Array.from(content_interface.children)
-
-    abas.forEach(aba => {
-        const icon = aba.querySelector('i')
-        if (icon) {
-            icon.classList.remove('open')
+        switch (type) {
+            case 'login':
+                elements = document.querySelectorAll('[class*="enter"]')
+                animate_itens(elements, 'fadeDown', 0.6, 0.55)
+        
+                const container = document.getElementById('container')
+                container.style.transition = 'border-radius 0.5s ease, height 0.85s ease 0.15s'
+                container.classList.remove('container_complete')
+                container.classList.add('enter--radius')
+    
+                break
+            
+    
+            case 'register':
+                elements = document.querySelectorAll('[class*="enter"]')
+                animate_itens(elements, 'fadeDown', 0.8, 0, 0.1)
+    
+                break
+            
+    
+            case 'page_user':
+                const header_enter = window.info_page.header
+                content.classList.remove('content_noBorder')
+    
+                setTimeout(() => {
+                    header_enter.classList.remove('header_hidden')
+                }, 180)
+            
+                setTimeout(() => {
+                    header_enter.removeAttribute('style')
+                    nav.classList.remove('nav_hidden')
+                }, 500)
+    
+                setTimeout(() => {
+                    replaceAba(null, args)
+                }, 650)
+    
+                break
+            
+    
+            case 'line':
+                const name_line = document.getElementById('interface_nome').textContent
+                loadInterfaceLine(name_line)
+    
+                break
+    
+    
+            case 'profile':
+                loadProfile()
+                const perfil = document.querySelector('section.perfil__container')
+                const header = perfil.querySelector('header')
+                header.classList.remove('enter')
+            
+                elements = document.querySelectorAll('[class*="enter"]')
+                config_animate(0, header_enter, 'fadeDown', 0.5, 0, 0.06)
+                animate_itens(elements, 'fadeDown', 0.5, 0.2)
+    
+                break
         }
-        aba.classList.remove('margin_bottom')
-    })
-    containers.forEach(container => {
-        container.classList.add('inactive')
-    })
-
-    setTimeout(() => {
-        interface.classList.remove('inactive')
-        header_pag.classList.add('inactive')
-        content_page.classList.add('inactive')
-        nav_page.classList.add('inactive')
-        interface.scrollTop = 0
-        
-        config_animate(0, header_interface, 'fadeDown', 0.5, 0, 0.07)
-        animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0)
-    }, 900)
+    }, dalay)
 }
 
 
-function close_interface_line() {
-    const interface = document.getElementById('interface_linha')
-    const header_interface = document.getElementById('interface_linha_header')
-    const content_interface = document.getElementById('interface_linha_content')
-    const header_pag = document.getElementById('header_page')
-    const content_page = document.getElementById('content_page')
-    const nav_page = document.getElementById('nav_page')
+function closeInterface(type, redirect = false, args = false) {
+    let elements = null
 
-    const children = Array.from(content_interface.children)
-    const elements = children.filter(element => !element.className.includes('inactive'))
-
-    header_pag.classList.remove('inactive')
-    content_page.classList.remove('inactive')
-    nav_page.classList.remove('inactive')
-    
-    animate_itens(elements, 'outUp', 0.7, 0.07, 0.07, 1)
-    setTimeout(() => {
-        config_animate(0, header_interface, 'outUp', 0.7, 0, 0.07)
-    }, 350)
-    
-    setTimeout(() => {
-        interface.classList.add('inactive')
-        enterPage()
-        copy_text()
-    }, 650)
-}
-
-
-function replace_form(obj_button) {
-    function reset_form(form) {
-        form.querySelectorAll('input').forEach(input => {
-            input.value = ''
-        })
+    function redirect_page(local, time = 0) {
+        if (local) {
+            setTimeout(() => {
+                window.location.href = `/${local}`
+            }, time)
+        }
     }
-    const buttons = document.querySelectorAll('button.form__btn--select')
-    const form_aluno = document.getElementById('form_aluno')
-    const form_motorista = document.getElementById('form_motorista')
 
-    const elements_aluno = Array.from(form_aluno.children)
-    const elements_motorista = Array.from(form_motorista.children)
+    switch (type) {
+        case 'login':
+            const container = document.getElementById('container')
+            container.style.transition = 'border-radius 0.5s ease 0.4s, height 0.7s ease'
+            
+            setTimeout(() => {
+                container.classList.remove('enter--radius')
+                container.classList.add('container_complete')
+            }, 300)
+            elements = document.querySelectorAll('[class*="enter"]:not(#container)')
+            animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
+            setTimeout(() => {
+                enterInterface('login', null, 50)
+            }, 1000)
+            redirect_page(redirect, 1010)
 
-    if (obj_button.textContent === 'Aluno' && !buttons[0].className.includes('selected')) {
-        buttons[0].classList.add('selected')
-        buttons[1].classList.remove('selected')
-        form_aluno.classList.add('scroll_vertical')
-        form_aluno.classList.remove('inactive')
-        form_motorista.classList.add('inactive')
-        form_motorista.classList.remove('scroll_vertical')
+            break
+        
 
-        reset_form(form_aluno)
-        animate_itens(elements_aluno, 'fadeDown', 0.6, 0, 0.07)
-        form_aluno.removeAttribute('style')
-        form_aluno.classList.remove('enter')
-        form_aluno.scrollTop = 0
+        case 'register':
+            const forms = document.querySelectorAll('form')
+            forms.forEach(form => {
+                form.classList.add('enter')
+            })
+            elements = document.querySelectorAll('[class*="enter"]:not(#container)')
+            animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
+            setTimeout(() => {
+                enterInterface('register', null, 50)
+            }, 600)
+            redirect_page(redirect, 610)
 
-    } else if (obj_button.textContent === 'Motorista' && !buttons[1].className.includes('selected')) {
-        buttons[1].classList.add('selected')
-        buttons[0].classList.remove('selected')
-        form_motorista.classList.add('scroll_vertical')
-        form_motorista.classList.remove('inactive')
-        form_aluno.classList.add('inactive')
-        form_aluno.classList.remove('scroll_vertical')
+            break
+        
+        case 'page_user':
+            header_close = window.info_page.header
+            let aba_atual = document.querySelector('i.page__icon--btn.selected').id
+            const aba = document.getElementById(`aba_${aba_atual}`)
+            const itens = aba.querySelectorAll('[class*="enter"]')
+            header_close.style.opacity = 0
 
-        reset_form(form_motorista)
-        animate_itens(elements_motorista, 'fadeDown', 0.6, 0, 0.07)
-        form_motorista.scrollTop = 0
+            let info = {
+                'principal': [extract_info(args, 'nome')],
+                'secondary': {'local_page': aba_atual}
+            }
+            redirect += generate_url_dict(info)
+        
+            setTimeout(() => {
+                animate_itens(itens, 'outUp', 0.5, 0, 0.03, 1)
+            }, 100)
+        
+            setTimeout(() => {
+                header_close.classList.add('header_hidden')
+                nav.classList.add('nav_hidden')
+            }, 150)
+        
+            setTimeout(() => {
+                content.classList.add('content_noBorder')
+            }, 400)
+            
+            setTimeout(() => {
+                enterInterface('page_user', aba_atual, 50)
+            }, 970)
+            redirect_page(redirect, 1000)
+
+            break
+        
+
+        case 'line':
+            
+
+            break
+        
+        
+        case 'profile':
+            const perfil = document.querySelector('section.perfil__container')
+            const header = perfil.querySelector('header')
+            header.classList.add('enter')
+        
+            elements = document.querySelectorAll('[class*="enter"]')
+            animate_itens(elements, 'outUp', 0.5, 0, 0.03, 1)
+        
+            if (logout) {
+                close_popup('confirm_logout')
+                fetch('/logout', {method: 'GET'})
+            } else {
+                redirect = 'page_user'
+                time = 700
+            }
+            setTimeout(() => {enterProfile()}, 1100)
+
+            break
     }
 }

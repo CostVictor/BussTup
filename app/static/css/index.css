@@ -1,5 +1,5 @@
 @import url(text.css);
-@import url(keyframes.css);
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400&display=swap');
 
 :root{
     --branco_primario: #f0f6ff;
@@ -25,15 +25,6 @@
     --size_16px: calc(0.7vw + 1vh + 1vmin);
 }
 
-@font-face {
-    font-family: "Poppins";
-    src: url(/static/data/font/Poppins-Regular.ttf);
-}
-
-@font-face {
-    font-family: "Roboto";
-    src: url(/static/data/font/Roboto-Medium.ttf);
-}
 
 * {
     font-family: "Poppins", Arial, Helvetica, sans-serif;
@@ -131,7 +122,76 @@ body {
 }
 
 
-/* Keyframes */
+.scroll_vertical {
+    display: flex;
+    padding: 0 calc(0.3vw + 0.3vh + 1vmin);
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+}
+
+.scroll_vertical.margin_bottom {
+    margin-bottom: calc(0.5vw + 0.5vh + 1vmin);
+}
+
+.scroll_vertical.margin_top {
+    margin-top: calc(0.5vw + 0.5vh + 1vmin);
+}
+
+.scroll_horizontal {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+}
+
+.scroll_horizontal.not_overflow {
+    overflow-x: hidden;
+}
+
+.btn_scroll {
+    width: 80%;
+}
+
+
+.swal2-popup {
+    z-index: 2000;
+    border-radius: 0 calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin);
+    box-shadow: 0px 3px 15px var(--cinza_primario);
+    font-size: calc(0.8vw + 0.8vh + 1vmin);
+    font-weight: bold;
+    background-color: var(--branco_secundario);
+    font-family: "Poppins", Arial, Helvetica, sans-serif;
+}
+
+.swal2-title {
+    font-size: calc(1.5vw + 1.5vh + 1vmin);
+    margin: 0 calc(1vw + 1vh + 1vmin);
+}
+
+.no-scroll {
+    overflow: hidden;
+}
+
+.btn_click {
+    cursor: pointer;
+}
+
+
+.icon_move {
+    color: var(--azul_terciario);
+    font-size: calc(0.9vw + 0.9vh + 1vmin);
+    margin: 0 calc(0.1vw + 0.1vh + 0.5vmin);
+    padding: calc(0.3vw + 0.3vh + 1vmin);
+    background-color: var(--branco_primario);
+    border-radius: calc(0.5vw + 0.5vh + 1vmin);
+    cursor: grab;
+}
+
+.icon_move.grabbing {
+    cursor: grabbing;
+}
+
 
 .enter {
     opacity: 0;
@@ -162,88 +222,52 @@ body {
 }
 
 
-/* Rolagens */
-
-.scroll_vertical {
-    display: flex;
-    padding: calc(0.3vw + 0.3vh + 1vmin);
-    flex-direction: column;
-    overflow-y: auto;
-    position: relative;
+@keyframes fadeDown {
+    0% {
+        opacity: 0;
+        transform: translateY(calc(-1vw + -1vh + -1vmin));
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.scroll_vertical.no_border {
-    padding: 0;
+@keyframes outUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(calc(-1vw + -1vh + -1vmin));
+    }
 }
 
-.scroll_vertical.no_borderY {
-    padding-top: 0;
-    padding-bottom: 0;
+@keyframes popupOpen {
+  0% {
+    scale: 0.85;
+    opacity: 0;
+  }
+  50% {
+    scale: 1.02;
+    opacity: 1;
+  }
+  80% {
+    scale: 0.98;
+  }
+  100% {
+    scale: 1;
+  }
 }
 
-.scroll_vertical.margin_bottom {
-    margin-bottom: calc(0.5vw + 0.5vh + 1vmin);
-}
-
-.scroll_vertical.margin_top {
-    margin-top: calc(0.5vw + 0.5vh + 1vmin);
-}
-
-.scroll_horizontal {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-}
-
-.scroll_horizontal.not_overflow {
-    overflow-x: hidden;
-}
-
-.btn_scroll {
-    width: 80%;
-}
-
-
-/* Popup */
-
-.swal2-popup {
-    z-index: 2000;
-    border-radius: 0 calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin) calc(2vw + 3vh + 1vmin);
-    box-shadow: 0px 3px 15px var(--cinza_primario);
-    font-size: calc(0.8vw + 0.8vh + 1vmin);
-    font-weight: bold;
-    background-color: var(--branco_secundario);
-    font-family: "Poppins", Arial, Helvetica, sans-serif;
-}
-
-.swal2-title {
-    font-size: calc(1.5vw + 1.5vh + 1vmin);
-    margin: 0 calc(1vw + 1vh + 1vmin);
-}
-
-.no-scroll {
-    overflow: hidden;
-}
-
-.btn_click {
-    cursor: pointer;
-}
-
-
-
-/* Sortable */
-
-.icon_move {
-    color: var(--azul_terciario);
-    font-size: calc(0.7vw + 0.7vh + 1vmin);
-    margin: 0 calc(0.1vw + 0.1vh + 0.5vmin);
-    padding: calc(0.1vw + 0.1vh + 1vmin);
-    background-color: var(--branco_primario);
-    border-radius: calc(0.5vw + 0.5vh + 1vmin);
-    cursor: grab;
-}
-
-.icon_move.grabbing {
-    cursor: grabbing;
+@keyframes popupClose {
+  0% {
+    scale: 1;
+    opacity: 1;
+  }
+  100% {
+    scale: 0.7;
+    opacity: 0;
+  }
 }

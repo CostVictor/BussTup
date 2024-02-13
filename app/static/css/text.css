@@ -195,7 +195,6 @@
 
 .text--click {
     display: flex;
-    width: 40%;
     text-decoration: none;
     border-bottom: none;
     font-size: calc(0.6vw + 0.5vh + 1vmin);

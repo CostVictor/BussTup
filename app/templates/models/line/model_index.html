@@ -1,0 +1,84 @@
+<div id="model_motorista" class="inactive">
+    <h1 class="page__division inactive"></h1>
+    <div class="page__container">
+        <p id="model_motorista_dono" class="text secundario emphasis inactive">Dono</p>
+        <p id="model_motorista_adm" class="text secundario emphasis inactive">Adm</p>
+        <p id="model_motorista_nome" class="text secundario emphasis max_width"></p>
+        {% if role == 'motorista' %}
+        <i id="model_motorista_btn" class="bi bi-three-dots-vertical page__icon content emphasis inactive"></i>
+        {% endif %}
+    </div>
+    
+    <div class="page__container">
+        <p class="text secundario fundo">Chave Pix:</p>
+        <div class="scroll_horizontal">
+            <p id="model_motorista_pix" class="text secundario fundo content nowrap"></p>
+        </div>
+        <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
+    </div>
+
+    <div class="page__container">
+        <p class="text secundario fundo">Telefone:</p>
+        <p id="model_motorista_telefone" class="text secundario fundo content"></p>
+        <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
+    </div>
+</div>
+
+
+<div id="model_option" class="popup__input checkbox grow inactive" onclick="popup_selectOption(this, false, true)">
+    <div class="scroll_horizontal">
+        <p class="popup__text input nowrap"></p>
+    </div>
+</div>
+
+
+{% if role == 'motorista' %}
+<div id="interface_model_aluno" class="popup__input min_height inactive">
+    <span class="inactive"></span>
+    <p class="popup__text input"></p>
+    <i class="bi bi-three-dots-vertical page__icon content right inactive"></i>
+</div>
+
+<div id="interface_model_option_headli" class="popup__input move inactive" onclick="open_popup('config_rel_point_route')">
+    <i class="bi bi-arrows-expand icon_move inactive"></i>
+    <span class="page__container max_width interaction">
+        <h4 id="interface_model_option_headli_number" class="text secundario fundo no_margin_y"></h4>
+        <p id="interface_model_option_headli_nome" class="text info fundo center no_margin_y max_width"></p>
+        <p id="interface_model_option_headli_horario" class="text secundario fundo no_margin_y nowrap"></p>
+    </span>
+</div>
+
+{% else %}
+<div id="interface_model_aluno" class="popup__input min_height inactive">
+    <p class="popup__text input"></p>
+</div>
+
+<div id="interface_model_option_headli" class="popup__input inactive" onclick="open_popup('config_rel_point_route')">
+    <span class="page__container max_width interaction">
+        <h4 id="interface_model_option_headli_number" class="text secundario fundo no_margin_y"></h4>
+        <p id="interface_model_option_headli_nome" class="text secundario fundo no_margin_y max_width"></p>
+        <p id="interface_model_option_headli_horario" class="text secundario fundo no_margin_y"></p>
+    </span>
+</div>
+{% endif %}
+
+
+<div id="model_interface_rota" class="popup__container--input inactive" onclick="open_popup('config_route', this)">
+    <span id="model_interface_rota_number" class="inactive"></span>
+    <div class="popup__input_big">
+        <div class="popup__local">
+            <p id="model_interface_rota_placa" class="popup__text_local first"></p>
+            <p class="popup__text_local">></p>
+            <p id="model_interface_rota_motorista" class="popup__text_local"></p>
+        </div>
+
+        <div class="popup__local">
+            <p id="model_interface_rota_turno" class="popup__text_local first"></p>
+            <p class="popup__text_local">></p>
+            <p id="model_interface_rota_horario_partida" class="popup__text_local"></p>
+            <p class="popup__text_local">~</p>
+            <p id="model_interface_rota_horario_retorno" class="popup__text_local"></p>
+        </div>
+    </div>
+    <p id="model_interface_rota_quantidade" class="popup__text_local display"></p>
+</div>

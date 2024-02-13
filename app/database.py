@@ -134,13 +134,14 @@ class Ponto(db.Model):
 
 class Parada(db.Model):
     __tablename__ = 'Parada'
-    Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), primary_key=True)
-    Ponto_id = db.Column(db.BigInteger, db.ForeignKey('Ponto.id'), primary_key=True)
+    codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     tipo = db.Column(db.Enum('partida', 'retorno'), nullable=False)
     ordem = db.Column(db.Integer, nullable=False)
     horario_passagem = db.Column(db.Time, nullable=False)
-    rota = db.relationship('Rota', backref=db.backref('pontos', lazy=True))
-    ponto = db.relationship('Ponto', backref=db.backref('rotas', lazy=True))
+    Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), nullable=False)
+    Ponto_id = db.Column(db.BigInteger, db.ForeignKey('Ponto.id'), nullable=False)
+    rota = db.relationship('Rota', backref=db.backref('paradas', lazy=True))
+    ponto = db.relationship('Ponto', backref=db.backref('relacoes', lazy=True))
 
 
 class Cartela_Ticket(db.Model):
@@ -161,7 +162,7 @@ class Contraturno_Fixo(db.Model):
     __tablename__ = 'Contraturno_Fixo'
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     dia_fixo = db.Column(db.Enum(*dias_semana), nullable=False)
-    Aluno_id = db.Column(db.String(100), db.ForeignKey('Aluno.id'), nullable=False)
+    Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
     aluno = db.relationship('Aluno', backref=db.backref('contraturnos_fixos', lazy=True))
 
 
@@ -181,14 +182,8 @@ class Registro_Parada(db.Model):
     data = db.Column(db.Date, nullable=False)
     veiculo_passou = db.Column(db.Boolean, nullable=False, default=False)
     quantidade_no_veiculo = db.Column(db.Integer, nullable=False)
-    Parada_Rota_codigo = db.Column(db.BigInteger, nullable=False)
-    Parada_Ponto_id = db.Column(db.BigInteger, nullable=False)
-    parada = db.relationship(
-        'Parada', 
-        primaryjoin='and_(Registro_Parada.Parada_Rota_codigo == Parada.Rota_codigo, Registro_Parada.Parada_Ponto_id == Parada.Ponto_id)', 
-        foreign_keys="[Registro_Parada.Parada_Rota_codigo, Registro_Parada.Parada_Ponto_id]", 
-        backref=db.backref('registros', lazy=True)
-    )
+    Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
+    parada = db.relationship('Parada', backref=db.backref('registros', lazy=True))
 
 
 class Registro_Rota(db.Model):
@@ -204,20 +199,15 @@ class Registro_Rota(db.Model):
 
 class Passagem(db.Model):
     __tablename__ = 'Passagem'
-    Parada_Rota_codigo = db.Column(db.BigInteger, primary_key=True)
-    Parada_Ponto_id = db.Column(db.BigInteger, primary_key=True)
-    Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), primary_key=True)
+    codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     passagem_fixa = db.Column(db.Boolean, nullable=False)
     passagem_contraturno = db.Column(db.Boolean, nullable=False)
     pediu_espera = db.Column(db.Boolean, nullable=False, default=False)
     data = db.Column(db.Date)
+    Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
+    Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
+    parada = db.relationship('Parada', backref=db.backref('passagens', lazy=True))
     aluno = db.relationship('Aluno', backref=db.backref('passagens', lazy=True))
-    parada = db.relationship(
-        'Parada', 
-        primaryjoin='and_(Passagem.Parada_Rota_codigo == Parada.Rota_codigo, Passagem.Parada_Ponto_id == Parada.Ponto_id)', 
-        foreign_keys="[Passagem.Parada_Rota_codigo, Passagem.Parada_Ponto_id]", 
-        backref=db.backref('passagens', lazy=True)
-    )
 
 
 with app.app_context():

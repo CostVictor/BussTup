@@ -38,7 +38,7 @@
                     <p class="text secundario fundo">Ônibus:</p>
                     <p id="config_route_onibus" class="text secundario content fundo nowrap"></p>
                     {% if role == 'motorista' %}
-                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_onibus_rota')"></i>
+                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_onibus', this)"></i>
                     {% endif %}
                 </div>
 
@@ -46,7 +46,7 @@
                     <p class="text secundario fundo">Turno:</p>
                     <p id="config_route_turno_rota" class="text secundario content fundo"></p>
                     {% if role == 'motorista' %}
-                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_turno_rota')"></i>
+                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_turno')"></i>
                     {% endif %}
                 </div>
     
@@ -55,7 +55,7 @@
                     <p id="config_route_horario_partida" class="text secundario content fundo"></p>
 
                     {% if role == 'motorista' %}
-                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_horario_rota')"></i>
+                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_partida')"></i>
                     {% endif %}
                 </div>
 
@@ -64,21 +64,21 @@
                     <p id="config_route_horario_retorno" class="text secundario content fundo"></p>
 
                     {% if role == 'motorista' %}
-                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_horario_rota')"></i>
+                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_retorno')"></i>
                     {% endif %}
                 </div>
 
                 {% if role == 'aluno' %}
                 <div class="page__container justify">
-                    <div class="interface__container--btn add margin_top" onclick="">
-                        <p class="interface__text">Agendar uma diária</p>
+                    <div class="line__container--btn add margin_top" onclick="">
+                        <p class="line__text">Agendar uma diária</p>
                     </div>
                 </div>
                 {% endif %}
 
                 <div class="page__container justify">
-                    <div class="interface__container--btn add margin_top" onclick="">
-                        <p class="interface__text">Ver estatística</p>
+                    <div class="line__container--btn add margin_top" onclick="">
+                        <p class="line__text">Ver estatística</p>
                     </div>
                 </div>
 
@@ -99,8 +99,8 @@
                     {% if role == 'motorista' %}
                     <h1 class="page__division inactive"></h1>
                     <div class="page__container justify inactive">
-                        <div class="interface__container--btn add margin_bottom" onclick="open_popup('add_point_route')">
-                            <i class="bi bi-plus-lg interface__icon plus"></i>
+                        <div id="config_route_add_partida" class="line__container--btn add margin_bottom" onclick="open_popup('add_point_route', this)">
+                            <i class="bi bi-plus-lg line__icon plus"></i>
                         </div>
                     </div>
                     {% endif %}
@@ -117,13 +117,13 @@
                     <h3 class="popup__text info space">Selecione seu ponto de descida:</h3>
                     {% endif %}
                     
-                    <div id="config_route_pontos_retorno_area" class="scroll_vertical init_top no_borderY popup__container--scroll principal sortable margin_top"></div>
+                    <div id="config_route_pontos_retorno_area" class="scroll_vertical popup__container--scroll principal sortable margin_top"></div>
                     
                     {% if role == 'motorista' %}
                     <h1 class="page__division inactive"></h1>
                     <div class="page__container justify inactive">
-                        <div class="interface__container--btn add margin_bottom" onclick="open_popup('add_point_route')">
-                            <i class="bi bi-plus-lg interface__icon plus"></i>
+                        <div id="config_route_add_retorno" class="line__container--btn add margin_bottom" onclick="open_popup('add_point_route', this)">
+                            <i class="bi bi-plus-lg line__icon plus"></i>
                         </div>
                     </div>
                     {% endif %}
@@ -131,8 +131,8 @@
                 
                 {% if role == 'aluno' %}
                 <div id="config_route_btn_contraturno" class="page__container justify">
-                    <div class="interface__container--btn add margin_top" onclick="">
-                        <p class="interface__text">Definir contraturno</p>
+                    <div class="line__container--btn add margin_top" onclick="">
+                        <p class="line__text">Definir contraturno</p>
                     </div>
                 </div>
 
@@ -145,8 +145,8 @@
 
                 <h1 id="route_division" class="page__division" class="inactive"></h1>
                 <div id="route_del" class="page__container justify inactive">
-                    <div class="interface__container--btn remove" onclick="open_popup('del_rota', this)">
-                        <i class="bi bi-trash3 interface__icon del"></i>
+                    <div class="line__container--btn remove" onclick="open_popup('del_route', this)">
+                        <i class="bi bi-trash3 line__icon del"></i>
                     </div>
                 </div>
                 {% endif %}
@@ -207,8 +207,8 @@
             <div id="config_rel_point_route_contraturno_container" class="scroll_vertical init_top no_borderY popup__container--scroll space inactive"></div>
 
             <div class="page__container justify inactive">
-                <div class="interface__container--btn del margin_top" onclick="">
-                    <p class="interface__text remove">Remover relação</p>
+                <div class="line__container--btn del margin_top" onclick="">
+                    <p class="line__text remove">Remover relação</p>
                 </div>
             </div>
             {% endif %}
