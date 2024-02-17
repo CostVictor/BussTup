@@ -44,7 +44,7 @@ function create_line(obj_form, event) {
         .then(response => response.json())
         .then(response => {
             if (response.error) {
-                create_popup(response.title, response.text, 'Voltar', 'info', '', false)
+                create_popup(response.title, response.text, 'Voltar', 'warning', '', false)
             } else {
                 close_popup('create_line')
                 create_popup(response.title, response.text, 'Ok', 'success')

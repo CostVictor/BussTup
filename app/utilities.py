@@ -145,23 +145,29 @@ def return_relationship(code_line):
 def return_route(code_line, plate, shift, time_par, time_ret, pos):
     if plate == 'Não definido' or plate == 'Nenhum' or plate == 'Sem veículo':
         plate = None
+    
+    keys = db.session.query(Rota.codigo).filter_by(Linha_codigo=code_line).subquery()
+    not_include = (
+        db.session.query(Marcador_Exclusao.key_item)
+        .filter(db.and_(
+            Marcador_Exclusao.tabela == 'Rota',
+            Marcador_Exclusao.key_item.in_(keys.select())
+        ))
+        .subquery()
+    )
 
-    if plate:
-        rota = Rota.query.filter_by(
-            Onibus_placa=plate,
-            Linha_codigo=code_line,
-            horario_partida=format_time(time_par, reverse=True),
-            horario_retorno=format_time(time_ret, reverse=True),
-            turno=shift
-        ).all()
-    else:
-        rota = Rota.query.filter(
-            Rota.Onibus_placa.is_(None),
+    rota = (
+        db.session.query(Rota)
+        .filter(db.and_(
+            db.not_(Rota.codigo.in_(not_include.select())),
+            (Rota.Onibus_placa == plate) if plate else (Rota.Onibus_placa.is_(None)),
             Rota.Linha_codigo == code_line,
             Rota.horario_partida == format_time(time_par, reverse=True),
             Rota.horario_retorno == format_time(time_ret, reverse=True),
             Rota.turno == shift
-        ).all()
+        ))
+        .all()
+    )
     
     if rota:
         if len(rota) > 1:

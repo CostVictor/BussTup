@@ -310,6 +310,17 @@ CREATE TABLE IF NOT EXISTS `Busstup`.`Passagem` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `Busstup`.`Marcador_Exclusao`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Busstup`.`Marcador_Exclusao` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `tabela` VARCHAR(20) NOT NULL,
+  `key_item` BIGINT NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

@@ -1,7 +1,7 @@
 from flask import render_template, request
 from flask_security import current_user, login_required
 from app import app, cursos, turnos, cidades, dias_semana
-from app.database import Linha
+from app.database import Linha, Marcador_Exclusao
 
 
 @app.route("/")
@@ -19,7 +19,7 @@ def cadastro():
 @app.route("/page_user")
 @login_required
 def pag_usuario():
-    abas = ['agenda', 'rotas', 'linhas', 'chat']
+    abas = ['agenda', 'rota', 'linhas', 'chat']
     local = request.args.get('local')
     local = local if local and local in abas else 'agenda'
 
@@ -31,7 +31,9 @@ def pag_usuario():
 @login_required
 def pag_linha(name_line):
     local_page = request.args.get('local_page')
-    if name_line and Linha.query.filter_by(nome=name_line).first():
+    linha = Linha.query.filter_by(nome=name_line).first()
+
+    if linha and not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first():
         role = current_user.roles[0].name
         return render_template('blog/line.html', name_line=name_line, role=role, turnos=turnos, local_page=local_page)
     return 'Linha não encontrada.'

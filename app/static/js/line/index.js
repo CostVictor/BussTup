@@ -61,6 +61,8 @@ function loadInterfaceLine(name_line, load_complete = true) {
                 loadInterfaceRoutes(name_line)
             }
         } else {create_popup(response.title, response.text, 'Voltar')}
+        const elements = document.querySelectorAll('[class*="-enter-"]')
+        animate_itens(elements, 'fadeDown', 0.6, 0.2)  
     })
 }
 
@@ -309,6 +311,16 @@ function config_popup_route(obj_click, data = false) {
                         if (relacao && relacao !== 'membro') {
                             icon.classList.remove('inactive')
                         }
+                    } else {
+                        if (response.meu_turno === information.turno_rota) {
+                            relacao.onclick = function() {
+                                open_popup('config_rel_point_route', this)
+                            }
+                        } else {
+                            relacao.onclick = function() {
+                                create_popup('Comunicado', 'Olá! Esta rota não pertence ao seu turno, portanto, seus pontos fixos estão disponíveis apenas para visualização. Se desejar definir um ponto como contraturno, selecione o botão "Definir contraturno".', 'Ok', 'warning', '', '#1468d6')
+                            }
+                        }
                     }
 
                     relacao.classList.remove('inactive')
@@ -319,6 +331,54 @@ function config_popup_route(obj_click, data = false) {
         } else {
             close_popup('config_route')
             create_popup(response.title, response.text, 'Voltar')
+        }
+    })
+}
+
+
+function config_popup_relationship(data) {
+    fetch('/get_relationship-point' + generate_url_dict(data), { method: 'GET' })
+    .then(response => response.json())
+    .then(response => {
+        const data = response.data
+
+        for (dado in data) {
+            const value = data[dado]
+            const info = document.getElementById(`config_rel_point_route_${dado}`)
+            info.textContent = value
+
+            if (response.role == 'motorista') {
+                const icon = info.parentNode.querySelector('i')
+                if (icon) {
+                    if (response.relacao && response.relacao !== 'membro') {
+                        icon.classList.remove('inactive')
+                    } else {
+                        icon.classList.add('inactive')
+                    }
+                }
+            }
+        }
+
+        if (response.role === 'motorista') {
+            const model_aluno = models.querySelector('#interface_model_aluno') 
+            const cadastrados = response.cadastrados
+            for (tipo in cadastrados) {
+                document.getElementById(`config_rel_point_route_${tipo}_quantidade`).textContent = cadastrados[tipo].quantidade
+                const alunos = cadastrados[tipo].alunos
+                const container = document.getElementById(`config_rel_point_route_${tipo}_container`)
+                create_aluno(alunos, container, model_aluno)
+            }
+        } else {
+            const btn_cadastrar = document.getElementById('config_rel_point_route_cadastrar')
+            const btn_sair = document.getElementById('config_rel_point_route_sair')
+
+            btn_cadastrar.classList.add('inactive')
+            btn_sair.classList.add('inactive')
+            if (response.cadastrado) {
+                btn_sair.classList.remove('inactive')
+            } else {
+                btn_cadastrar.classList.remove('inactive')
+            }
         }
     })
 }
@@ -338,12 +398,13 @@ function return_data_route(obj_model = false, format_dict_url = false) {
         var time_par = document.getElementById('config_route_horario_partida').textContent
         var time_ret = document.getElementById('config_route_horario_retorno').textContent
         var pos = document.getElementById('config_route_pos').textContent
+        console.log(pos)
     }
 
     if (format_dict_url) {
         return {
             'principal': [name_line, plate, shift, time_par, time_ret],
-            'secondary': {'pos': pos}
+            'secondary': pos ? {'pos': pos} : {}
         }
     }
     return {

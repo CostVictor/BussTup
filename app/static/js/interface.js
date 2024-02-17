@@ -31,10 +31,10 @@ function copy_text(obj_click = null) {
 
 
 function generate_url_dict(dict_reference) {
+    const keys = Object.keys(dict_reference)
     let url = ''
-
-    console.log(dict_reference)
-    if (dict_reference.principal.length) {
+    
+    if (keys.includes('principal') && dict_reference.principal.length) {
         let principal = []
         for (index in dict_reference.principal) {
             let value = dict_reference.principal[index]
@@ -43,7 +43,7 @@ function generate_url_dict(dict_reference) {
         url = '/' + principal.join('/')
     }
 
-    if (dict_reference.secondary) {
+    if (keys.includes('secondary') && dict_reference.secondary) {
         let results = []
         const keys_secondary = Object.keys(dict_reference.secondary)
         keys_secondary.forEach(key => {
@@ -86,7 +86,7 @@ function return_btn_open(btn) {
 
 
 function include_options_container(container, option, dict, option_nenhum = false, set_limit = false,  model_id = 'model_option') {
-    const model = document.getElementById(model_id)
+    const model = models.querySelector(`#${model_id}`)
 
     if (option_nenhum) {
         const nenhum = model.cloneNode(true)
@@ -183,11 +183,6 @@ function setSortable(element) {
 }
 
 
-function destroySortable(element) {
-    element.sortable("destroy")
-}
-
-
 function config_animate(index, item, name, duraction, value_initial, sum) {
     item.style.animation = `${name} ${duraction}s forwards ${value_initial + (index * sum)}s`
 }
@@ -195,14 +190,14 @@ function config_animate(index, item, name, duraction, value_initial, sum) {
 
 function animate_itens(list_itens, animate='fadeDown', duraction = 0.3, dalay_init = 0, interval_itens = 0.06, opacity = 0, exception = false) {
     if (list_itens) {
-        list_execute = []
+        let list_execute = []
         list_itens.forEach(item => {
             if (exception) {
-                if (!item.className.includes('inactive') || item.id.includes(exception)) {
+                if (!item.classList.contains('inactive') || item.id.includes(exception)) {
                     list_execute.push(item)
                 }
             } else {
-                if (!item.className.includes('inactive')) {
+                if (!item.classList.contains('inactive')) {
                     list_execute.push(item)
                 }
             }
@@ -222,7 +217,7 @@ function enterInterface(type, args = null, dalay = 0) {
     setTimeout(() => {
         switch (type) {
             case 'login':
-                elements = document.querySelectorAll('[class*="enter"]')
+                elements = document.querySelectorAll('[class*="-enter-"]')
                 animate_itens(elements, 'fadeDown', 0.6, 0.55)
         
                 const container = document.getElementById('container')
@@ -234,7 +229,7 @@ function enterInterface(type, args = null, dalay = 0) {
             
     
             case 'register':
-                elements = document.querySelectorAll('[class*="enter"]')
+                elements = document.querySelectorAll('[class*="-enter-"]')
                 animate_itens(elements, 'fadeDown', 0.8, 0, 0.1)
     
                 break
@@ -263,18 +258,12 @@ function enterInterface(type, args = null, dalay = 0) {
             case 'line':
                 const name_line = document.getElementById('interface_nome').textContent
                 loadInterfaceLine(name_line)
-    
                 break
     
     
             case 'profile':
                 loadProfile()
-                const perfil = document.querySelector('section.perfil__container')
-                const header = perfil.querySelector('header')
-                header.classList.remove('enter')
-            
-                elements = document.querySelectorAll('[class*="enter"]')
-                config_animate(0, header_enter, 'fadeDown', 0.5, 0, 0.06)
+                elements = document.querySelectorAll('[class*="-enter-"]')
                 animate_itens(elements, 'fadeDown', 0.5, 0.2)
     
                 break
@@ -286,11 +275,11 @@ function enterInterface(type, args = null, dalay = 0) {
 function closeInterface(type, redirect = false, args = false) {
     let elements = null
 
-    function redirect_page(local, time = 0) {
+    function redirect_page(local, dalay = 0) {
         if (local) {
             setTimeout(() => {
                 window.location.href = `/${local}`
-            }, time)
+            }, dalay)
         }
     }
 
@@ -303,7 +292,7 @@ function closeInterface(type, redirect = false, args = false) {
                 container.classList.remove('enter--radius')
                 container.classList.add('container_complete')
             }, 300)
-            elements = document.querySelectorAll('[class*="enter"]:not(#container)')
+            elements = document.querySelectorAll('[class*="-enter-"]:not(#container)')
             animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
             setTimeout(() => {
                 enterInterface('login', null, 50)
@@ -316,9 +305,9 @@ function closeInterface(type, redirect = false, args = false) {
         case 'register':
             const forms = document.querySelectorAll('form')
             forms.forEach(form => {
-                form.classList.add('enter')
+                form.classList.add('-enter-')
             })
-            elements = document.querySelectorAll('[class*="enter"]:not(#container)')
+            elements = document.querySelectorAll('[class*="-enter-"]:not(#container)')
             animate_itens(elements, 'outUp', 0.4, 0, 0.07, 1)
             setTimeout(() => {
                 enterInterface('register', null, 50)
@@ -331,14 +320,18 @@ function closeInterface(type, redirect = false, args = false) {
             header_close = window.info_page.header
             let aba_atual = document.querySelector('i.page__icon--btn.selected').id
             const aba = document.getElementById(`aba_${aba_atual}`)
-            const itens = aba.querySelectorAll('[class*="enter"]')
+            const itens = aba.querySelectorAll('[class*="-enter-"]')
             header_close.style.opacity = 0
 
-            let info = {
-                'principal': [extract_info(args, 'nome')],
-                'secondary': {'local_page': aba_atual}
+            if (redirect === 'line') {
+                let info = {
+                    'principal': [extract_info(args, 'nome')],
+                    'secondary': {'local_page': aba_atual}
+                }
+                redirect += generate_url_dict(info)
+            } else {
+                redirect += `?local_page=${encodeURIComponent(aba_atual)}`
             }
-            redirect += generate_url_dict(info)
         
             setTimeout(() => {
                 animate_itens(itens, 'outUp', 0.5, 0, 0.03, 1)
@@ -362,28 +355,32 @@ function closeInterface(type, redirect = false, args = false) {
         
 
         case 'line':
-            
+            elements = document.querySelectorAll('[class*="-enter-"]')
+            animate_itens(elements, 'outUp', 0.5, 0, 0.03, 1)
+            setTimeout(() => {
+                enterInterface('line', null, 50)
+            }, 640)
+            redirect_page(`page_user?local=${encodeURIComponent(args)}`, 650)
 
             break
         
         
         case 'profile':
-            const perfil = document.querySelector('section.perfil__container')
-            const header = perfil.querySelector('header')
-            header.classList.add('enter')
-        
-            elements = document.querySelectorAll('[class*="enter"]')
+            elements = document.querySelectorAll('[class*="-enter-"]')
             animate_itens(elements, 'outUp', 0.5, 0, 0.03, 1)
+            console.log(args)
         
-            if (logout) {
+            if (args[1]) {
                 close_popup('confirm_logout')
                 fetch('/logout', {method: 'GET'})
+                redirect_page(redirect, 700)
             } else {
-                redirect = 'page_user'
-                time = 700
+                setTimeout(() => {
+                    enterInterface('profile')
+                }, 690)
+                redirect_page(redirect + `?local=${encodeURIComponent(args[0])}`, 700)
             }
-            setTimeout(() => {enterProfile()}, 1100)
-
+            
             break
     }
 }

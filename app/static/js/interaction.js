@@ -1,4 +1,7 @@
+const templates_popup = document.getElementById('templates_popup')
+const local_popup = document.getElementById('popup_local')
 const list_inputs = document.querySelectorAll('input')
+
 function set_animate_label(list_inputs, local = false) {
     list_inputs.forEach(input => {
         let label = document.querySelector(`label[for="${input.id}"]`)
@@ -143,7 +146,7 @@ function createObserver(root = null, range_visibility = 0.2) {
 }
 
 
-function create_popup(title, text='', text_buttom='Ok', icon='info', redirect='', open_scroll = true) {
+function create_popup(title, text='', text_buttom='Ok', icon='warning', redirect='', color='') {
     document.body.classList.add('no-scroll')
     Swal.fire({
         title: title,
@@ -152,9 +155,10 @@ function create_popup(title, text='', text_buttom='Ok', icon='info', redirect=''
         width: '80%',
         confirmButtonText: text_buttom,
         confirmButtonColor: '#004aad',
-        iconColor: `${icon === 'info' ? "#ffe646" : icon === 'success'? "#0aa999" : "#ff7272"}`
+        iconColor: color ? color : `${icon === 'warning' ? "#ffe646" : icon === 'success' ? "#0aa999" : "#ff7272"}`
     }).then(() => {
-        if (open_scroll) {document.body.classList.remove('no-scroll')}
+        const itens = local_popup.querySelectorAll('section')
+        if (!itens.length) {document.body.classList.remove('no-scroll')}
         if (redirect) {window.location.href = '/' + redirect}
     })
 }
@@ -249,70 +253,70 @@ function animateIconPassword(obj_click) {
     }
 }
 
-
-const templates_popup = document.getElementById('templates_popup')
-const local_popup = document.getElementById('popup_local')
-
 function open_popup(id, obj_click=false) {
     const popups = document.importNode(templates_popup.content, true)
     const popup = popups.querySelector(`#${id}`)
-    const card = popup.querySelector('div.popup__container')
-
-    const inputs = popup.querySelectorAll('input')
-    set_animate_label(inputs, popup)
-
-    const inputs_tell = popup.querySelectorAll('[class*="format_tell"]')
-    set_valid_tell(inputs_tell)
-
-    const inputs_name = popup.querySelectorAll('[class*="format_name"]')
-    set_valid_name(inputs_name)
     
-    const inputs_options = popup.querySelectorAll('[class*="format_options"]')
-    set_input_options(inputs_options)
-
-    const forms = popup.querySelectorAll('form')
-    set_submit_form(forms)
-
-    local_popup.appendChild(popup)
-    document.body.classList.add('no-scroll')
-
-    popup.classList.remove('inactive')
-    popup.classList.remove('close')
-    card.classList.remove('close')
-
-    $(function() {
-        $(".sortable").each(function() {
-            setSortable($(this))
-        })
-    })
-
-    if (obj_click) {
-        action_popup(popup, card, id, obj_click)
+    if (popup) {
+        const card = popup.querySelector('div.popup__container')
+    
+        const inputs = popup.querySelectorAll('input')
+        set_animate_label(inputs, popup)
+    
+        const inputs_tell = popup.querySelectorAll('[class*="format_tell"]')
+        set_valid_tell(inputs_tell)
+    
+        const inputs_name = popup.querySelectorAll('[class*="format_name"]')
+        set_valid_name(inputs_name)
+        
+        const inputs_options = popup.querySelectorAll('[class*="format_options"]')
+        set_input_options(inputs_options)
+    
+        const forms = popup.querySelectorAll('form')
+        set_submit_form(forms)
+    
+        local_popup.appendChild(popup)
+        document.body.classList.add('no-scroll')
+    
+        popup.classList.remove('inactive')
+        popup.classList.remove('close')
+        card.classList.remove('close')
+        
+        if (!window.location.href.includes('profile')) {
+            $(function() {
+                $(".sortable").each(function() {
+                    setSortable($(this))
+                })
+            })
+        }
+    
+        if (obj_click) {
+            action_popup(popup, card, id, obj_click)
+        }
     }
 }
 
 
 function close_popup(id) {
     const popup = local_popup.querySelector(`#${id}`)
-    const card = popup.querySelector('div.popup__container')
-
-    card.classList.add('close')
-    popup.classList.add('close')
-
-    $(function() {
-        $(".sortable").each(function() {
-            destroySortable($(this))
-        })
-    })
-
-    setTimeout(() => {
-        popup.classList.add('inactive')
-        document.body.classList.remove('no-scroll')
-    }, 150)
-    setTimeout(() => {
-        local_popup.removeChild(popup)
-    }, 160)
-    copy_text()
+    if (popup) {
+        const card = popup.querySelector('div.popup__container')
+    
+        card.classList.add('close')
+        popup.classList.add('close')
+    
+        setTimeout(() => {
+            popup.classList.add('inactive')
+            const itens = local_popup.querySelectorAll('section')
+            if (itens.length === 1) {
+                document.body.classList.remove('no-scroll')
+            }
+        }, 150)
+        setTimeout(() => {
+            local_popup.removeChild(popup)
+        }, 160)
+        copy_text()
+    }
 }
 
 

@@ -25,7 +25,7 @@ def get_perfil():
         data['curso'] = user.curso
         data['turno'] = user.turno
     else:
-        data['pix'] = user.pix  
+        data['pix'] = user.pix
         if not data['pix']:
             data['pix'] = 'Não definido'
 
@@ -73,20 +73,20 @@ def get_lines():
             ).first()
             if passagem:
                 data['minha_linha'] = passagem.parada.ponto.linha.nome
-        
+
         for result in query:
             linha = result.linha
             dict_linha = {'nome': linha.nome, 'ferias': linha.ferias, 'paga': linha.paga}
 
             if linha.cidade not in data['cidades']:
                 data['cidades'][linha.cidade] = []
-        
+
             data['cidades'][linha.cidade].append(dict_linha)
             dict_linha['dono'] = result.motorista.nome
 
             if role == 'motorista' and dict_linha['dono'] == user.nome:
                 data['minha_linha'].append(dict_linha)
-            
+
     else: data['identify'] = False
     return jsonify(data)
 
@@ -108,7 +108,7 @@ def get_interface_line(name_line):
         retorno['data'] = data
 
         return jsonify(retorno)
-        
+
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
@@ -121,7 +121,7 @@ def get_interface_driver(name_line):
         motoristas = {}
         retorno = {
             'error': False,
-            'role': current_user.roles[0].name, 
+            'role': current_user.roles[0].name,
             'relacao': return_relationship(linha.codigo),
             'data': motoristas
         }
@@ -139,19 +139,19 @@ def get_interface_driver(name_line):
 
                 if not motorista.pix:
                     dict_dono['pix'] = 'Não definido'
-            
+
             elif relacao.adm:
                 if 'adm' not in motoristas:
                     motoristas['adm'] = []
                 motoristas['adm'].append(dict_motorista)
-            
+
             else:
                 if 'membro' not in motoristas:
                     motoristas['membro'] = []
                 motoristas['membro'].append(dict_motorista)
-        
+
         return jsonify(retorno)
-            
+
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
@@ -163,7 +163,7 @@ def get_interface_vehicle(name_line):
     user = return_my_user()
     if linha and user:
         retorno = {
-            'error': False, 
+            'error': False,
             'relacao': return_relationship(linha.codigo),
             'meu_nome': user.nome,
             'data': []
@@ -173,7 +173,7 @@ def get_interface_vehicle(name_line):
             dict_vehicle = return_dict(vehicle, not_includes=['Linha_codigo', 'Motorista_id'])
             dict_vehicle['motorista_nome'] = vehicle.motorista.nome if vehicle.motorista else 'Nenhum'
             retorno['data'].append(dict_vehicle)
-        
+
         return jsonify(retorno)
 
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
@@ -186,13 +186,25 @@ def get_interface_points(name_line):
     linha = Linha.query.filter_by(nome=name_line).first()
     if linha:
         retorno = {'error': False, 'relacao': return_relationship(linha.codigo)}
-        pontos = Ponto.query.filter_by(Linha_codigo=linha.codigo).order_by(Ponto.nome).all()
+        keys = db.session.query(Ponto.id).filter_by(Linha_codigo=linha.codigo).subquery()
+        not_include = (
+            db.session.query(Marcador_Exclusao.key_item)
+            .filter(db.and_(
+                Marcador_Exclusao.tabela == 'Ponto',
+                Marcador_Exclusao.key_item.in_(keys.select())
+            ))
+            .subquery()
+        )
+        pontos = Ponto.query.filter(
+            Ponto.Linha_codigo == linha.codigo,
+            db.not_(Ponto.id.in_(not_include.select()))
+        ).all()
+        
         data = [ponto.nome for ponto in pontos]
-
         retorno['quantidade'] = count_list(data, 'cadastrado')
         retorno['data'] = data
         return retorno
-    
+
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
@@ -201,7 +213,24 @@ def get_interface_points(name_line):
 def get_interface_route(name_line):
     linha = Linha.query.filter_by(nome=name_line).first()
     if linha:
-        rotas = Rota.query.filter_by(Linha_codigo=linha.codigo).order_by(Rota.horario_partida).all()
+        keys = db.session.query(Rota.codigo).filter_by(Linha_codigo=linha.codigo).subquery()
+        not_include = (
+            db.session.query(Marcador_Exclusao.key_item)
+            .filter(db.and_(
+                Marcador_Exclusao.tabela == 'Rota',
+                Marcador_Exclusao.key_item.in_(keys.select())
+            ))
+            .subquery()
+        )
+        rotas = (
+            Rota.query.filter(db.and_(
+                Rota.Linha_codigo == linha.codigo,
+                db.not_(Rota.codigo.in_(not_include.select()))
+            ))
+            .order_by(Rota.horario_partida)
+            .all()
+        )
+
         retorno = {'error': False, 'relacao': return_relationship(linha.codigo)}
         retorno['ativas'] = []; retorno['desativas'] = []
         retorno['role'] = current_user.roles[0].name
@@ -260,7 +289,7 @@ def get_options_driver(name_line):
             not_includes = db.session.query(Onibus.Motorista_id).filter(
                 db.and_(Onibus.Linha_codigo == linha.codigo, Onibus.Motorista_id.isnot(None))
             ).subquery()
-            
+
             query = db.session.query(Membro).filter(
                 db.and_(
                     Membro.Linha_codigo == linha.codigo,
@@ -279,7 +308,7 @@ def get_options_driver(name_line):
 @roles_required("motorista")
 def get_options_vehicle(name_line):
     plate_ignore = request.args.get('plate_ignore')
-    
+
     if plate_ignore == 'Não definido':
         plate_ignore = None
 
@@ -295,10 +324,10 @@ def get_options_vehicle(name_line):
                     if motorista:
                         retorno['data'].appendleft(f"{onibus.placa} > {motorista.nome}")
                     else: retorno['data'].append(f"{onibus.placa} > Nenhum")
-            
+
             retorno['data'] = list(retorno['data'])
             return jsonify(retorno)
-    
+
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
@@ -317,21 +346,39 @@ def get_options_point(name_line, plate, shift, hr_par, hr_ret, type):
                 if rota is not None:
                     if not rota:
                         return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
-                
-                    not_includes = db.session.query(Ponto.id).join(Parada).filter(
-                        db.and_(
-                            Parada.Rota_codigo == rota.codigo,
-                            Parada.Ponto_id == Ponto.id,
-                            Parada.tipo == type
-                        )
-                    ).subquery()
 
-                    pontos = db.session.query(Ponto.nome).filter(
-                        db.and_(
+                    keys = db.session.query(Ponto.id).filter_by(Linha_codigo=linha.codigo).subquery()
+                    not_includes_1 = (
+                        db.session.query(Marcador_Exclusao.key_item)
+                        .filter(db.and_(
+                            Marcador_Exclusao.tabela == 'Ponto',
+                            Marcador_Exclusao.key_item.in_(keys.select())
+                        ))
+                        .subquery()
+                    )
+
+                    not_includes_2 = (
+                        db.session.query(Ponto.id).join(Parada)
+                        .filter(db.and_(
+                            Parada.Ponto_id.in_(keys.select()),
+                            Parada.Rota_codigo == rota.codigo,
+                            Parada.tipo == type
+                        ))
+                        .subquery()
+                    )
+
+                    pontos = (
+                        db.session.query(Ponto.nome)
+                        .filter(db.and_(
                             Ponto.Linha_codigo == linha.codigo,
-                            db.not_(Ponto.id.in_(not_includes.select()))
-                        )
-                    ).order_by(Ponto.nome).all()
+                            db.not_(db.or_(
+                                Ponto.id.in_(not_includes_1.select()),
+                                Ponto.id.in_(not_includes_2.select())
+                            ))
+                        ))
+                        .order_by(Ponto.nome)
+                        .all()
+                    )
 
                     return jsonify({'error': False, 'data': [ponto.nome for ponto in pontos]})
 
@@ -359,10 +406,10 @@ def get_point(name_line, name_point):
                 retorno['turnos']['Matutino'] = {'alunos': [], 'contraturno': []}
                 retorno['turnos']['Vespertino'] = {'alunos': [], 'contraturno': []}
                 retorno['turnos']['Noturno'] = {'alunos': [], 'contraturno': []}
-                
+
                 if not dict_ponto['linkGPS']:
                     dict_ponto['linkGPS'] = 'Não definido'
-                
+
                 for relacao_parada in ponto.relacoes:
                     rota = relacao_parada.rota
 
@@ -405,6 +452,10 @@ def get_point(name_line, name_point):
                         retorno['turnos'][value.turno]['contraturno'].append(value.nome)
                     else: retorno['turnos'][value.turno]['alunos'].append(value.nome)
 
+                for turno in retorno['turnos']:
+                    local = retorno['turnos'][turno]
+                    local['quantidade'] = count_list([local['alunos'], local['contraturno']], 'cadastrado', list_unique=False)
+
                 return jsonify(retorno)
 
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações do ponto.'})
@@ -439,7 +490,7 @@ def get_route(name_line, plate, shift, hr_par, hr_ret):
                     if veiculo.motorista:
                         motorista = veiculo.motorista.nome
                 else: retorno['msg_desativada'] = True
-                        
+
                 retorno['info'] = {
                     'motorista': motorista,
                     'onibus': placa,
@@ -501,16 +552,91 @@ def get_route(name_line, plate, shift, hr_par, hr_ret):
                             Parada.tipo == tipo
                         )
                     ).order_by(Parada.ordem).all()
-                    
+
                     for value in values:
                         info = {
-                            'number': value.ordem,
-                            'nome': value.nome,
-                            'horario': format_time(value.horario_passagem)
+                            'number': value[0].ordem,
+                            'nome': value[1].nome,
+                            'horario': format_time(value[0].horario_passagem)
                         }
                         retorno['data'][tipo]['paradas'].append(info)
                     retorno['data'][tipo]['quantidade'] = count_list(values, 'definido')
 
                 return jsonify(retorno)
+
+    return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações da rota.'})
+
+
+@app.route("/get_relationship-point/<name_line>/<plate>/<shift>/<hr_par>/<hr_ret>/<type>/<name_point>", methods=['GET'])
+@login_required
+def get_relationship(name_line, plate, shift, hr_par, hr_ret, type, name_point):
+    pos = request.args.get('pos')
+
+    if name_line and name_point and plate and type and shift and hr_par and hr_ret:
+        linha = Linha.query.filter_by(nome=name_line).first()
+        if linha:
+            relationship = return_relationship(linha.codigo)
+            role = current_user.roles[0].name
+            retorno = {'error': False, 'role': role, 'relacao': relationship}
+
+            rota = return_route(linha.codigo, plate, shift, hr_par, hr_ret, pos)
+            if rota is not None:
+                if not rota:
+                    return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+                
+                parada, ponto = (
+                    db.session.query(Parada, Ponto)
+                    .filter(db.and_(
+                        Ponto.nome == name_point,
+                        Parada.Ponto_id == Ponto.id,
+                        Parada.tipo == type,
+                        Parada.Rota_codigo == rota.codigo,
+                    ))
+                    .first()
+                )
+
+                if parada and ponto:
+                    data = {
+                        'tipo': type.capitalize(),
+                        'nome': ponto.nome,
+                        'horario': format_time(parada.horario_passagem),
+                        'linkGPS': ponto.linkGPS if ponto.linkGPS else 'Não definido'
+                    }
+                    retorno['data'] = data
+
+                    if role == 'motorista':
+                        alunos = {'turno': {'alunos': []}, 'contraturno': {'alunos': []}}
+                        passagens = (
+                            db.session.query(Passagem, Aluno)
+                            .filter(db.and_(
+                                Passagem.Parada_codigo == parada.codigo,
+                                Passagem.Aluno_id == Aluno.id,
+                                Passagem.passagem_fixa == True,
+                            ))
+                            .order_by(Aluno.nome)
+                            .all()
+                        )
+
+                        for value in passagens:
+                            passagem, aluno = value
+                            if passagem.passagem_contraturno:
+                                alunos['contraturno']['alunos'].append(aluno.nome)
+                            else: alunos['turno']['alunos'].append(aluno.nome)
+
+                        alunos['turno']['quantidade'] = count_list(alunos['turno']['alunos'], 'cadastrado')
+                        alunos['contraturno']['quantidade'] = count_list(alunos['contraturno']['alunos'], 'cadastrado')
+                        retorno['cadastrados'] = alunos
+                    
+                    else:
+                        retorno['cadastrado'] = False
+                        if Passagem.query.filter_by(
+                            Parada_codigo=parada.codigo,
+                            Aluno_id=current_user.primary_key,
+                            passagem_contraturno=False,
+                            passagem_fixa=True,
+                        ).first():
+                            retorno['cadastrado'] = True
+                    
+                    return jsonify(retorno)
     
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações da rota.'})

@@ -40,23 +40,25 @@ def create_line():
         if 'nome' in data and 'cidade' in data:
             if not data['cidade'] in cidades:
                 return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'A cidade definida não está presente entre as opções disponíveis.'})
+            
+            linha = Linha.query.filter_by(nome=data['nome']).first()
+            if linha:
+                if not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first():
+                    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Já existe uma linha com o nome especificado.'})
 
-            if not Linha.query.filter_by(nome=data['nome']).first():
-                data['ferias'] = False
-                linha = Linha(**data)
-                try:
-                    db.session.add(linha)
-                    with db.session.begin_nested():
-                        relacao = Membro(Linha_codigo=linha.codigo, Motorista_id=current_user.primary_key, dono=True, adm=True)
-                        db.session.add(relacao)
-                    db.session.commit()
-                    return jsonify({'error': False, 'title': 'Linha Cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado(a) como usuário dono.'})
+            data['ferias'] = False
+            linha = Linha(**data)
+            try:
+                db.session.add(linha)
+                with db.session.begin_nested():
+                    relacao = Membro(Linha_codigo=linha.codigo, Motorista_id=current_user.primary_key, dono=True, adm=True)
+                    db.session.add(relacao)
+                db.session.commit()
+                return jsonify({'error': False, 'title': 'Linha Cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado(a) como usuário dono.'})
 
-                except Exception as e:
-                    db.session.rollback()
-                    print(f'Erro na criação da linha: {str(e)}')
-            else:
-                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Já existe uma linha com o nome especificado.'}) 
+            except Exception as e:
+                db.session.rollback()
+                print(f'Erro na criação da linha: {str(e)}')
 
     return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a linha.'})
 
@@ -138,19 +140,23 @@ def create_point():
     if data and 'name_point' in data and 'name_line' in data and 'id' not in data and 'nome' not in data:
         permission = check_permission(data)
         if permission == 'autorizado':
-            data['nome'] = data.pop('name_point').lower().capitalize()
-            if not Ponto.query.filter_by(nome=data['nome'], Linha_codigo=data['Linha_codigo']).first():
-                ponto = Ponto(**data)
-                try:
-                    db.session.add(ponto)
-                    db.session.commit()
+            data['nome'] = capitalize(data.pop('name_point'), 'motorista')
 
-                    return jsonify({'error': False, 'title': 'Ponto Cadastrado', 'text': f'<strong>{ponto.nome}</strong> foi cadastrado com sucesso.'})
-                except Exception as e:
-                    db.session.rollback()
-                    print(f'Erro ao criar o ponto: {str(e)}')
-            else:
-                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Identificamos que já existe um ponto com esse nome em sua linha. A ação não pôde ser concluída.'})
+            ponto_check = Ponto.query.filter_by(nome=data['nome'], Linha_codigo=data['Linha_codigo']).first()
+            if ponto_check:
+                if not Marcador_Exclusao.query.filter_by(tabela='Ponto', key_item=ponto_check.id).first():
+                    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Identificamos que já existe um ponto com esse nome em sua linha. A ação não pôde ser concluída.'})
+
+            ponto = Ponto(**data)
+            try:
+                db.session.add(ponto)
+                db.session.commit()
+
+                return jsonify({'error': False, 'title': 'Ponto Cadastrado', 'text': f'<strong>{ponto.nome}</strong> foi cadastrado com sucesso.'})
+            
+            except Exception as e:
+                db.session.rollback()
+                print(f'Erro ao criar o ponto: {str(e)}')
 
     return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar o ponto.'})
 

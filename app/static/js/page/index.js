@@ -81,7 +81,7 @@ function loadLines() {
 
                     regiao.querySelector('h2').textContent = cidade
                     regiao.classList.remove('inactive')
-                    regiao.classList.add('enter')
+                    regiao.classList.add('-enter-')
                     local_linhas.appendChild(regiao)
                 }
                 create_lines(regiao, response['cidades'][cidade], response.minha_linha)
@@ -89,7 +89,7 @@ function loadLines() {
             if (minha_linha_area) {
                 create_lines(minha_linha_area, response.minha_linha)
             }
-            const elements = divs[2].querySelectorAll('[class*="enter"]')
+            const elements = divs[2].querySelectorAll('[class*="-enter-"]')
             animate_itens(elements, 'fadeDown', 0.7, 0)
         }
         
@@ -174,7 +174,7 @@ function checkLine(name_aba, obj_aba) {
                 loadLines()
             }
         }
-        const elements = obj_aba.querySelectorAll('[class*="enter"]')
+        const elements = obj_aba.querySelectorAll('[class*="-enter-"]')
         animate_itens(elements, 'fadeDown', 0.7, 0)
     })
 }

@@ -210,6 +210,13 @@ class Passagem(db.Model):
     aluno = db.relationship('Aluno', backref=db.backref('passagens', lazy=True))
 
 
+class Marcador_Exclusao(db.Model):
+    __tablename__ = 'Marcador_Exclusao'
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    tabela = db.Column(db.String(20), nullable=False)
+    key_item = db.Column(db.BigInteger, nullable=False)
+
+
 with app.app_context():
     db.create_all()
 

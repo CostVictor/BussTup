@@ -83,7 +83,7 @@ def edit_linha_valor():
         if permission == 'autorizado':
             if data['field'] == 'nome':
                 check = Linha.query.filter_by(nome=data['new_value']).first()
-                if check:
+                if check and not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=check.codigo).first():
                     if check.codigo == data['Linha_codigo']:
                         return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Você deve definir um nome diferente do atual.'})
                     return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Já existe uma linha cadastrada com este nome. Por favor, escolha um nome diferente para prosseguir.'})
@@ -224,8 +224,9 @@ def edit_point():
             permission = check_permission(data)
             if permission == 'autorizado':
                 if data['field'] == 'nome':
-                    data['new_value'] = data['new_value'].lower().capitalize()
-                    if Ponto.query.filter_by(Linha_codigo=data['Linha_codigo'], nome=data['new_value']).first():
+                    data['new_value'] = capitalize(data['new_value'], 'motorista')
+                    check = Ponto.query.filter_by(Linha_codigo=data['Linha_codigo'], nome=data['new_value']).first()
+                    if check and not Marcador_Exclusao.query.filter_by(tabela='Ponto', key_item=check.id).first():
                         return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Identificamos a existência de um ponto com o mesmo nome já cadastrado em sua linha. A ação não pôde ser concluída.'})
 
                 ponto = Ponto.query.filter_by(Linha_codigo=data['Linha_codigo'], nome=data['name_point']).first()
@@ -294,3 +295,93 @@ def edit_route():
                             print(f'Erro na edição da rota: {str(e)}')
 
     return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
+
+
+@app.route("/edit_relationship-ponto", methods=['PATCH'])
+@login_required
+@roles_required("motorista")
+def edit_relationship_ponto():
+    data = request.get_json()
+    if data and 'name_line' in data and 'plate' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
+        permission = check_permission(data)
+        if permission == 'autorizado' and 'field' in data and 'new_value' in data and 'type' in data and 'name_point' in data:
+            field = data['field']
+            new_value = data['new_value']
+            plate = data['plate']
+            shift = data['shift']
+            time_par = data['time_par']
+            time_ret = data['time_ret']
+
+            if field and field == 'horario_passagem' and new_value and plate and shift and time_par and time_ret:
+                rota = return_route(data['Linha_codigo'], plate, shift, time_par, time_ret, data['pos'])
+                if rota is not None:
+                    if not rota:
+                        return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+                    
+                    parada = (
+                        db.session.query(Parada).join(Ponto)
+                        .filter(db.and_(
+                            Ponto.nome == data['name_point'],
+                            Parada.Ponto_id == Ponto.id,
+                            Parada.Rota_codigo == rota.codigo,
+                            Parada.tipo == data['type']
+                        ))
+                        .first()
+                    )
+
+                    if parada:
+                        try:
+                            parada.horario_passagem = new_value
+                            db.session.commit()
+                            return jsonify({'error': False, 'title': 'Edição Concluída', 'text': ''})
+                        
+                        except Exception as e:
+                            db.session.rollback()
+                            print(f'Erro na edição da relação do ponto: {str(e)}')
+
+    return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
+
+
+@app.route("/edit_order_stop", methods=['PUT'])
+@login_required
+@roles_required("motorista")
+def edit_order_stop():
+    data = request.get_json()
+    if data and 'name_line' in data and 'plate' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
+        permission = check_permission(data)
+        hr_par = data['time_par']
+        hr_ret = data['time_ret']
+        plate = data['plate']
+        shift = data['shift']
+
+        if permission == 'autorizado' and hr_par and hr_ret and plate and shift and 'partida' in data and 'retorno' in data:
+            rota = return_route(data['Linha_codigo'], plate, shift, hr_par, hr_ret, data['pos'])
+            if rota is not None:
+                if rota:
+                    try:
+                        for tipo in ['partida', 'retorno']:
+                            for index, nome in enumerate(data[tipo]):
+                                parada = (
+                                    db.session.query(Parada)
+                                    .join(Ponto)
+                                    .filter(
+                                        db.and_(
+                                            Ponto.nome == nome,
+                                            Parada.Ponto_id == Ponto.id,
+                                            Parada.Rota_codigo == rota.codigo,
+                                            Parada.tipo == tipo
+                                        )
+                                    )
+                                    .first()
+                                )
+                                parada.ordem = index + 1
+                        db.session.commit()
+                        return jsonify({'error': False})
+
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f'Erro no salvamento automático da rota: {str(e)}')
+    
+            return jsonify({'error': True, 'title': 'Erro ao Salvar', 'text': 'Ocorreu um erro inesperado durante o salvamento automático dos dados da sua rota. Implementamos o procedimento padrão de segurança, revertendo as alterações feitas para uma versão anterior estável.'})
+        
+    return jsonify({'error': False})

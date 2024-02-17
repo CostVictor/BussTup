@@ -5,9 +5,10 @@ function create_vehicle() {
     const options = return_bool_selected(document.getElementById('add_vehicle_options'))
 
     let execute = true
+    let motorista_selected = 'Nenhum'
     if (options) {
         const container = document.getElementById('add_vehicle_options_container')
-        const motorista_selected = return_option_selected(container)
+        motorista_selected = return_option_selected(container)
 
         if (!motorista_selected) {
             execute = false
@@ -20,7 +21,7 @@ function create_vehicle() {
         fetch("/create_vehicle", {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({'placa': placa, 'capacidade': capacidade, 'motorista_nome': motorista_nome, 'name_line': name_line})
+            body: JSON.stringify({'placa': placa, 'capacidade': capacidade, 'motorista_nome': motorista_selected, 'name_line': name_line})
         })
         .then(response => response.json())
         .then(response => {
@@ -159,8 +160,7 @@ function create_stop(event) {
         .then(response => response.json())
         .then(response => {
             if (!response.error) {
-                loadInterfaceRoutes(data.name_line)
-                config_popup_route(null, return_data_route())
+                config_popup_route(null, return_data_route(null, format_dict_url=true))
                 close_popup('add_point_route')
                 create_popup(response.title, response.text, 'Ok', 'success')
             } else {create_popup(response.title, response.text, 'Voltar')}
@@ -236,7 +236,6 @@ function edit_config_line_bool(obj_click) {
         const name_line = document.getElementById('interface_nome').textContent
         const opcao = obj_click.querySelector('p').textContent
         const content = document.getElementById('interface_line_content')
-        const elements = Array.from(content.children)
         content.classList.add('inactive')
 
         let field = 'paga'
@@ -257,9 +256,6 @@ function edit_config_line_bool(obj_click) {
         .then(response => {
             if (!response.error) {
                 loadInterfaceLine(name_line, false)
-                if (opcao === 'Sim') {
-                    animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0, field)
-                } else (animate_itens(elements, 'fadeDown', 0.5, 0.07, 0.07, 0))
                 content.classList.remove('inactive')
             } else {create_popup(response.title, response.text, 'Voltar')}
         })
@@ -390,4 +386,59 @@ function edit_route(obj_reference, event = false) {
             } else {create_popup(response.title, response.text, 'Voltar')}
         })
     }
+}
+
+
+function edit_horario_relationship() {
+    const new_horario = document.getElementById('edit_horario_relacao_ponto_rota_new_horario').value.trim()
+    const data = return_data_route()
+    data['type'] = document.getElementById('config_rel_point_route_tipo').textContent.toLowerCase()
+    data['name_point'] = document.getElementById('config_rel_point_route_nome').textContent
+    data['field'] = 'horario_passagem'
+    data['new_value'] = new_horario
+
+    fetch("/edit_relationship-ponto", {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (!response.error) {
+            close_popup('edit_horario_relacao_ponto_rota')
+            close_popup('config_rel_point_route')
+            config_popup_route(null, return_data_route(null, format_dict_url=true))
+            create_popup(response.title, response.text, 'Ok', 'success')
+
+        } else {create_popup(response.title, response.text, 'Voltar')}
+    })
+}
+
+
+function save_data_route() {
+    const container_partida = Array.from(document.getElementById('config_route_pontos_partida_area').children)
+    const container_retorno = Array.from(document.getElementById('config_route_pontos_retorno_area').children)
+    const data = return_data_route()
+    data['partida'] = []
+    data['retorno'] = []
+
+    container_partida.forEach(parada => {
+        data.partida.push(extract_info(parada, 'nome'))
+    })
+    container_retorno.forEach(parada => {
+        data.retorno.push(extract_info(parada, 'nome'))
+    })
+
+    fetch("/edit_order_stop", {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(response => {
+        if (response.error) {
+            create_popup(response.title, response.text, 'Ok')
+        }
+    })
+    close_popup('config_route')
 }

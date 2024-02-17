@@ -42,20 +42,20 @@
             </div>
 
             <div id="area_agenda" class="page__container column">
-                <div class="page__container title enter">
+                <div class="page__container title -enter-">
                     <h1 id="nome_linha" class="text principal">Nome da linha</h1>
                     <h1 class="text principal">~</h1>
                     <h1 id="cidade_linha" class="text principal">Cidade</h1>
                 </div>
 
                 {% if role == 'aluno' %}
-                <h1 class="text title enter">Meu ponto</h1>
-                <div class="page__container enter">
+                <h1 class="text title -enter-">Meu ponto</h1>
+                <div class="page__container -enter-">
                     <p class="text secundario emphasis">Motorista</p>
                     <p id="motorista_nome" class="text secundario content fundo">Nome do motorista</p>
                 </div>
 
-                <div class="enter">
+                <div class="-enter-">
                     <div class="page__container pos_relative">
                         <p class="text secundario emphasis">Ponto</p>
                         <p id="nome_ponto" class="text secundario emphasis max_width">Nome do ponto</p>
@@ -72,20 +72,20 @@
                     </div>
                 </div>
 
-                <h1 class="text title enter">Minha semana</h1>
-                <div id="minha_semana" class="">
-                    <!-- <div class="page__container">
+                <h1 class="text title -enter-">Minha semana</h1>
+                <div id="minha_semana">
+                    <div class="page__container -enter-">
                         <p class="text secundario fundo">Tickets restantes:</p>
-                        <p id="quant_tickets" class="text secundario content fundo"></p>
-                    </div> -->
+                        <p id="quant_tickets" class="text secundario content fundo">Em breve</p>
+                    </div>
 
-                    <div class="page__container enter">
+                    <div class="page__container -enter-">
                         <p class="text secundario fundo">Contraturno fixo:</p>
                         <p id="contaturnos_fixos" class="text secundario content fundo">Nenhum</p>
                         <i class="bi bi-pencil-square page__icon content" onclick="open_popup('edit_contraturno')"></i>
                     </div>
 
-                    <div class="page__container scroll_horizontal enter">
+                    <div class="page__container scroll_horizontal -enter-">
                         {% for index in range(5) %}
                         <div class="page__container--card hidden" onclick="open_popup('edit_dia', this)">
                             <div class="page__container--card_title pos_relative">
@@ -125,69 +125,24 @@
                 </div>
                 {% endif %}
                 
-                <h1 class="text title enter">Previsão do ônibus</h1>
-                <div id="previsao_onibus">
-                    {% if role == 'aluno' %}
-                    <div class="page__container enter">
-                        <p class="text secundario fundo">Capacidade total:</p>
-                        <div class="text secundario fundo">
-                            <p id="capacidade_onibus" class="text secundario content container space">30</p>
-                            <p class="text secundario content container">pessoas</p>
-                        </div>
-                    </div>
-
-                    <div class="page__container enter">
-                        <p class="text secundario fundo">Período:</p>
-                        <p class="text secundario content fundo">27/11/2023 - 01/12/2023</p>
-                    </div>
-
-                    {% for index_previsao in range(3) %}
-                    <div id="previsao_{{ turnos[index_previsao] }}" class="enter">
-                        <div id="{{ turnos[index_previsao] }}_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
-                            <h2 class="text secundario fundo max_width">{{ turnos[index_previsao] }}</h2>
-                            <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-                        </div>
-                        
-                        <div id="{{ turnos[index_previsao] }}_container" class="inactive">
-                            {% for index_dia in range(5) %}
-                            <div id="{{ turnos[index_previsao] }}-dia_{{ index_dia }}" class="page__container align">
-                                <h2 class="text indicate emphasis">{{ dias_semana[index_dia][0:3] }}</h2>
-                                <i class="bi bi-arrow-right-short page__icon indicate"></i>
-                                <p class="text terciario fundo">Previsão:</p>
-                                <div class="text secundario fundo">
-                                    <p id="{{ turnos[index_previsao] }}-dia_{{ index_dia }}_previsao" class="text terciario content container space">0</p>
-                                    <p class="text terciario content container">pessoas</p>
-                                </div>
-                                <p class="text terciario fundo">Estado:</p>
-                                <p id="{{ turnos[index_previsao] }}-dia_{{ index_dia }}_estado" class="text terciario content green fundo">Normal</p>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                    {% elif role == 'motorista' %}
-                    <div class="page__container enter">
-                        <p class="text secundario fundo">Período:</p>
-                        <p id="periodo_previsao" class="text secundario content fundo">09/12/2023 - 10/12/2023</p>
-                    </div>
-                    {% endif %}
-                </div>
+                <h1 class="text title -enter-">Previsão do ônibus</h1>
+                <p class="text secundario justify emphasis -enter-">O recurso de previsão ainda está em desenvolvimento.</p>
+                <p class="text secundario justify fundo -enter-">Estamos trabalhando para oferecer informações precisas e em tempo real.</p>
             </div>
         </section>
 
         <section id="aba_rota" class="page__container--aba">
             <div id="area_rota" class="page__container column inactive">
                 {% if role == 'motorista' %}
-                <div class="page__container title enter">
+                <div class="page__container title -enter-">
                     <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
                     <h1 class="text principal">></h1>
                     <h1 class="text principal">Rotas</h1>
                 </div>
 
-                <h2 class="text title enter">Minhas rotas</h2>
+                <h2 class="text title -enter-">Minhas rotas</h2>
                 <div id="minhas_rota">
-                    <div id="sem_veiculo" class="enter">
+                    <div id="sem_veiculo" class="-enter-">
                         <p class="text secundario emphasis">Você não possui relação com nenhum veículo.</p>
                         <p class="text secundario fundo">Defina um veículo para conseguir iniciar um trajeto:</p>
                         <div class="page__container justify">
@@ -207,24 +162,24 @@
                         </div>
                     </div>
 
-                    <div id="minha_rota_area" class="enter"></div>
-                    <h1 class="page__division enter"></h1>
+                    <div id="minha_rota_area" class="-enter-"></div>
+                    <h1 class="page__division -enter-"></h1>
                 </div>
 
                 {% else %}
-                <div class="page__container title enter">
+                <div class="page__container title -enter-">
                     <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
                     <h1 class="text principal">></h1>
                     <h1 class="text principal">Rota</h1>
                 </div>
-                <h2 class="text title enter">Minha rota</h2>
-                <div id="minha_rota_area" class="enter"></div>
-                <h1 class="page__division enter"></h1>
+                <h2 class="text title -enter-">Minha rota</h2>
+                <div id="minha_rota_area" class="-enter-"></div>
+                <h1 class="page__division -enter-"></h1>
                 {% endif %}
                 
                 {% for index in range(3) %}
                 <div id="rotas_{{ turnos[index] }}">
-                    <h2 class="text title enter">{{ turnos[index] }}</h2>
+                    <h2 class="text title -enter-">{{ turnos[index] }}</h2>
                 </div>
                 {% endfor %}
             </div>
@@ -232,24 +187,24 @@
 
         <section id="aba_linhas" class="page__container--aba">
             <div id="area_linhas" class="page__container column inactive">
-                <div class="page__container title enter">
+                <div class="page__container title -enter-">
                     <h1 class="text principal">Linhas</h1>
                 </div>
 
                 {% if role == 'motorista' %}
-                <h2 class="text title big_space enter">Minhas linhas</h2>
-                <div id="minha_linha_area" class="enter"></div>
+                <h2 class="text title big_space -enter-">Minhas linhas</h2>
+                <div id="minha_linha_area" class="-enter-"></div>
 
-                <div id="msg_criar_linha" class="enter">
+                <div id="msg_criar_linha" class="-enter-">
                     <p class="text secundario emphasis">Você ainda não está relacionado a nenhuma linha.</p>
                     <p class="text secundario fundo">Solicite entrada em alguma linha ou crie a sua:</p>
                     <div class="page__container--line selected">
                         <i class="bi bi-plus-lg page__icon--box plus" onclick="open_popup('create_line')"></i>
                     </div>
                 </div>
-                <h1 class="page__division enter"></h1>
+                <h1 class="page__division -enter-"></h1>
                 <div id="msg_solicitar_entrada" class="page__container">
-                    <p class="text secundario fundo enter">Solicite entrada:</p>
+                    <p class="text secundario fundo -enter-">Solicite entrada:</p>
                 </div>
                 {% endif %}
 
@@ -259,15 +214,15 @@
 
         <section id="aba_chat" class="page__container--aba">
             <div id="area_chat" class="page__container column inactive">
-                <div class="page__container title enter">
+                <div class="page__container title -enter-">
                     <h1 id="area_chat_nome_linha" class="text principal">Nome da linha</h1>
                     <h1 class="text principal">></h1>
                     <h1 class="text principal">Chat</h1>
                 </div>
 
-                <h2 class="text title enter">Aviso</h2>
-                <p class="text secundario emphasis enter">O recurso de chat ainda se encontra em desenvolvimento.</p>
-                <p class="text secundario fundo enter">Estamos trabalhando para permitir uma linha de comunicação estável para todos os usuários.</p>
+                <h2 class="text title -enter-">Aviso</h2>
+                <p class="text secundario justify emphasis -enter-">O recurso de chat ainda está em desenvolvimento</p>
+                <p class="text secundario justify fundo -enter-">Estamos trabalhando para permitir uma linha de comunicação estável para todos os usuários.</p>
             </div>
         </section>
     </main>

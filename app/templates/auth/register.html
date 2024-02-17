@@ -12,8 +12,8 @@
 <body onload="enterInterface('register')" style="background-color: var(--branco_secundario);">
     <p class="hidden_point">.</p>
     <main id="content" class="form__container--content register">
-        <h1 class="form__text_title enter">Cadastro</h1>
-        <section id="select_register" class="form__container--card enter">
+        <h1 class="form__text_title -enter-">Cadastro</h1>
+        <section id="select_register" class="form__container--card -enter-">
             <h2 class="text--select">Cadastrar como:</h2>
             <div class="form__container--btn_select">
                 <button onclick="replace_form(this)" class="form__btn--select selected">Aluno</button>
@@ -21,7 +21,7 @@
             </div>
         </section>
 
-        <form id="form_aluno" class="form__container--card scroll_vertical enter" onsubmit="validationRegister(this, event)">
+        <form id="form_aluno" class="form__container--card scroll_vertical -enter-" onsubmit="validationRegister(this, event)">
             <div class="form__container--input first">
                 <input id="user_login_aluno" class="form__input input_notIcon" type="text" name="login" minlength="10" required>
                 <label class="form__label label_notIcon" for="user_login_aluno">Usuário de login</label>
@@ -115,13 +115,15 @@
             </div>
         </form>
 
-        <button id="button_submit" class="form__btn margin_bottom btn_scroll enter" onclick="submit()">Enviar</button>
+        <button id="button_submit" class="form__btn margin_bottom btn_scroll -enter-" onclick="submit()">Enviar</button>
 
-        <div class="form__container--text_info enter">
+        <div class="form__container--text_info -enter-">
             <p class="text">Já possui uma conta?</p>
             <button class="form__btn--simple" onclick="closeInterface('register', 'login', 700)">Logar</button>
         </div>
     </main>
+    <div id="popup_local"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/static/js/interface.js"></script>
     <script src="/static/js/interaction.js"></script>

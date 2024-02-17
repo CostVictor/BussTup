@@ -6,20 +6,20 @@
 
         <div class="popup__container--content">
             <div class="perfil__container--justify margin_top">
-                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup('trocar_nome')">
-                    <p class="interface__text">Trocar meu nome de exibição</p>
+                <div class="line__container--btn margin_bottom add aba" onclick="open_popup('trocar_nome')">
+                    <p class="line__text">Trocar meu nome de exibição</p>
                 </div>
             </div>
 
             <div class="perfil__container--justify">
-                <div class="interface__container--btn margin_bottom add aba" onclick="open_popup('trocar_login')">
-                    <p class="interface__text">Trocar meu usuário de login</p>
+                <div class="line__container--btn margin_bottom add aba" onclick="open_popup('trocar_login')">
+                    <p class="line__text">Trocar meu usuário de login</p>
                 </div>
             </div>
 
             <div class="perfil__container--justify">
-                <div class="interface__container--btn add aba" onclick="open_popup('trocar_senha')">
-                    <p class="interface__text">Trocar minha senha</p>
+                <div class="line__container--btn add aba" onclick="open_popup('trocar_senha')">
+                    <p class="line__text">Trocar minha senha</p>
                 </div>
             </div>
 
@@ -28,8 +28,8 @@
             </span>
 
             <div class="perfil__container--justify">
-                <div class="interface__container--btn del margin_bottom aba" onclick="open_popup('deletar_conta')">
-                    <p class="interface__text remove">Deletar minha conta</p>
+                <div class="line__container--btn del margin_bottom aba" onclick="open_popup('deletar_conta')">
+                    <p class="line__text remove">Deletar minha conta</p>
                 </div>
             </div>
         </div>
@@ -245,7 +245,7 @@
 
         <footer class="popup__container--footer">
             <button class="popup__btn cancel" onclick="close_popup('confirm_logout')">Cancelar</button>
-            <button class="popup__btn" onclick="closeProfile(true)">Sair</button>
+            <button class="popup__btn" onclick="closeInterface('profile', 'login', ['', true])">Sair</button>
         </footer>
     </div>
 </section>

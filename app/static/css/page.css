@@ -409,3 +409,7 @@ body {
 .page__division.aba {
     margin: calc(1vw + 1vh + 1vmin) calc(0.5vw + 0.5vh + 1vmin);
 }
+
+.page__division.no_margin_top {
+    margin-top: 0;
+}

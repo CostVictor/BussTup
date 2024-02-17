@@ -8,7 +8,11 @@ function action_popup(popup, card, id, obj_click) {
         card.querySelector('h2').textContent = `Digite a capacidade de ${placa_capacidade}:`
 
    } else if (id === 'edit_vehicle_motorista') {
-        const name_line = {'name_line': document.getElementById('interface_nome').textContent}
+        const data = {
+            'principal': [document.getElementById('interface_nome').textContent],
+            'secondary': {}
+        }
+
         const placa_vehicle = extract_info(obj_click, 'placa')
         const info_atual = extract_info(obj_click, 'motorista')
         popup.querySelector('span').textContent = placa_vehicle
@@ -21,7 +25,7 @@ function action_popup(popup, card, id, obj_click) {
         if (info_atual === 'Nenhum') {
             option_nenhum = false
         }
-        include_options_container(container, 'option_driver', name_line, option_nenhum)
+        include_options_container(container, 'option_driver', data, option_nenhum)
 
    } else if (id === 'config_motorista') {
        card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
@@ -34,7 +38,8 @@ function action_popup(popup, card, id, obj_click) {
 
     } else if (id === 'config_route') {
         config_popup_route(obj_click)
-       
+        document.getElementById('config_route_pos').textContent = obj_click.querySelector('span').textContent
+        
    } else if (id === 'config_line') {
         card.querySelector('h1').textContent = extract_info(obj_click, 'nome')
         card.querySelector('p#config_line_cidade').textContent = extract_info(obj_click, 'cidade')
@@ -52,11 +57,14 @@ function action_popup(popup, card, id, obj_click) {
         } else {config_bool(options_gratuidade, 'Sim')}
 
    } else if (id === 'add_vehicle' || id === 'add_route') {
-       const name_line = {'name_line': document.getElementById('interface_nome').textContent}
+        const data = {
+            'principal': [document.getElementById('interface_nome').textContent],
+            'secondary': {}
+        }
        const container = card.querySelector('div#' + popup.id + '_options_container')
        container.innerHTML = ''
        const option = id === 'add_vehicle' ? 'option_driver' : 'option_vehicle'
-       include_options_container(container, option, name_line)
+       include_options_container(container, option, data)
 
    } else if (id == 'promover_motorista' || id === 'rebaixar_motorista' || id === 'del_ponto' || id === 'del_linha') {
        card.querySelector('h2').textContent = extract_info(obj_click, 'nome')
@@ -71,14 +79,14 @@ function action_popup(popup, card, id, obj_click) {
 
    } else if (id === 'edit_route_onibus') {
        const data = {
-           'name_line': document.getElementById('interface_nome').textContent,
-           'plate_ignore': extract_info(obj_click, 'onibus')
+           'principal': [document.getElementById('interface_nome').textContent],
+           'secondary': {'plate_ignore': extract_info(obj_click, 'onibus')}
        }
        const container = document.getElementById(id + '_container')
        container.innerHTML = ''
 
        let option_nenhum = true
-       if (data.plate_ignore === 'Não definido') {
+       if (data.secondary.plate_ignore === 'Não definido') {
            option_nenhum = false
        }
        include_options_container(container, 'option_vehicle', data, option_nenhum)
@@ -86,6 +94,7 @@ function action_popup(popup, card, id, obj_click) {
    } else if (id === 'add_point_route') {
        const container = document.getElementById(id + '_container')
        const data = return_data_route(null, format_dict_url=true)
+
        let tipo = obj_click.id.trim().split('_')
        tipo = tipo[tipo.length - 1]
 
@@ -94,6 +103,13 @@ function action_popup(popup, card, id, obj_click) {
        container.classList.remove('inactive')
        popup.querySelector('span').textContent = tipo
        include_options_container(container, 'option_point', data, false, true)
+
+   } else if (id === 'config_rel_point_route') {
+        const data = return_data_route(null, format_dict_url=true)
+        data.principal.push(obj_click.id.includes('partida') ? 'partida' : 'retorno')
+        data.principal.push(extract_info(obj_click, 'nome'))
+        document.getElementById('config_rel_point_route_ordem').textContent = extract_info(obj_click, 'number')
+        config_popup_relationship(data)
    }
 }
 
@@ -219,39 +235,40 @@ function loadInterfacePoints(name_line) {
 }
 
 
+function create_aluno(list_aluno, container, model_aluno) {
+    for (index in list_aluno) {
+        const aluno = model_aluno.cloneNode(true)
+        aluno.id = `${container.id}-aluno_${index}`
+        const nome = aluno.querySelector('p')
+        nome.textContent = list_aluno[index]
+        nome.id = aluno.id + '_nome'
+
+        if (index) {
+            if (list_aluno[index - 1] === nome.textContent) {
+                const aluno_ant = document.getElementById(`${container.id}-aluno_${index - 1}`)
+                const span_ant = aluno_ant.querySelector('span')
+                if (!span_ant.textContent) {span_ant.textContent = 0}
+                aluno.querySelector('span').textContent = parseInt(span_ant.textContent) + 1
+            }
+        }
+
+        if (response.relacao !== 'membro') {
+            aluno.classList.add('grow')
+            aluno.querySelector('i').classList.remove('inactive')
+            aluno.onclick = function() {
+                open_popup('config_aluno', this)
+            }
+        }
+        aluno.classList.remove('inactive')
+        container.appendChild(aluno)
+    }
+}
+
+
 function config_popup_point(name_point) {
     const name_line = document.getElementById('interface_nome').textContent
     const get = {'principal': [name_line, name_point]}
     const model_aluno = models.querySelector('#interface_model_aluno')
-
-    function create_aluno(list_aluno, container) {
-        for (index in list_aluno) {
-            const aluno = model_aluno.cloneNode(true)
-            aluno.id = `${container.id}-aluno_${index}`
-            const nome = aluno.querySelector('p')
-            nome.textContent = list_aluno[index]
-            nome.id = aluno.id + '_nome'
-
-            if (index) {
-                if (list_aluno[index - 1] === nome.textContent) {
-                    const aluno_ant = document.getElementById(`${container.id}-aluno_${index - 1}`)
-                    const span_ant = aluno_ant.querySelector('span')
-                    if (!span_ant.textContent) {span_ant.textContent = 0}
-                    aluno.querySelector('span').textContent = parseInt(span_ant.textContent) + 1
-                }
-            }
-
-            if (response.relacao !== 'membro') {
-                aluno.classList.add('grow')
-                aluno.querySelector('i').classList.remove('inactive')
-                aluno.onclick = function() {
-                    open_popup('config_aluno', this)
-                }
-            }
-            aluno.classList.remove('inactive')
-            container.appendChild(aluno)
-        }
-    }
 
     fetch('/get_point' + generate_url_dict(get), { method: 'GET' })
     .then(response => response.json())
@@ -309,7 +326,17 @@ function config_popup_point(name_point) {
                 route.classList.remove('inactive')
                 utilizacao_container.appendChild(route)
             }
-        
+            
+            for (turno in turnos) {
+                const btn = document.getElementById(`config_point_${turno}_btn`)
+                const container_turno = document.getElementById(`config_point_${turno}_area`)
+                const container_contraturno = document.getElementById(`config_point_${turno}_area_contraturno`)
+
+                const info = turnos[turno]
+                btn.querySelector('p').textContent = info.quantidade
+                create_aluno(info.alunos, container_turno, model_aluno)
+                create_aluno(info.container, container_contraturno, model_aluno)
+            }
 
         } else {
             close_popup('config_point')
@@ -357,6 +384,6 @@ $(function() {
                 number.removeClass('shadow')
                 text.removeClass('shadow')
             }, 400)
-        }
+        },
     })
 })

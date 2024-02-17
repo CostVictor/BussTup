@@ -22,7 +22,7 @@ function replace_form(obj_button) {
         reset_form(form_aluno)
         animate_itens(elements_aluno, 'fadeDown', 0.6, 0, 0.07)
         form_aluno.removeAttribute('style')
-        form_aluno.classList.remove('enter')
+        form_aluno.classList.remove('-enter-')
         form_aluno.scrollTop = 0
 
     } else if (obj_button.textContent === 'Motorista' && !buttons[1].className.includes('selected')) {
@@ -79,9 +79,9 @@ function validationRegister(form_submit, event) {
         .then(response => response.json())
         .then(retorno => {
             if (retorno.error) {
-                create_popup(retorno.title, retorno.text, 'Voltar', 'info')
+                create_popup(retorno.title, retorno.text, 'Voltar')
             } else {
-                create_popup(retorno.title, retorno.text, 'Acessar login', 'success', '/') 
+                create_popup(retorno.title, retorno.text, 'Acessar login', 'success', 'login') 
             }
         })
     } else {

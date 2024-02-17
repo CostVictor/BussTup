@@ -15,9 +15,12 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" integrity="sha512-0bEtK0USNd96MnO4XhH8jhv3nyRF0eK87pJke6pkYf3cM0uDIhNJy9ltuzqgypoIFXw3JSuiy04tVk4AjpZdZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body onload="enterInterface('line')">
+    <p class="hidden_point">.</p>
+
     <template id="templates_model">
         {% include "/models/line/model_index.html" %}
         {% if role == 'motorista' %}
@@ -26,32 +29,33 @@
     </template>
     
     <template id="templates_popup">
+        {% include "/popups/indisponivel.html" %}
         {% include "/popups/line/popup_index.html" %}
         {% if role == 'motorista' %}
         {% include "/popups/line/popup_driver.html" %}
         {% endif %}
     </template>
 
-    <header id="interface_line_header" class="line__container--header">
+    <header id="interface_line_header" class="-enter- line__container--header">
         <i class="bi bi-arrow-left-short line__icon animate" onclick="closeInterface('line', 'page_user', '{{ local_page }}')"></i>
         <h1 id="interface_nome" class="text title no_marge no_border">{{ name_line }}</h1>
         <h1 class="text title no_marge no_border">~</h1>
         <h1 id="interface_cidade" class="text title no_marge no_border"></h1>
-    
+        
         {% if role == 'motorista' %}
         <i id="interface_config" class="bi bi-gear line__icon--header inactive" onclick="open_popup('config_line', this)"></i>         
         {% endif %}
     </header>
     
     <main id="interface_line_content" class="line__container--content">
-        <section id="interface_line_enter" class="line__container--area">
+        <section id="interface_line_enter" class="-enter- line__container--area">
             <h2 class="text title">Aviso</h2>
             <p class="text secundario fundo cinza">Você não participa desta linha.</p>
     
             {% if role == 'motorista' %}
             <p class="text secundario fundo margin_bottom">Solicite entrada para conseguir interagir:</p>
             <div class="page__container justify">
-                <div class="line__container--btn add aba" onclick="">
+                <div class="line__container--btn add aba" onclick="open_popup('indisponivel')">
                     <p class="line__text">Solicitar entrada</p>
                 </div>
             </div>
@@ -68,12 +72,12 @@
             <h1 class="page__division"></h1>
         </section>
     
-        <section id="interface_ferias" class="line__container--aviso">
+        <section id="interface_ferias" class="-enter- line__container--aviso">
             <h1 class="line__aviso">Linha de Férias</h1>
             <h1 class="page__division"></h1>
         </section>
     
-        <section id="area_paga" class="line__container--area">
+        <section id="area_paga" class="-enter- line__container--area">
             <h2 class="text title">Valores</h2>
             <div class="page__container">
                 <p class="text secundario fundo">Valor da cartela:</p>
@@ -98,12 +102,12 @@
             </div>
         </section>
     
-        <section id="area_motoristas" class="line__container--area">
+        <section id="area_motoristas" class="-enter- line__container--area">
             <h2 class="text title">Motoristas</h2>
         </section>
     
         {% if role == 'motorista' %}
-        <section id="area_onibus" class="line__container--area">
+        <section id="area_onibus" class="-enter- line__container--area">
             <h2 class="text title">Ônibus</h2>
             <div id="area_onibus_content"></div>
     
@@ -116,7 +120,7 @@
         </section>
         {% endif %}
     
-        <section id="area_rotas" class="line__container--area">
+        <section id="area_rotas" class="-enter- line__container--area">
             {% if role == 'aluno' %}
             <h2 class="text title big_space">Rotas</h2>
             <div id="interface_rotas_ativas" class="scroll_vertical popup__container--scroll principal"></div>
@@ -164,11 +168,11 @@
         </section>
     
         {% if role == 'motorista' %}
-        <section id="area_alunos" class="line__container--area">
+        <section id="area_alunos" class="-enter- line__container--area">
             <h2 class="text title">Alunos e Tickets</h2>
             <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
                 <h3 class="text secundario fundo">Alunos</h3>
-                <h3 id="interface_alunos_quant" class="text secundario fundo max_width">1 cadastrado</h3>
+                <h3 id="interface_alunos_quant" class="text secundario fundo max_width"></h3>
                 <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
             </div>
     

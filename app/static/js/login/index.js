@@ -13,7 +13,7 @@ function validationLogin(event) {
     .then(response => response.json())
     .then(response => {
         if (response.error) {
-            create_popup(response.title, response.text, 'Ok', 'info')
+            create_popup(response.title, response.text, 'Ok')
         } else {closeInterface('login', response.redirect)}
     })
 }

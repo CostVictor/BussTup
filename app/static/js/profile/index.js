@@ -45,7 +45,7 @@ function editData_profile(obj_click) {
                 if (response.title.includes('Senha')) {
                     input_password_conf.classList.add('input_error')
                 } else {input_new_value.classList.add('input_error')}
-                create_popup(response.title, response.text, 'Voltar', 'info', '', false)
+                create_popup(response.title, response.text, 'Voltar', 'warning', '', false)
             }
         })
     }
