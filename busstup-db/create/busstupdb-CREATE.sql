@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `Busstup`.`Motorista` (
   `nome` VARCHAR(100) NOT NULL,
   `email` VARCHAR(100) NOT NULL,
   `telefone` CHAR(15) NOT NULL,
-  `pix` VARCHAR(100) NULL,
+  `pix` VARCHAR(100) NULL DEFAULT 'Não definido',
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -47,13 +47,14 @@ ENGINE = InnoDB;
 -- Table `Busstup`.`Onibus`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `Busstup`.`Onibus` (
-  `placa` CHAR(7) NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `apelido` VARCHAR(15) NOT NULL,
   `capacidade` INT NOT NULL,
   `Linha_codigo` INT NOT NULL,
   `Motorista_id` INT NULL,
-  PRIMARY KEY (`placa`),
   INDEX `fk_Onibus_Motorista1_idx` (`Motorista_id` ASC),
   INDEX `fk_Onibus_Linha1_idx` (`Linha_codigo` ASC),
+  PRIMARY KEY (`id`),
   CONSTRAINT `fk_Onibus_Motorista1`
     FOREIGN KEY (`Motorista_id`)
     REFERENCES `Busstup`.`Motorista` (`id`)
@@ -78,18 +79,18 @@ CREATE TABLE IF NOT EXISTS `Busstup`.`Rota` (
   `horario_partida` TIME NOT NULL,
   `horario_retorno` TIME NOT NULL,
   `Linha_codigo` INT NOT NULL,
-  `Onibus_placa` CHAR(7) NULL,
+  `Onibus_id` BIGINT NULL,
   PRIMARY KEY (`codigo`),
   INDEX `fk_Rota_Linha1_idx` (`Linha_codigo` ASC),
-  INDEX `fk_Rota_Onibus1_idx` (`Onibus_placa` ASC),
+  INDEX `fk_Rota_Onibus1_idx` (`Onibus_id` ASC),
   CONSTRAINT `fk_Rota_Linha1`
     FOREIGN KEY (`Linha_codigo`)
     REFERENCES `Busstup`.`Linha` (`codigo`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Rota_Onibus1`
-    FOREIGN KEY (`Onibus_placa`)
-    REFERENCES `Busstup`.`Onibus` (`placa`)
+    FOREIGN KEY (`Onibus_id`)
+    REFERENCES `Busstup`.`Onibus` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -318,6 +319,24 @@ CREATE TABLE IF NOT EXISTS `Busstup`.`Marcador_Exclusao` (
   `tabela` VARCHAR(20) NOT NULL,
   `key_item` BIGINT NOT NULL,
   PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `Busstup`.`Aparencia`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Busstup`.`Aparencia` (
+  `Onibus_id` BIGINT NOT NULL,
+  `cor` VARCHAR(50) NOT NULL,
+  `modelo` VARCHAR(50) NOT NULL,
+  `descricao` VARCHAR(255) NOT NULL DEFAULT 'Não definido',
+  PRIMARY KEY (`Onibus_id`),
+  INDEX `fk_Aparencia_Onibus1_idx` (`Onibus_id` ASC),
+  CONSTRAINT `fk_Aparencia_Onibus1`
+    FOREIGN KEY (`Onibus_id`)
+    REFERENCES `Busstup`.`Onibus` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 

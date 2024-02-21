@@ -157,22 +157,30 @@ def get_interface_driver(name_line):
 
 @app.route("/get_interface-vehicle/<name_line>", methods=['GET'])
 @login_required
-@roles_required("motorista")
 def get_interface_vehicle(name_line):
     linha = Linha.query.filter_by(nome=name_line).first()
     user = return_my_user()
     if linha and user:
+        role = current_user.roles[0].name
         retorno = {
             'error': False,
+            'role': role,
             'relacao': return_relationship(linha.codigo),
-            'meu_nome': user.nome,
-            'data': []
+            'data': {'com_condutor': [], 'sem_condutor': []}
         }
-        vehicles = Onibus.query.filter_by(Linha_codigo=linha.codigo).order_by(Onibus.placa).all()
+
+        if role == 'motorista':
+            retorno['meu_nome'] = user.nome
+
+        vehicles = Onibus.query.filter_by(Linha_codigo=linha.codigo).order_by(Onibus.apelido).all()
         for vehicle in vehicles:
             dict_vehicle = return_dict(vehicle, not_includes=['Linha_codigo', 'Motorista_id'])
-            dict_vehicle['motorista_nome'] = vehicle.motorista.nome if vehicle.motorista else 'Nenhum'
-            retorno['data'].append(dict_vehicle)
+            if vehicle.motorista:
+                dict_vehicle['motorista_nome'] = vehicle.motorista.nome
+                retorno['data']['com_condutor'].append(dict_vehicle)
+            else:
+                dict_vehicle['motorista_nome'] = 'Nenhum'
+                retorno['data']['sem_condutor'].append(dict_vehicle)
 
         return jsonify(retorno)
 
@@ -244,18 +252,18 @@ def get_interface_route(name_line):
             }
 
             veiculo = rota.onibus
-            placa = 'Sem veículo'
+            surname = 'Sem veículo'
             motorista = 'Desativada'
 
             if veiculo:
-                placa = veiculo.placa
+                surname = veiculo.apelido
                 motorista = 'Nenhum'
                 if veiculo.motorista:
                     motorista = veiculo.motorista.nome
                 retorno['ativas'].append(info)
             else: retorno['desativas'].append(info)
 
-            info['placa'] = placa
+            info['apelido'] = surname
             info['motorista'] = motorista
         retorno['quantidade'] = count_list([retorno['ativas'], retorno['desativas']], 'cadastrada', list_unique=False)
 
@@ -307,10 +315,10 @@ def get_options_driver(name_line):
 @login_required
 @roles_required("motorista")
 def get_options_vehicle(name_line):
-    plate_ignore = request.args.get('plate_ignore')
+    surname_ignore = request.args.get('surname_ignore')
 
-    if plate_ignore == 'Não definido':
-        plate_ignore = None
+    if surname_ignore == 'Não definido':
+        surname_ignore = None
 
     linha = Linha.query.filter_by(nome=name_line).first()
     if linha:
@@ -319,11 +327,11 @@ def get_options_vehicle(name_line):
             retorno = {'error': False, 'data': deque()}
 
             for onibus in linha.onibus:
-                if plate_ignore != onibus.placa:
+                if surname_ignore != onibus.apelido:
                     motorista = onibus.motorista
                     if motorista:
-                        retorno['data'].appendleft(f"{onibus.placa} > {motorista.nome}")
-                    else: retorno['data'].append(f"{onibus.placa} > Nenhum")
+                        retorno['data'].appendleft(f"{onibus.apelido} > {motorista.nome}")
+                    else: retorno['data'].append(f"{onibus.apelido} > Nenhum")
 
             retorno['data'] = list(retorno['data'])
             return jsonify(retorno)
@@ -331,18 +339,18 @@ def get_options_vehicle(name_line):
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
 
-@app.route("/get_interface-option_point/<name_line>/<plate>/<shift>/<hr_par>/<hr_ret>/<type>", methods=['GET'])
+@app.route("/get_interface-option_point/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type>", methods=['GET'])
 @login_required
 @roles_required("motorista")
-def get_options_point(name_line, plate, shift, hr_par, hr_ret, type):
+def get_options_point(name_line, surname, shift, hr_par, hr_ret, type):
     pos = request.args.get('pos')
 
-    if name_line and plate and shift and hr_par and hr_ret and type:
+    if name_line and surname and shift and hr_par and hr_ret and type:
         linha = Linha.query.filter_by(nome=name_line).first()
         if linha:
             relationship = return_relationship(linha.codigo)
             if relationship and relationship != 'membro':
-                rota = return_route(linha.codigo, plate, shift, hr_par, hr_ret, pos)
+                rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, pos)
                 if rota is not None:
                     if not rota:
                         return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
@@ -415,18 +423,18 @@ def get_point(name_line, name_point):
 
                     if relacao_parada.tipo == 'partida':
                         veiculo = rota.onibus
-                        placa = 'Sem veículo'
+                        surname = 'Sem veículo'
                         motorista = 'Desativada'
 
                         if veiculo:
-                            placa = veiculo.placa
+                            surname = veiculo.apelido
                             motorista = 'Nenhum'
                             if veiculo.motorista:
                                 motorista = veiculo.motorista.nome
 
                         dados = {
                             'motorista': motorista,
-                            'placa': placa,
+                            'apelido': surname,
                             'turno': rota.turno,
                             'horario_partida': format_time(rota.horario_partida),
                             'horario_retorno': format_time(rota.horario_retorno),
@@ -461,9 +469,9 @@ def get_point(name_line, name_point):
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações do ponto.'})
 
 
-@app.route("/get_route/<name_line>/<plate>/<shift>/<hr_par>/<hr_ret>", methods=['GET'])
+@app.route("/get_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>", methods=['GET'])
 @login_required
-def get_route(name_line, plate, shift, hr_par, hr_ret):
+def get_route(name_line, surname, shift, hr_par, hr_ret):
     pos = request.args.get('pos')
 
     if name_line and shift and hr_par and hr_ret:
@@ -476,7 +484,7 @@ def get_route(name_line, plate, shift, hr_par, hr_ret):
             retorno['msg_desativada'] = False
 
             user = return_my_user()
-            rota = return_route(linha.codigo, plate, shift, hr_par, hr_ret, pos)
+            rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, pos)
 
             if rota is not None and user:
                 if not rota:
@@ -484,16 +492,16 @@ def get_route(name_line, plate, shift, hr_par, hr_ret):
 
                 veiculo = rota.onibus
                 motorista = 'Nenhum'
-                placa = 'Não definido'
+                surname = 'Não definido'
                 if veiculo:
-                    placa = veiculo.placa
+                    surname = veiculo.apelido
                     if veiculo.motorista:
                         motorista = veiculo.motorista.nome
                 else: retorno['msg_desativada'] = True
 
                 retorno['info'] = {
                     'motorista': motorista,
-                    'onibus': placa,
+                    'onibus': surname,
                     'turno_rota': rota.turno,
                     'horario_partida': format_time(rota.horario_partida),
                     'horario_retorno': format_time(rota.horario_retorno)
@@ -567,19 +575,19 @@ def get_route(name_line, plate, shift, hr_par, hr_ret):
     return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações da rota.'})
 
 
-@app.route("/get_relationship-point/<name_line>/<plate>/<shift>/<hr_par>/<hr_ret>/<type>/<name_point>", methods=['GET'])
+@app.route("/get_relationship-point/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type>/<name_point>", methods=['GET'])
 @login_required
-def get_relationship(name_line, plate, shift, hr_par, hr_ret, type, name_point):
+def get_relationship(name_line, surname, shift, hr_par, hr_ret, type, name_point):
     pos = request.args.get('pos')
 
-    if name_line and name_point and plate and type and shift and hr_par and hr_ret:
+    if name_line and name_point and surname and type and shift and hr_par and hr_ret:
         linha = Linha.query.filter_by(nome=name_line).first()
         if linha:
             relationship = return_relationship(linha.codigo)
             role = current_user.roles[0].name
             retorno = {'error': False, 'role': role, 'relacao': relationship}
 
-            rota = return_route(linha.codigo, plate, shift, hr_par, hr_ret, pos)
+            rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, pos)
             if rota is not None:
                 if not rota:
                     return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})

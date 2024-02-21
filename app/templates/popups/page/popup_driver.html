@@ -1,61 +1,64 @@
 <section id="create_line" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Criar linha</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Criar linha</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
-                <form id="formulario_create_line" class="form__container--card max_width" onsubmit="create_line(this, event)">
-                    <div class="form__container--input first">
-                        <input id="nome_create_line" class="form__input white input_notIcon" type="text" name="nome" required>
-                        <label class="form__label intense label_notIcon" for="nome_create_line">Nome da linha</label>
-                    </div>
-                    
-                    <div class="form__container--input_options">
-                        <div class="form__container--input">
-                            <input id="cidade_create_line" class="form__input input_notIcon white format_options format_name" type="text" name="cidade" required>
-                            <label class="form__label label_notIcon intense" for="cidade_create_line">Cidade</label>
-                        </div>
-                        
-                        <ul id="lista_cidades" class="form__container--ul white inactive">
-                            {% for cidade in cidades %}
-                            <li class="form__option">{{ cidade }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    
-                    <h3 class="popup__text question">Esta linha será paga?</h3>
-                    <div id="options_gratuidade" class="popup__container--options">
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
-                            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-                            <p class="popup__text content input">Sim</p>
-                        </div>
+    <div class="popup__container--content">
+      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+        <form id="formulario_create_line" class="form__container--card max_width" onsubmit="create_line(this, event)">
+          <div class="form__container--input first">
+            <input id="nome_create_line" class="form__input white input_notIcon" type="text" name="nome" required>
+            <label class="form__label intense label_notIcon" for="nome_create_line">Nome da linha</label>
+          </div>
 
-                        <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
-                            <i class="bi bi-circle popup__icon ratio"></i>
-                            <p class="popup__text content input">Não</p>
-                        </div>
-                    </div>
-
-                    <div id="options_gratuidade_container">
-                        <div class="form__container--input">
-                            <input id="valor_cartela" class="form__input white input_notIcon" type="number" step="0.01" name="preço da cartela">
-                            <label class="form__label intense label_notIcon" for="valor_cartela">Preço da cartela</label>
-                        </div>
-
-                        <div class="form__container--input">
-                            <input id="valor_diaria" class="form__input white input_notIcon" type="number" step="0.01" name="preço da diária">
-                            <label class="form__label intense label_notIcon" for="valor_diaria">Preço da diária</label>
-                        </div>
-                    </div>
-                </form>
+          <div class="form__container--input_options">
+            <div class="form__container--input">
+              <input id="cidade_create_line" class="form__input input_notIcon white format_options format_name"
+                type="text" name="cidade" required>
+              <label class="form__label label_notIcon intense" for="cidade_create_line">Cidade</label>
             </div>
-        </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('create_line', true, 'Sim')">Cancelar</button>
-            <button class="popup__btn" onclick="submit('formulario_create_line')">Criar</button>
-        </footer>
+            <ul id="lista_cidades" class="form__container--ul white inactive">
+              {% for cidade in cidades %}
+              <li class="form__option">{{ cidade }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <h3 class="popup__text question">Esta linha será paga?</h3>
+          <div id="options_gratuidade" class="popup__container--options">
+            <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+              <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+              <p class="popup__text content input">Sim</p>
+            </div>
+
+            <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+              <i class="bi bi-circle popup__icon ratio"></i>
+              <p class="popup__text content input">Não</p>
+            </div>
+          </div>
+
+          <div id="options_gratuidade_container">
+            <div class="form__container--input">
+              <input id="valor_cartela" class="form__input white input_notIcon" type="number" step="0.01"
+                name="preço da cartela">
+              <label class="form__label intense label_notIcon" for="valor_cartela">Preço da cartela</label>
+            </div>
+
+            <div class="form__container--input">
+              <input id="valor_diaria" class="form__input white input_notIcon" type="number" step="0.01"
+                name="preço da diária">
+              <label class="form__label intense label_notIcon" for="valor_diaria">Preço da diária</label>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('create_line', true, 'Sim')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_create_line')">Criar</button>
+    </footer>
+  </div>
 </section>

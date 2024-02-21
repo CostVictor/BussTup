@@ -142,9 +142,9 @@ def return_relationship(code_line):
     return None
 
 
-def return_route(code_line, plate, shift, time_par, time_ret, pos):
-    if plate == 'Não definido' or plate == 'Nenhum' or plate == 'Sem veículo':
-        plate = None
+def return_route(code_line, surname, shift, time_par, time_ret, pos):
+    if surname == 'Não definido' or surname == 'Nenhum' or surname == 'Sem veículo':
+        surname = None
     
     keys = db.session.query(Rota.codigo).filter_by(Linha_codigo=code_line).subquery()
     not_include = (
@@ -157,10 +157,10 @@ def return_route(code_line, plate, shift, time_par, time_ret, pos):
     )
 
     rota = (
-        db.session.query(Rota)
+        db.session.query(Rota).join(Onibus)
         .filter(db.and_(
             db.not_(Rota.codigo.in_(not_include.select())),
-            (Rota.Onibus_placa == plate) if plate else (Rota.Onibus_placa.is_(None)),
+            (Onibus.id == Rota.Onibus_id, Onibus.apelido == surname) if surname else (Rota.Onibus_id.is_(None)),
             Rota.Linha_codigo == code_line,
             Rota.horario_partida == format_time(time_par, reverse=True),
             Rota.horario_retorno == format_time(time_ret, reverse=True),
@@ -204,17 +204,19 @@ def check_permission(data, permission='adm'):
     return 'não autorizado'
 
 
-def check_times(plate, time=[]):
-    if Rota.query.filter(
-        db.and_(
-            Rota.Onibus_placa == plate,
-            db.or_(
-                Rota.horario_partida.in_(time),
-                Rota.horario_retorno.in_(time)
-            )
-        )
-    ).first():
-        return True
+def check_times(vehicle_id, time=[]):
+    if vehicle_id:
+        if (
+            Rota.query.filter(db.and_(
+                Rota.Onibus_id == vehicle_id,
+                db.or_(
+                    Rota.horario_partida.in_(time),
+                    Rota.horario_retorno.in_(time)
+                ) 
+            ))
+            .first()
+        ):
+            return True
     return False
 
 

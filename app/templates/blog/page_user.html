@@ -1,263 +1,268 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BussTup > Pág Principal</title>
-    <link rel="icon" href="/static/img/icon_busstup.png">
-    <link rel="stylesheet" href="/static/css/index.css">
-    <link rel="stylesheet" href="/static/css/page.css">
-    <link rel="stylesheet" href="/static/css/form.css">
-    <link rel="stylesheet" href="/static/css/popup.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BussTup > Pág Principal</title>
+  <link rel="icon" href="/static/img/icon_busstup.png">
+  <link rel="stylesheet" href="/static/css/index.css">
+  <link rel="stylesheet" href="/static/css/page.css">
+  <link rel="stylesheet" href="/static/css/form.css">
+  <link rel="stylesheet" href="/static/css/popup.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body onload="enterInterface('page_user', '{{ local }}')">
-    <p class="hidden_point">.</p>
+  <p class="hidden_point">.</p>
 
-    <template id="templates_model">
-        {% include "/models/page/model_index.html" %}
-    </template>
-    
-    <template id="templates_popup">
-        {% if role == 'motorista' %}
-        {% include "/popups/page/popup_driver.html" %}
-        {% else %}
-        {% include "/popups/page/popup_student.html" %}
-        {% endif %}
-    </template>
+  <template id="templates_model">
+    {% include "/models/page/model_index.html" %}
+  </template>
 
-    <header id="header_page" class="page__container--header header_hidden hidden">
-        <h1 class="text--header">BussTup</h1>
-        <div class="page__container--icon">
-            <i class="bi bi-person-circle page__icon animate first" onclick="closeInterface('page_user', 'profile_user')"></i>
-        </div>
-    </header>
-    
-    <main id="content_page" class="page__container--content scroll_horizontal not_overflow content_noBorder">
-        <section id="aba_agenda" class="page__container--aba">
-            <div id="not_line_agenda" class="inactive">
-                Você não possui uma linha
-            </div>
-
-            <div id="area_agenda" class="page__container column">
-                <div class="page__container title -enter-">
-                    <h1 id="nome_linha" class="text principal">Nome da linha</h1>
-                    <h1 class="text principal">~</h1>
-                    <h1 id="cidade_linha" class="text principal">Cidade</h1>
-                </div>
-
-                {% if role == 'aluno' %}
-                <h1 class="text title -enter-">Meu ponto</h1>
-                <div class="page__container -enter-">
-                    <p class="text secundario emphasis">Motorista</p>
-                    <p id="motorista_nome" class="text secundario content fundo">Nome do motorista</p>
-                </div>
-
-                <div class="-enter-">
-                    <div class="page__container pos_relative">
-                        <p class="text secundario emphasis">Ponto</p>
-                        <p id="nome_ponto" class="text secundario emphasis max_width">Nome do ponto</p>
-                        <i class="bi bi-pencil-square page__icon content absolute" onclick="open_popup('edit_ponto')"></i>
-                    </div>
-
-                    <div class="page__container space_itens">
-                        <p class="text secundario emphasis">Ordem</p>
-                        <p id="ordem_ponto" class="text secundario content fundo">1</p>
-                        <p class="text secundario emphasis">Horário</p>
-                        <p id="horario_ponto" class="text secundario content fundo">07h</p>
-                        <p class="text secundario emphasis">Localização</p>
-                        <i id="localizacao_ponto" class="bi bi-pin-map page__icon content location"></i>
-                    </div>
-                </div>
-
-                <h1 class="text title -enter-">Minha semana</h1>
-                <div id="minha_semana">
-                    <div class="page__container -enter-">
-                        <p class="text secundario fundo">Tickets restantes:</p>
-                        <p id="quant_tickets" class="text secundario content fundo">Em breve</p>
-                    </div>
-
-                    <div class="page__container -enter-">
-                        <p class="text secundario fundo">Contraturno fixo:</p>
-                        <p id="contaturnos_fixos" class="text secundario content fundo">Nenhum</p>
-                        <i class="bi bi-pencil-square page__icon content" onclick="open_popup('edit_contraturno')"></i>
-                    </div>
-
-                    <div class="page__container scroll_horizontal -enter-">
-                        {% for index in range(5) %}
-                        <div class="page__container--card hidden" onclick="open_popup('edit_dia', this)">
-                            <div class="page__container--card_title pos_relative">
-                                <h1 class="text terciario">{{ dias_semana[index] }}</h1>
-                                <i class="bi bi-pencil-square page__icon card"></i>
-                            </div>
-
-                            <div class="page__container--card_body">
-                                <div class="page__container">
-                                    <p class="text terciario">Data:</p>
-                                    <p id="data_{{ dias_semana[index] }}" class="text terciario content">27/11/2023</p>
-                                </div>
-
-                                <div class="page__container">
-                                    <p class="text terciario">Irá faltar:</p>
-                                    <p id="falta_{{ dias_semana[index] }}" class="text terciario content">Não</p>
-                                </div>
-
-                                <div class="page__container">
-                                    <p class="text terciario">Contraturno:</p>
-                                    <p id="contraturno_{{ dias_semana[index] }}" class="text terciario content">Não</p>
-                                </div>
-
-                                <div class="page__container inactive">
-                                    <p class="text terciario">Ponto subida:</p>
-                                    <p id="pSubida_{{ dias_semana[index] }}" class="text terciario content"></p>
-                                </div>
-
-                                <div class="page__container inactive">
-                                    <p class="text terciario">Ponto descida:</p>
-                                    <p id="pDescida_{{ dias_semana[index] }}" class="text terciario content"></p>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-                
-                <h1 class="text title -enter-">Previsão do ônibus</h1>
-                <p class="text secundario justify emphasis -enter-">O recurso de previsão ainda está em desenvolvimento.</p>
-                <p class="text secundario justify fundo -enter-">Estamos trabalhando para oferecer informações precisas e em tempo real.</p>
-            </div>
-        </section>
-
-        <section id="aba_rota" class="page__container--aba">
-            <div id="area_rota" class="page__container column inactive">
-                {% if role == 'motorista' %}
-                <div class="page__container title -enter-">
-                    <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
-                    <h1 class="text principal">></h1>
-                    <h1 class="text principal">Rotas</h1>
-                </div>
-
-                <h2 class="text title -enter-">Minhas rotas</h2>
-                <div id="minhas_rota">
-                    <div id="sem_veiculo" class="-enter-">
-                        <p class="text secundario emphasis">Você não possui relação com nenhum veículo.</p>
-                        <p class="text secundario fundo">Defina um veículo para conseguir iniciar um trajeto:</p>
-                        <div class="page__container justify">
-                            <div class="page__btn_redirect" onclick="">
-                                <i class="bi bi-box-arrow-up-right page__icon_redirect"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="sem_rota" class="inactive">
-                        <p class="text secundario emphasis">Seu veículo não possui nenhuma rota definida.</p>
-                        <p class="text secundario fundo">Crie uma rota para conseguir iniciar um trajeto:</p>
-                        <div class="page__container justify">
-                            <div class="page__btn_redirect" onclick="">
-                                <i class="bi bi-box-arrow-up-right page__icon_redirect"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="minha_rota_area" class="-enter-"></div>
-                    <h1 class="page__division -enter-"></h1>
-                </div>
-
-                {% else %}
-                <div class="page__container title -enter-">
-                    <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
-                    <h1 class="text principal">></h1>
-                    <h1 class="text principal">Rota</h1>
-                </div>
-                <h2 class="text title -enter-">Minha rota</h2>
-                <div id="minha_rota_area" class="-enter-"></div>
-                <h1 class="page__division -enter-"></h1>
-                {% endif %}
-                
-                {% for index in range(3) %}
-                <div id="rotas_{{ turnos[index] }}">
-                    <h2 class="text title -enter-">{{ turnos[index] }}</h2>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section id="aba_linhas" class="page__container--aba">
-            <div id="area_linhas" class="page__container column inactive">
-                <div class="page__container title -enter-">
-                    <h1 class="text principal">Linhas</h1>
-                </div>
-
-                {% if role == 'motorista' %}
-                <h2 class="text title big_space -enter-">Minhas linhas</h2>
-                <div id="minha_linha_area" class="-enter-"></div>
-
-                <div id="msg_criar_linha" class="-enter-">
-                    <p class="text secundario emphasis">Você ainda não está relacionado a nenhuma linha.</p>
-                    <p class="text secundario fundo">Solicite entrada em alguma linha ou crie a sua:</p>
-                    <div class="page__container--line selected">
-                        <i class="bi bi-plus-lg page__icon--box plus" onclick="open_popup('create_line')"></i>
-                    </div>
-                </div>
-                <h1 class="page__division -enter-"></h1>
-                <div id="msg_solicitar_entrada" class="page__container">
-                    <p class="text secundario fundo -enter-">Solicite entrada:</p>
-                </div>
-                {% endif %}
-
-                <div id="local_linhas"></div>
-            </div>
-        </section>
-
-        <section id="aba_chat" class="page__container--aba">
-            <div id="area_chat" class="page__container column inactive">
-                <div class="page__container title -enter-">
-                    <h1 id="area_chat_nome_linha" class="text principal">Nome da linha</h1>
-                    <h1 class="text principal">></h1>
-                    <h1 class="text principal">Chat</h1>
-                </div>
-
-                <h2 class="text title -enter-">Aviso</h2>
-                <p class="text secundario justify emphasis -enter-">O recurso de chat ainda está em desenvolvimento</p>
-                <p class="text secundario justify fundo -enter-">Estamos trabalhando para permitir uma linha de comunicação estável para todos os usuários.</p>
-            </div>
-        </section>
-    </main>
-
-    <nav id="nav_page" class="page__container--buttom nav_hidden">
-        <div class="page__btn">
-            <i id="agenda" class="bi bi-journal-text page__icon--btn" onclick="replaceAba(this)"></i>
-        </div>
-
-        <div class="page__btn">
-            <i id="rota" class="bi bi-geo-alt page__icon--btn" onclick="replaceAba(this)"></i>
-        </div>
-
-        <div class="page__btn">
-            <i id="linhas" class="bi bi-bus-front page__icon--btn" onclick="replaceAba(this)"></i>
-        </div>
-
-        <div class="page__btn">
-            <i id="chat" class="bi bi-chat-dots page__icon--btn" onclick="replaceAba(this)"></i>
-        </div>
-    </nav>
-    <div id="popup_local"></div>
-    
-    <script>
-        window.info_page = {
-            'header': document.getElementById('header_page'),
-            'content': document.getElementById('content_page'),
-            'nav': document.getElementById('nav_page'),
-        }
-    </script>
-    <script src="/static/js/interface.js"></script>
-    <script src="/static/js/interaction.js"></script>
-    <script src="/static/js/page/index.js"></script>
+  <template id="templates_popup">
     {% if role == 'motorista' %}
-    <script src="/static/js/page/driver/edition_driver.js"></script>
+    {% include "/popups/page/popup_driver.html" %}
+    {% else %}
+    {% include "/popups/page/popup_student.html" %}
     {% endif %}
+  </template>
+
+  <header id="header_page" class="page__container--header header_hidden hidden">
+    <h1 class="text--header">BussTup</h1>
+    <div class="page__container--icon">
+      <i class="bi bi-person-circle page__icon animate first" onclick="closeInterface('page_user', 'profile_user')"></i>
+    </div>
+  </header>
+
+  <main id="content_page" class="page__container--content scroll_horizontal not_overflow content_noBorder">
+    <section id="aba_agenda" class="page__container--aba">
+      <div id="not_line_agenda" class="inactive">
+        Você não possui uma linha
+      </div>
+
+      <div id="area_agenda" class="page__container column">
+        <div class="page__container title -enter-">
+          <h1 id="nome_linha" class="text principal">Nome da linha</h1>
+          <h1 class="text principal">~</h1>
+          <h1 id="cidade_linha" class="text principal">Cidade</h1>
+        </div>
+
+        {% if role == 'aluno' %}
+        <h1 class="text title -enter-">Meu ponto</h1>
+        <div class="page__container -enter-">
+          <p class="text secundario emphasis">Motorista</p>
+          <p id="motorista_nome" class="text secundario content fundo">Nome do motorista</p>
+        </div>
+
+        <div class="-enter-">
+          <div class="page__container pos_relative">
+            <p class="text secundario emphasis">Ponto</p>
+            <p id="nome_ponto" class="text secundario emphasis max_width">Nome do ponto</p>
+            <i class="bi bi-pencil-square page__icon content absolute" onclick="open_popup('edit_ponto')"></i>
+          </div>
+
+          <div class="page__container space_itens">
+            <p class="text secundario emphasis">Ordem</p>
+            <p id="ordem_ponto" class="text secundario content fundo">1</p>
+            <p class="text secundario emphasis">Horário</p>
+            <p id="horario_ponto" class="text secundario content fundo">07h</p>
+            <p class="text secundario emphasis">Localização</p>
+            <i id="localizacao_ponto" class="bi bi-pin-map page__icon content location"></i>
+          </div>
+        </div>
+
+        <h1 class="text title -enter-">Minha semana</h1>
+        <div id="minha_semana">
+          <div class="page__container -enter-">
+            <p class="text secundario fundo">Tickets restantes:</p>
+            <p id="quant_tickets" class="text secundario content fundo">Em breve</p>
+          </div>
+
+          <div class="page__container -enter-">
+            <p class="text secundario fundo">Contraturno fixo:</p>
+            <p id="contaturnos_fixos" class="text secundario content fundo">Nenhum</p>
+            <i class="bi bi-pencil-square page__icon content" onclick="open_popup('edit_contraturno')"></i>
+          </div>
+
+          <div class="page__container scroll_horizontal -enter-">
+            {% for index in range(5) %}
+            <div class="page__container--card hidden" onclick="open_popup('edit_dia', this)">
+              <div class="page__container--card_title pos_relative">
+                <h1 class="text terciario">{{ dias_semana[index] }}</h1>
+                <i class="bi bi-pencil-square page__icon card"></i>
+              </div>
+
+              <div class="page__container--card_body">
+                <div class="page__container">
+                  <p class="text terciario">Data:</p>
+                  <p id="data_{{ dias_semana[index] }}" class="text terciario content">27/11/2023</p>
+                </div>
+
+                <div class="page__container">
+                  <p class="text terciario">Irá faltar:</p>
+                  <p id="falta_{{ dias_semana[index] }}" class="text terciario content">Não</p>
+                </div>
+
+                <div class="page__container">
+                  <p class="text terciario">Contraturno:</p>
+                  <p id="contraturno_{{ dias_semana[index] }}" class="text terciario content">Não</p>
+                </div>
+
+                <div class="page__container inactive">
+                  <p class="text terciario">Ponto subida:</p>
+                  <p id="pSubida_{{ dias_semana[index] }}" class="text terciario content"></p>
+                </div>
+
+                <div class="page__container inactive">
+                  <p class="text terciario">Ponto descida:</p>
+                  <p id="pDescida_{{ dias_semana[index] }}" class="text terciario content"></p>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <h1 class="text title -enter-">Previsão do ônibus</h1>
+        <p class="text secundario justify emphasis -enter-">O recurso de previsão ainda está em desenvolvimento.</p>
+        <p class="text secundario justify fundo -enter-">Estamos trabalhando para oferecer informações precisas e em
+          tempo real.</p>
+      </div>
+    </section>
+
+    <section id="aba_rota" class="page__container--aba">
+      <div id="area_rota" class="page__container column inactive">
+        {% if role == 'motorista' %}
+        <div class="page__container title -enter-">
+          <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
+          <h1 class="text principal">></h1>
+          <h1 class="text principal">Rotas</h1>
+        </div>
+
+        <h2 class="text title -enter-">Minhas rotas</h2>
+        <div id="minhas_rota">
+          <div id="sem_veiculo" class="-enter-">
+            <p class="text secundario emphasis">Você não possui relação com nenhum veículo.</p>
+            <p class="text secundario fundo">Defina um veículo para conseguir iniciar um trajeto:</p>
+            <div class="page__container justify">
+              <div class="page__btn_redirect" onclick="">
+                <i class="bi bi-box-arrow-up-right page__icon_redirect"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="sem_rota" class="inactive">
+            <p class="text secundario emphasis">Seu veículo não possui nenhuma rota definida.</p>
+            <p class="text secundario fundo">Crie uma rota para conseguir iniciar um trajeto:</p>
+            <div class="page__container justify">
+              <div class="page__btn_redirect" onclick="">
+                <i class="bi bi-box-arrow-up-right page__icon_redirect"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="minha_rota_area" class="-enter-"></div>
+          <h1 class="page__division -enter-"></h1>
+        </div>
+
+        {% else %}
+        <div class="page__container title -enter-">
+          <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
+          <h1 class="text principal">></h1>
+          <h1 class="text principal">Rota</h1>
+        </div>
+        <h2 class="text title -enter-">Minha rota</h2>
+        <div id="minha_rota_area" class="-enter-"></div>
+        <h1 class="page__division -enter-"></h1>
+        {% endif %}
+
+        {% for index in range(3) %}
+        <div id="rotas_{{ turnos[index] }}">
+          <h2 class="text title -enter-">{{ turnos[index] }}</h2>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="aba_linhas" class="page__container--aba">
+      <div id="area_linhas" class="page__container column inactive">
+        <div class="page__container title -enter-">
+          <h1 class="text principal">Linhas</h1>
+        </div>
+
+        {% if role == 'motorista' %}
+        <h2 class="text title big_space -enter-">Minhas linhas</h2>
+        <div id="minha_linha_area" class="-enter-"></div>
+
+        <div id="msg_criar_linha" class="-enter-">
+          <p class="text secundario emphasis">Você ainda não está relacionado a nenhuma linha.</p>
+          <p class="text secundario fundo">Solicite entrada em alguma linha ou crie a sua:</p>
+          <div class="page__container--line selected">
+            <i class="bi bi-plus-lg page__icon--box plus" onclick="open_popup('create_line')"></i>
+          </div>
+        </div>
+        <h1 class="page__division -enter-"></h1>
+        <div id="msg_solicitar_entrada" class="page__container">
+          <p class="text secundario fundo -enter-">Solicite entrada:</p>
+        </div>
+        {% endif %}
+
+        <div id="local_linhas"></div>
+      </div>
+    </section>
+
+    <section id="aba_chat" class="page__container--aba">
+      <div id="area_chat" class="page__container column inactive">
+        <div class="page__container title -enter-">
+          <h1 id="area_chat_nome_linha" class="text principal">Nome da linha</h1>
+          <h1 class="text principal">></h1>
+          <h1 class="text principal">Chat</h1>
+        </div>
+
+        <h2 class="text title -enter-">Aviso</h2>
+        <p class="text secundario justify emphasis -enter-">O recurso de chat ainda está em desenvolvimento</p>
+        <p class="text secundario justify fundo -enter-">Estamos trabalhando para permitir uma linha de comunicação
+          estável para todos os usuários.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav id="nav_page" class="page__container--buttom nav_hidden">
+    <div class="page__btn">
+      <i id="agenda" class="bi bi-journal-text page__icon--btn" onclick="replaceAba(this)"></i>
+    </div>
+
+    <div class="page__btn">
+      <i id="rota" class="bi bi-geo-alt page__icon--btn" onclick="replaceAba(this)"></i>
+    </div>
+
+    <div class="page__btn">
+      <i id="linhas" class="bi bi-bus-front page__icon--btn" onclick="replaceAba(this)"></i>
+    </div>
+
+    <div class="page__btn">
+      <i id="chat" class="bi bi-chat-dots page__icon--btn" onclick="replaceAba(this)"></i>
+    </div>
+  </nav>
+  <div id="popup_local"></div>
+
+  <script>
+    window.info_page = {
+      'header': document.getElementById('header_page'),
+      'content': document.getElementById('content_page'),
+      'nav': document.getElementById('nav_page'),
+    }
+  </script>
+  <script src="/static/js/interface.js"></script>
+  <script src="/static/js/interaction.js"></script>
+  <script src="/static/js/page/index.js"></script>
+  {% if role == 'motorista' %}
+  <script src="/static/js/page/driver/edition_driver.js"></script>
+  {% endif %}
 </body>
+
 </html>

@@ -115,16 +115,16 @@ def edit_linha_valor():
 @roles_required("motorista")
 def edit_vehicle():
     data = request.get_json()
-    if data and 'field' in data and 'new_value' in data and 'name_line' in data and 'plate' in data:
+    if data and 'field' in data and 'new_value' in data and 'name_line' in data and 'surname' in data:
         field = data['field']; new_value = data['new_value']
-        not_modify = ['placa', 'Linha_codigo', 'Motorista_id']
+        not_modify = ['id', 'Linha_codigo', 'Motorista_id']
 
-        if field and field not in not_modify and new_value and data['plate']:
+        if field and field not in not_modify and new_value and data['surname']:
             linha = Linha.query.filter_by(nome=data['name_line']).first()
             code_line = linha.codigo if linha else None
 
             relationship = return_relationship(code_line)
-            vehicle = Onibus.query.filter_by(Linha_codigo=code_line, placa=data['plate']).first() if relationship else False
+            vehicle = Onibus.query.filter_by(Linha_codigo=code_line, apelido=data['surname']).first() if relationship else False
 
             if vehicle:
                 if relationship == 'membro':
@@ -134,7 +134,7 @@ def edit_vehicle():
                                 try:
                                     vehicle.Motorista_id = None
                                     db.session.commit()
-                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você não possui mais relação com <strong>{vehicle.placa}</strong>.'}) 
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você não possui mais relação com <strong>{vehicle.apelido}</strong>.'}) 
                                 
                                 except Exception as e:
                                     db.session.rollback()
@@ -148,7 +148,7 @@ def edit_vehicle():
                                 try:
                                     vehicle.Motorista_id = current_user.primary_key
                                     db.session.commit()
-                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido como condutor de <strong>{vehicle.placa}</strong>.'})
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido como condutor de <strong>{vehicle.apelido}</strong>.'})
                                 
                                 except Exception as e:
                                     db.session.rollback()
@@ -191,9 +191,9 @@ def edit_vehicle():
                             
                                 if new_value:
                                     if motorista.id == current_user.primary_key:
-                                        return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido(a) como condutor(a) de <strong>{vehicle.placa}</strong>.'})
-                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'{motorista.nome} foi definido(a) como condutor(a) de <strong>{vehicle.placa}</strong>.'}) 
-                                return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'O condutor de <strong>{vehicle.placa}</strong> foi definido como: <strong>Nenhum</strong>.'}) 
+                                        return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido(a) como condutor(a) de <strong>{vehicle.apelido}</strong>.'})
+                                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'{motorista.nome} foi definido(a) como condutor(a) de <strong>{vehicle.apelido}</strong>.'}) 
+                                return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'O condutor de <strong>{vehicle.apelido}</strong> foi definido como: <strong>Nenhum</strong>.'}) 
                             
                             except Exception as e:
                                 db.session.rollback()
@@ -248,7 +248,7 @@ def edit_point():
 @roles_required("motorista")
 def edit_route():
     data = request.get_json()
-    if data and 'name_line' in data and 'plate' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
+    if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
         permission = check_permission(data)
         if permission == 'autorizado' and 'field' in data and 'new_value' in data:
             not_modify = ['codigo', 'Linha_codigo', 'em_partida', 'em_retorno']
@@ -256,10 +256,11 @@ def edit_route():
             new_value = data['new_value']
             hr_par = data['time_par']
             hr_ret = data['time_ret']
-            plate = data['plate']
+            surname = data['surname']
 
-            if field and field not in not_modify and new_value and hr_par and hr_ret and plate:
-                rota = return_route(data['Linha_codigo'], plate, data['shift'], hr_par, hr_ret, data['pos'])
+            if field and field not in not_modify and new_value and hr_par and hr_ret and surname:
+                vehicle = Onibus.query.filter_by(Linha_codigo=data['Linha_codigo'], apelido=data['surname']).first()
+                rota = return_route(data['Linha_codigo'], surname, data['shift'], hr_par, hr_ret, data['pos'])
                 
                 if rota is not None:
                     if not rota:
@@ -270,19 +271,19 @@ def edit_route():
                             return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'O turno definido não está presente entre as opções disponíveis.'})
                         
                     elif field == 'onibus':
-                        field = 'Onibus_placa'
+                        field = 'Onibus_id'
                         if new_value != 'Nenhum':
-                            if not Onibus.query.filter_by(placa=new_value, Linha_codigo=data['Linha_codigo']).first():
-                                return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Não foi possível identificar um veículo com esta placa em sua linha.'})
+                            if not Onibus.query.filter_by(apelido=new_value, Linha_codigo=data['Linha_codigo']).first():
+                                return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Não foi possível identificar um veículo com este apelido em sua linha.'})
                             
                             elif check_times(new_value, [hr_par, hr_ret]):
                                 return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': f'Identificamos a possibilidade de um conflito de horários nesta rota com outra rota já definida para <strong>{new_value}</strong>. A ação não pôde ser concluída.'})
                             
                         else: new_value = None
                     
-                    elif plate and (field == 'horario_partida' or field == 'horario_retorno'):
-                        if check_times(plate, [new_value]):
-                            return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': f'Identificamos a possibilidade de um conflito de horários nesta rota com outra rota já definida para <strong>{plate}</strong>. A ação não pôde ser concluída.'})
+                    elif field == 'horario_partida' or field == 'horario_retorno':
+                        if check_times(vehicle.id if vehicle else False, [new_value]):
+                            return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': f'Identificamos a possibilidade de um conflito de horários nesta rota com outra rota já definida para <strong>{vehicle.apelido}</strong>. A ação não pôde ser concluída.'})
                     
                     if hasattr(rota, field):
                         try:
@@ -302,18 +303,18 @@ def edit_route():
 @roles_required("motorista")
 def edit_relationship_ponto():
     data = request.get_json()
-    if data and 'name_line' in data and 'plate' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
+    if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
         permission = check_permission(data)
         if permission == 'autorizado' and 'field' in data and 'new_value' in data and 'type' in data and 'name_point' in data:
             field = data['field']
             new_value = data['new_value']
-            plate = data['plate']
+            surname = data['surname']
             shift = data['shift']
             time_par = data['time_par']
             time_ret = data['time_ret']
 
-            if field and field == 'horario_passagem' and new_value and plate and shift and time_par and time_ret:
-                rota = return_route(data['Linha_codigo'], plate, shift, time_par, time_ret, data['pos'])
+            if field and field == 'horario_passagem' and new_value and surname and shift and time_par and time_ret:
+                rota = return_route(data['Linha_codigo'], surname, shift, time_par, time_ret, data['pos'])
                 if rota is not None:
                     if not rota:
                         return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
@@ -347,15 +348,15 @@ def edit_relationship_ponto():
 @roles_required("motorista")
 def edit_order_stop():
     data = request.get_json()
-    if data and 'name_line' in data and 'plate' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
+    if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
         permission = check_permission(data)
         hr_par = data['time_par']
         hr_ret = data['time_ret']
-        plate = data['plate']
+        surname = data['surname']
         shift = data['shift']
 
-        if permission == 'autorizado' and hr_par and hr_ret and plate and shift and 'partida' in data and 'retorno' in data:
-            rota = return_route(data['Linha_codigo'], plate, shift, hr_par, hr_ret, data['pos'])
+        if permission == 'autorizado' and hr_par and hr_ret and surname and shift and 'partida' in data and 'retorno' in data:
+            rota = return_route(data['Linha_codigo'], surname, shift, hr_par, hr_ret, data['pos'])
             if rota is not None:
                 if rota:
                     try:

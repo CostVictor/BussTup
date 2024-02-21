@@ -1,297 +1,320 @@
 <section id="config_usuario" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 id="config_usuario_nome" class="popup__title">Configurações</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 id="config_usuario_nome" class="popup__title">Configurações</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <div class="perfil__container--justify margin_top">
-                <div class="line__container--btn margin_bottom add aba" onclick="open_popup('trocar_nome')">
-                    <p class="line__text">Trocar meu nome de exibição</p>
-                </div>
-            </div>
-
-            <div class="perfil__container--justify">
-                <div class="line__container--btn margin_bottom add aba" onclick="open_popup('trocar_login')">
-                    <p class="line__text">Trocar meu usuário de login</p>
-                </div>
-            </div>
-
-            <div class="perfil__container--justify">
-                <div class="line__container--btn add aba" onclick="open_popup('trocar_senha')">
-                    <p class="line__text">Trocar minha senha</p>
-                </div>
-            </div>
-
-            <span style="display: flex; justify-content: center;">
-                <h1 class="perfil__division popup"></h1>
-            </span>
-
-            <div class="perfil__container--justify">
-                <div class="line__container--btn del margin_bottom aba" onclick="open_popup('deletar_conta')">
-                    <p class="line__text remove">Deletar minha conta</p>
-                </div>
-            </div>
+    <div class="popup__container--content">
+      <div class="perfil__container--justify margin_top">
+        <div class="line__container--btn margin_bottom add aba" onclick="open_popup('trocar_nome')">
+          <p class="line__text">Trocar meu nome de exibição</p>
         </div>
+      </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn" onclick="close_popup('config_usuario')">Fechar</button>
-        </footer>
+      <div class="perfil__container--justify">
+        <div class="line__container--btn margin_bottom add aba" onclick="open_popup('trocar_login')">
+          <p class="line__text">Trocar meu usuário de login</p>
+        </div>
+      </div>
+
+      <div class="perfil__container--justify">
+        <div class="line__container--btn add aba" onclick="open_popup('trocar_senha')">
+          <p class="line__text">Trocar minha senha</p>
+        </div>
+      </div>
+
+      <span style="display: flex; justify-content: center;">
+        <h1 class="perfil__division popup"></h1>
+      </span>
+
+      <div class="perfil__container--justify">
+        <div class="line__container--btn del margin_bottom aba" onclick="open_popup('deletar_conta')">
+          <p class="line__text remove">Deletar minha conta</p>
+        </div>
+      </div>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_popup('config_usuario')">Fechar</button>
+    </footer>
+  </div>
 </section>
 
 
 <section id="edit_email" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Editar e-mail</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Editar e-mail</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <h2 class="popup__text">Digite o e-mail:</h2>
-            <form id="formulario_edit_email" class="form__container--card max_width"  onsubmit="editData_profile(this)">
-                <div class="form__container--input first">
-                    <input id="edit_email_new" class="form__input white input_notIcon" type="email" required>
-                    <label class="form__label intense label_notIcon" for="edit_email_new">E-mail</label>
-                </div>
-
-                <h1 class="perfil__division"></h1>
-                <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
-                <div class="form__container--input first">
-                    <input id="edit_email_conf" class="form__input input_password white input_notIcon" type="password" required>
-                    <i id="edit_email_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                    <label class="form__label intense label_notIcon" for="edit_email_conf">Senha de confirmação</label>
-                </div>
-            </form>
+    <div class="popup__container--content">
+      <h2 class="popup__text">Digite o e-mail:</h2>
+      <form id="formulario_edit_email" class="form__container--card max_width" onsubmit="editData_profile(this)">
+        <div class="form__container--input first">
+          <input id="edit_email_new" class="form__input white input_notIcon" type="email" required>
+          <label class="form__label intense label_notIcon" for="edit_email_new">E-mail</label>
         </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('edit_email')">Cancelar</button>
-            <button class="popup__btn" onclick="submit('formulario_edit_email')">Alterar</button>
-        </footer>
+        <h1 class="perfil__division"></h1>
+        <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
+        <div class="form__container--input first">
+          <input id="edit_email_conf" class="form__input input_password white input_notIcon" type="password" required>
+          <i id="edit_email_btn_password" class="bi bi-eye-fill form__btn--password white"
+            onclick="animateIconPassword(this)"></i>
+          <label class="form__label intense label_notIcon" for="edit_email_conf">Senha de confirmação</label>
+        </div>
+      </form>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('edit_email')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_edit_email')">Alterar</button>
+    </footer>
+  </div>
 </section>
 
 
 <section id="edit_telefone" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Editar telefone</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Editar telefone</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <h2 class="popup__text">Digite o novo telefone:</h2>
-            <form id="formulario_edit_telefone" class="form__container--card max_width" method="patch"  onsubmit="editData_profile(this)">
-                <div class="form__container--input first">
-                    <input id="edit_telefone_new" class="form__input white input_notIcon format_tell" type="text" minlength="15" required>
-                    <label class="form__label intense label_notIcon" for="edit_telefone_new">Telefone</label>
-                </div>
-
-                <h1 class="perfil__division"></h1>
-                <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
-                <div class="form__container--input first">
-                    <input id="edit_telefone_conf" class="form__input input_password white input_notIcon" type="password" required>
-                    <i id="edit_telefone_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                    <label class="form__label intense label_notIcon" for="edit_telefone_conf">Senha de confirmação</label>
-                </div>
-            </form>
+    <div class="popup__container--content">
+      <h2 class="popup__text">Digite o novo telefone:</h2>
+      <form id="formulario_edit_telefone" class="form__container--card max_width" method="patch"
+        onsubmit="editData_profile(this)">
+        <div class="form__container--input first">
+          <input id="edit_telefone_new" class="form__input white input_notIcon format_tell" type="text" minlength="15"
+            required>
+          <label class="form__label intense label_notIcon" for="edit_telefone_new">Telefone</label>
         </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('edit_telefone')">Cancelar</button>
-            <button class="popup__btn" onclick="submit('formulario_edit_telefone')">Alterar</button>
-        </footer>
+        <h1 class="perfil__division"></h1>
+        <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
+        <div class="form__container--input first">
+          <input id="edit_telefone_conf" class="form__input input_password white input_notIcon" type="password"
+            required>
+          <i id="edit_telefone_btn_password" class="bi bi-eye-fill form__btn--password white"
+            onclick="animateIconPassword(this)"></i>
+          <label class="form__label intense label_notIcon" for="edit_telefone_conf">Senha de confirmação</label>
+        </div>
+      </form>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('edit_telefone')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_edit_telefone')">Alterar</button>
+    </footer>
+  </div>
 </section>
 
 
 {% if role == 'motorista' %}
 <section id="edit_pix" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Editar chave pix</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Editar chave pix</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <h2 class="popup__text">Digite a chave do pix:</h2>
-            <form id="formulario_edit_pix" class="form__container--card max_width" method="post" onsubmit="editData_profile(this)">
-                <div class="form__container--input first">
-                    <input id="edit_pix_new" class="form__input white input_notIcon" type="text" required>
-                    <label class="form__label intense label_notIcon" for="edit_pix_new">Chave pix</label>
-                </div>
-
-                <h1 class="perfil__division"></h1>
-                <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
-                <div class="form__container--input first">
-                    <input id="edit_pix_conf" class="form__input input_password white input_notIcon" type="password" required>
-                    <i id="edit_pix_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                    <label class="form__label intense label_notIcon" for="edit_pix_conf">Senha de confirmação</label>
-                </div>
-            </form>
+    <div class="popup__container--content">
+      <h2 class="popup__text">Digite a chave do pix:</h2>
+      <form id="formulario_edit_pix" class="form__container--card max_width" method="post"
+        onsubmit="editData_profile(this)">
+        <div class="form__container--input first">
+          <input id="edit_pix_new" class="form__input white input_notIcon" type="text" required>
+          <label class="form__label intense label_notIcon" for="edit_pix_new">Chave pix</label>
         </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('edit_pix')">Cancelar</button>
-            <button class="popup__btn" onclick="submit('formulario_edit_pix')">Alterar</button>
-        </footer>
+        <h1 class="perfil__division"></h1>
+        <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
+        <div class="form__container--input first">
+          <input id="edit_pix_conf" class="form__input input_password white input_notIcon" type="password" required>
+          <i id="edit_pix_btn_password" class="bi bi-eye-fill form__btn--password white"
+            onclick="animateIconPassword(this)"></i>
+          <label class="form__label intense label_notIcon" for="edit_pix_conf">Senha de confirmação</label>
+        </div>
+      </form>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('edit_pix')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_edit_pix')">Alterar</button>
+    </footer>
+  </div>
 </section>
 {% endif %}
 
 
 <section id="trocar_nome" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Trocar meu nome</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Trocar meu nome</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <form id="formulario_trocar_nome" class="form__container--card max_width" method="post" onsubmit="editData_profile(this)">
-                <div class="form__container--input first">
-                    <input id="trocar_nome_new" class="form__input white input_notIcon format_name" type="text" required>
-                    <label class="form__label intense label_notIcon" for="trocar_nome_new">Novo nome</label>
-                </div>
-    
-                <h1 class="perfil__division"></h1>
-                <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
-                <div class="form__container--input first">
-                    <input id="trocar_nome_conf" class="form__input input_password white input_notIcon" type="password" required>
-                    <i id="trocar_nome_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                    <label class="form__label intense label_notIcon" for="trocar_nome_conf">Senha de confirmação</label>
-                </div>
-            </form>
+    <div class="popup__container--content">
+      <form id="formulario_trocar_nome" class="form__container--card max_width" method="post"
+        onsubmit="editData_profile(this)">
+        <div class="form__container--input first">
+          <input id="trocar_nome_new" class="form__input white input_notIcon format_name" type="text" required>
+          <label class="form__label intense label_notIcon" for="trocar_nome_new">Novo nome</label>
         </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('trocar_nome')">Cancelar</button>
-            <button class="popup__btn" onclick="submit('formulario_trocar_nome')">Alterar</button>
-        </footer>
+        <h1 class="perfil__division"></h1>
+        <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
+        <div class="form__container--input first">
+          <input id="trocar_nome_conf" class="form__input input_password white input_notIcon" type="password" required>
+          <i id="trocar_nome_btn_password" class="bi bi-eye-fill form__btn--password white"
+            onclick="animateIconPassword(this)"></i>
+          <label class="form__label intense label_notIcon" for="trocar_nome_conf">Senha de confirmação</label>
+        </div>
+      </form>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('trocar_nome')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_trocar_nome')">Alterar</button>
+    </footer>
+  </div>
 </section>
 
 
 <section id="trocar_login" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Trocar meu login</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Trocar meu login</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <form id="formulario_trocar_login" class="form__container--card max_width" method="post" onsubmit="editData_profile(this)">
-                <div class="form__container--input first">
-                    <input id="trocar_login_new" class="form__input white input_notIcon format_name" type="text" required>
-                    <label class="form__label intense label_notIcon" for="trocar_login_new">Novo login</label>
-                </div>
-    
-                <h1 class="perfil__division"></h1>
-                <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
-                <div class="form__container--input first">
-                    <input id="trocar_login_conf" class="form__input input_password white input_notIcon" type="password" required>
-                    <i id="trocar_login_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                    <label class="form__label intense label_notIcon" for="trocar_login_conf">Senha de confirmação</label>
-                </div>
-            </form>
+    <div class="popup__container--content">
+      <form id="formulario_trocar_login" class="form__container--card max_width" method="post"
+        onsubmit="editData_profile(this)">
+        <div class="form__container--input first">
+          <input id="trocar_login_new" class="form__input white input_notIcon format_name" type="text" required>
+          <label class="form__label intense label_notIcon" for="trocar_login_new">Novo login</label>
         </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('trocar_login')">Cancelar</button>
-            <button class="popup__btn" onclick="submit('formulario_trocar_login')">Alterar</button>
-        </footer>
+        <h1 class="perfil__division"></h1>
+        <h3 class="popup__text info space">Confirme a alteração com sua senha:</h3>
+        <div class="form__container--input first">
+          <input id="trocar_login_conf" class="form__input input_password white input_notIcon" type="password" required>
+          <i id="trocar_login_btn_password" class="bi bi-eye-fill form__btn--password white"
+            onclick="animateIconPassword(this)"></i>
+          <label class="form__label intense label_notIcon" for="trocar_login_conf">Senha de confirmação</label>
+        </div>
+      </form>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('trocar_login')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_trocar_login')">Alterar</button>
+    </footer>
+  </div>
 </section>
 
 
 <section id="trocar_senha" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Trocar minha senha</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Trocar minha senha</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <form id="formulario_trocar_senha" class="form__container--card max_width" method="post" onsubmit="editData_profile(this)">
-                <div class="form__container--input first">
-                    <input id="trocar_senha_new" class="form__input input_password white input_notIcon" type="password" required>
-                    <i id="trocar_senha_new_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                    <label class="form__label intense label_notIcon" for="trocar_senha_new">Nova senha</label>
-                </div>
-    
-                <h1 class="perfil__division"></h1>
-                <h3 class="popup__text info space">Confirme a alteração com sua senha atual:</h3>
-                <div class="form__container--input first">
-                    <input id="trocar_senha_conf" class="form__input input_password white input_notIcon" type="password" required>
-                    <i id="trocar_senha_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                    <label class="form__label intense label_notIcon" for="trocar_senha_conf">Senha de confirmação</label>
-                </div>
-            </form>
+    <div class="popup__container--content">
+      <form id="formulario_trocar_senha" class="form__container--card max_width" method="post"
+        onsubmit="editData_profile(this)">
+        <div class="form__container--input first">
+          <input id="trocar_senha_new" class="form__input input_password white input_notIcon" type="password" required>
+          <i id="trocar_senha_new_btn_password" class="bi bi-eye-fill form__btn--password white"
+            onclick="animateIconPassword(this)"></i>
+          <label class="form__label intense label_notIcon" for="trocar_senha_new">Nova senha</label>
         </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('trocar_senha')">Cancelar</button>
-            <button class="popup__btn" onclick="submit('formulario_trocar_senha')">Alterar</button>
-        </footer>
+        <h1 class="perfil__division"></h1>
+        <h3 class="popup__text info space">Confirme a alteração com sua senha atual:</h3>
+        <div class="form__container--input first">
+          <input id="trocar_senha_conf" class="form__input input_password white input_notIcon" type="password" required>
+          <i id="trocar_senha_btn_password" class="bi bi-eye-fill form__btn--password white"
+            onclick="animateIconPassword(this)"></i>
+          <label class="form__label intense label_notIcon" for="trocar_senha_conf">Senha de confirmação</label>
+        </div>
+      </form>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('trocar_senha')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_trocar_senha')">Alterar</button>
+    </footer>
+  </div>
 </section>
 
 
 <section id="confirm_logout" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Sair da conta</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Sair da conta</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <p class="popup__text justify">Tem certeza de que deseja sair da sua conta?</p>
-        </div>
-
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('confirm_logout')">Cancelar</button>
-            <button class="popup__btn" onclick="closeInterface('profile', 'login', ['', true])">Sair</button>
-        </footer>
+    <div class="popup__container--content">
+      <p class="popup__text justify">Tem certeza de que deseja sair da sua conta?</p>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('confirm_logout')">Cancelar</button>
+      <button class="popup__btn" onclick="closeInterface('profile', 'login', ['', true])">Sair</button>
+    </footer>
+  </div>
 </section>
 
 
 <section id="deletar_conta" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Deletar minha conta</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Deletar minha conta</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <p class="popup__text justify">Você está prestes a excluir permanentemente sua conta. Ao fazê-lo, observe que todos os dados e informações associadas à sua conta serão removidos de forma irrecuperável. Além disso, quaisquer gastos vinculados à sua conta serão perdidos sem a possibilidade de recuperação. Esta ação é irreversível.</p>
-        </div>
-
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('deletar_conta')">Cancelar</button>
-            <button class="popup__btn" onclick="open_popup('termo_concordancia_excusao')">Proseguir</button>
-        </footer>
+    <div class="popup__container--content">
+      <p class="popup__text justify">Você está prestes a excluir permanentemente sua conta. Ao fazê-lo, observe que
+        todos os dados e informações associadas à sua conta serão removidos de forma irrecuperável. Além disso,
+        quaisquer gastos vinculados à sua conta serão perdidos sem a possibilidade de recuperação. Esta ação é
+        irreversível.</p>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('deletar_conta')">Cancelar</button>
+      <button class="popup__btn" onclick="open_popup('termo_concordancia_excusao')">Proseguir</button>
+    </footer>
+  </div>
 </section>
 
 
 <section id="termo_concordancia_excusao" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header">
-            <h1 class="popup__title">Termo de Exclusão de Conta</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Termo de Exclusão de Conta</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <p class="popup__text justify">Ao clicar em "Excluir", você concorda que todos os dados, informações e quaisquer gastos associados à sua conta serão permanentemente removidos e não poderão ser recuperados. Esta ação implica na perda irreversível de todos os dados armazenados, bem como de quaisquer valores ou gastos relacionados à sua conta. Certifique-se de estar ciente das consequências antes de prosseguir com esta ação.</p>
+    <div class="popup__container--content">
+      <p class="popup__text justify">Ao clicar em "Excluir", você concorda que todos os dados, informações e quaisquer
+        gastos associados à sua conta serão permanentemente removidos e não poderão ser recuperados. Esta ação implica
+        na perda irreversível de todos os dados armazenados, bem como de quaisquer valores ou gastos relacionados à sua
+        conta. Certifique-se de estar ciente das consequências antes de prosseguir com esta ação.</p>
 
-            <h1 class="perfil__division"></h1>
-            <form id="formulario_termo_concordancia_excusao" class="form__container--card max_width" method="post">
-                <h3 class="popup__text info space">Confirme a exclusão com sua senha:</h3>
-                <div class="form__container--input first">
-                    <input id="termo_concordancia_excusao_conf" class="form__input input_password white input_notIcon" type="password" required>
-                    <i id="termo_concordancia_excusao_btn_password" class="bi bi-eye-fill form__btn--password white" onclick="animateIconPassword(this)"></i>
-                    <label class="form__label intense label_notIcon" for="termo_concordancia_excusao_conf">Senha de confirmação</label>
-                </div>
-            </form>
+      <h1 class="perfil__division"></h1>
+      <form id="formulario_termo_concordancia_excusao" class="form__container--card max_width" method="post">
+        <h3 class="popup__text info space">Confirme a exclusão com sua senha:</h3>
+        <div class="form__container--input first">
+          <input id="termo_concordancia_excusao_conf" class="form__input input_password white input_notIcon"
+            type="password" required>
+          <i id="termo_concordancia_excusao_btn_password" class="bi bi-eye-fill form__btn--password white"
+            onclick="animateIconPassword(this)"></i>
+          <label class="form__label intense label_notIcon" for="termo_concordancia_excusao_conf">Senha de
+            confirmação</label>
         </div>
-
-        <footer class="popup__container--footer">
-            <button class="popup__btn cancel" onclick="close_popup('termo_concordancia_excusao')">Cancelar</button>
-            <button class="popup__btn">Excluir</button>
-        </footer>
+      </form>
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('termo_concordancia_excusao')">Cancelar</button>
+      <button class="popup__btn">Excluir</button>
+    </footer>
+  </div>
 </section>

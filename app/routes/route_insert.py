@@ -69,22 +69,22 @@ def create_line():
 def create_vehicle():
     data = request.get_json()
     permission = check_permission(data)
-    if permission == 'autorizado' and 'placa' in data and 'motorista_nome' in data:
+    if permission == 'autorizado' and 'surname' in data and 'motorista_nome' in data:
         motorista_nome = data.pop('motorista_nome')
-        verify_placa = Onibus.query.filter_by(placa=data['placa']).first()
+        verify_surname = Onibus.query.filter_by(apelido=data['surname'], Linha_codigo=data['Linha_codigo']).first()
         
         if motorista_nome != 'Nenhum':
             subquery = db.session.query(Membro.Motorista_id).filter(Membro.Linha_codigo == data['Linha_codigo']).subquery()
-            motoria_id = db.session.query(Motorista.id).filter(
+            motorista_id = db.session.query(Motorista.id).filter(
                 db.and_(
                     Motorista.nome == motorista_nome,
                     Motorista.id.in_(subquery.select())
                 )
             ).all()
             
-            if not verify_placa:
-                if motoria_id and len(motoria_id) == 1:
-                    data['Motorista_id'] = motoria_id[0].id
+            if not verify_surname:
+                if motorista_id and len(motorista_id) == 1:
+                    data['Motorista_id'] = motorista_id[0].id
                     check_not_dis = Onibus.query.filter_by(Motorista_id=data['Motorista_id'], Linha_codigo=data['Linha_codigo']).first()
 
                     report = False
@@ -98,7 +98,7 @@ def create_vehicle():
                         db.session.commit()
 
                         if report:
-                            if motoria_id[0].id == current_user.primary_key:
+                            if motorista_id[0].id == current_user.primary_key:
                                 return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'Ao realizar o cadastro, identificamos que você já possui vínculo com outro veículo nesta linha. O condutor deste veículo foi definido como: <strong>Nenhum</strong>.'})
                             
                             return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'Ao realizar o cadastro, identificamos que o(a) motorista <strong>{motorista_nome}</strong> já possui vínculo com outro veículo. O condutor deste veículo foi definido como: <strong>Nenhum</strong>.'})
@@ -114,7 +114,7 @@ def create_vehicle():
                 else:
                     return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'O cadastro não pôde ser concluído devido à existência de mais de um usuário motorista com o mesmo nome na linha.'})
         else:
-            if not verify_placa:
+            if not verify_surname:
                 onibus = Onibus(**data)
 
                 try:
@@ -127,7 +127,7 @@ def create_vehicle():
                     db.session.rollback()
                     print(f'Erro ao criar o veículo: {str(e)}')
             else:
-                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Identificamos a existência de um veículo cadastrado com a mesma placa em nosso banco de dados. Por favor, revise as informações e tente novamente.'})
+                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Identificamos a existência de um veículo já cadastrado com esse apelido em sua linha. Por favor, escolha um apelido diferente.'})
 
     return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar o veículo.'})   
 
@@ -166,33 +166,34 @@ def create_point():
 @roles_required("motorista")
 def create_route():
     data = request.get_json()
-    if data and 'name_line' in data and 'plate' in data and 'turno' in data and 'codigo' not in data:
+    if data and 'name_line' in data and 'surname' in data and 'turno' in data and 'codigo' not in data:
         permission = check_permission(data)
         if permission == 'autorizado' and 'horario_partida' in data and 'horario_retorno' in data:
-            data['Onibus_placa'] = data.pop('plate')
-            hr_par = data['horario_partida']
-            hr_ret = data['horario_retorno']
+            vehicle = Onibus.query.filter_by(Linha_codigo=data['Linha_codigo'], apelido=data['surname']).first()
+            if vehicle:
+                del data['surname']
+                data['Onibus_id'] = vehicle.id
+                hr_par = data['horario_partida']
+                hr_ret = data['horario_retorno']
 
-            if data['turno'] not in turnos:
-                return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'O turno definido não está presente entre as opções disponíveis.'})
+                if data['turno'] not in turnos:
+                    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'O turno definido não está presente entre as opções disponíveis.'})
 
-            if data['Onibus_placa'] != 'Nenhum':
-                veiculo = Onibus.query.filter_by(Linha_codigo=data['Linha_codigo'], placa=data['Onibus_placa']).first()
-                if veiculo:
-                    if check_times(veiculo.placa, time=[hr_par, hr_ret]):
-                        return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': f'Identificamos a possibilidade de um conflito de horários nesta rota com outra rota já definida para <strong>{veiculo.placa}</strong>. A ação não pôde ser concluída.'})
+                if check_times(vehicle.id, time=[hr_par, hr_ret]):
+                    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': f'Identificamos a possibilidade de um conflito de horários nesta rota com outra rota já definida para <strong>{vehicle.apelido}</strong>. A ação não pôde ser concluída.'})
 
-                    rota = Rota(**data)
-                    try:
-                        db.session.add(rota)
-                        db.session.commit()
+                rota = Rota(**data)
+                try:
+                    db.session.add(rota)
+                    db.session.commit()
 
-                        return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada para o veículo: <strong>{veiculo.placa}</strong>.'})
-                    except Exception as e:
-                        db.session.rollback()
-                        print(f'Erro ao criar a rota: {str(e)}')
+                    return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada para o veículo: <strong>{vehicle.apelido}</strong>.'})
+                except Exception as e:
+                    db.session.rollback()
+                    print(f'Erro ao criar a rota: {str(e)}')
+
             else:
-                del data['Onibus_placa']
+                data['apelido'] = data.pop('surname')
                 rota = Rota(**data)
                 try:
                     db.session.add(rota)
@@ -211,14 +212,14 @@ def create_route():
 @roles_required("motorista")
 def create_stop():
     data = request.get_json()
-    if data and 'name_line' in data and 'name_point' in data and 'plate' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data and 'type' in data:
+    if data and 'name_line' in data and 'name_point' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data and 'type' in data:
         permission = check_permission(data)
         hr_par = data['time_par']; hr_ret = data['time_ret']
-        plate = data['plate']; tipo = data['type']
+        surname = data['surname']; tipo = data['type']
         dis = ['partida', 'retorno']
 
-        if permission == 'autorizado' and tipo in dis and hr_par and hr_ret and plate:
-            rota = return_route(data['Linha_codigo'], plate, data['shift'], hr_par, hr_ret, data['pos'])
+        if permission == 'autorizado' and tipo in dis and hr_par and hr_ret and surname:
+            rota = return_route(data['Linha_codigo'], surname, data['shift'], hr_par, hr_ret, data['pos'])
 
             if rota is not None:
                 if not rota:

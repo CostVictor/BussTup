@@ -1,244 +1,260 @@
 <section id="config_route" class="popup__container--shadow inactive">
-    <span id="config_route_pos" class="inactive"></span>
-    {% if role == 'motorista' %}
-    <span id="config_route_save_order"></span>
-    {% endif %}
-    
-    <div class="popup__container">
-        <header class="popup__container--header pos_relative">
-            <h1 class="popup__title">Rota</h1>
-        </header>
+  <span id="config_route_pos" class="inactive"></span>
+  {% if role == 'motorista' %}
+  <span id="config_route_save_order"></span>
+  {% endif %}
 
-        <div class="popup__container--content">
-            <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
-                <div id="config_route_desativada" class="inactive">
-                    <p class="text info center fundo cinza">Rota desativada</p>
-                    <p class="text info fundo justify margin_top">Apenas usuários motoristas ou alunos que já possuíam vínculo com esta rota podem visualizá-la.</p>
-                    <h1 class="page__division"></h1>
-                </div>
+  <div class="popup__container">
+    <header class="popup__container--header pos_relative">
+      <h1 class="popup__title">Rota</h1>
+    </header>
 
-                {% if role == 'aluno' %}
-                <div id="config_route_aviso_cadastrar" class="inactive">
-                    <p class="text info center fundo cinza">Não vinculado</p>
-                    <p class="text info fundo justify margin_top">Para efetuar o cadastro, selecione os locais desejados para ida e volta na área "Pontos" da rota.</p>
-                    <h1 class="page__division"></h1>
-                </div>
-
-                <div id="config_route_aviso_contraturno" class="inactive">
-                    <p class="text info center fundo cinza">Defina seu contraturno</p>
-                    <p class="text info fundo justify margin_top">Selecione o local a ser utilizado como contraturno na área "Pontos" da rota.</p>
-                    <h1 class="page__division"></h1>
-                </div>
-                {% endif %}
-                
-                <div class="page__container">
-                    <p class="text secundario fundo">Motorista:</p>
-                    <div class="scroll_horizontal">
-                        <p id="config_route_motorista" class="text secundario content fundo nowrap"></p>
-                    </div>
-                </div>
-
-                <div class="page__container">
-                    <p class="text secundario fundo">Ônibus:</p>
-                    <p id="config_route_onibus" class="text secundario content fundo nowrap"></p>
-                    {% if role == 'motorista' %}
-                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_onibus', this)"></i>
-                    {% endif %}
-                </div>
-
-                <div class="page__container">
-                    <p class="text secundario fundo">Turno:</p>
-                    <p id="config_route_turno_rota" class="text secundario content fundo"></p>
-                    {% if role == 'motorista' %}
-                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_turno')"></i>
-                    {% endif %}
-                </div>
-    
-                <div class="page__container">
-                    <p class="text secundario fundo">Horário de partida:</p>
-                    <p id="config_route_horario_partida" class="text secundario content fundo"></p>
-
-                    {% if role == 'motorista' %}
-                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_partida')"></i>
-                    {% endif %}
-                </div>
-
-                <div class="page__container">
-                    <p class="text secundario fundo">Horário de retorno:</p>
-                    <p id="config_route_horario_retorno" class="text secundario content fundo"></p>
-
-                    {% if role == 'motorista' %}
-                    <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_retorno')"></i>
-                    {% endif %}
-                </div>
-
-                {% if role == 'aluno' %}
-                <div class="page__container justify">
-                    <div class="line__container--btn add margin_top" onclick="">
-                        <p class="line__text" onclick="open_popup('indisponivel')">Agendar uma diária</p>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="page__container justify">
-                    <div class="line__container--btn add margin_top" onclick="">
-                        <p class="line__text" onclick="open_popup('indisponivel')">Ver estatística</p>
-                    </div>
-                </div>
-
-                <h3 class="popup__text question">Pontos</h3>
-                <div id="config_route_pontos_container_partida_btn" class="page__container interaction pos_relative" onclick="action_container(this, 50)">
-                    <h3 class="text secundario emphasis">Partida</h3>
-                    <h3 id="config_route_pontos_quantidade_partida" class="text secundario fundo max_width"></h3>
-                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-                </div>
-                
-                <div id="config_route_pontos_container_partida_container" class="page__container column inactive">
-                    <div id="config_route_pontos_partida_area" class="scroll_vertical popup__container--scroll principal sortable margin_top"></div>
-                    
-                    {% if role == 'motorista' %}
-                    <h1 class="page__division inactive"></h1>
-                    <div class="page__container justify inactive">
-                        <div id="config_route_add_partida" class="line__container--btn add margin_bottom" onclick="open_popup('add_point_route', this)">
-                            <i class="bi bi-plus-lg line__icon plus"></i>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div id="config_route_pontos_container_retorno_btn" class="page__container interaction pos_relative" onclick="action_container(this, 50)">
-                    <h3 class="text secundario emphasis">Retorno</h3>
-                    <h3 id="config_route_pontos_quantidade_retorno" class="text secundario fundo max_width"></h3>
-                    <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-                </div>
-                
-                <div id="config_route_pontos_container_retorno_container" class="inactive">
-                    <div id="config_route_pontos_retorno_area" class="scroll_vertical popup__container--scroll principal sortable margin_top"></div>
-                    
-                    {% if role == 'motorista' %}
-                    <h1 class="page__division inactive"></h1>
-                    <div class="page__container justify inactive">
-                        <div id="config_route_add_retorno" class="line__container--btn add margin_bottom" onclick="open_popup('add_point_route', this)">
-                            <i class="bi bi-plus-lg line__icon plus"></i>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-                
-                {% if role == 'aluno' %}
-                <div id="config_route_btn_contraturno" class="page__container justify">
-                    <div class="line__container--btn add margin_top" onclick="">
-                        <p class="line__text">Definir contraturno</p>
-                    </div>
-                </div>
-
-                <div id="config_route_contraturno_container" class="page__container inactive">
-                    <p class="text secundario fundo">Contraturno:</p>
-                    <p id="config_route_contraturno" class="text secundario content fundo"></p>
-                </div>
-
-                {% else %}
-
-                <h1 id="route_division" class="page__division" class="inactive"></h1>
-                <div id="route_del" class="page__container justify inactive">
-                    <div class="line__container--btn remove" onclick="open_popup('del_route', this)">
-                        <i class="bi bi-trash3 line__icon del"></i>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
+    <div class="popup__container--content">
+      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
+        <div id="config_route_desativada" class="inactive">
+          <p class="text info center fundo cinza">Rota desativada</p>
+          <p class="text info fundo justify margin_top">Apenas usuários motoristas ou alunos que já possuíam vínculo com
+            esta rota podem visualizá-la.</p>
+          <h1 class="page__division"></h1>
         </div>
 
-        <footer class="popup__container--footer">
-            {% if role == 'motorista' %}
-            <button class="popup__btn" onclick="save_data_route()">Fechar</button>
-            {% else %}
-            <button class="popup__btn" onclick="check_state()">Fechar</button>
-            {% endif %}
-        </footer>
+        {% if role == 'aluno' %}
+        <div id="config_route_aviso_cadastrar" class="inactive">
+          <p class="text info center fundo cinza">Não vinculado</p>
+          <p class="text info fundo justify margin_top">Para efetuar o cadastro, selecione os locais desejados para ida
+            e volta na área "Pontos" da rota.</p>
+          <h1 class="page__division"></h1>
+        </div>
+
+        <div id="config_route_aviso_contraturno" class="inactive">
+          <p class="text info center fundo cinza">Defina seu contraturno</p>
+          <p class="text info fundo justify margin_top">Selecione o local a ser utilizado como contraturno na área
+            "Pontos" da rota.</p>
+          <h1 class="page__division"></h1>
+        </div>
+        {% endif %}
+
+        <div class="page__container">
+          <p class="text secundario fundo">Motorista:</p>
+          <div class="scroll_horizontal">
+            <p id="config_route_motorista" class="text secundario content fundo nowrap"></p>
+          </div>
+        </div>
+
+        <div class="page__container">
+          <p class="text secundario fundo">Ônibus:</p>
+          <p id="config_route_onibus" class="text secundario content fundo nowrap"></p>
+          {% if role == 'motorista' %}
+          <i class="bi bi-pencil-square page__icon content inactive"
+            onclick="open_popup('edit_route_onibus', this)"></i>
+          {% endif %}
+        </div>
+
+        <div class="page__container">
+          <p class="text secundario fundo">Turno:</p>
+          <p id="config_route_turno_rota" class="text secundario content fundo"></p>
+          {% if role == 'motorista' %}
+          <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_turno')"></i>
+          {% endif %}
+        </div>
+
+        <div class="page__container">
+          <p class="text secundario fundo">Horário de partida:</p>
+          <p id="config_route_horario_partida" class="text secundario content fundo"></p>
+
+          {% if role == 'motorista' %}
+          <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_partida')"></i>
+          {% endif %}
+        </div>
+
+        <div class="page__container">
+          <p class="text secundario fundo">Horário de retorno:</p>
+          <p id="config_route_horario_retorno" class="text secundario content fundo"></p>
+
+          {% if role == 'motorista' %}
+          <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_retorno')"></i>
+          {% endif %}
+        </div>
+
+        {% if role == 'aluno' %}
+        <div class="page__container justify">
+          <div class="line__container--btn add margin_top" onclick="">
+            <p class="line__text" onclick="open_popup('indisponivel')">Agendar uma diária</p>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="page__container justify">
+          <div class="line__container--btn add margin_top" onclick="">
+            <p class="line__text" onclick="open_popup('indisponivel')">Ver estatística</p>
+          </div>
+        </div>
+
+        <h3 class="popup__text question">Pontos</h3>
+        <div id="config_route_pontos_container_partida_btn" class="page__container interaction pos_relative"
+          onclick="action_container(this, 50)">
+          <h3 class="text secundario emphasis">Partida</h3>
+          <h3 id="config_route_pontos_quantidade_partida" class="text secundario fundo max_width"></h3>
+          <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+
+        <div id="config_route_pontos_container_partida_container" class="page__container column space inactive">
+          <div id="config_route_pontos_partida_area"
+            class="scroll_vertical popup__container--scroll principal sortable"></div>
+
+          {% if role == 'motorista' %}
+          <h1 class="page__division inactive"></h1>
+          <div class="page__container justify inactive">
+            <div id="config_route_add_partida" class="line__container--btn add margin_bottom"
+              onclick="open_popup('add_point_route', this)">
+              <i class="bi bi-plus-lg line__icon plus"></i>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div id="config_route_pontos_container_retorno_btn" class="page__container interaction pos_relative"
+          onclick="action_container(this, 50)">
+          <h3 class="text secundario emphasis">Retorno</h3>
+          <h3 id="config_route_pontos_quantidade_retorno" class="text secundario fundo max_width"></h3>
+          <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+
+        <div id="config_route_pontos_container_retorno_container" class="page__container column space inactive">
+          <div id="config_route_pontos_retorno_area"
+            class="scroll_vertical popup__container--scroll principal sortable"></div>
+
+          {% if role == 'motorista' %}
+          <h1 class="page__division inactive"></h1>
+          <div class="page__container justify inactive">
+            <div id="config_route_add_retorno" class="line__container--btn add margin_bottom"
+              onclick="open_popup('add_point_route', this)">
+              <i class="bi bi-plus-lg line__icon plus"></i>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if role == 'aluno' %}
+        <div id="config_route_btn_contraturno" class="page__container justify">
+          <div class="line__container--btn add margin_top" onclick="">
+            <p class="line__text">Definir contraturno</p>
+          </div>
+        </div>
+
+        <div id="config_route_contraturno_container" class="page__container inactive">
+          <p class="text secundario fundo">Contraturno:</p>
+          <p id="config_route_contraturno" class="text secundario content fundo"></p>
+        </div>
+
+        {% else %}
+
+        <h1 id="route_division" class="page__division" class="inactive"></h1>
+        <div id="route_del" class="page__container justify inactive">
+          <div class="line__container--btn remove" onclick="open_popup('del_route', this)">
+            <i class="bi bi-trash3 line__icon del"></i>
+          </div>
+        </div>
+        {% endif %}
+      </div>
     </div>
+
+    <footer class="popup__container--footer">
+      {% if role == 'motorista' %}
+      <button class="popup__btn" onclick="save_data_route()">Fechar</button>
+      {% else %}
+      <button class="popup__btn" onclick="check_state()">Fechar</button>
+      {% endif %}
+    </footer>
+  </div>
 </section>
 
 
 <section id="config_rel_point_route" class="popup__container--shadow inactive">
-    <div class="popup__container">
-        <header class="popup__container--header pos_relative">
-            <h1 class="popup__title">Relação do Ponto</h1>
-        </header>
+  <div class="popup__container">
+    <header class="popup__container--header pos_relative">
+      <h1 class="popup__title">Relação do Ponto</h1>
+    </header>
 
-        <div class="popup__container--content">
-            <div class="page__container">
-                <p class="text secundario fundo">Tipo:</p>
-                <p id="config_rel_point_route_tipo" class="text secundario content fundo"></p>
-            </div>
+    <div class="popup__container--content">
+      <div class="page__container">
+        <p class="text secundario fundo">Tipo:</p>
+        <p id="config_rel_point_route_tipo" class="text secundario content fundo"></p>
+      </div>
 
-            <div class="page__container">
-                <p class="text secundario fundo">Nome:</p>
-                <div class="scroll_horizontal">
-                    <p id="config_rel_point_route_nome" class="text secundario content fundo nowrap"></p>
-                </div>
-            </div>
-
-            <div class="page__container">
-                <p class="text secundario fundo">Link GPS:</p>
-                <p id="config_rel_point_route_linkGPS" class="text secundario content fundo"></p>
-            </div>
-
-            <div class="page__container">
-                <p class="text secundario fundo">Ordem de passagem:</p>
-                <p id="config_rel_point_route_ordem" class="text secundario content fundo"></p>
-            </div>
-
-            <div class="page__container">
-                <p class="text secundario fundo">Horário de passagem:</p>
-                <p id="config_rel_point_route_horario" class="text secundario content fundo"></p>
-
-                {% if role == 'motorista' %}
-                <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_horario_relacao_ponto_rota', this)"></i>
-                {% endif %}
-            </div>
-
-            {% if role == 'motorista' %}
-            <h3 class="popup__text question">Alunos</h3>
-            <div id="config_rel_point_route_turno_btn" class="page__container interaction pos_relative" onclick="action_container(this, 50)">
-                <h3 class="text secundario emphasis nowrap">Do turno</h3>
-                <h3 id="config_rel_point_route_turno_quantidade" class="text secundario fundo max_width"></h3>
-                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-            </div>
-            
-            <div id="config_rel_point_route_turno_container" class="scroll_vertical popup__container--scroll space inactive"></div>
-
-            <div id="config_rel_point_route_contraturno_btn" class="page__container interaction pos_relative" onclick="action_container(this, 50)">
-                <h3 class="text secundario emphasis nowrap">Contraturno</h3>
-                <h3 id="config_rel_point_route_contraturno_quantidade" class="text secundario fundo max_width"></h3>
-                <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-            </div>
-            
-            <div id="config_rel_point_route_contraturno_container" class="scroll_vertical popup__container--scroll space inactive"></div>
-
-            <div id="config_rel_point_route_del" class="page__container justify inactive">
-                <div class="line__container--btn del margin_top" onclick="">
-                    <p class="line__text remove">Remover relação</p>
-                </div>
-            </div>
-
-            {% else %}
-            <div id="config_rel_point_route_cadastrar" class="page__container justify inactive">
-                <div class="line__container--btn add margin_top" onclick="">
-                    <p class="line__text">Cadastrar-me neste ponto</p>
-                </div>
-            </div>
-
-            <div id="config_rel_point_route_sair" class="page__container justify inactive">
-                <div class="line__container--btn del margin_top" onclick="">
-                    <p class="line__text remove">Cancelar meu cadastro</p>
-                </div>
-            </div>
-            {% endif %}
+      <div class="page__container">
+        <p class="text secundario fundo">Nome:</p>
+        <div class="scroll_horizontal">
+          <p id="config_rel_point_route_nome" class="text secundario content fundo nowrap"></p>
         </div>
+      </div>
 
-        <footer class="popup__container--footer">
-            <button class="popup__btn" onclick="close_popup('config_rel_point_route')">Fechar</button>
-        </footer>
+      <div class="page__container">
+        <p class="text secundario fundo">Link GPS:</p>
+        <p id="config_rel_point_route_linkGPS" class="text secundario content fundo"></p>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Ordem de passagem:</p>
+        <p id="config_rel_point_route_ordem" class="text secundario content fundo"></p>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Horário de passagem:</p>
+        <p id="config_rel_point_route_horario" class="text secundario content fundo"></p>
+
+        {% if role == 'motorista' %}
+        <i class="bi bi-pencil-square page__icon content inactive"
+          onclick="open_popup('edit_horario_relacao_ponto_rota', this)"></i>
+        {% endif %}
+      </div>
+
+      {% if role == 'motorista' %}
+      <h3 class="popup__text question">Alunos</h3>
+      <div id="config_rel_point_route_turno_btn" class="page__container interaction pos_relative"
+        onclick="action_container(this, 50)">
+        <h3 class="text secundario emphasis nowrap">Do turno</h3>
+        <h3 id="config_rel_point_route_turno_quantidade" class="text secundario fundo max_width"></h3>
+        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+      </div>
+
+      <div id="config_rel_point_route_turno_container" class="scroll_vertical popup__container--scroll space inactive">
+      </div>
+
+      <div id="config_rel_point_route_contraturno_btn" class="page__container interaction pos_relative"
+        onclick="action_container(this, 50)">
+        <h3 class="text secundario emphasis nowrap">Contraturno</h3>
+        <h3 id="config_rel_point_route_contraturno_quantidade" class="text secundario fundo max_width"></h3>
+        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+      </div>
+
+      <div id="config_rel_point_route_contraturno_container"
+        class="scroll_vertical popup__container--scroll space inactive"></div>
+
+      <h1 id="config_rel_point_route_division" class="page__division"></h1>
+      <div id="config_rel_point_route_del" class="page__container justify inactive">
+        <div class="line__container--btn del margin_top" onclick="">
+          <p class="line__text remove">Remover relação</p>
+        </div>
+      </div>
+
+      {% else %}
+      <div id="config_rel_point_route_cadastrar" class="page__container justify inactive">
+        <div class="line__container--btn add margin_top" onclick="">
+          <p class="line__text">Cadastrar-me neste ponto</p>
+        </div>
+      </div>
+
+      <div id="config_rel_point_route_sair" class="page__container justify inactive">
+        <div class="line__container--btn del margin_top" onclick="">
+          <p class="line__text remove">Cancelar meu cadastro</p>
+        </div>
+      </div>
+      {% endif %}
     </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_popup('config_rel_point_route')">Fechar</button>
+    </footer>
+  </div>
 </section>

@@ -1,55 +1,58 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BussTup</title>
-    <link rel="icon" href="/static/img/icon_busstup.png">
-    <link rel="stylesheet" href="/static/css/index.css">
-    <link rel="stylesheet" href="/static/css/form.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BussTup</title>
+  <link rel="icon" href="/static/img/icon_busstup.png">
+  <link rel="stylesheet" href="/static/css/index.css">
+  <link rel="stylesheet" href="/static/css/form.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
+
 <body onload="enterInterface('login')">
-    <section id="container" class="form__container container_complete">
-        <p class="hidden_point">.</p>
-        <header class="form__container--header -enter-">
-            <div class="form__container--img">
-                <img class="form__img" src="/static/img/logo_busstup.png" alt="Logo do aplicativo BussTup">
-            </div>
-            <div class="form__container--text">
-                <h1 class="form__text_title--secondary">Bem vindo</h1>
-            </div>
-        </header>
-        <main class="form__container--content">
-            <h1 class="form__text_title -enter-">Login</h1>
-            <form id="formulario_login" class="form__container--card" onsubmit="validationLogin(event)">
-                <div class="form__container--input first -enter-">
-                    <input id="user" class="form__input" type="text" required>
-                    <i id="icon_user" class="bi bi-person-fill form__icon"></i>
-                    <label class="form__label" for="user">Usuário</label>
-                </div>
+  <section id="container" class="form__container container_complete">
+    <p class="hidden_point">.</p>
+    <header class="form__container--header -enter-">
+      <div class="form__container--img">
+        <img class="form__img" src="/static/img/logo_busstup.png" alt="Logo do aplicativo BussTup">
+      </div>
+      <div class="form__container--text">
+        <h1 class="form__text_title--secondary">Bem vindo</h1>
+      </div>
+    </header>
+    <main class="form__container--content">
+      <h1 class="form__text_title -enter-">Login</h1>
+      <form id="formulario_login" class="form__container--card" onsubmit="validationLogin(event)">
+        <div class="form__container--input first -enter-">
+          <input id="user" class="form__input" type="text" required>
+          <i id="icon_user" class="bi bi-person-fill form__icon"></i>
+          <label class="form__label" for="user">Usuário</label>
+        </div>
 
-                <div class="form__container--input -enter-">
-                    <input id="password" class="form__input input_password" type="password" required>
-                    <i id="btn_password" class="bi bi-eye-fill form__btn--password" onclick="animateIconPassword(this)"></i>
-                    <i id="icon_password" class="bi bi-key-fill form__icon"></i>
-                    <label class="form__label" for="password">Senha</label>
-                </div>
-                
-                <a class="text--click -enter-" href="">Esqueceu seu Usuário/Senha?</a>
-                <input class="form__btn -enter-" type="submit" value="Entrar">
-            </form>
-            
-            <div class="form__container--text_info -enter-">
-                <p class="text">Não possui uma conta?</p>
-                <button class="form__btn--simple" onclick="closeInterface('login', 'register')">Criar conta</button>
-            </div>
-        </main>
-    </section>
+        <div class="form__container--input -enter-">
+          <input id="password" class="form__input input_password" type="password" required>
+          <i id="btn_password" class="bi bi-eye-fill form__btn--password" onclick="animateIconPassword(this)"></i>
+          <i id="icon_password" class="bi bi-key-fill form__icon"></i>
+          <label class="form__label" for="password">Senha</label>
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/static/js/interaction.js"></script>
-    <script src="/static/js/interface.js"></script>
-    <script src="/static/js/login/index.js"></script>
+        <a class="text--click -enter-" href="">Esqueceu seu Usuário/Senha?</a>
+        <input class="form__btn -enter-" type="submit" value="Entrar">
+      </form>
+
+      <div class="form__container--text_info -enter-">
+        <p class="text">Não possui uma conta?</p>
+        <button class="form__btn--simple" onclick="closeInterface('login', 'register')">Criar conta</button>
+      </div>
+    </main>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/static/js/interaction.js"></script>
+  <script src="/static/js/interface.js"></script>
+  <script src="/static/js/login/index.js"></script>
 </body>
+
 </html>

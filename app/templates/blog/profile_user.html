@@ -1,91 +1,95 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BussTup > Perfil</title>
-    <link rel="icon" href="/static/img/icon_busstup.png">
-    <link rel="stylesheet" href="/static/css/index.css">
-    <link rel="stylesheet" href="/static/css/form.css">
-    <link rel="stylesheet" href="/static/css/popup.css">
-    <link rel="stylesheet" href="/static/css/line.css">
-    <link rel="stylesheet" href="/static/css/perfil.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BussTup > Perfil</title>
+  <link rel="icon" href="/static/img/icon_busstup.png">
+  <link rel="stylesheet" href="/static/css/index.css">
+  <link rel="stylesheet" href="/static/css/form.css">
+  <link rel="stylesheet" href="/static/css/popup.css">
+  <link rel="stylesheet" href="/static/css/line.css">
+  <link rel="stylesheet" href="/static/css/perfil.css">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body onload="enterInterface('profile')">
-    <p class="hidden_point">.</p>
+  <p class="hidden_point">.</p>
 
-    <template id="templates_popup">
-        {% include "/popups/profile/popup_profile.html" %}
-    </template>
+  <template id="templates_popup">
+    {% include "/popups/profile/popup_profile.html" %}
+  </template>
 
-    <section class="perfil__container">
-        <header class="perfil__container--header pos_relative -enter-" onclick="open_popup('config_usuario')">
-            <p id="perfil_nome" class="perfil__title"></p>
-            <i class="bi bi-three-dots-vertical perfil__icon title"></i>
-        </header>
-        
-        <div class="perfil__container--content">
-            <h1 class="text title first -enter-">Meus dados</h1>
-            <div class="perfil__item -enter-">
-                <p class="text secundario emphasis nowrap">E-mail</p>
-                <div class="scroll_horizontal">
-                    <p id="perfil_email" class="text secundario fundo content"></p>
-                </div>
-                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_email')"></i>
-            </div>
+  <section class="perfil__container">
+    <header class="perfil__container--header pos_relative -enter-" onclick="open_popup('config_usuario')">
+      <p id="perfil_nome" class="perfil__title"></p>
+      <i class="bi bi-three-dots-vertical perfil__icon title"></i>
+    </header>
 
-            <div class="perfil__item -enter-">
-                <p class="text secundario emphasis nowrap">Telefone</p>
-                <p id="perfil_telefone" class="text secundario fundo content"></p>
-                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_telefone')"></i>
-            </div>
-
-            {% if role == 'motorista' %}
-            <div class="perfil__item -enter-">
-                <p class="text secundario emphasis nowrap">Chave Pix</p>
-                <div class="scroll_horizontal">
-                    <p id="perfil_pix" class="text secundario fundo content"></p>
-                </div>
-                <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_pix')"></i>
-            </div>
-
-            {% else %}
-            <div class="perfil__item -enter-">
-                <p class="text secundario emphasis">Curso</p>
-                <p id="perfil_curso" class="text secundario fundo content"></p>
-            </div>
-
-            <div class="perfil__item -enter-">
-                <p class="text secundario emphasis">Turno</p>
-                <p id="perfil_turno" class="text secundario fundo content"></p>
-            </div>
-            
-            <h1 class="text title -enter-">Cartela de tickets</h1>
-            {% endif %}
+    <div class="perfil__container--content">
+      <h1 class="text title first -enter-">Meus dados</h1>
+      <div class="perfil__item -enter-">
+        <p class="text secundario emphasis nowrap">E-mail</p>
+        <div class="scroll_horizontal">
+          <p id="perfil_email" class="text secundario fundo content"></p>
         </div>
+        <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_email')"></i>
+      </div>
 
-        <div class="perfil__container--footer">
-            <h1 class="perfil__division -enter-"></h1>
-            <div class="perfil__container--justify -enter-">
-                <div class="line__container--btn margin_bottom add aba" onclick="open_popup('confirm_logout')">
-                    <p class="line__text">Sair da conta</p>
-                </div>
-            </div>
+      <div class="perfil__item -enter-">
+        <p class="text secundario emphasis nowrap">Telefone</p>
+        <p id="perfil_telefone" class="text secundario fundo content"></p>
+        <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_telefone')"></i>
+      </div>
 
-            <div class="perfil__container--justify -enter-">
-                <div class="line__container--btn margin_bottom add aba" onclick="closeInterface('profile', 'page_user', ['{{ local_page }}', false])">
-                    <p class="line__text white">Voltar</p>
-                </div>
-            </div>
+      {% if role == 'motorista' %}
+      <div class="perfil__item -enter-">
+        <p class="text secundario emphasis nowrap">Chave Pix</p>
+        <div class="scroll_horizontal">
+          <p id="perfil_pix" class="text secundario fundo content"></p>
         </div>
-    </section>
-    <div id="popup_local"></div>
+        <i class="bi bi-pencil-square perfil__icon" onclick="open_popup('edit_pix')"></i>
+      </div>
 
-    <script src="/static/js/interface.js"></script>
-    <script src="/static/js/interaction.js"></script>
-    <script src="/static/js/profile/index.js"></script>
+      {% else %}
+      <div class="perfil__item -enter-">
+        <p class="text secundario emphasis">Curso</p>
+        <p id="perfil_curso" class="text secundario fundo content"></p>
+      </div>
+
+      <div class="perfil__item -enter-">
+        <p class="text secundario emphasis">Turno</p>
+        <p id="perfil_turno" class="text secundario fundo content"></p>
+      </div>
+
+      <h1 class="text title -enter-">Cartela de tickets</h1>
+      {% endif %}
+    </div>
+
+    <div class="perfil__container--footer">
+      <h1 class="perfil__division -enter-"></h1>
+      <div class="perfil__container--justify -enter-">
+        <div class="line__container--btn margin_bottom add aba" onclick="open_popup('confirm_logout')">
+          <p class="line__text">Sair da conta</p>
+        </div>
+      </div>
+
+      <div class="perfil__container--justify -enter-">
+        <div class="line__container--btn margin_bottom add aba"
+          onclick="closeInterface('profile', 'page_user', ['{{ local_page }}', false])">
+          <p class="line__text white">Voltar</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div id="popup_local"></div>
+
+  <script src="/static/js/interface.js"></script>
+  <script src="/static/js/interaction.js"></script>
+  <script src="/static/js/profile/index.js"></script>
 </body>
+
 </html>

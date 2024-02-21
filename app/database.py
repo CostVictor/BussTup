@@ -36,7 +36,7 @@ class Role(db.Model, RoleMixin):
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     name = db.Column(db.Enum('aluno', 'motorista', 'administrador'), nullable=False)
     User_id = db.Column(db.BigInteger, db.ForeignKey('User.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('roles', lazy=True))
+    user = db.relationship('User', backref=db.backref('roles', cascade='all, delete'), lazy=True)
 
 
 class Access_Device(db.Model):
@@ -45,7 +45,7 @@ class Access_Device(db.Model):
     codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     dispositivo = db.Column(db.String(60), nullable=False)
     User_id = db.Column(db.BigInteger, db.ForeignKey('User.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('devices', lazy=True))
+    user = db.relationship('User', backref=db.backref('devices', cascade='all, delete'), lazy=True)
 
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
@@ -62,7 +62,7 @@ class Motorista(db.Model):
     nome = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     telefone = db.Column(db.String(15), nullable=False)
-    pix = db.Column(db.String(100))
+    pix = db.Column(db.String(100), default='Não definido')
 
 
 class Linha(db.Model):
@@ -78,12 +78,13 @@ class Linha(db.Model):
 
 class Onibus(db.Model):
     __tablename__ = 'Onibus'
-    placa = db.Column(db.String(7), primary_key=True)
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    apelido = db.Column(db.String(15), nullable=False)
     capacidade = db.Column(db.Integer, nullable=False)
     Linha_codigo = db.Column(db.Integer, db.ForeignKey('Linha.codigo'), nullable=False)
     Motorista_id = db.Column(db.Integer, db.ForeignKey('Motorista.id'))
-    linha = db.relationship('Linha', backref=db.backref('onibus', lazy=True))
-    motorista = db.relationship('Motorista', backref=db.backref('onibus', lazy=True))
+    linha = db.relationship('Linha', backref=db.backref('onibus', cascade='all, delete'), lazy=True)
+    motorista = db.relationship('Motorista', backref=db.backref('onibus', cascade='all, delete-orphan'), lazy=True)
 
 
 class Rota(db.Model):
@@ -95,9 +96,9 @@ class Rota(db.Model):
     horario_partida = db.Column(db.Time, nullable=False)
     horario_retorno = db.Column(db.Time, nullable=False)
     Linha_codigo = db.Column(db.BigInteger, db.ForeignKey('Linha.codigo'), nullable=False)
-    Onibus_placa = db.Column(db.String(7), db.ForeignKey('Onibus.placa'))
-    linha = db.relationship('Linha', backref=db.backref('rotas', lazy=True))
-    onibus = db.relationship('Onibus', backref=db.backref('rotas', lazy=True))
+    Onibus_id = db.Column(db.BigInteger, db.ForeignKey('Onibus.id'))
+    linha = db.relationship('Linha', backref=db.backref('rotas', cascade='all, delete'), lazy=True)
+    onibus = db.relationship('Onibus', backref=db.backref('rotas', cascade='all, delete-orphan'), lazy=True)
 
 
 class Aluno(db.Model):
@@ -119,7 +120,7 @@ class Registro_Aluno(db.Model):
     presente_partida = db.Column(db.Boolean, nullable=False, default=False)
     presente_retorno = db.Column(db.Boolean, nullable=False, default=False)
     Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
-    aluno = db.relationship('Aluno', backref=db.backref('registros', lazy=True))
+    aluno = db.relationship('Aluno', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 
 
 class Ponto(db.Model):
@@ -129,7 +130,7 @@ class Ponto(db.Model):
     tempo_tolerancia = db.Column(db.String(2), nullable=False, default='5')
     linkGPS = db.Column(db.String(200))
     Linha_codigo = db.Column(db.Integer, db.ForeignKey('Linha.codigo'), nullable=False)
-    linha = db.relationship('Linha', backref=db.backref('pontos', lazy=True))
+    linha = db.relationship('Linha', backref=db.backref('pontos', cascade='all, delete'), lazy=True)
 
 
 class Parada(db.Model):
@@ -140,8 +141,8 @@ class Parada(db.Model):
     horario_passagem = db.Column(db.Time, nullable=False)
     Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), nullable=False)
     Ponto_id = db.Column(db.BigInteger, db.ForeignKey('Ponto.id'), nullable=False)
-    rota = db.relationship('Rota', backref=db.backref('paradas', lazy=True))
-    ponto = db.relationship('Ponto', backref=db.backref('relacoes', lazy=True))
+    rota = db.relationship('Rota', backref=db.backref('paradas', cascade='all, delete'), lazy=True)
+    ponto = db.relationship('Ponto', backref=db.backref('relacoes', cascade='all, delete'), lazy=True)
 
 
 class Cartela_Ticket(db.Model):
@@ -154,8 +155,8 @@ class Cartela_Ticket(db.Model):
     ultima_atualizacao = db.Column(db.Date)
     Linha_codigo = db.Column(db.Integer, db.ForeignKey('Linha.codigo'), nullable=False)
     Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
-    linha = db.relationship('Linha', backref=db.backref('cartelas', lazy=True))
-    aluno = db.relationship('Aluno', backref=db.backref('cartelas', lazy=True))
+    linha = db.relationship('Linha', backref=db.backref('cartelas', cascade='all, delete'), lazy=True)
+    aluno = db.relationship('Aluno', backref=db.backref('cartelas', cascade='all, delete'), lazy=True)
 
 
 class Contraturno_Fixo(db.Model):
@@ -163,7 +164,7 @@ class Contraturno_Fixo(db.Model):
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     dia_fixo = db.Column(db.Enum(*dias_semana), nullable=False)
     Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
-    aluno = db.relationship('Aluno', backref=db.backref('contraturnos_fixos', lazy=True))
+    aluno = db.relationship('Aluno', backref=db.backref('contraturnos_fixos', cascade='all, delete'), lazy=True)
 
 
 class Membro(db.Model):
@@ -172,8 +173,8 @@ class Membro(db.Model):
     Motorista_id = db.Column(db.Integer, db.ForeignKey('Motorista.id'), primary_key=True)
     dono = db.Column(db.Boolean, nullable=False, default=False)
     adm = db.Column(db.Boolean, nullable=False, default=False)
-    linha = db.relationship('Linha', backref=db.backref('membros', lazy=True))
-    motorista = db.relationship('Motorista', backref=db.backref('linhas', lazy=True))
+    linha = db.relationship('Linha', backref=db.backref('membros', cascade='all, delete'), lazy=True)
+    motorista = db.relationship('Motorista', backref=db.backref('linhas', cascade='all, delete'), lazy=True)
 
 
 class Registro_Parada(db.Model):
@@ -183,7 +184,7 @@ class Registro_Parada(db.Model):
     veiculo_passou = db.Column(db.Boolean, nullable=False, default=False)
     quantidade_no_veiculo = db.Column(db.Integer, nullable=False)
     Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
-    parada = db.relationship('Parada', backref=db.backref('registros', lazy=True))
+    parada = db.relationship('Parada', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 
 
 class Registro_Rota(db.Model):
@@ -194,7 +195,7 @@ class Registro_Rota(db.Model):
     quantidade_pessoas = db.Column(db.Integer, nullable=False)
     previsao_pessoas = db.Column(db.Integer, nullable=False)
     Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), nullable=False)
-    rota = db.relationship('Rota', backref=db.backref('registros', lazy=True))
+    rota = db.relationship('Rota', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 
 
 class Passagem(db.Model):
@@ -206,8 +207,17 @@ class Passagem(db.Model):
     data = db.Column(db.Date)
     Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
     Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
-    parada = db.relationship('Parada', backref=db.backref('passagens', lazy=True))
-    aluno = db.relationship('Aluno', backref=db.backref('passagens', lazy=True))
+    parada = db.relationship('Parada', backref=db.backref('passagens', cascade='all, delete'), lazy=True)
+    aluno = db.relationship('Aluno', backref=db.backref('passagens', cascade='all, delete'), lazy=True)
+
+
+class Aparencia(db.Model):
+    __tablename__ = 'Aparencia'
+    Onibus_id = db.Column(db.BigInteger, db.ForeignKey('Onibus.id'), primary_key=True, nullable=False)
+    cor = db.Column(db.String(50), nullable=False)
+    modelo = db.Column(db.String(50), nullable=False)
+    descricao = db.Column(db.String(255), nullable=False, default='Não definido')
+    onibus = db.relationship('Onibus', backref=db.backref('aparencia', cascade='all, delete', uselist=False), lazy=True)
 
 
 class Marcador_Exclusao(db.Model):
