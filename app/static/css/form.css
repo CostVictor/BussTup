@@ -153,6 +153,22 @@
   width: 80%;
 }
 
+.form__textarea {
+  padding: calc(0.2vw + 0.3vh + 1vmin);
+  color: var(--cinza_secundario);
+  border-radius: calc(0.5vw + 0.5vh + 1vmin);
+  background-color: var(--branco_terciario);
+  border: var(--branco_terciario) solid 0.06rem;
+  font-size: var(--size_16px);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.form__textarea:focus {
+  transition: border 0.1s;
+  border: var(--azul_primario) solid 0.06rem;
+}
+
 .form__input {
   position: relative;
   padding: calc(0.2vw + 0.3vh + 1vmin);

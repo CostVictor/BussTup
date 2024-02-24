@@ -2,6 +2,9 @@ function create_vehicle() {
   const name_line = document.getElementById("interface_nome").textContent;
   const surname = document.getElementById("add_vehicle_surname").value;
   const capacidade = document.getElementById("add_vehicle_capacidade").value;
+  const cor = document.getElementById("add_vehicle_cor").value;
+  const modelo = document.getElementById("add_vehicle_modelo").value;
+  const descricao = document.getElementById("add_vehicle_descricao").value;
   const options = return_bool_selected(
     document.getElementById("add_vehicle_options")
   );
@@ -24,8 +27,11 @@ function create_vehicle() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        surname: surname,
+        apelido: surname,
         capacidade: capacidade,
+        cor: cor,
+        modelo: modelo,
+        descricao: descricao,
         motorista_nome: motorista_selected,
         name_line: name_line,
       }),
@@ -199,6 +205,7 @@ function create_stop(event) {
         } else {
           create_popup(response.title, response.text, "Voltar");
         }
+        document.getElementById("config_route_pos").textContent = data.pos;
       });
   } else {
     create_popup(title, text, "Voltar");
@@ -389,6 +396,102 @@ function edit_motorista_veiculo() {
         }
       });
   }
+}
+
+function edit_surname_vehicle(event) {
+  event.preventDefault();
+
+  const name_line = document.getElementById("interface_nome").textContent;
+  const vehicle_surname = document
+    .getElementById("edit_vehicle_surname")
+    .querySelector("span").textContent;
+  const new_value = document
+    .getElementById("edit_vehicle_surname_new")
+    .value.trim();
+
+  fetch("/edit_vehicle", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      field: "apelido",
+      new_value: new_value,
+      name_line: name_line,
+      surname: vehicle_surname,
+    }),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        close_popup("edit_vehicle_surname");
+        create_popup(response.title, response.text, "Ok", "success");
+        loadInterfaceVehicle(name_line);
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+      }
+    });
+}
+
+function save_data_description() {
+  const name_line = document.getElementById("interface_nome").textContent;
+  const surname = document.getElementById(
+    "aparence_vehicle_surname"
+  ).textContent;
+  const local = document.getElementById("aparence_vehicle_description");
+  const text = local.querySelector("textarea");
+
+  if (text) {
+    fetch("/edit_aparence", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        field: "description",
+        new_value: text.value.trim(),
+        name_line: name_line,
+        surname: surname,
+      }),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (response.error) {
+          create_popup(response.title, response.text);
+        }
+      });
+  }
+  close_popup("aparence_vehicle");
+}
+
+function edit_aparence(obj_click, event) {
+  event.preventDefault();
+
+  const name_line = document.getElementById("interface_nome").textContent;
+  const surname = document.getElementById(
+    "aparence_vehicle_surname"
+  ).textContent;
+
+  let field = obj_click.id.split("_");
+  field = field[field.length - 1];
+  const new_value = obj_click.querySelector('[id*="new"]').value.trim();
+
+  fetch("/edit_aparence", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      field: field,
+      new_value: new_value,
+      name_line: name_line,
+      surname: surname,
+    }),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        close_popup("edit_aparence_" + field);
+        config_popup_aparence(surname);
+        create_popup(response.title, response.text, "Ok", "success");
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+      }
+    });
 }
 
 function edit_point(form_submit, event) {

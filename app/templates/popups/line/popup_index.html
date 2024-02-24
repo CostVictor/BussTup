@@ -10,7 +10,7 @@
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
+      <div class="scroll_vertical popup__container--scroll principal_max">
         <div id="config_route_desativada" class="inactive">
           <p class="text info center fundo cinza">Rota desativada</p>
           <p class="text info fundo justify margin_top">Apenas usuários motoristas ou alunos que já possuíam vínculo com
@@ -100,7 +100,8 @@
 
         <div id="config_route_pontos_container_partida_container" class="page__container column space inactive">
           <div id="config_route_pontos_partida_area"
-            class="scroll_vertical popup__container--scroll principal sortable"></div>
+            class="scroll_vertical popup__container--scroll principal sortable">
+          </div>
 
           {% if role == 'motorista' %}
           <h1 class="page__division inactive"></h1>
@@ -122,7 +123,8 @@
 
         <div id="config_route_pontos_container_retorno_container" class="page__container column space inactive">
           <div id="config_route_pontos_retorno_area"
-            class="scroll_vertical popup__container--scroll principal sortable"></div>
+            class="scroll_vertical popup__container--scroll principal sortable">
+          </div>
 
           {% if role == 'motorista' %}
           <h1 class="page__division inactive"></h1>
@@ -177,84 +179,151 @@
     </header>
 
     <div class="popup__container--content">
-      <div class="page__container">
-        <p class="text secundario fundo">Tipo:</p>
-        <p id="config_rel_point_route_tipo" class="text secundario content fundo"></p>
-      </div>
-
-      <div class="page__container">
-        <p class="text secundario fundo">Nome:</p>
-        <div class="scroll_horizontal">
-          <p id="config_rel_point_route_nome" class="text secundario content fundo nowrap"></p>
+      <div class="scroll_vertical popup__container--scroll principal_max">
+        <div class="page__container">
+          <p class="text secundario fundo">Tipo:</p>
+          <p id="config_rel_point_route_tipo" class="text secundario content fundo"></p>
         </div>
-      </div>
 
-      <div class="page__container">
-        <p class="text secundario fundo">Link GPS:</p>
-        <p id="config_rel_point_route_linkGPS" class="text secundario content fundo"></p>
-      </div>
+        <div class="page__container">
+          <p class="text secundario fundo">Nome:</p>
+          <div class="scroll_horizontal">
+            <p id="config_rel_point_route_nome" class="text secundario content fundo nowrap"></p>
+          </div>
+        </div>
 
-      <div class="page__container">
-        <p class="text secundario fundo">Ordem de passagem:</p>
-        <p id="config_rel_point_route_ordem" class="text secundario content fundo"></p>
-      </div>
+        <div class="page__container">
+          <p class="text secundario fundo">Link GPS:</p>
+          <p id="config_rel_point_route_linkGPS" class="text secundario content fundo"></p>
+        </div>
 
-      <div class="page__container">
-        <p class="text secundario fundo">Horário de passagem:</p>
-        <p id="config_rel_point_route_horario" class="text secundario content fundo"></p>
+        <div class="page__container">
+          <p class="text secundario fundo">Ordem de passagem:</p>
+          <p id="config_rel_point_route_ordem" class="text secundario content fundo"></p>
+        </div>
+
+        <div class="page__container">
+          <p class="text secundario fundo nowrap">Horário de passagem:</p>
+          <p id="config_rel_point_route_horario" class="text secundario nowrap content fundo"></p>
+
+          {% if role == 'motorista' %}
+          <i class="bi bi-pencil-square page__icon content inactive"
+            onclick="open_popup('edit_horario_relacao_ponto_rota', this)"></i>
+          {% endif %}
+        </div>
 
         {% if role == 'motorista' %}
-        <i class="bi bi-pencil-square page__icon content inactive"
-          onclick="open_popup('edit_horario_relacao_ponto_rota', this)"></i>
+        <h3 class="popup__text question">Alunos</h3>
+        <div id="config_rel_point_route_turno_btn" class="page__container interaction pos_relative"
+          onclick="action_container(this, 50)">
+          <h3 class="text secundario emphasis nowrap">Do turno</h3>
+          <h3 id="config_rel_point_route_turno_quantidade" class="text secundario fundo max_width"></h3>
+          <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+
+        <div id="config_rel_point_route_turno_container"
+          class="scroll_vertical popup__container--scroll space inactive">
+        </div>
+
+        <div id="config_rel_point_route_contraturno_btn" class="page__container interaction pos_relative"
+          onclick="action_container(this, 50)">
+          <h3 class="text secundario emphasis nowrap">Contraturno</h3>
+          <h3 id="config_rel_point_route_contraturno_quantidade" class="text secundario fundo max_width"></h3>
+          <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+
+        <div id="config_rel_point_route_contraturno_container"
+          class="scroll_vertical popup__container--scroll space inactive"></div>
+
+        <h1 id="config_rel_point_route_division" class="page__division"></h1>
+        <div id="config_rel_point_route_del" class="page__container justify inactive">
+          <div class="line__container--btn del space" onclick="">
+            <p class="line__text remove">Remover relação</p>
+          </div>
+        </div>
+
+        {% else %}
+        <div id="config_rel_point_route_cadastrar" class="page__container justify inactive">
+          <div class="line__container--btn add space" onclick="">
+            <p class="line__text">Cadastrar-me neste ponto</p>
+          </div>
+        </div>
+
+        <div id="config_rel_point_route_sair" class="page__container justify inactive">
+          <div class="line__container--btn del space" onclick="">
+            <p class="line__text remove">Cancelar meu cadastro</p>
+          </div>
+        </div>
         {% endif %}
       </div>
-
-      {% if role == 'motorista' %}
-      <h3 class="popup__text question">Alunos</h3>
-      <div id="config_rel_point_route_turno_btn" class="page__container interaction pos_relative"
-        onclick="action_container(this, 50)">
-        <h3 class="text secundario emphasis nowrap">Do turno</h3>
-        <h3 id="config_rel_point_route_turno_quantidade" class="text secundario fundo max_width"></h3>
-        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-      </div>
-
-      <div id="config_rel_point_route_turno_container" class="scroll_vertical popup__container--scroll space inactive">
-      </div>
-
-      <div id="config_rel_point_route_contraturno_btn" class="page__container interaction pos_relative"
-        onclick="action_container(this, 50)">
-        <h3 class="text secundario emphasis nowrap">Contraturno</h3>
-        <h3 id="config_rel_point_route_contraturno_quantidade" class="text secundario fundo max_width"></h3>
-        <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
-      </div>
-
-      <div id="config_rel_point_route_contraturno_container"
-        class="scroll_vertical popup__container--scroll space inactive"></div>
-
-      <h1 id="config_rel_point_route_division" class="page__division"></h1>
-      <div id="config_rel_point_route_del" class="page__container justify inactive">
-        <div class="line__container--btn del margin_top" onclick="">
-          <p class="line__text remove">Remover relação</p>
-        </div>
-      </div>
-
-      {% else %}
-      <div id="config_rel_point_route_cadastrar" class="page__container justify inactive">
-        <div class="line__container--btn add margin_top" onclick="">
-          <p class="line__text">Cadastrar-me neste ponto</p>
-        </div>
-      </div>
-
-      <div id="config_rel_point_route_sair" class="page__container justify inactive">
-        <div class="line__container--btn del margin_top" onclick="">
-          <p class="line__text remove">Cancelar meu cadastro</p>
-        </div>
-      </div>
-      {% endif %}
     </div>
 
     <footer class="popup__container--footer">
       <button class="popup__btn" onclick="close_popup('config_rel_point_route')">Fechar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="aparence_vehicle" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 id="aparence_vehicle_surname" class="popup__title"></h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div class="scroll_vertical popup__container--scroll principal_big">
+        <div class="page__container">
+          <p class="text secundario fundo">Cor do veículo:</p>
+          <p id="aparence_vehicle_color" class="text secundario content fundo"></p>
+          {% if role == 'motorista' %}
+          <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_aparence_cor')"></i>
+          {% endif %}
+        </div>
+  
+        <div class="page__container">
+          <p class="text secundario fundo">Modelo:</p>
+          <p id="aparence_vehicle_model" class="text secundario content fundo"></p>
+          {% if role == 'motorista' %}
+          <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_aparence_modelo')"></i>
+          {% endif %}
+        </div>
+  
+        <h1 class="page__division"></h1>
+        <div class="page__container">
+          <p class="text secundario fundo">Descrição:</p>
+        </div>
+        {% if role == 'motorista' %}
+        <span id="aparence_vehicle_description"></span>
+        {% else %}
+        <p id="aparence_vehicle_description" class="text secundario content fundo justify"></p>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      {% if role == 'motorista' %}
+      <button class="popup__btn" onclick="save_data_description()">Fechar</button>
+      {% else %}
+      <button class="popup__btn" onclick="close_popup('aparence_vehicle')">Fechar</button>
+      {% endif %}
+    </footer>
+  </div>
+</section>
+
+
+<section id="vehicle_utilities_routes" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 id="vehicle_utilities_routes_surname" class="popup__title"></h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div id="vehicle_utilities_routes_container" class="scroll_vertical popup__container--scroll principal_big"></div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_popup('vehicle_utilities_routes')">Fechar</button>
     </footer>
   </div>
 </section>

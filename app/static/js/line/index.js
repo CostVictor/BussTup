@@ -66,8 +66,8 @@ function loadInterfaceLine(name_line, load_complete = true) {
 
         if (load_complete) {
           loadInterfaceDriver(name_line);
+          loadInterfaceVehicle(name_line);
           if (response.role === "motorista") {
-            loadInterfaceVehicle(name_line);
             loadInterfacePoints(name_line);
           }
           loadInterfaceRoutes(name_line);
@@ -136,7 +136,62 @@ function loadInterfaceDriver(name_line) {
     });
 }
 
-function adicionar_veiculo(model, list, container) {}
+function adicionar_veiculo(model, list, container, response) {
+  container.innerHTML = "";
+
+  for (index in list) {
+    const vehicle = model.cloneNode(true);
+    vehicle.id = `${container.id}-veiculo_${index}`;
+
+    ids = vehicle.querySelectorAll(`[id*="${model.id}"]`);
+    ids.forEach((item) => {
+      item.id = item.id.replace(model.id, vehicle.id);
+    });
+
+    const dados = list[index];
+    for (dado in dados) {
+      const value = dados[dado];
+      const info = vehicle.querySelector(`[id*="${dado}"]`);
+      info.textContent = value;
+
+      if (response.role == "motorista") {
+        let icon = info.parentNode.querySelector("i");
+        if (dado === "capacidade") {
+          icon = info.parentNode.parentNode.querySelector("i");
+        }
+
+        if (icon && icon.className.includes("pencil")) {
+          if (response.relacao) {
+            if (
+              response.relacao !== "membro" ||
+              value === "Nenhum" ||
+              value === response.meu_nome
+            ) {
+              icon.classList.remove("inactive");
+            }
+          }
+        }
+      }
+    }
+
+    if (
+      response.role == "motorista" &&
+      response.relacao &&
+      response.relacao !== "membro"
+    ) {
+      vehicle
+        .querySelector('[id*="division_edit"]')
+        .classList.remove("inactive");
+
+      vehicle
+        .querySelector('[id*="edit_apelido"]')
+        .classList.remove("inactive");
+
+      vehicle.querySelector('[id*="delete"]').classList.remove("inactive");
+    }
+    container.appendChild(vehicle);
+  }
+}
 
 function loadInterfaceVehicle(name_line) {
   fetch(`/get_interface-vehicle/${encodeURIComponent(name_line)}`, {
@@ -145,7 +200,166 @@ function loadInterfaceVehicle(name_line) {
     .then((response) => response.json())
     .then((response) => {
       if (!response.error) {
-        const model_vehicle = models.querySelector('model')
+        const model_vehicle = models.querySelector("#model_vehicle");
+        const container_sem = document.getElementById(
+          "area_vehicle_content_sem_condutor"
+        );
+        const container_com = document.getElementById(
+          "area_vehicle_content_com_condutor"
+        );
+        const division_local = document.getElementById(
+          "area_vehicle_division_vehicle"
+        );
+
+        const com_mot = response.data.com_condutor;
+        const sem_mot = response.data.sem_condutor;
+
+        adicionar_veiculo(model_vehicle, com_mot, container_com, response);
+        adicionar_veiculo(model_vehicle, sem_mot, container_sem, response);
+
+        if (sem_mot.length && com_mot.length) {
+          division_local.classList.remove("inactive");
+        } else {
+          division_local.classList.add("inactive");
+        }
+
+        if (response.role == "motorista") {
+          const division = document.getElementById("area_vehicle_division_add");
+          const btn_add = document.getElementById("area_vehicle_btn_add");
+
+          if (response.relacao && response.relacao !== "membro") {
+            btn_add.classList.remove("inactive");
+            if (com_mot.length || sem_mot.length) {
+              division.classList.remove("inactive");
+            }
+          }
+        }
+      } else {
+        create_popup(response.title, response.text);
+      }
+    });
+}
+
+function config_popup_aparence(surname_vehicle) {
+  const name_line = document.getElementById("interface_nome").textContent;
+  data = { principal: [name_line, surname_vehicle] };
+
+  fetch("/get_aparence" + generate_url_dict(data), {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const data = response.data;
+        for (dado in data) {
+          const value = data[dado];
+          const info = document.getElementById(`aparence_vehicle_${dado}`);
+
+          if (response.role === "motorista") {
+            const model_textarea = models.querySelector("#model_description");
+            const icon = info.parentNode.querySelector("i");
+
+            if (response.relacao && response.relacao !== "membro") {
+              if (icon) {
+                icon.classList.remove("inactive");
+              }
+
+              if (dado === "description") {
+                const text = model_textarea.cloneNode(true);
+                text.value = value;
+                info.innerHTML = "";
+                info.appendChild(text);
+              } else {
+                info.textContent = value;
+              }
+            } else {
+              if (icon) {
+                icon.classList.add("inactive");
+              }
+
+              if (dado === "description") {
+                const text = document.createElement("p");
+                text.className = "text secundario content fundo justify";
+                text.textContent = value;
+                info.innerHTML = "";
+                info.appendChild(text);
+              } else {
+                info.textContent = value;
+              }
+            }
+          } else {
+            info.textContent = value;
+          }
+        }
+      } else {
+        create_popup(response.title, response.text);
+      }
+    });
+}
+
+function config_popup_routes_vehicle(surname_vehicle) {
+  const name_line = document.getElementById("interface_nome").textContent;
+  const model_rota = models.querySelector("#model_interface_rota");
+  data = { principal: [name_line, surname_vehicle] };
+
+  fetch("/get_interface-option_route_vehicle" + generate_url_dict(data), {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const data = response.data;
+        const container = document.getElementById(
+          "vehicle_utilities_routes_container"
+        );
+        if (data.length) {
+          for (index in data) {
+            const route = model_rota.cloneNode(true);
+            route.querySelector("div.popup__input_big").classList.add("max");
+            route.querySelector("p.display").classList.add("min");
+            route.id = `${container.id}-rota_${index}`;
+
+            ids = route.querySelectorAll(`[id*="${model_rota.id}"]`);
+            ids.forEach((value) => {
+              value.id = value.id.replace(model_rota.id, route.id);
+            });
+
+            const dados = data[index];
+            for (dado in dados) {
+              route.querySelector(`[id*="${dado}"]`).textContent = dados[dado];
+            }
+
+            if (index) {
+              let qnt = 0;
+              const dados_ant = data[index - 1];
+              for (num in dados_ant) {
+                if (dados_ant[num] === dados[num]) {
+                  qnt++;
+                }
+              }
+
+              if (qnt === Object.keys(dados).length) {
+                const route_ant = document.getElementById(
+                  `${container.id}-rota_${index - 1}`
+                );
+                const span_ant = route_ant.querySelector("span");
+                if (!span_ant.textContent) {
+                  span_ant.textContent = 0;
+                }
+                route.querySelector("span").textContent =
+                  parseInt(span_ant.textContent) + 1;
+              }
+            }
+
+            route.classList.remove("inactive");
+            container.appendChild(route);
+          }
+        } else {
+          const text = document.createElement("p");
+          text.className = "text info center fundo cinza";
+          text.textContent = "Nenhuma Rota Encontrada";
+          container.appendChild(text);
+        }
       } else {
         create_popup(response.title, response.text);
       }
@@ -241,8 +455,10 @@ function loadInterfaceRoutes(name_line) {
           }
           if (desativas.length) {
             local_desativas.classList.remove("inactive");
-            division_desativas.classList.remove("inactive");
             title_desativas.classList.remove("inactive");
+            if (ativas.length) {
+              division_desativas.classList.remove("inactive");
+            }
           }
           load_route(desativas, local_desativas);
         }
@@ -258,6 +474,7 @@ function config_popup_route(obj_click, data = false) {
     data = return_data_route(obj_click, (format_dict_url = true));
   }
   document.getElementById("config_route_pos").textContent = data.pos;
+  close_popup("vehicle_utilities_routes");
   close_popup("config_point");
 
   fetch("/get_route" + generate_url_dict(data), { method: "GET" })
@@ -378,7 +595,7 @@ function config_popup_route(obj_click, data = false) {
             if (role === "motorista") {
               icon = relacao.querySelector("i");
               icon.classList.add("inactive");
-              if (relacao && relacao !== "membro") {
+              if (response.relacao && response.relacao !== "membro") {
                 icon.classList.remove("inactive");
               }
             } else {
@@ -479,7 +696,7 @@ function config_popup_relationship(data) {
 function return_data_route(obj_model = false, format_dict_url = false) {
   const name_line = document.getElementById("interface_nome").textContent;
   if (obj_model) {
-    var surname = extract_info(obj_model, "surname");
+    var surname = extract_info(obj_model, "apelido");
     var shift = extract_info(obj_model, "turno");
     var time_par = extract_info(obj_model, "horario_partida");
     var time_ret = extract_info(obj_model, "horario_retorno");
@@ -494,7 +711,6 @@ function return_data_route(obj_model = false, format_dict_url = false) {
       "config_route_horario_retorno"
     ).textContent;
     var pos = document.getElementById("config_route_pos").textContent;
-    console.log(pos);
   }
 
   if (format_dict_url) {

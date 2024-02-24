@@ -14,19 +14,19 @@ app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/busstup'
 app.config['SQLALCHEMY_BINDS'] = {
-    'db_session': 'mysql+pymysql://root@localhost/busstup_session'
+  'db_session': 'mysql+pymysql://root@localhost/busstup_session'
 }
 
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_size': 5,
-    'max_overflow': 5   
+  'pool_size': 5,
+  'max_overflow': 5   
 }
 
 app.config['SQLALCHEMY_BINDS_OPTIONS'] = {
-    'db_session': {
-        'pool_size': 5,
-        'max_overflow': 2
-    }
+  'db_session': {
+    'pool_size': 5,
+    'max_overflow': 2
+  }
 }
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -85,20 +85,20 @@ app.config['CELERY_BROKER_URL'] = 'pyamqp://guest:guest@localhost//'
 app.config['CELERY_RESULT_BACKEND'] = 'rpc://'
 
 def make_celery(app):
-    celery = Celery(
-        'BussTup',
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
-    )
-    celery.conf.update(app.config)
+  celery = Celery(
+    'BussTup',
+    backend=app.config['CELERY_RESULT_BACKEND'],
+    broker=app.config['CELERY_BROKER_URL']
+  )
+  celery.conf.update(app.config)
 
-    class ContextTask(celery.Task):
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return self.run(*args, **kwargs)
+  class ContextTask(celery.Task):
+    def __call__(self, *args, **kwargs):
+      with app.app_context():
+        return self.run(*args, **kwargs)
 
-    celery.Task = ContextTask
-    return celery
+  celery.Task = ContextTask
+  return celery
 
 celery = make_celery(app)
 limiter = Limiter(get_remote_address, app=app, storage_uri="memory://")

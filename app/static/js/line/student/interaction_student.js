@@ -28,6 +28,16 @@ function action_popup(popup, card, id, obj_click) {
     document.getElementById("config_rel_point_route_ordem").textContent =
       extract_info(obj_click, "number");
     config_popup_relationship(data);
+  } else if (id === "aparence_vehicle") {
+    const surname_vehicle = extract_info(obj_click, "surname");
+    document.getElementById("aparence_vehicle_surname").textContent =
+      surname_vehicle;
+    config_popup_aparence(surname_vehicle);
+  } else if ("vehicle_utilities_routes") {
+    const surname_vehicle = extract_info(obj_click, "surname");
+    document.getElementById("vehicle_utilities_routes_surname").textContent =
+      surname_vehicle;
+    config_popup_routes_vehicle(surname_vehicle);
   }
 }
 

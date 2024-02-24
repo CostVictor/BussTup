@@ -406,6 +406,10 @@ body {
   margin: calc(1vw + 1vh + 1vmin) 0;
 }
 
+.page__division.min_space {
+  margin: calc(0.3vw + 0.3vh + 1vmin) 0;
+}
+
 .page__division.aba {
   margin: calc(1vw + 1vh + 1vmin) calc(0.5vw + 0.5vh + 1vmin);
 }
