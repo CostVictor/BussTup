@@ -37,6 +37,8 @@
     {% include "/popups/line/popup_index.html" %}
     {% if role == 'motorista' %}
     {% include "/popups/line/popup_driver.html" %}
+    {% else %}
+    {% include "/popups/line/popup_student.html" %}
     {% endif %}
   </template>
 
@@ -55,10 +57,9 @@
 
   <main id="interface_line_content" class="line__container--content">
     <section id="interface_line_enter" class="-enter- line__container--area">
+      {% if role == 'motorista' %}
       <h2 class="text title">Aviso</h2>
       <p class="text secundario fundo cinza">Você não participa desta linha.</p>
-
-      {% if role == 'motorista' %}
       <p class="text secundario fundo margin_bottom">Solicite entrada para conseguir interagir:</p>
       <div class="page__container justify">
         <div class="line__container--btn add aba" onclick="open_popup('indisponivel')">
@@ -67,10 +68,12 @@
       </div>
 
       {% else %}
-      <p class="text secundario fundo margin_bottom">Cadastre-se em uma rota para participar:</p>
+      <h2 class="text title">Ajuda</h2>
+      <p class="text secundario fundo cinza">Parece que você não participa desta linha. Deixe-nos ajudar!!</p>
+      <p class="text secundario fundo margin_bottom">Cadastre-se em uma rota com nosso Assistente de Cadastro:</p>
       <div class="page__container justify">
-        <div class="line__container--btn add aba" onclick="">
-          <p class="line__text">Cadastrar</p>
+        <div class="line__container--btn add aba" onclick="check_state(true, false)">
+          <p class="line__text">Cadastrar com assistência</p>
         </div>
       </div>
 

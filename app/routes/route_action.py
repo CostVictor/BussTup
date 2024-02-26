@@ -1,6 +1,7 @@
-from flask_security import login_user, logout_user, login_required
+from flask_security import login_user, logout_user, login_required, roles_required
 from app import app, limiter
 from flask import request, jsonify
+from app.utilities import *
 from app.database import *
 import bcrypt
 
@@ -41,3 +42,115 @@ def autenticar_usuario():
       return jsonify({'error': False, 'redirect': 'page_user'})
     
   return jsonify({'error': True, 'title': 'Falha de Login', 'text': 'Verifique suas credenciais e tente novamente.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~ Assistance ~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/help_student/<name_line>", methods=['GET'])
+@login_required
+@roles_required("aluno")
+def assistência_aluno(name_line):
+  linha = Linha.query.filter_by(nome=name_line).first()
+  not_dis = Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first()
+  user = return_my_user()
+
+  if linha and user and not not_dis:
+    retorno = {'error': False, 'finished': False}
+    pass_fixed = Passagem.query.filter_by(
+      passagem_fixa=True,
+      passagem_contraturno=False
+    ).all()
+
+    if not pass_fixed:
+      retorno['popup'] = 'new'
+      rotas_shift = return_options_route(linha, user)
+
+      if rotas_shift:
+        retorno['data'] = rotas_shift
+      else:
+        return jsonify({'error': True, 'title': 'Rota Não Identificada', 'text': 'Parece que esta linha não possui nenhuma rota com veículo e motorista disponíveis no momento.'})
+    
+    elif len(pass_fixed) == 1:
+      rota = pass_fixed[0].parada.rota
+      if rota.linha.codigo == linha.codigo:
+        retorno['popup'] = 'blocked'
+        retorno['data'] = []
+
+        onibus = rota.onibus
+        retorno['data'].append({
+          'motorista': onibus.motorista.nome,
+          'apelido': onibus.apelido,
+          'turno': rota.turno,
+          'horario_partida': format_time(rota.horario_partida),
+          'horario_retorno': format_time(rota.horario_retorno),
+          'quantidade': count_part_route(rota, formated=False)
+        })
+      
+      else:
+        retorno['popup'] = 'change'
+        rotas = return_options_route(linha, user)
+        if rotas:
+          retorno['data'] = rotas
+        else:
+          return jsonify({'error': True, 'title': 'Rota Não Identificada', 'text': 'Parece que esta linha não possui nenhuma rota com veículo e motorista disponíveis no momento.'})
+    
+    elif len(pass_fixed) == 2:
+      rota = pass_fixed[0].parada.rota
+      if rota.linha.codigo == linha.codigo:
+        contraturno = Passagem.query.filter_by(
+          passagem_fixa=True,
+          passagem_contraturno=True
+        ).first()
+
+        if contraturno:
+          retorno['finished'] = True
+        else:
+          shift_query = ['Matutino', 'Vespertino', 'Noturno']
+          shift_query.remove(user.turno)
+
+          retorno['popup'] = 'contraturno'
+          retorno['data'] = {}
+
+          for shift in shift_query:
+            if shift not in retorno['data']:
+              retorno['data'][shift] = []
+            
+            rotas_shift = (
+              db.session.query(Rota, Onibus)
+              .filter(db.and_(
+                db.not_(Onibus.Motorista_id.is_(None)),
+                Rota.Onibus_id == Onibus.id,
+                Rota.Linha_codigo == linha.codigo,
+                Rota.turno == shift
+              ))
+              .order_by(Rota.horario_partida)
+              .all()
+            )
+
+            for value in rotas_shift:
+              rota_shift, onibus = value
+              motorista_nome = onibus.motorista.nome
+
+              dados = {
+                'motorista': motorista_nome,
+                'apelido': onibus.apelido,
+                'turno': rota_shift.turno,
+                'horario_partida': format_time(rota_shift.horario_partida),
+                'horario_retorno': format_time(rota_shift.horario_retorno),
+                'quantidade': count_part_route(rota_shift, formated=False)
+              }
+              retorno['data'][shift].append(dados)
+      
+      else:
+        retorno['popup'] = 'change'
+        rotas = return_options_route(linha, user)
+        if rotas:
+          retorno['data'] = rotas
+        else:
+          return jsonify({'error': True, 'title': 'Rota Não Identificada', 'text': 'Parece que esta linha não possui nenhuma rota com veículo e motorista disponíveis no momento.'})
+
+    return jsonify(retorno)
+  
+  return jsonify({'error': True})

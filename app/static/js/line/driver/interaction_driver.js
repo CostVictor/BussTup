@@ -273,53 +273,10 @@ function config_popup_point(name_point) {
         document
           .getElementById("config_point_utilizacao_btn")
           .querySelector("p").textContent = utilizacao.quantidade;
-        const model_rota = models.querySelector("#model_interface_rota");
         const utilizacao_container = document.getElementById(
           "config_point_utilizacao_container"
         );
-        utilizacao_container.innerHTML = "";
-
-        for (index in utilizacao.rotas) {
-          const route = model_rota.cloneNode(true);
-          route.querySelector("div.popup__input_big").classList.add("max");
-          route.querySelector("p.display").classList.add("min");
-          route.id = `${utilizacao_container.id}-rota_${index}`;
-
-          ids = route.querySelectorAll('[id*="interface_model_rota"]');
-          ids.forEach((value) => {
-            value.id = value.id.replace(model_rota.id, route.id);
-          });
-
-          const dados = utilizacao.rotas[index];
-          for (dado in dados) {
-            route.querySelector(`[id*="${dado}"]`).textContent = dados[dado];
-          }
-
-          if (index) {
-            let qnt = 0;
-            const dados_ant = utilizacao.rotas[index - 1];
-            for (num in dados_ant) {
-              if (dados_ant[num] === dados[num]) {
-                qnt++;
-              }
-            }
-
-            if (qnt === Object.keys(dados).length) {
-              const route_ant = document.getElementById(
-                `${utilizacao_container.id}-rota_${index - 1}`
-              );
-              const span_ant = route_ant.querySelector("span");
-              if (!span_ant.textContent) {
-                span_ant.textContent = 0;
-              }
-              route.querySelector("span").textContent =
-                parseInt(span_ant.textContent) + 1;
-            }
-          }
-
-          route.classList.remove("inactive");
-          utilizacao_container.appendChild(route);
-        }
+        criar_rota(utilizacao.rotas, utilizacao_container, true)
 
         for (turno in turnos) {
           const btn = document.getElementById(`config_point_${turno}_btn`);

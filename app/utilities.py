@@ -5,11 +5,6 @@ from app.database import *
 import bcrypt
 
 
-'''~~~~~~~~~~~~~~~~~~~~~~~~'''
-''' ~~~~~~~~ Edit ~~~~~~~~ '''
-'''~~~~~~~~~~~~~~~~~~~~~~~~'''
-
-
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~~ Format ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -190,6 +185,37 @@ def return_route(code_line, surname, shift, time_par, time_ret, pos):
       return False
     return rota[0]
   return None
+
+
+def return_options_route(linha, user):
+  retorno = []
+  rotas = (
+    db.session.query(Rota, Onibus)
+    .filter(db.and_(
+      Rota.turno == user.turno,
+      Rota.Linha_codigo == linha.codigo,
+      Rota.Onibus_id == Onibus.id,
+      db.not_(Onibus.Motorista_id.is_(None))
+    ))
+    .order_by(Rota.horario_partida)
+    .all()
+  )
+
+  for value in rotas:
+    rota, onibus = value
+    motorista_nome = onibus.motorista.nome
+
+    dados = {
+      'motorista': motorista_nome,
+      'apelido': onibus.apelido,
+      'turno': rota.turno,
+      'horario_partida': format_time(rota.horario_partida),
+      'horario_retorno': format_time(rota.horario_retorno),
+      'quantidade': count_part_route(rota, formated=False)
+    }
+    retorno.append(dados)
+  
+  return retorno
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''

@@ -1,0 +1,112 @@
+<section id="help_me_cadastro_new" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Assistente</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div id="help_me_cadastro_new_msg">
+        <h3 class="popup__text info"><> Chequei aqui e parece que você não possui nenhum vínculo.</h3>
+        <h1 class="page__division"></h1>
+        <h3 class="popup__text info"><> Vamos começar pelos seus pontos fixos! Filtrei as rotas com base em seu turno; escolha a rota que mais lhe agrada e selecione seus locais:</h3>
+      </div>
+
+      <div id="help_me_cadastro_new_msg_reload" class="inactive">
+        <h3 class="popup__text info"><> Sem pressa! Estou aqui o dia todo.</h3>
+        <h1 class="page__division"></h1>
+      </div>
+      <div id="help_me_cadastro_new_container" class="scroll_vertical popup__container--scroll principal_big margin_top"></div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_help()">Parar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="help_me_cadastro_change" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Assistente</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div id="help_me_cadastro_change_msg">
+        <h3 class="popup__text info"><> Chequei aqui e parece que você já possui vínculo com outra linha.</h3>
+        <h1 class="page__division"></h1>
+        <h3 class="popup__text info"><> Mas deixa comigo, cuidarei de tudo! Selecione sua nova rota fixa:</h3>
+      </div>
+
+      <div id="help_me_cadastro_change_msg_reload">
+        <h3 class="popup__text info"><> Sem pressa! Procure a opção que melhor se encaixa em seu dia a dia.</h3>
+        <h1 class="page__division"></h1>
+      </div>
+      <div id="help_me_cadastro_change_container" class="scroll_vertical popup__container--scroll principal_big margin_top"></div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_help()">Parar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="help_me_cadastro_blocked" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Assistente</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div id="help_me_cadastro_blocked_msg">
+        <h3 class="popup__text info"><> Você preencheu apenas um dos seus pontos fixos. Não é possível definir pontos fixos em rotas diferentes.</h3>
+        <h1 class="page__division"></h1>
+        <h3 class="popup__text info"><> Peço que defina os dois locais para que possamos prosseguir:</h3>
+      </div>
+      <div id="help_me_cadastro_blocked_msg_reload">
+        <h3 class="popup__text info"><> Lembre-se, os pontos fixos devem ser definidos na mesma rota.</h3>
+        <h1 class="page__division"></h1>
+      </div>
+      <div id="help_me_cadastro_blocked_container" class="scroll_vertical popup__container--scroll principal_big margin_top"></div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_help()">Parar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="help_me_cadastro_contraturno" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Assistente</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div id="help_me_cadastro_contraturno_msg">
+        <h3 class="popup__text info"><> Estamos quase lá! Agora, escolha uma rota para ser o seu contraturno.</h3>
+        <h1 class="page__division"></h1>
+        <h3 class="popup__text info"><> Estas são as opções disponíveis:</h3>
+      </div>
+
+      <div id="help_me_cadastro_contraturno_msg_reload">
+        <h3 class="popup__text info"><> Ficarei no aguardo! Lembre-se de que para definir o contraturno, basta clicar no botão "Definir Contraturno" ao final do pop-up da rota.</h3>
+        <h1 class="page__division"></h1>
+      </div>
+
+      <div class="scroll_vertical popup__container--scroll principal_big margin_top">
+        <h3 id="op_1" class="inactive"></h3>
+        <div id="op_1_container" class="inactive"></div>
+        <h1 class="page__division"></h1>
+        <h3 id="op_2" class="inactive"></h3>
+        <div id="op_2_container" class="inactive"></div>
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_help()">Parar</button>
+    </footer>
+  </div>
+</section>

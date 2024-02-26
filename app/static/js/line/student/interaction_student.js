@@ -41,6 +41,94 @@ function action_popup(popup, card, id, obj_click) {
   }
 }
 
-function check_state() {
-  close_popup("config_route");
+const local = document.getElementById("popup_local");
+function check_help() {
+  const popups = local.querySelectorAll('section[id*="help_me_cadastro"]');
+  if (popups.length) {
+    return true;
+  }
+  return false;
+}
+
+function close_help() {
+  const popups = local.querySelectorAll('section[id*="help_me_cadastro"]');
+  popups.forEach((popup) => {
+    close_popup(popup.id);
+  });
+}
+
+function check_state(init = false, check = true) {
+  if (check ? check_help() : true) {
+    const name_line = document.getElementById("interface_nome").textContent;
+    fetch(`/help_student/${encodeURIComponent(name_line)}`, {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (!response.error) {
+          const data = response.data;
+          const type = response.popup;
+
+          if (!response.finished) {
+            let popup_id = `help_me_cadastro_${type}`;
+            if (!local.querySelector(`#${popup_id}`)) {
+              close_help();
+              open_popup(popup_id);
+            } else {
+              document.getElementById(popup_id + '_msg').classList.add('inactive')
+              document.getElementById(popup_id + '_msg_reload').classList.remove('inactive')
+            }
+
+            if (type !== "contraturno") {
+              const container = document.getElementById(
+                popup_id + "_container"
+              );
+              criar_rota(data, container, true);
+            } else {
+              shifts = Object.keys(data);
+              const op_1 = document.getElementById("op_1");
+              const op_1_container = document.getElementById("op_1_container");
+
+              const op_2 = document.getElementById("op_2");
+              const op_2_container = document.getElementById("op_2_container");
+
+              op_1.textContent = shifts[0];
+              criar_rota(data[shifts[0]], op_1_container, true);
+
+              op_2.textContent = shifts[1];
+              criar_rota(data[shifts[1]], op_2_container, true);
+            }
+          } else {
+            close_help();
+            if (init) {
+              create_popup(
+                "Assistente",
+                "<> Você já fez todas as configurações necessárias!",
+                "Ok",
+                "success"
+              );
+            } else {
+              create_popup(
+                "Assistente",
+                "<> Prontinho! Você já fez todas as configurações necessárias. Agora, aproveite ao máximo os nossos recursos!",
+                "Ok",
+                "success"
+              );
+            }
+          }
+        } else {
+          close_help();
+          create_popup(response.title, response.text);
+        }
+      });
+
+    if (init) {
+      const msg_help = document.getElementById("interface_line_enter");
+      msg_help.classList.add("inactive");
+    } else {
+      close_popup("config_route");
+    }
+  } else {
+    close_popup("config_route");
+  }
 }

@@ -297,9 +297,57 @@ function config_popup_aparence(surname_vehicle) {
     });
 }
 
+function criar_rota(list, container, format_min = false) {
+  const model_rota = models.querySelector("#model_interface_rota");
+  container.innerHTML = "";
+
+  for (index in list) {
+    const route = model_rota.cloneNode(true);
+    if (format_min) {
+      route.querySelector("div.popup__input_big").classList.add("max");
+      route.querySelector("p.display").classList.add("min");
+    }
+    route.id = `${container.id}-rota_${index}`;
+
+    ids = route.querySelectorAll(`[id*="${model_rota.id}"]`);
+    ids.forEach((value) => {
+      value.id = value.id.replace(model_rota.id, route.id);
+    });
+
+    const dados = list[index];
+    for (dado in dados) {
+      route.querySelector(`[id*="${dado}"]`).textContent = dados[dado];
+    }
+
+    if (index) {
+      let qnt = 0;
+      const dados_ant = list[index - 1];
+      for (num in dados_ant) {
+        if (dados_ant[num] === dados[num]) {
+          qnt++;
+        }
+      }
+
+      if (qnt === Object.keys(dados).length) {
+        const route_ant = document.getElementById(
+          `${container.id}-rota_${index - 1}`
+        );
+        const span_ant = route_ant.querySelector("span");
+        if (!span_ant.textContent) {
+          span_ant.textContent = 0;
+        }
+        route.querySelector("span").textContent =
+          parseInt(span_ant.textContent) + 1;
+      }
+    }
+
+    route.classList.remove("inactive");
+    container.appendChild(route);
+  }
+}
+
 function config_popup_routes_vehicle(surname_vehicle) {
   const name_line = document.getElementById("interface_nome").textContent;
-  const model_rota = models.querySelector("#model_interface_rota");
   data = { principal: [name_line, surname_vehicle] };
 
   fetch("/get_interface-option_route_vehicle" + generate_url_dict(data), {
@@ -313,47 +361,7 @@ function config_popup_routes_vehicle(surname_vehicle) {
           "vehicle_utilities_routes_container"
         );
         if (data.length) {
-          for (index in data) {
-            const route = model_rota.cloneNode(true);
-            route.querySelector("div.popup__input_big").classList.add("max");
-            route.querySelector("p.display").classList.add("min");
-            route.id = `${container.id}-rota_${index}`;
-
-            ids = route.querySelectorAll(`[id*="${model_rota.id}"]`);
-            ids.forEach((value) => {
-              value.id = value.id.replace(model_rota.id, route.id);
-            });
-
-            const dados = data[index];
-            for (dado in dados) {
-              route.querySelector(`[id*="${dado}"]`).textContent = dados[dado];
-            }
-
-            if (index) {
-              let qnt = 0;
-              const dados_ant = data[index - 1];
-              for (num in dados_ant) {
-                if (dados_ant[num] === dados[num]) {
-                  qnt++;
-                }
-              }
-
-              if (qnt === Object.keys(dados).length) {
-                const route_ant = document.getElementById(
-                  `${container.id}-rota_${index - 1}`
-                );
-                const span_ant = route_ant.querySelector("span");
-                if (!span_ant.textContent) {
-                  span_ant.textContent = 0;
-                }
-                route.querySelector("span").textContent =
-                  parseInt(span_ant.textContent) + 1;
-              }
-            }
-
-            route.classList.remove("inactive");
-            container.appendChild(route);
-          }
+          criar_rota(data, container, true);
         } else {
           const text = document.createElement("p");
           text.className = "text info center fundo cinza";
@@ -367,49 +375,6 @@ function config_popup_routes_vehicle(surname_vehicle) {
 }
 
 function loadInterfaceRoutes(name_line) {
-  const model_route = models.querySelector("#model_interface_rota");
-  function load_route(list_itens, container_include) {
-    for (index in list_itens) {
-      const route = model_route.cloneNode(true);
-      route.id = `${container_include.id}-rota_${index}`;
-
-      ids = route.querySelectorAll(`[id*="${model_route.id}"]`);
-      ids.forEach((element) => {
-        element.id = element.id.replace(model_route.id, route.id);
-      });
-
-      const dados = list_itens[index];
-      for (dado in dados) {
-        const info = route.querySelector(`[id*="${dado}"]`);
-        info.textContent = dados[dado];
-      }
-
-      if (index) {
-        let qnt = 0;
-        const dados_ant = list_itens[index - 1];
-        for (num in dados_ant) {
-          if (dados_ant[num] === dados[num]) {
-            qnt++;
-          }
-        }
-
-        if (qnt === Object.keys(dados).length) {
-          const route_ant = document.getElementById(
-            `${container_include.id}-rota_${index - 1}`
-          );
-          const span_ant = route_ant.querySelector("span");
-          if (!span_ant.textContent) {
-            span_ant.textContent = 0;
-          }
-          route.querySelector("span").textContent =
-            parseInt(span_ant.textContent) + 1;
-        }
-      }
-      route.classList.remove("inactive");
-      container_include.appendChild(route);
-    }
-  }
-
   fetch(`/get_interface-routes/${encodeURIComponent(name_line)}`, {
     method: "GET",
   })
@@ -419,7 +384,6 @@ function loadInterfaceRoutes(name_line) {
         const local_ativas = document.getElementById("interface_rotas_ativas");
         const ativas = response.ativas;
 
-        local_ativas.innerHTML = "";
         if (response.role == "motorista") {
           const local_desativas = document.getElementById(
             "interface_rotas_desativas"
@@ -432,7 +396,6 @@ function loadInterfaceRoutes(name_line) {
           );
           const desativas = response.desativas;
 
-          local_desativas.innerHTML = "";
           local_desativas.classList.add("inactive");
           division_desativas.classList.add("inactive");
           title_desativas.classList.add("inactive");
@@ -460,9 +423,9 @@ function loadInterfaceRoutes(name_line) {
               division_desativas.classList.remove("inactive");
             }
           }
-          load_route(desativas, local_desativas);
+          criar_rota(desativas, local_desativas);
         }
-        load_route(ativas, local_ativas);
+        criar_rota(ativas, local_ativas);
       } else {
         create_popup(response.title, response.text, "Voltar");
       }
