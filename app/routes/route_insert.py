@@ -289,3 +289,222 @@ def create_stop():
               print(f'Erro ao criar parada: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a parada.'})
+
+
+@app.route("/create_pass_fixed", methods=['POST'])
+@login_required
+@roles_required("aluno")
+def create_pass_fixed():
+  data = request.get_json()
+  if data and 'name_line' in data and 'name_point' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data and 'type' in data:
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    user = return_my_user()
+
+    hr_par = data['time_par']; hr_ret = data['time_ret']
+    surname = data['surname']; tipo = data['type'].lower()
+    shift = data['shift']
+    dis = ['partida', 'retorno']
+    
+    if linha and user and hr_par and hr_ret and surname and shift and tipo in dis:
+      route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
+      if route is not None:
+        if not route:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+        dis.remove(tipo)
+        reverse = dis[0]
+        check_passagem = (
+          db.session.query(Passagem).join(Parada)
+          .filter(db.and_(
+            Parada.tipo == tipo,
+            Passagem.Parada_codigo == Parada.codigo,
+            Passagem.Aluno_id == user.id,
+            Passagem.passagem_fixa == True,
+            Passagem.passagem_contraturno == False
+          ))
+          .first()
+        )
+        parada = (
+          db.session.query(Parada).join(Ponto)
+          .filter(db.and_(
+            Ponto.nome == data['name_point'],
+            Parada.Ponto_id == Ponto.id,
+            Parada.Rota_codigo == route.codigo,
+            Parada.tipo == tipo
+          ))
+          .first()
+        )
+
+        if parada:
+          info = {
+            'passagem_fixa': True,
+            'passagem_contraturno': False,
+            'Parada_codigo': parada.codigo,
+            'Aluno_id': user.id
+          }
+
+          new_passagem = Passagem(**info)
+          if check_passagem:
+            parada_atual = check_passagem.parada
+            rota_atual = parada_atual.rota
+            if rota_atual.codigo == route.codigo:
+              ponto_atual = parada_atual.ponto
+
+              if ponto_atual.nome != data['name_point']:
+                try:
+                  db.session.delete(check_passagem)
+
+                  with db.session.begin_nested():
+                    db.session.add(new_passagem)
+                  db.session.commit()
+
+                  return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong>. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong>, caso não possua.'})
+                
+                except Exception as e:
+                  db.session.rollback()
+                  print(f'Erro ao criar a passagem: {str(e)}')
+            
+            else:
+              code_line = rota_atual.linha.codigo
+              passagens = (
+                db.session.query(Passagem)
+                .filter(db.and_(
+                  Passagem.passagem_fixa == True,
+                  Passagem.passagem_contraturno == False if linha.codigo == code_line else True,
+                  Passagem.Aluno_id == user.id
+                ))
+                .all()
+              )
+              try:
+                for passagem in passagens:
+                  db.session.delete(passagem)
+
+                with db.session.begin_nested():
+                  db.session.add(new_passagem)
+                db.session.commit()
+
+                if linha.codigo == code_line:
+                  return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; suas relações fixas na rota anterior foram removidas. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta rota, caso não possua.'})
+
+                return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; esta linha foi definida como sua linha atual, e todos os vínculos com a linha anterior foram removidos. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta nova rota, caso não possua.'})
+
+              except Exception as e:
+                db.session.rollback()
+                print(f'Erro ao criar a passagem: {str(e)}')
+          
+          else:
+            check_passagem = (
+              db.session.query(Passagem).join(Parada)
+              .filter(db.and_(
+                Parada.tipo == reverse,
+                Passagem.Parada_codigo == Parada.codigo,
+                Passagem.Aluno_id == user.id,
+                Passagem.passagem_fixa == True,
+                Passagem.passagem_contraturno == False
+              ))
+              .first()
+            )
+            text = f'Você definiu seu ponto fixo de <strong>{tipo.capitalize()}</strong>. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong>, caso não possua.'
+
+            try:
+              if check_passagem:
+                rota_check = check_passagem.parada.rota
+                if rota_check.codigo != route.codigo:
+                  db.session.delete(check_passagem)
+                  if rota_check.linha.codigo != linha.codigo:
+                    contraturno = (
+                      Passagem.query.filter_by(
+                        Aluno_id=user.id,
+                        passagem_fixa=True,
+                        passagem_contraturno=True
+                      )
+                      .first()
+                    )
+                    if contraturno:
+                      db.session.delete(contraturno)
+                    text = f'Você definiu seu ponto fixo de <strong>{tipo.capitalize()}</strong> em outra linha; todas os seus vínculos com a linha anterior foram removidos. Defina seu novo ponto de <strong>{reverse.capitalize()}</strong> e <strong>Contraturno</strong> nesta nova linha.'
+                  else:
+                    text = f'Você definiu seu ponto fixo de <strong>{tipo.capitalize()}</strong> em outra rota; seu ponto de <strong>{reverse.capitalize()}</strong> na rota anterior foi removido.'
+
+              db.session.add(new_passagem)
+              db.session.commit()
+              return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': text})
+            
+            except Exception as e:
+              db.session.rollback()
+              print(f'Erro ao criar a passagem: {str(e)}')
+    
+  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a passagem na rota.'})
+
+
+@app.route("/create_pass_contraturno", methods=['POST'])
+@login_required
+@roles_required("aluno")
+def create_pass_contraturno():
+  data = request.get_json()
+  if data and 'name_line' in data and 'name_point' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    user = return_my_user()
+
+    hr_par = data['time_par']; hr_ret = data['time_ret']
+    surname = data['surname']; shift = data['shift']
+    
+    if linha and user and hr_par and hr_ret and surname and shift:
+      route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
+      if route is not None:
+        if not route:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+        check_passagem = (
+          Passagem.query.filter_by(
+            passagem_fixa=True,
+            passagem_contraturno=True,
+            Aluno_id=user.id
+          )
+          .first()
+        )
+        parada = (
+          db.session.query(Parada).join(Ponto)
+          .filter(db.and_(
+            Ponto.nome == data['name_point'],
+            Parada.Ponto_id == Ponto.id,
+            Parada.Rota_codigo == route.codigo
+          ))
+          .first()
+        )
+
+        if parada:
+          info = {
+            'passagem_fixa': True,
+            'passagem_contraturno': True,
+            'Parada_codigo': parada.codigo,
+            'Aluno_id': user.id
+          }
+
+          new_contraturno = Passagem(**info)
+          if check_passagem:
+            try:
+              db.session.delete(check_passagem)
+              db.session.commit()
+
+              with db.session.begin_nested():
+                db.session.add(new_contraturno)
+              db.session.commit()
+
+              return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto de contraturno.'})
+            
+            except Exception as e:
+              db.session.rollback()
+              print(f'Erro ao criar a passagem: {str(e)}')
+          
+          else:
+            try:
+              db.session.add(new_contraturno)
+              db.session.commit()
+              return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': ''})
+            
+            except Exception as e:
+              db.session.rollback()
+              print(f'Erro ao criar a passagem: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a passagem na rota.'})

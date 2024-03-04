@@ -6,13 +6,13 @@
 
     <div class="popup__container--content">
       <div id="help_me_cadastro_new_msg">
-        <h3 class="popup__text info"><> Chequei aqui e parece que você não possui nenhum vínculo.</h3>
+        <p class="popup__text secundario justify"><> Chequei aqui e parece que você não possui nenhum vínculo.</p>
         <h1 class="page__division"></h1>
-        <h3 class="popup__text info"><> Vamos começar pelos seus pontos fixos! Filtrei as rotas com base em seu turno; escolha a rota que mais lhe agrada e selecione seus locais:</h3>
+        <p class="popup__text secundario justify"><> Vamos começar pelos seus pontos fixos! Filtrei as rotas com base em seu turno; escolha a rota que mais lhe agrada e selecione seus locais:</p>
       </div>
 
       <div id="help_me_cadastro_new_msg_reload" class="inactive">
-        <h3 class="popup__text info"><> Sem pressa! Estou aqui o dia todo.</h3>
+        <p class="popup__text secundario justify"><> Sem pressa! Estou aqui o dia todo.</p>
         <h1 class="page__division"></h1>
       </div>
       <div id="help_me_cadastro_new_container" class="scroll_vertical popup__container--scroll principal_big margin_top"></div>
@@ -33,13 +33,13 @@
 
     <div class="popup__container--content">
       <div id="help_me_cadastro_change_msg">
-        <h3 class="popup__text info"><> Chequei aqui e parece que você já possui vínculo com outra linha.</h3>
+        <p class="popup__text secundario justify"><> Chequei aqui e parece que você já possui vínculo com outra linha.</p>
         <h1 class="page__division"></h1>
-        <h3 class="popup__text info"><> Mas deixa comigo, cuidarei de tudo! Selecione sua nova rota fixa:</h3>
+        <p class="popup__text secundario justify"><> Mas deixa comigo, cuidarei de tudo! Selecione sua nova rota fixa:</p>
       </div>
 
-      <div id="help_me_cadastro_change_msg_reload">
-        <h3 class="popup__text info"><> Sem pressa! Procure a opção que melhor se encaixa em seu dia a dia.</h3>
+      <div id="help_me_cadastro_change_msg_reload" class="inactive">
+        <p class="popup__text secundario justify"><> Sem pressa! Procure a opção que melhor se encaixa em seu dia a dia.</p>
         <h1 class="page__division"></h1>
       </div>
       <div id="help_me_cadastro_change_container" class="scroll_vertical popup__container--scroll principal_big margin_top"></div>
@@ -60,12 +60,13 @@
 
     <div class="popup__container--content">
       <div id="help_me_cadastro_blocked_msg">
-        <h3 class="popup__text info"><> Você preencheu apenas um dos seus pontos fixos. Não é possível definir pontos fixos em rotas diferentes.</h3>
+        <p class="popup__text secundario justify"><> Você preencheu apenas um dos seus pontos fixos. Não é possível definir pontos fixos em rotas diferentes.</p>
         <h1 class="page__division"></h1>
-        <h3 class="popup__text info"><> Peço que defina os dois locais para que possamos prosseguir:</h3>
+        <p class="popup__text secundario justify"><> Peço que defina os dois locais para que possamos prosseguir:</p>
       </div>
-      <div id="help_me_cadastro_blocked_msg_reload">
-        <h3 class="popup__text info"><> Lembre-se, os pontos fixos devem ser definidos na mesma rota.</h3>
+      
+      <div id="help_me_cadastro_blocked_msg_reload" class="inactive">
+        <p class="popup__text secundario justify"><> Lembre-se, os pontos fixos devem ser definidos na mesma rota.</p>
         <h1 class="page__division"></h1>
       </div>
       <div id="help_me_cadastro_blocked_container" class="scroll_vertical popup__container--scroll principal_big margin_top"></div>
@@ -86,27 +87,55 @@
 
     <div class="popup__container--content">
       <div id="help_me_cadastro_contraturno_msg">
-        <h3 class="popup__text info"><> Estamos quase lá! Agora, escolha uma rota para ser o seu contraturno.</h3>
+        <p class="popup__text secundario justify"><> Estamos quase lá! Agora, escolha uma rota para ser o seu contraturno.</p>
         <h1 class="page__division"></h1>
-        <h3 class="popup__text info"><> Estas são as opções disponíveis:</h3>
+        <p class="popup__text secundario justify"><> Estas são as opções disponíveis:</p>
       </div>
 
       <div id="help_me_cadastro_contraturno_msg_reload">
-        <h3 class="popup__text info"><> Ficarei no aguardo! Lembre-se de que para definir o contraturno, basta clicar no botão "Definir Contraturno" ao final do pop-up da rota.</h3>
+        <p class="popup__text secundario justify"><> Ficarei no aguardo! Lembre-se de que para definir o contraturno, basta clicar no botão "Definir Contraturno" ao final do pop-up da rota.</p>
         <h1 class="page__division"></h1>
       </div>
 
       <div class="scroll_vertical popup__container--scroll principal_big margin_top">
-        <h3 id="op_1" class="inactive"></h3>
+        <p id="op_1" class="inactive"></p>
         <div id="op_1_container" class="inactive"></div>
         <h1 class="page__division"></h1>
-        <h3 id="op_2" class="inactive"></h3>
+        <p id="op_2" class="inactive"></p>
         <div id="op_2_container" class="inactive"></div>
       </div>
     </div>
 
     <footer class="popup__container--footer">
       <button class="popup__btn" onclick="close_help()">Parar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="confirm_register_in_point" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Confirmação</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div id="confirm_register_in_point_msg" class="inactive">
+        <p class="popup__text secundario justify">Seu cadastro será efetuado neste ponto. Você será identificado(a) como participante da linha para os motoristas. Estes terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
+      </div>
+
+      <div id="confirm_register_in_point_change" class="inactive">
+        <p class="popup__text secundario justify">Você já possui um vínculo com este tipo de trajeto em outro ponto/rota desta linha. Ao prosseguir, este ponto será definido como novo local, e o vínculo anterior será removido.</p>
+      </div>
+
+      <div id="confirm_register_in_point_new_line" class="inactive">
+        <p class="popup__text secundario justify">Você possui vínculo com outra linha. Ao prosseguir, todos os vínculos não pertencentes a esta linha serão removidos, e você será cadastrado(a) neste ponto, tornando-se participante da linha. Os motoristas da mesma terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('confirm_register_in_point')">Cancelar</button>
+      <button class="popup__btn" onclick="register_in_point_fixed()">Confirmar</button>
     </footer>
   </div>
 </section>

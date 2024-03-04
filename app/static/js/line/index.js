@@ -625,7 +625,7 @@ function config_popup_relationship(data) {
           const container = document.getElementById(
             `config_rel_point_route_${tipo}_container`
           );
-          create_aluno(alunos, container, model_aluno);
+          criar_aluno(alunos, container, response, model_aluno);
         }
 
         const division = document.getElementById(

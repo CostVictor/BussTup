@@ -272,10 +272,12 @@ function action_container(obj_click, set_limit = false) {
     container.scrollTop = 0;
     icon.classList.add("open");
 
-    if (set_limit) {
-      set_limitScroll(container, set_limit);
-    } else {
-      set_limitScroll(container);
+    if (container.className.includes('scroll')) {
+      if (set_limit) {
+        set_limitScroll(container, set_limit);
+      } else {
+        set_limitScroll(container);
+      }
     }
   }
 
@@ -289,14 +291,12 @@ function action_container(obj_click, set_limit = false) {
     });
   }
 
-  const rolament = container.querySelector("div.scroll_vertical");
-  if (rolament) {
-    rolament.scrollTop = 0;
-  }
-
   elements.forEach((element) => {
     if (element.className.includes("scroll")) {
-      set_limitScroll(element);
+      element.scrollTop = 0;
+      element.classList.remove('inactive')
+      animate_itens(Array.from(element.children))
+      set_limitScroll(element, set_limit ? set_limit : 30);
     }
   });
 }
@@ -317,6 +317,23 @@ function animateIconPassword(obj_click) {
       : "bi bi-eye-fill form__btn--password";
     inputPassword.type = "password";
   }
+}
+
+function popup_enter_animate(popup) {
+  const card = popup.querySelector("div.popup__container");
+  popup.classList.remove("inactive");
+  popup.classList.remove("close");
+  card.classList.remove("close");
+}
+
+function popup_close_animate(popup) {
+  const card = popup.querySelector("div.popup__container");
+  card.classList.add("close");
+  popup.classList.add("close");
+
+  setTimeout(() => {
+    popup.classList.add("inactive");
+  }, 200);
 }
 
 function open_popup(id, obj_click = false) {
@@ -341,12 +358,14 @@ function open_popup(id, obj_click = false) {
     const forms = popup.querySelectorAll("form");
     set_submit_form(forms);
 
+    const list = Array.from(local_popup.children);
+    list.forEach((item) => popup_close_animate(item));
+
     local_popup.appendChild(popup);
     document.body.classList.add("no-scroll");
-
-    popup.classList.remove("inactive");
-    popup.classList.remove("close");
-    card.classList.remove("close");
+    setTimeout(() => {
+      popup_enter_animate(popup);
+    }, 55);
 
     if (!window.location.href.includes("profile")) {
       $(function () {
@@ -365,18 +384,20 @@ function open_popup(id, obj_click = false) {
 function close_popup(id) {
   const popup = local_popup.querySelector(`#${id}`);
   if (popup) {
-    const card = popup.querySelector("div.popup__container");
+    popup_close_animate(popup);
 
-    card.classList.add("close");
-    popup.classList.add("close");
+    const itens = local_popup.querySelectorAll("section");
+    if (itens.length === 1) {
+      document.body.classList.remove("no-scroll");
+    }
 
-    setTimeout(() => {
-      popup.classList.add("inactive");
-      const itens = local_popup.querySelectorAll("section");
-      if (itens.length === 1) {
-        document.body.classList.remove("no-scroll");
-      }
-    }, 150);
+    const list = Array.from(local_popup.children);
+    if (list.length >= 2) {
+      setTimeout(() => {
+        popup_enter_animate(list[list.length - 2]);
+      }, 55);
+    }
+
     setTimeout(() => {
       local_popup.removeChild(popup);
     }, 160);

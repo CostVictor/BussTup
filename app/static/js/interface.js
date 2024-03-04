@@ -152,7 +152,7 @@ function set_limitScroll(element_scroll, size_limit = 30) {
 
   if (element_scroll.childElementCount) {
     if (size_element > maxHeight) {
-      element_scroll.style.minHeight = `${maxHeight}px`;
+      element_scroll.style.minHeight = `${parseInt(maxHeight)}px`;
     } else {
       element_scroll.style.minHeight = `${size_element}px`;
     }
@@ -394,7 +394,6 @@ function closeInterface(type, redirect = false, args = false) {
     case "profile":
       elements = document.querySelectorAll('[class*="-enter-"]');
       animate_itens(elements, "outUp", 0.5, 0, 0.03, 1);
-      console.log(args);
 
       if (args[1]) {
         close_popup("confirm_logout");

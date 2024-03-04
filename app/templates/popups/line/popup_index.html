@@ -26,6 +26,12 @@
           <h1 class="page__division"></h1>
         </div>
 
+        <div id="config_route_aviso_incompleto" class="inactive">
+          <p class="text info center fundo cinza">Cadastro incompleto</p>
+          <p id="config_route_aviso_incompleto_msg" class="text info fundo justify margin_top"></p>
+          <h1 class="page__division"></h1>
+        </div>
+
         <div id="config_route_aviso_contraturno" class="inactive">
           <p class="text info center fundo cinza">Defina seu contraturno</p>
           <p class="text info fundo justify margin_top">Selecione o local a ser utilizado como contraturno na área
@@ -215,7 +221,7 @@
         {% if role == 'motorista' %}
         <h3 class="popup__text question">Alunos</h3>
         <div id="config_rel_point_route_turno_btn" class="page__container interaction pos_relative"
-          onclick="action_container(this, 50)">
+          onclick="action_container(this)">
           <h3 class="text secundario emphasis nowrap">Do turno</h3>
           <h3 id="config_rel_point_route_turno_quantidade" class="text secundario fundo max_width"></h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -226,7 +232,7 @@
         </div>
 
         <div id="config_rel_point_route_contraturno_btn" class="page__container interaction pos_relative"
-          onclick="action_container(this, 50)">
+          onclick="action_container(this)">
           <h3 class="text secundario emphasis nowrap">Contraturno</h3>
           <h3 id="config_rel_point_route_contraturno_quantidade" class="text secundario fundo max_width"></h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -244,13 +250,13 @@
 
         {% else %}
         <div id="config_rel_point_route_cadastrar" class="page__container justify inactive">
-          <div class="line__container--btn add space" onclick="">
+          <div class="line__container--btn add space" onclick="confirm_register_in()">
             <p class="line__text">Cadastrar-me neste ponto</p>
           </div>
         </div>
 
         <div id="config_rel_point_route_sair" class="page__container justify inactive">
-          <div class="line__container--btn del space" onclick="">
+          <div class="line__container--btn del space" onclick="del_point_fixed()">
             <p class="line__text remove">Cancelar meu cadastro</p>
           </div>
         </div>

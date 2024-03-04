@@ -283,7 +283,7 @@ def count_part_route(route, formated=True):
       db.and_(
         Passagem.passagem_fixa == True,
         Passagem.Parada_codigo == Parada.codigo,
-        Parada.Ponto_id.in_([parada.ponto.id for parada in route.paradas])
+        Parada.Rota_codigo == route.codigo
       )
     )
     .scalar()

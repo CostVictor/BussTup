@@ -126,9 +126,8 @@ function action_popup(popup, card, id, obj_click) {
 
     data["principal"].push(tipo);
     container.innerHTML = "";
-    container.classList.remove("inactive");
     popup.querySelector("span").textContent = tipo;
-    include_options_container(container, "option_point", data, false, true);
+    include_options_container(container, "option_point", data, false);
   } else if (id === "config_rel_point_route") {
     const data = return_data_route(null, (format_dict_url = true));
     data.principal.push(
@@ -212,7 +211,9 @@ function loadInterfacePoints(name_line) {
     });
 }
 
-function create_aluno(list_aluno, container, model_aluno) {
+function criar_aluno(list_aluno, container, response, model_aluno) {
+  container.innerHTML = ''
+
   for (index in list_aluno) {
     const aluno = model_aluno.cloneNode(true);
     aluno.id = `${container.id}-aluno_${index}`;
@@ -289,8 +290,8 @@ function config_popup_point(name_point) {
 
           const info = turnos[turno];
           btn.querySelector("p").textContent = info.quantidade;
-          create_aluno(info.alunos, container_turno, model_aluno);
-          create_aluno(info.container, container_contraturno, model_aluno);
+          criar_aluno(info.alunos, container_turno, response, model_aluno);
+          criar_aluno(info.container, container_contraturno, response, model_aluno);
         }
       } else {
         close_popup("config_point");

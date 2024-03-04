@@ -513,9 +513,10 @@ def get_point(name_line, name_point):
         )
 
         for value in values:
-          if value.passagem_contraturno:
-            retorno['turnos'][value.turno]['contraturno'].append(value.nome)
-          else: retorno['turnos'][value.turno]['alunos'].append(value.nome)
+          passagem, aluno = value
+          if passagem.passagem_contraturno:
+            retorno['turnos'][aluno.turno]['contraturno'].append(aluno.nome)
+          else: retorno['turnos'][aluno.turno]['alunos'].append(aluno.nome)
 
         for turno in retorno['turnos']:
           local = retorno['turnos'][turno]
@@ -572,15 +573,17 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
           if user.turno == rota.turno:
             retorno['meus_pontos'] = {}
 
-            values = db.session.query(Passagem, Parada).filter(
-              db.and_(
+            values = (
+              db.session.query(Parada).join(Passagem)
+              .filter(db.and_(
                 Passagem.Parada_codigo == Parada.codigo,
                 Parada.Rota_codigo == rota.codigo,
                 Passagem.Aluno_id == current_user.primary_key,
                 Passagem.passagem_contraturno == False,
                 Passagem.passagem_fixa == True
-              )
-            ).all()
+              ))
+              .all()
+            )
 
             if values:
               for value in values:

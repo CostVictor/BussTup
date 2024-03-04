@@ -75,8 +75,12 @@ function check_state(init = false, check = true) {
               close_help();
               open_popup(popup_id);
             } else {
-              document.getElementById(popup_id + '_msg').classList.add('inactive')
-              document.getElementById(popup_id + '_msg_reload').classList.remove('inactive')
+              document
+                .getElementById(popup_id + "_msg")
+                .classList.add("inactive");
+              document
+                .getElementById(popup_id + "_msg_reload")
+                .classList.remove("inactive");
             }
 
             if (type !== "contraturno") {
@@ -132,3 +136,72 @@ function check_state(init = false, check = true) {
     close_popup("config_route");
   }
 }
+
+function confirm_register_in() {
+  const popup = local.querySelector("#config_rel_point_route");
+  const name_line = document.getElementById("interface_nome").textContent;
+  data = {
+    principal: [name_line, extract_info(popup, "tipo")],
+  };
+  fetch("/check_register_in" + generate_url_dict(data), {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const id = "confirm_register_in_point";
+        open_popup(id);
+
+        if (response.change) {
+          if (response.new_line) {
+            document
+              .getElementById(id + "_new_line")
+              .classList.remove("inactive");
+          } else {
+            document
+              .getElementById(id + "_change")
+              .classList.remove("inactive");
+          }
+        } else {
+          document.getElementById(id + "_msg").classList.remove("inactive");
+        }
+      } else {
+        create_popup(response.title, response.text);
+      }
+    });
+}
+
+function register_in_point_fixed() {
+  const data = return_data_route();
+  const popup_point = local_popup.querySelector("#config_rel_point_route");
+  data.type = extract_info(popup_point, "tipo");
+  data.name_point = extract_info(popup_point, "nome");
+
+  fetch("/create_pass_fixed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        create_popup(response.title, response.text, "Ok", "success");
+        close_popup("confirm_register_in_point");
+        loadInterfaceRoutes(data.name_line);
+        config_popup_route(
+          null,
+          return_data_route(null, (format_dict_url = true))
+        );
+        document
+          .getElementById("config_rel_point_route_cadastrar")
+          .classList.add("inactive");
+        document
+          .getElementById("config_rel_point_route_sair")
+          .classList.remove("inactive");
+      } else {
+        create_popup(response.title, response.text);
+      }
+    });
+}
+
+function del_point_fixed() {}

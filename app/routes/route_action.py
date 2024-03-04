@@ -154,3 +154,31 @@ def assistência_aluno(name_line):
     return jsonify(retorno)
   
   return jsonify({'error': True})
+
+
+@app.route("/check_register_in/<name_line>/<type>", methods=['GET'])
+@login_required
+@roles_required("aluno")
+def check_register_in(name_line, type):
+  user = return_my_user()
+  if user and name_line and type:
+    retorno = {'error': False, 'change': False, 'new_line': False}
+    parada = (
+      db.session.query(Parada).join(Passagem)
+      .filter(db.and_(
+        Parada.tipo == type,
+        Passagem.Parada_codigo == Parada.codigo,
+        Passagem.Aluno_id == user.id
+      ))
+      .first()
+    )
+
+    if parada:
+      linha = parada.ponto.linha.nome
+      retorno['change'] = True
+      if linha != name_line:
+        retorno['new_line'] = True
+
+    return retorno
+
+  return jsonify({'error': True, 'title': 'Relação não identificada', 'text': 'Ocorreu um erro inesperado ao tentar identificar as relações de usuário.'})

@@ -110,7 +110,7 @@
 
     <div class="popup__container--content">
       <h2 class="popup__text"></h2>
-      <div id="edit_vehicle_motorista_container" class="scroll_vertical init_top no_borderY popup__container--scroll">
+      <div id="edit_vehicle_motorista_container" class="scroll_vertical popup__container--scroll">
       </div>
     </div>
 
@@ -229,7 +229,7 @@
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
+      <div class="scroll_vertical popup__container--scroll principal_big">
         <form id="formulario_add_vehicle" class="form__container--card max_width" onsubmit="create_vehicle()">
           <h3 class="popup__text info margin_bottom">Defina como seu veículo será chamado:</h3>
           <div class="form__container--input first">
@@ -276,7 +276,7 @@
 
           <h3 id="add_vehicle_options_title" class="popup__text info space inactive">Selecione o motorista:</h3>
           <div id="add_vehicle_options_container"
-            class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
+            class="scroll_vertical popup__container--scroll inactive"></div>
         </form>
       </div>
     </div>
@@ -296,7 +296,7 @@
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+      <div class="scroll_vertical popup__container--scroll principal">
         <form id="formulario_add_point" class="form__container--card max_width" onsubmit="create_point(event)">
           <div class="form__container--input first">
             <input id="add_point_nome" class="form__input white input_notIcon" type="text" required>
@@ -332,9 +332,15 @@
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
+      <div class="scroll_vertical popup__container--scroll principal_max">
         <h3 class="popup__text question first">Selecione o novo ponto da rota:</h3>
-        <div id="add_point_route_container" class="scroll_vertical init_top no_borderY popup__container--scroll"></div>
+
+        <div id="add_point_route_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
+          <h3 class="text secundario fundo max_width">Pontos disponíveis</h3>
+          <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+
+        <div id="add_point_route_container" class="scroll_vertical popup__container--scroll margin_top inactive"></div>
 
         <h3 class="popup__text question">Selecione o horário de passagem:</h3>
         <h4 class="popup__text info">(OBS) Este horário refere-se ao momento de passagem deste ponto no trajeto desta
@@ -386,7 +392,7 @@
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal">
+      <div class="scroll_vertical popup__container--scroll principal">
         <form id="formulario_add_route" class="form__container--card max_width" onsubmit="create_route(event)">
           <div class="form__container--input_options">
             <div class="form__container--input first">
@@ -429,7 +435,7 @@
 
           <h3 id="add_route_options_title" class="popup__text info space inactive">Selecione o veículo da rota:</h3>
           <div id="add_route_options_container"
-            class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
+            class="scroll_vertical popup__container--scroll inactive"></div>
         </form>
       </div>
     </div>
@@ -535,7 +541,7 @@
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
+      <div class="scroll_vertical popup__container--scroll principal_max">
         <div class="page__container">
           <p class="text secundario fundo">Tempo tolerância:</p>
           <div class="text secundario fundo">
@@ -563,7 +569,7 @@
         </div>
 
         <div id="config_point_utilizacao_container"
-          class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
+          class="scroll_vertical popup__container--scroll inactive"></div>
 
         <h3 class="popup__text question">Alunos</h3>
         {% for turno in turnos %}
@@ -606,7 +612,7 @@
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
+      <div class="scroll_vertical popup__container--scroll principal_big">
         <div class="page__container">
           <p class="text secundario emphasis">Nome</p>
           <div class="scroll_horizontal">
@@ -640,7 +646,7 @@
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
 
-        <div id="config_aluno_container" class="scroll_vertical init_top no_borderY popup__container--scroll inactive">
+        <div id="config_aluno_container" class="scroll_vertical popup__container--scroll inactive">
           <h3 class="text secundario fundo">Não disponível.</h3>
         </div>
       </div>
@@ -931,7 +937,7 @@
     <div class="popup__container--content">
       <h2 class="popup__text">Selecione o novo veículo da rota:</h2>
       <div id="edit_route_onibus_container"
-        class="scroll_vertical init_top no_borderY popup__container--scroll principal"></div>
+        class="scroll_vertical popup__container--scroll principal"></div>
     </div>
 
     <footer class="popup__container--footer">
