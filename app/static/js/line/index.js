@@ -297,7 +297,7 @@ function config_popup_aparence(surname_vehicle) {
     });
 }
 
-function criar_rota(list, container, format_min = false) {
+function criar_rota(list, container, format_min = false, selected = false, compare=false) {
   const model_rota = models.querySelector("#model_interface_rota");
   container.innerHTML = "";
 
@@ -319,16 +319,26 @@ function criar_rota(list, container, format_min = false) {
       route.querySelector(`[id*="${dado}"]`).textContent = dados[dado];
     }
 
-    if (index) {
-      let qnt = 0;
-      const dados_ant = list[index - 1];
-      for (num in dados_ant) {
-        if (dados_ant[num] === dados[num]) {
-          qnt++;
+    if (compare) {
+      if (Array.isArray(compare)) {
+        for (pos in compare) {
+          const item = compare[pos][0]
+          if (item) {
+            if (JSON.stringify(item) === JSON.stringify(dados)) {
+              route.classList.add('selected')
+            }
+          }
+        }
+      } else {
+        if (JSON.stringify(compare) === JSON.stringify(dados)) {
+          route.classList.add('selected')
         }
       }
+    }
 
-      if (qnt === Object.keys(dados).length) {
+    if (index) {
+      const dados_ant = list[index - 1];
+      if (JSON.stringify(dados) === JSON.stringify(dados_ant)) {
         const route_ant = document.getElementById(
           `${container.id}-rota_${index - 1}`
         );
@@ -339,6 +349,9 @@ function criar_rota(list, container, format_min = false) {
         route.querySelector("span").textContent =
           parseInt(span_ant.textContent) + 1;
       }
+    }
+    if (selected) {
+      route.classList.add("selected");
     }
 
     route.classList.remove("inactive");
@@ -424,8 +437,47 @@ function loadInterfaceRoutes(name_line) {
             }
           }
           criar_rota(desativas, local_desativas);
+          criar_rota(ativas, local_ativas);
+        } else {
+          const local_minhas_rotas = document.getElementById(
+            "interface_rotas_minhas_rotas"
+          );
+          if (response.relacao === "participante") {
+            local_minhas_rotas.classList.remove("inactive");
+            const local_msgs = local_minhas_rotas.querySelector("span");
+            const minhas_rotas = response.minhas_rotas;
+
+            local_msgs.innerHTML = "";
+            const mensagens = response.mensagens
+            if (mensagens) {
+              for (index in mensagens) {
+                const text = document.createElement("p");
+                text.className = "text info fundo cinza";
+                text.textContent = mensagens[index];
+                local_msgs.appendChild(text);
+              }
+              const text = document.createElement("h1");
+              text.className = "page__division";
+              local_msgs.appendChild(text);
+            }
+
+            for (tipo in minhas_rotas) {
+              const area_local = document.getElementById(
+                "interface_rotas_minhas_rotas_" + tipo
+              );
+              if (minhas_rotas[tipo].length) {
+                area_local.classList.remove("inactive");
+                const container = area_local.querySelector("div");
+                criar_rota(minhas_rotas[tipo], container);
+              } else {
+                area_local.classList.add("inactive");
+              }
+            }
+            criar_rota(ativas, local_ativas, false, false, [minhas_rotas.turno, minhas_rotas.contraturno]);
+          } else {
+            local_minhas_rotas.classList.add("inactive");
+          }
         }
-        criar_rota(ativas, local_ativas);
       } else {
         create_popup(response.title, response.text, "Voltar");
       }
@@ -461,6 +513,15 @@ function config_popup_route(obj_click, data = false) {
           const msg_cadastrar = document.getElementById(
             "config_route_aviso_cadastrar"
           );
+
+          const msg_incompleta = document.getElementById(
+            "config_route_aviso_incompleto"
+          );
+
+          const msg_incompleta_txt = document.getElementById(
+            "config_route_aviso_incompleto_txt"
+          );
+
           const msg_contraturno = document.getElementById(
             "config_route_aviso_contraturno"
           );
@@ -469,15 +530,21 @@ function config_popup_route(obj_click, data = false) {
           );
 
           msg_cadastrar.classList.add("inactive");
+          msg_incompleta.classList.add("inactive");
           msg_contraturno.classList.add("inactive");
           btn_contraturno.classList.add("inactive");
           if (response.msg_cadastrar) {
             msg_cadastrar.classList.remove("inactive");
-          }
+          } else {
+            if (response.msg_incompleta) {
+              msg_incompleta_txt.textContent = `Você não definiu seu ponto de ${response.incompleta}.`;
+              msg_incompleta.classList.remove("inactive");
+            }
 
-          if (response.msg_contraturno) {
-            msg_contraturno.classList.remove("inactive");
-            btn_contraturno.classList.remove("inactive");
+            if (response.msg_contraturno) {
+              msg_contraturno.classList.remove("inactive");
+              btn_contraturno.classList.remove("inactive");
+            }
           }
         } else {
           const route_division = document.getElementById("route_division");
@@ -552,7 +619,15 @@ function config_popup_route(obj_click, data = false) {
             dados = paradas[index];
             for (dado in dados) {
               const value = dados[dado];
-              relacao.querySelector(`[id*="${dado}"]`).textContent = value;
+              const item = relacao.querySelector(`[id*="${dado}"]`);
+              item.textContent = value;
+
+              if (role == "aluno") {
+                const meu_ponto = response.meus_pontos[nome];
+                if (meu_ponto === dados.nome) {
+                  item.classList.add("selected");
+                }
+              }
             }
 
             if (role === "motorista") {

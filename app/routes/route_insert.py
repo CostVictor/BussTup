@@ -384,9 +384,9 @@ def create_pass_fixed():
                 db.session.commit()
 
                 if linha.codigo == code_line:
-                  return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; suas relações fixas na rota anterior foram removidas. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta rota, caso não possua.'})
+                  return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; suas relações fixas na rota anterior foram removidas. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta rota.'})
 
-                return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; esta linha foi definida como sua linha atual, e todos os vínculos com a linha anterior foram removidos. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta nova rota, caso não possua.'})
+                return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; esta linha foi definida como sua linha atual, e todos os vínculos com a linha anterior foram removidos. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta nova rota.'})
 
               except Exception as e:
                 db.session.rollback()

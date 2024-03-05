@@ -58,6 +58,10 @@
   margin: calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin) calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin);
 }
 
+.text.secundario.center {
+  justify-content: center;
+}
+
 .text.secundario.selected {
   background-color: var(--branco_primario);
 }

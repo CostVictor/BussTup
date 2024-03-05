@@ -581,9 +581,10 @@ function edit_route(obj_reference, event = false) {
           if (field === "onibus") {
             action_container(btn_route);
           }
-
           loadInterfaceRoutes(data.name_line);
-          close_popup("config_route");
+          const local_popup = document.getElementById('popup_local')
+          local_popup.removeChild(local_popup.querySelector('#config_route'))
+
           close_popup(obj_reference.id.replace("formulario_", ""));
           create_popup(response.title, response.text, "Ok", "success");
         } else {

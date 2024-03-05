@@ -136,9 +136,22 @@
     <section id="area_rotas" class="-enter- line__container--area">
       {% if role == 'aluno' %}
       <h2 class="text title big_space">Rotas</h2>
-      <div id="interface_rotas_ativas" class="scroll_vertical popup__container--scroll principal"></div>
+      <div id="interface_rotas_minhas_rotas" class="inactive">
+        <span></span>
+        <div id="interface_rotas_minhas_rotas_turno" class="inactive">
+          <h3 class="text secundario center emphasis margin_bottom margin_top">Minha Rota Fixa</h3>
+          <div></div>
+        </div>
 
-      {% elif role == 'motorista' %}
+        <div id="interface_rotas_minhas_rotas_contraturno" class="inactive">
+          <h3 class="text secundario center emphasis margin_bottom margin_top">Minha Rota de Contraturno</h3>
+          <div></div>
+        </div>
+        <h1 class="page__division"></h1>
+      </div>
+      <div id="interface_rotas_ativas" class="scroll_vertical popup__container--scroll principal_max"></div>
+
+      {% else %}
       <h2 class="text title">Pontos e Rotas</h2>
       <div id="interface_pontos_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
         <h3 class="text secundario emphasis">Pontos</h3>
@@ -210,7 +223,7 @@
       </div>
 
       <div id="interface_tickets_container" class="scroll_vertical popup__container--scroll principal inactive">
-        <h3 class="text secundario fundo">Não disponível.</h3>
+        <h3 class="text info center fundo cinza">Em Desenvolvimento</h3>
       </div>
     </section>
     {% endif %}

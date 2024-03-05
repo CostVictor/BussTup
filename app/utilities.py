@@ -211,7 +211,7 @@ def return_options_route(linha, user):
       'turno': rota.turno,
       'horario_partida': format_time(rota.horario_partida),
       'horario_retorno': format_time(rota.horario_retorno),
-      'quantidade': count_part_route(rota, formated=False)
+      'quantidade': count_part_route(rota.codigo, formated=False)
     }
     retorno.append(dados)
   
@@ -245,13 +245,17 @@ def check_permission(data, permission='adm'):
 
 
 def check_times(vehicle_id, time=[]):
-  if vehicle_id:
+  if vehicle_id and time:
+    time_formated = []
+    for value in time:
+      time_formated.append(format_time(value, reverse=True))
+
     if (
       Rota.query.filter(db.and_(
         Rota.Onibus_id == vehicle_id,
         db.or_(
-          Rota.horario_partida.in_(time),
-          Rota.horario_retorno.in_(time)
+          Rota.horario_partida.in_(time_formated),
+          Rota.horario_retorno.in_(time_formated)
         ) 
       ))
       .first()
@@ -276,14 +280,14 @@ def count_list(list: list, name_format: str, list_unique=True):
   return f'{quantidade} {name_format}'
 
 
-def count_part_route(route, formated=True):
+def count_part_route(route_code, formated=True):
   quantidade = (db.session.query(func.count(func.distinct(Passagem.Aluno_id)))
     .join(Parada)
     .filter(
       db.and_(
         Passagem.passagem_fixa == True,
         Passagem.Parada_codigo == Parada.codigo,
-        Parada.Rota_codigo == route.codigo
+        Parada.Rota_codigo == route_code
       )
     )
     .scalar()

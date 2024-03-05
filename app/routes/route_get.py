@@ -254,7 +254,7 @@ def get_interface_route(name_line):
         'turno': rota.turno,
         'horario_partida': format_time(rota.horario_partida),
         'horario_retorno': format_time(rota.horario_retorno),
-        'quantidade': count_part_route(rota)
+        'quantidade': count_part_route(rota.codigo),
       }
 
       veiculo = rota.onibus
@@ -276,6 +276,55 @@ def get_interface_route(name_line):
     if retorno['role'] == 'aluno':
       del retorno['quantidade']
       del retorno['desativas']
+
+      if retorno['relacao'] == 'participante':
+        retorno['minhas_rotas'] = {'turno': [], 'contraturno': []}
+        retorno['mensagens'] = []
+        user = return_my_user()
+
+        minhas_paradas = (
+          db.session.query(Parada).join(Passagem)
+          .filter(db.and_(
+            Passagem.Aluno_id == user.id,
+            Passagem.passagem_fixa == True,
+            Passagem.Parada_codigo == Parada.codigo,
+          ))
+          .all()
+        )
+        
+        list_posibility = ['partida', 'retorno']
+        for parada in minhas_paradas:
+          rota = parada.rota
+          info = {
+            'turno': rota.turno,
+            'horario_partida': format_time(rota.horario_partida),
+            'horario_retorno': format_time(rota.horario_retorno),
+            'quantidade': count_part_route(rota.codigo),
+          }
+
+          veiculo = rota.onibus
+          surname = 'Sem veículo'
+          motorista = 'Desativada'
+
+          if veiculo:
+            surname = veiculo.apelido
+            motorista = 'Nenhum'
+            if veiculo.motorista:
+              motorista = veiculo.motorista.nome
+          info['apelido'] = surname
+          info['motorista'] = motorista
+
+          if rota.turno == user.turno:
+            list_posibility.remove(parada.tipo)
+            if not retorno['minhas_rotas']['turno']:
+              retorno['minhas_rotas']['turno'].append(info)
+          else: retorno['minhas_rotas']['contraturno'].append(info)
+        
+        for tipo in list_posibility:
+          retorno['mensagens'].append(f'Aviso: Você não definiu seu ponto fixo de {tipo.capitalize()}.')
+        
+        if not retorno['minhas_rotas']['contraturno']:
+          retorno['mensagens'].append('Aviso: Você não definiu sua rota de Contraturno.')
 
     return jsonify(retorno)
 
@@ -433,7 +482,7 @@ def get_options_route_vehicle(name_line, surname):
         'turno': rota.turno,
         'horario_partida': format_time(rota.horario_partida),
         'horario_retorno': format_time(rota.horario_retorno),
-        'quantidade': count_part_route(rota, formated=False)
+        'quantidade': count_part_route(rota.codigo, formated=False)
       }
       retorno['data'].append(dados)
 
@@ -495,7 +544,7 @@ def get_point(name_line, name_point):
             'turno': rota.turno,
             'horario_partida': format_time(rota.horario_partida),
             'horario_retorno': format_time(rota.horario_retorno),
-            'quantidade': count_part_route(rota, formated=False)
+            'quantidade': count_part_route(rota.codigo, formated=False)
           }
           retorno['utilizacao']['rotas'].append(dados)
         retorno['utilizacao']['quantidade'] = count_list(retorno['utilizacao']['rotas'], 'rota')
@@ -569,6 +618,7 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
           retorno['meu_turno'] = user.turno
           retorno['msg_cadastrar'] = False
           retorno['msg_contraturno'] = False
+          retorno['msg_incompleta'] = False
 
           if user.turno == rota.turno:
             retorno['meus_pontos'] = {}
@@ -589,27 +639,50 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
               for value in values:
                 ponto = value.ponto
                 retorno['meus_pontos'][value.tipo] = ponto.nome
-            else: retorno['msg_cadastrar'] = True
+              
+              if retorno['meus_pontos']:
+                if 'partida' not in retorno['meus_pontos']:
+                  retorno['msg_incompleta'] = True
+                  retorno['incompleta'] = 'Partida'
+                
+                elif 'retorno' not in retorno['meus_pontos']:
+                  retorno['msg_incompleta'] = True
+                  retorno['incompleta'] = 'Retorno'
+
+            else:
+              check_cadastro = (
+                Passagem.query.filter_by(
+                  Aluno_id=user.id,
+                  passagem_fixa=True,
+                  passagem_contraturno=False
+                )
+                .first()
+              )
+
+              if check_cadastro:
+                linha_codigo = check_cadastro.parada.rota.linha.codigo
+                if linha_codigo != linha.codigo:
+                  retorno['msg_cadastrar'] = True
+              else: retorno['msg_cadastrar'] = True
           else:
             retorno['meu_contraturno'] = None
 
-            ponto_contraturno = (
-              db.session.query(Ponto.nome).join(Parada).join(Passagem)
-              .filter(
-                db.and_(
-                  Ponto.id == Parada.Ponto_id,
-                  Parada.Rota_codigo == rota.codigo,
-                  Passagem.Parada_codigo == Parada.codigo,
-                  Passagem.Aluno_id == current_user.primary_key,
-                  Passagem.passagem_contraturno == True,
-                  Passagem.passagem_fixa == True
-                )
-              )
+            parada_contraturno = (
+              db.session.query(Parada).join(Passagem)
+              .filter(db.and_(
+                Passagem.Parada_codigo == Parada.codigo,
+                Passagem.Aluno_id == current_user.primary_key,
+                Passagem.passagem_contraturno == True,
+                Passagem.passagem_fixa == True
+              ))
               .first()
             )
 
-            if ponto_contraturno:
-              retorno['meu_contraturno'] = ''
+            if parada_contraturno:
+              rota_contraturno = parada_contraturno.rota
+              if rota_contraturno.codigo == rota.codigo:
+                retorno['meu_contraturno'] = parada_contraturno.ponto.nome
+              else: retorno['msg_contraturno'] = True
             else: retorno['msg_contraturno'] = True
 
         for tipo in ['partida', 'retorno']:

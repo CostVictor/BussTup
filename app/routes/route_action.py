@@ -85,7 +85,7 @@ def assistência_aluno(name_line):
           'turno': rota.turno,
           'horario_partida': format_time(rota.horario_partida),
           'horario_retorno': format_time(rota.horario_retorno),
-          'quantidade': count_part_route(rota, formated=False)
+          'quantidade': count_part_route(rota.codigo, formated=False)
         })
       
       else:
@@ -139,7 +139,7 @@ def assistência_aluno(name_line):
                 'turno': rota_shift.turno,
                 'horario_partida': format_time(rota_shift.horario_partida),
                 'horario_retorno': format_time(rota_shift.horario_retorno),
-                'quantidade': count_part_route(rota_shift, formated=False)
+                'quantidade': count_part_route(rota_shift.codigo, formated=False)
               }
               retorno['data'][shift].append(dados)
       

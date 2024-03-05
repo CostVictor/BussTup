@@ -104,6 +104,10 @@
   width: 100%;
 }
 
+.popup__container--input.selected {
+  background-color: var(--branco_primario);
+}
+
 .popup__container--input.inactive {
   display: none;
 }
