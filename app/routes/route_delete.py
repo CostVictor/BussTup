@@ -5,21 +5,21 @@ from app.database import *
 from app import app
 
 
-@app.route("/del_point_fixed", methods=['DELETE'])
+@app.route("/del_myPoint_fixed/<type>", methods=['DELETE'])
 @login_required
 @roles_required("aluno")
-def check_register_in():
-  data = request.get_json()
+def del_myPoint_fixed(type):
   user = return_my_user()
 
-  if user and data and 'type' in data:
+  if user and type:
     passagem = (
-      Passagem.query.filter_by(
-        Aluno_id=user.id,
-        tipo=data['type'],
-        passagem_fixa=True,
-        passagem_contraturno=False
-      )
+      db.session.query(Passagem).join(Parada)
+      .filter(db.and_(
+        Passagem.Aluno_id == user.id,
+        Passagem.passagem_fixa == True,
+        Passagem.passagem_contraturno == False,
+        Parada.tipo == type
+      ))
       .first()
     )
     

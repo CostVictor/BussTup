@@ -197,7 +197,7 @@ def return_options_route(linha, user):
       Rota.Onibus_id == Onibus.id,
       db.not_(Onibus.Motorista_id.is_(None))
     ))
-    .order_by(Rota.horario_partida)
+    .order_by(Rota.horario_partida, Onibus.apelido)
     .all()
   )
 

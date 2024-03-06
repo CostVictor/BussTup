@@ -96,11 +96,29 @@ function check_state(init = false, check = true) {
               const op_2 = document.getElementById("op_2");
               const op_2_container = document.getElementById("op_2_container");
 
-              op_1.textContent = shifts[0];
-              criar_rota(data[shifts[0]], op_1_container, true);
+              if (shifts.length) {
+                if (shifts.length > 1) {
+                  shift_1 = shifts[0].split(" ");
+                  op_1.textContent = '~> ' + shift_1[shift_1.length - 1];
+                  criar_rota(data[shifts[0]], op_1_container, true);
 
-              op_2.textContent = shifts[1];
-              criar_rota(data[shifts[1]], op_2_container, true);
+                  shift_2 = shifts[1].split(" ");
+                  op_2.textContent = '~> ' + shift_2[shift_2.length - 1];
+                  criar_rota(data[shifts[1]], op_2_container, true);
+
+                  op_1.classList.remove('inactive')
+                  op_1_container.classList.remove('inactive')
+                  op_2.classList.remove('inactive')
+                  op_2_container.classList.remove('inactive')
+                } else {
+                  shift_1 = shifts[0].split(" ");
+                  op_1.textContent = '~> ' + shift_1[shift_1.length - 1];
+                  criar_rota(data[shifts[0]], op_1_container, true);
+
+                  op_1.classList.remove('inactive')
+                  op_1_container.classList.remove('inactive')
+                }
+              }
             }
           } else {
             close_help();
@@ -204,4 +222,33 @@ function register_in_point_fixed() {
     });
 }
 
-function del_point_fixed() {}
+function del_myPoint_fixed() {
+  const name_line = document.getElementById("interface_nome").textContent;
+  const type = extract_info(
+    local_popup.querySelector("#config_rel_point_route"),
+    "tipo"
+  );
+
+  fetch("/del_myPoint_fixed/" + encodeURIComponent(type), { method: "DELETE" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        document
+          .getElementById("config_rel_point_route_cadastrar")
+          .classList.remove("inactive");
+        document
+          .getElementById("config_rel_point_route_sair")
+          .classList.add("inactive");
+
+        create_popup(response.title, response.text, "Ok", "success");
+        close_popup("confirm_del_mypoint");
+        config_popup_route(
+          null,
+          return_data_route(null, (format_dict_url = true))
+        );
+        loadInterfaceRoutes(name_line);
+      } else {
+        create_popup(response.title, response.text);
+      }
+    });
+}

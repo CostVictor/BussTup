@@ -92,16 +92,16 @@
         <p class="popup__text secundario justify"><> Estas são as opções disponíveis:</p>
       </div>
 
-      <div id="help_me_cadastro_contraturno_msg_reload">
+      <div id="help_me_cadastro_contraturno_msg_reload" class="inactive">
         <p class="popup__text secundario justify"><> Ficarei no aguardo! Lembre-se de que para definir o contraturno, basta clicar no botão "Definir Contraturno" ao final do pop-up da rota.</p>
         <h1 class="page__division"></h1>
       </div>
 
       <div class="scroll_vertical popup__container--scroll principal_big margin_top">
-        <p id="op_1" class="inactive"></p>
+        <p id="op_1" class="popup__text secundario inactive"></p>
         <div id="op_1_container" class="inactive"></div>
-        <h1 class="page__division"></h1>
-        <p id="op_2" class="inactive"></p>
+
+        <p id="op_2" class="popup__text secundario space inactive"></p>
         <div id="op_2_container" class="inactive"></div>
       </div>
     </div>
@@ -136,6 +136,24 @@
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('confirm_register_in_point')">Cancelar</button>
       <button class="popup__btn" onclick="register_in_point_fixed()">Confirmar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="confirm_del_mypoint" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Confirmação</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <p class="popup__text secundario justify">Ao prosseguir, você irá remover o vínculo selecionado. Esta ação retira a visualização de sua participação no trajeto especificado.</p>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('confirm_del_mypoint')">Cancelar</button>
+      <button class="popup__btn" onclick="del_myPoint_fixed()">Confirmar</button>
     </footer>
   </div>
 </section>

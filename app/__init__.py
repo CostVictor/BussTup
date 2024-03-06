@@ -103,4 +103,4 @@ def make_celery(app):
 celery = make_celery(app)
 limiter = Limiter(get_remote_address, app=app, storage_uri="memory://")
 
-from app.routes import route_action, route_insert, route_edit, route_get, route_render
+from app.routes import route_action, route_insert, route_edit, route_get, route_render, route_delete

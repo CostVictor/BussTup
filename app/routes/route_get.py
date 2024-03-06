@@ -237,11 +237,12 @@ def get_interface_route(name_line):
       .subquery()
     )
     rotas = (
-      Rota.query.filter(db.and_(
+      db.session.query(Rota).outerjoin(Onibus)
+      .filter(db.and_(
         Rota.Linha_codigo == linha.codigo,
         db.not_(Rota.codigo.in_(not_include.select()))
       ))
-      .order_by(Rota.horario_partida)
+      .order_by(Rota.horario_partida, Onibus.apelido)
       .all()
     )
 
@@ -517,13 +518,13 @@ def get_point(name_line, name_point):
           dict_ponto['linkGPS'] = 'Não definido'
         
         rotas = (
-          db.session.query(Rota).join(Parada)
+          db.session.query(Rota).join(Parada).outerjoin(Onibus)
           .filter(db.and_(
             Parada.Rota_codigo == Rota.codigo,
             Parada.Ponto_id == ponto.id,
             Parada.tipo == 'partida'
           ))
-          .order_by(Rota.horario_partida)
+          .order_by(Rota.horario_partida, Onibus.apelido)
           .all()
         )
 

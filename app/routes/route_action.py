@@ -125,7 +125,7 @@ def assistência_aluno(name_line):
                 Rota.Linha_codigo == linha.codigo,
                 Rota.turno == shift
               ))
-              .order_by(Rota.horario_partida)
+              .order_by(Rota.horario_partida, Onibus.apelido)
               .all()
             )
 
@@ -142,6 +142,11 @@ def assistência_aluno(name_line):
                 'quantidade': count_part_route(rota_shift.codigo, formated=False)
               }
               retorno['data'][shift].append(dados)
+
+          new_data = {}
+          for index, key in enumerate(retorno['data']):
+            new_data[f'{index} {key}'] = retorno['data'][key]
+          retorno['data'] = new_data
       
       else:
         retorno['popup'] = 'change'

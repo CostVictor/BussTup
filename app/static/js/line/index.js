@@ -297,7 +297,13 @@ function config_popup_aparence(surname_vehicle) {
     });
 }
 
-function criar_rota(list, container, format_min = false, selected = false, compare=false) {
+function criar_rota(
+  list,
+  container,
+  format_min = false,
+  selected = false,
+  compare = false
+) {
   const model_rota = models.querySelector("#model_interface_rota");
   container.innerHTML = "";
 
@@ -319,19 +325,22 @@ function criar_rota(list, container, format_min = false, selected = false, compa
       route.querySelector(`[id*="${dado}"]`).textContent = dados[dado];
     }
 
+    delete dados.quantidade;
     if (compare) {
       if (Array.isArray(compare)) {
         for (pos in compare) {
-          const item = compare[pos][0]
+          const item = compare[pos][0];
           if (item) {
+            delete item.quantidade;
             if (JSON.stringify(item) === JSON.stringify(dados)) {
-              route.classList.add('selected')
+              route.classList.add("selected");
             }
           }
         }
       } else {
+        delete compare.quantidade;
         if (JSON.stringify(compare) === JSON.stringify(dados)) {
-          route.classList.add('selected')
+          route.classList.add("selected");
         }
       }
     }
@@ -445,10 +454,13 @@ function loadInterfaceRoutes(name_line) {
           if (response.relacao === "participante") {
             local_minhas_rotas.classList.remove("inactive");
             const local_msgs = local_minhas_rotas.querySelector("span");
+            const division = document.getElementById(
+              "interface_rotas_division"
+            );
             const minhas_rotas = response.minhas_rotas;
 
             local_msgs.innerHTML = "";
-            const mensagens = response.mensagens
+            const mensagens = response.mensagens;
             if (mensagens) {
               for (index in mensagens) {
                 const text = document.createElement("p");
@@ -473,9 +485,19 @@ function loadInterfaceRoutes(name_line) {
                 area_local.classList.add("inactive");
               }
             }
-            criar_rota(ativas, local_ativas, false, false, [minhas_rotas.turno, minhas_rotas.contraturno]);
+
+            division.classList.add("inactive");
+            if (ativas.length) {
+              division.classList.remove("inactive");
+            }
+
+            criar_rota(ativas, local_ativas, false, false, [
+              minhas_rotas.turno,
+              minhas_rotas.contraturno,
+            ]);
           } else {
             local_minhas_rotas.classList.add("inactive");
+            criar_rota(ativas, local_ativas);
           }
         }
       } else {
@@ -537,7 +559,7 @@ function config_popup_route(obj_click, data = false) {
             msg_cadastrar.classList.remove("inactive");
           } else {
             if (response.msg_incompleta) {
-              msg_incompleta_txt.textContent = `Você não definiu seu ponto de ${response.incompleta}.`;
+              msg_incompleta_txt.textContent = `Você não definiu seu ponto fixo de ${response.incompleta}.`;
               msg_incompleta.classList.remove("inactive");
             }
 
