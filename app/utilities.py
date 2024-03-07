@@ -182,6 +182,11 @@ def return_route(code_line, surname, shift, time_par, time_ret, pos):
     if len(rota) > 1:
       if pos and isinstance(pos, str) and pos.isdigit():
         return rota[int(pos)]
+
+      check = check_myRoute(shift)
+      if check:
+        return check
+      
       return False
     return rota[0]
   return None
@@ -262,6 +267,23 @@ def check_times(vehicle_id, time=[]):
     ):
       return True
   return False
+
+
+def check_myRoute(shift):
+  if current_user.roles[0].name == 'aluno':
+    user = return_my_user()
+    myRoute = (
+      db.session.query(Rota).join(Parada).join(Passagem)
+      .filter(db.and_(
+        Passagem.Aluno_id == user.id,
+        Passagem.passagem_fixa == True,
+        Passagem.passagem_contraturno == (False if shift.capitalize() == user.turno else True)
+      ))
+      .first()
+    )
+    if myRoute:
+      return myRoute
+  return None
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''

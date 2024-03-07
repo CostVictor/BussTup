@@ -40,7 +40,11 @@
   <main id="content_page" class="page__container--content scroll_horizontal not_overflow content_noBorder">
     <section id="aba_agenda" class="page__container--aba">
       <div id="not_line_agenda" class="inactive">
-        Você não possui uma linha
+        <div class="page__container title -enter-">
+          <h1 id="nome_linha" class="text principal">Não vinculado</h1>
+        </div>
+
+
       </div>
 
       <div id="area_agenda" class="page__container column">
@@ -135,6 +139,14 @@
     </section>
 
     <section id="aba_rota" class="page__container--aba">
+      <div id="not_line_rota" class="inactive">
+        <div class="page__container title -enter-">
+          <h1 id="nome_linha" class="text principal">Não vinculado</h1>
+        </div>
+
+        
+      </div>
+
       <div id="area_rota" class="page__container column inactive">
         {% if role == 'motorista' %}
         <div class="page__container title -enter-">
@@ -147,22 +159,12 @@
         <div id="minhas_rota">
           <div id="sem_veiculo" class="-enter-">
             <p class="text secundario emphasis">Você não possui relação com nenhum veículo.</p>
-            <p class="text secundario fundo">Defina um veículo para conseguir iniciar um trajeto:</p>
-            <div class="page__container justify">
-              <div class="page__btn_redirect" onclick="">
-                <i class="bi bi-box-arrow-up-right page__icon_redirect"></i>
-              </div>
-            </div>
+            <p class="text secundario fundo">Defina um veículo para ter acesso ao controle de funcionamento de uma rota.</p>
           </div>
 
           <div id="sem_rota" class="inactive">
             <p class="text secundario emphasis">Seu veículo não possui nenhuma rota definida.</p>
-            <p class="text secundario fundo">Crie uma rota para conseguir iniciar um trajeto:</p>
-            <div class="page__container justify">
-              <div class="page__btn_redirect" onclick="">
-                <i class="bi bi-box-arrow-up-right page__icon_redirect"></i>
-              </div>
-            </div>
+            <p class="text secundario fundo">Crie uma rota para conseguir iniciar um trajeto.</p>
           </div>
 
           <div id="minha_rota_area" class="-enter-"></div>
@@ -216,6 +218,14 @@
     </section>
 
     <section id="aba_chat" class="page__container--aba">
+      <div id="not_line_chat" class="inactive">
+        <div class="page__container title -enter-">
+          <h1 id="nome_linha" class="text principal">Não vinculado</h1>
+        </div>
+
+        
+      </div>
+
       <div id="area_chat" class="page__container column inactive">
         <div class="page__container title -enter-">
           <h1 id="area_chat_nome_linha" class="text principal">Nome da linha</h1>

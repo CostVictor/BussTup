@@ -442,14 +442,16 @@ def create_pass_fixed():
 @roles_required("aluno")
 def create_pass_contraturno():
   data = request.get_json()
-  if data and 'name_line' in data and 'name_point' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data:
+  if data and 'name_line' in data and 'name_point' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'type' in data and 'pos' in data:
     linha = Linha.query.filter_by(nome=data['name_line']).first()
     user = return_my_user()
 
     hr_par = data['time_par']; hr_ret = data['time_ret']
-    surname = data['surname']; shift = data['shift']
+    surname = data['surname']; tipo = data['type'].lower()
+    shift = data['shift']
+    dis = ['partida', 'retorno']
     
-    if linha and user and hr_par and hr_ret and surname and shift:
+    if linha and user and hr_par and hr_ret and surname and shift and tipo in dis:
       route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
       if route is not None:
         if not route:

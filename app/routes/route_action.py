@@ -60,7 +60,8 @@ def assistência_aluno(name_line):
     retorno = {'error': False, 'finished': False}
     pass_fixed = Passagem.query.filter_by(
       passagem_fixa=True,
-      passagem_contraturno=False
+      passagem_contraturno=False,
+      Aluno_id=user.id
     ).all()
 
     if not pass_fixed:
@@ -101,7 +102,8 @@ def assistência_aluno(name_line):
       if rota.linha.codigo == linha.codigo:
         contraturno = Passagem.query.filter_by(
           passagem_fixa=True,
-          passagem_contraturno=True
+          passagem_contraturno=True,
+          Aluno_id=user.id
         ).first()
 
         if contraturno:
@@ -113,9 +115,9 @@ def assistência_aluno(name_line):
           retorno['popup'] = 'contraturno'
           retorno['data'] = {}
 
-          for shift in shift_query:
+          for index, shift in enumerate(shift_query):
             if shift not in retorno['data']:
-              retorno['data'][shift] = []
+              retorno['data'][f'{index} {shift}'] = []
             
             rotas_shift = (
               db.session.query(Rota, Onibus)
@@ -141,12 +143,7 @@ def assistência_aluno(name_line):
                 'horario_retorno': format_time(rota_shift.horario_retorno),
                 'quantidade': count_part_route(rota_shift.codigo, formated=False)
               }
-              retorno['data'][shift].append(dados)
-
-          new_data = {}
-          for index, key in enumerate(retorno['data']):
-            new_data[f'{index} {key}'] = retorno['data'][key]
-          retorno['data'] = new_data
+              retorno['data'][f'{index} {shift}'].append(dados)
       
       else:
         retorno['popup'] = 'change'
@@ -172,8 +169,9 @@ def check_register_in(name_line, type):
       db.session.query(Parada).join(Passagem)
       .filter(db.and_(
         Parada.tipo == type,
-        Passagem.Parada_codigo == Parada.codigo,
-        Passagem.Aluno_id == user.id
+        Passagem.Aluno_id == user.id,
+        Passagem.passagem_fixa == True,
+        Passagem.passagem_contraturno == False
       ))
       .first()
     )
@@ -187,3 +185,31 @@ def check_register_in(name_line, type):
     return retorno
 
   return jsonify({'error': True, 'title': 'Relação não identificada', 'text': 'Ocorreu um erro inesperado ao tentar identificar as relações de usuário.'})
+
+
+@app.route("/check_register_in_contraturno/<name_line>", methods=['GET'])
+@login_required
+@roles_required("aluno")
+def check_register_in_contraturno(name_line):
+  user = return_my_user()
+  if user and name_line:
+    retorno = {'error': False, 'change': False, 'new_line': False}
+    parada = (
+      db.session.query(Parada).join(Passagem)
+      .filter(db.and_(
+        Passagem.Aluno_id == user.id,
+        Passagem.passagem_fixa == True,
+        Passagem.passagem_contraturno == True
+      ))
+      .first()
+    )
+
+    if parada:
+      linha = parada.ponto.linha.nome
+      retorno['change'] = True
+      if linha != name_line:
+        retorno['new_line'] = True
+
+    return retorno
+
+  return jsonify({'error': True, 'title': 'Relação não identificada', 'text': 'Ocorreu um erro inesperado ao tentar identificar a relação do usuário.'})

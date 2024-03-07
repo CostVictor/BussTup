@@ -139,8 +139,8 @@ function replaceAba(btn_click, id = "") {
   if (execute) {
     btns.forEach((element, index) => {
       if (element === btn_click) {
-        const divAlvo = divs[index];
-        content.scrollLeft = divAlvo.offsetLeft;
+        const sectionAlvo = divs[index];
+        content.scrollLeft = sectionAlvo.offsetLeft;
         element.classList.add("selected");
 
         const abas = document.querySelectorAll(
@@ -151,6 +151,14 @@ function replaceAba(btn_click, id = "") {
             checkLine(name_aba, aba);
           } else {
             aba.classList.add("inactive");
+            const local = aba.id.split("_");
+            const not_line = document.getElementById(
+              "not_line_" + local[local.length - 1]
+            );
+
+            if (not_line) {
+              not_line.classList.add("inactive");
+            }
           }
         });
       } else {
@@ -170,6 +178,9 @@ function checkLine(name_aba, obj_aba) {
       if (!response.conf && name_aba !== "linhas") {
         area.classList.add("inactive");
         aviso.classList.remove("inactive");
+
+        const elements = aviso.querySelectorAll('[class*="-enter-"]');
+        animate_itens(elements, "fadeDown", 0.7, 0);
       } else {
         if (area) {
           area.classList.remove("inactive");

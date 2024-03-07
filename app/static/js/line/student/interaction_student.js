@@ -99,24 +99,24 @@ function check_state(init = false, check = true) {
               if (shifts.length) {
                 if (shifts.length > 1) {
                   shift_1 = shifts[0].split(" ");
-                  op_1.textContent = '~> ' + shift_1[shift_1.length - 1];
+                  op_1.textContent = "~> " + shift_1[shift_1.length - 1];
                   criar_rota(data[shifts[0]], op_1_container, true);
 
                   shift_2 = shifts[1].split(" ");
-                  op_2.textContent = '~> ' + shift_2[shift_2.length - 1];
+                  op_2.textContent = "~> " + shift_2[shift_2.length - 1];
                   criar_rota(data[shifts[1]], op_2_container, true);
 
-                  op_1.classList.remove('inactive')
-                  op_1_container.classList.remove('inactive')
-                  op_2.classList.remove('inactive')
-                  op_2_container.classList.remove('inactive')
+                  op_1.classList.remove("inactive");
+                  op_1_container.classList.remove("inactive");
+                  op_2.classList.remove("inactive");
+                  op_2_container.classList.remove("inactive");
                 } else {
                   shift_1 = shifts[0].split(" ");
-                  op_1.textContent = '~> ' + shift_1[shift_1.length - 1];
+                  op_1.textContent = "~> " + shift_1[shift_1.length - 1];
                   criar_rota(data[shifts[0]], op_1_container, true);
 
-                  op_1.classList.remove('inactive')
-                  op_1_container.classList.remove('inactive')
+                  op_1.classList.remove("inactive");
+                  op_1_container.classList.remove("inactive");
                 }
               }
             }
@@ -133,7 +133,7 @@ function check_state(init = false, check = true) {
               create_popup(
                 "Assistente",
                 "<> Prontinho! Você já fez todas as configurações necessárias. Agora, aproveite ao máximo os nossos recursos!",
-                "Ok",
+                "Claro!!",
                 "success"
               );
             }
@@ -155,19 +155,27 @@ function check_state(init = false, check = true) {
   }
 }
 
-function confirm_register_in() {
+function confirm_register_in(contraturno = false) {
   const popup = local.querySelector("#config_rel_point_route");
   const name_line = document.getElementById("interface_nome").textContent;
   data = {
-    principal: [name_line, extract_info(popup, "tipo")],
+    principal: contraturno
+      ? [name_line]
+      : [name_line, extract_info(popup, "tipo")],
   };
-  fetch("/check_register_in" + generate_url_dict(data), {
-    method: "GET",
-  })
+  fetch(
+    `/check_register_in${contraturno ? "_contraturno" : ""}` +
+      generate_url_dict(data),
+    {
+      method: "GET",
+    }
+  )
     .then((response) => response.json())
     .then((response) => {
       if (!response.error) {
-        const id = "confirm_register_in_point";
+        const id = contraturno
+          ? "confirm_register_contraturno"
+          : "confirm_register_in_point";
         open_popup(id);
 
         if (response.change) {
@@ -251,4 +259,25 @@ function del_myPoint_fixed() {
         create_popup(response.title, response.text);
       }
     });
+}
+
+function register_in_point_contraturno() {
+  const data = return_data_route();
+  let execute = true;
+
+  if (execute) {
+    fetch("/create_pass_contraturno", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (!response.error) {
+          console.log(response);
+        } else {
+          create_popup(response.title, response.text);
+        }
+      });
+  }
 }

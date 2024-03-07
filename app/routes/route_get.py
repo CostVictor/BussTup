@@ -39,7 +39,7 @@ def get_perfil():
 @app.route("/get_association", methods=['GET'])
 @login_required
 def get_association():
-  response = {'conf': True}
+  response = {'conf': False}
 
   if current_user.roles[0].name == 'aluno':
     if Passagem.query.filter_by(
@@ -492,6 +492,37 @@ def get_options_route_vehicle(name_line, surname):
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações do veículo.'})
 
 
+@app.route("/get_interface-option_point_all/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>", methods=['GET'])
+@login_required
+@roles_required("aluno")
+def get_interface_option_point_all(name_line, surname, shift, hr_par, hr_ret):
+  pos = request.args.get('pos')
+
+  if name_line and surname and shift and hr_par and hr_ret:
+    linha = Linha.query.filter_by(nome=name_line).first()
+    if linha:
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, pos)
+      if rota is not None:
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+
+        values = (
+          db.session.query(Parada, Ponto)
+          .filter(Parada.Rota_codigo == rota.codigo)
+          .order_by(Parada.ordem)
+          .all()
+        )
+
+        retorno = {'error': False, 'data': {'Partida': [], 'Retorno': []}}
+        for value in values:
+          parada, ponto = value
+          retorno['data'][parada.tipo.capitalize()].append({'ordem': parada.ordem, 'nome': ponto.nome})
+        
+        return jsonify(retorno)
+
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ GET Config ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -559,6 +590,7 @@ def get_point(name_line, name_point):
             Passagem.Aluno_id == Aluno.id
           ))
           .order_by(Aluno.nome)
+          .group_by(Aluno.id)
           .all()
         )
 
