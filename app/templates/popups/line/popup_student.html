@@ -185,3 +185,33 @@
     </footer>
   </div>
 </section>
+
+
+<section id="options_contraturno" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Opções de Contraturno</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <p class="text info justify margin_bottom">Selecione seu ponto para contraturno:</p>
+      <div class="scroll_vertical popup__container--scroll principal_big">
+        <div id="options_contraturno_container_partida" class="inactive">
+          <p class="text secundario">~> Partida</p>
+          <div></div>
+        </div>
+        
+        <h1 id="options_contraturno_division" class="page__division inactive"></h1>
+        <div id="options_contraturno_container_retorno" class="inactive">
+          <p class="text secundario">~> Retorno</p>
+          <div></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('options_contraturno')">Voltar</button>
+      <button class="popup__btn" onclick="">Confirmar</button>
+    </footer>
+  </div>
+</section>

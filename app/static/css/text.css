@@ -66,6 +66,10 @@
   background-color: var(--branco_primario);
 }
 
+.text.secundario.selected_intense {
+  background-color: var(--branco_quaternario);
+}
+
 .text.secundario.max_width {
   width: 100%;
   box-sizing: border-box;

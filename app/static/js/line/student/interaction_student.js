@@ -33,11 +33,13 @@ function action_popup(popup, card, id, obj_click) {
     document.getElementById("aparence_vehicle_surname").textContent =
       surname_vehicle;
     config_popup_aparence(surname_vehicle);
-  } else if ("vehicle_utilities_routes") {
+  } else if (id === "vehicle_utilities_routes") {
     const surname_vehicle = extract_info(obj_click, "surname");
     document.getElementById("vehicle_utilities_routes_surname").textContent =
       surname_vehicle;
     config_popup_routes_vehicle(surname_vehicle);
+  } else if (id === "options_contraturno") {
+    config_popup_contraturno();
   }
 }
 
@@ -280,4 +282,59 @@ function register_in_point_contraturno() {
         }
       });
   }
+}
+
+function config_popup_contraturno() {
+  const data = return_data_route(null, (format_dict_url = true));
+  const model_option = models.querySelector("#interface_model_option_headli");
+
+  fetch("/get_interface-option_point_contraturno" + generate_url_dict(data), {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const data = response.data;
+        for (shift in data) {
+          const local = document.getElementById(
+            `options_contraturno_container_${shift}`
+          );
+          const container = local.querySelector('div')
+
+          const local_reverse = document.getElementById(
+            `options_contraturno_container_${shift === 'partida' ? 'retorno' : 'partida'}`
+          );
+          const container_reverse = local_reverse.querySelector('div')
+          
+          local.classList.remove('inactive')
+          container.innerHTML = "";
+
+          const options = data[shift];
+          for (index in options) {
+            const option = model_option.cloneNode(true);
+            option.id = container.id + `-ponto_${index}`;
+
+            ids = option.querySelectorAll(`[id*="${model_option.id}"]`);
+            ids.forEach((value) => {
+              value.id = value.id.replace(model_option.id, option.id);
+            });
+
+            for (dado in options[index]) {
+              const info = options[index][dado];
+              option.querySelector(`[id*="${dado}"]`).textContent = info;
+            }
+            
+            option.removeAttribute('onclick')
+            option.onclick = function() {
+              popup_selectOption_span(this, [container_reverse])
+            }
+
+            option.classList.remove("inactive");
+            container.appendChild(option);
+          }
+        }
+      } else {
+        create_popup(response.title, response.text);
+      }
+    });
 }

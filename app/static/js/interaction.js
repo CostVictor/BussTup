@@ -272,7 +272,7 @@ function action_container(obj_click, set_limit = false) {
     container.scrollTop = 0;
     icon.classList.add("open");
 
-    if (container.className.includes('scroll')) {
+    if (container.className.includes("scroll")) {
       if (set_limit) {
         set_limitScroll(container, set_limit);
       } else {
@@ -294,8 +294,8 @@ function action_container(obj_click, set_limit = false) {
   elements.forEach((element) => {
     if (element.className.includes("scroll")) {
       element.scrollTop = 0;
-      element.classList.remove('inactive')
-      animate_itens(Array.from(element.children))
+      element.classList.remove("inactive");
+      animate_itens(Array.from(element.children));
       set_limitScroll(element, set_limit ? set_limit : 30);
     }
   });
@@ -481,6 +481,36 @@ function popup_selectOption(
         } else {
           item.classList.remove("selected");
         }
+      });
+    }
+  }
+}
+
+function popup_selectOption_span(obj_click, includes_container = []) {
+  if (!obj_click.className.includes("selected_intense")) {
+    const reference = obj_click.parentNode;
+    const reference_elements = Array.from(reference.children);
+
+    reference_elements.forEach((item) => {
+      const elements = Array.from(item.querySelector("span").children);
+      if (item === obj_click) {
+        elements.forEach((element) => {
+          element.classList.add("selected_intense");
+        });
+      } else {
+        elements.forEach((element) => {
+          element.classList.remove("selected_intense");
+        });
+      }
+    });
+
+    for (index in includes_container) {
+      const elements_container = Array.from(includes_container[index].children);
+      elements_container.forEach((item) => {
+        const elements_item = Array.from(item.querySelector("span").children);
+        elements_item.forEach((element) => {
+          element.classList.remove("selected_intense");
+        });
       });
     }
   }

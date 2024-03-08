@@ -492,7 +492,7 @@ def get_options_route_vehicle(name_line, surname):
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações do veículo.'})
 
 
-@app.route("/get_interface-option_point_all/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>", methods=['GET'])
+@app.route("/get_interface-option_point_contraturno/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>", methods=['GET'])
 @login_required
 @roles_required("aluno")
 def get_interface_option_point_all(name_line, surname, shift, hr_par, hr_ret):
@@ -506,17 +506,41 @@ def get_interface_option_point_all(name_line, surname, shift, hr_par, hr_ret):
         if not rota:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
 
-        values = (
-          db.session.query(Parada, Ponto)
-          .filter(Parada.Rota_codigo == rota.codigo)
-          .order_by(Parada.ordem)
-          .all()
-        )
+        user = return_my_user()
+        if user.turno != 'Noturno':
+          values = (
+            db.session.query(Parada, Ponto)
+            .filter(db.and_(
+              Parada.Rota_codigo == rota.codigo,
+              Parada.Ponto_id == Ponto.id,
+              Parada.tipo == 'retorno' if user.turno == 'Matutino' else 'Partida'
+            ))
+            .order_by(Parada.ordem)
+            .all()
+          )
+        else:
+          values = (
+            db.session.query(Parada, Ponto)
+            .filter(db.and_(
+              Parada.Rota_codigo == rota.codigo,
+              Parada.Ponto_id == Ponto.id,
+            ))
+            .order_by(Parada.ordem)
+            .all()
+          )
 
-        retorno = {'error': False, 'data': {'Partida': [], 'Retorno': []}}
+        retorno = {'error': False, 'data': {}}
         for value in values:
           parada, ponto = value
-          retorno['data'][parada.tipo.capitalize()].append({'ordem': parada.ordem, 'nome': ponto.nome})
+          if parada.tipo not in retorno['data']:
+            retorno['data'][parada.tipo] = []
+
+          info = {
+            'number': parada.ordem,
+            'nome': ponto.nome,
+            'horario': format_time(parada.horario_passagem)
+          }
+          retorno['data'][parada.tipo].append(info)
         
         return jsonify(retorno)
 
@@ -751,7 +775,7 @@ def get_relationship(name_line, surname, shift, hr_par, hr_ret, type, name_point
     if linha:
       relationship = return_relationship(linha.codigo)
       role = current_user.roles[0].name
-      retorno = {'error': False, 'role': role, 'relacao': relationship}
+      retorno = {'error': False, 'role': role, 'relacao': relationship, 'contraturno': False}
 
       rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, pos)
       if rota is not None:
@@ -802,14 +826,18 @@ def get_relationship(name_line, surname, shift, hr_par, hr_ret, type, name_point
             retorno['cadastrados'] = alunos
           
           else:
-            retorno['cadastrado'] = False
-            if Passagem.query.filter_by(
-              Parada_codigo=parada.codigo,
-              Aluno_id=current_user.primary_key,
-              passagem_contraturno=False,
-              passagem_fixa=True,
-            ).first():
-              retorno['cadastrado'] = True
+            user = return_my_user()
+            if user.turno == rota.turno:
+              retorno['cadastrado'] = False
+              if Passagem.query.filter_by(
+                Parada_codigo=parada.codigo,
+                passagem_contraturno=False,
+                passagem_fixa=True,
+                Aluno_id=user.id
+              ).first():
+                retorno['cadastrado'] = True
+            else:
+              retorno['contraturno'] = True
           
           return jsonify(retorno)
   

@@ -307,7 +307,7 @@ def create_pass_fixed():
     
     if linha and user and hr_par and hr_ret and surname and shift and tipo in dis:
       route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
-      if route is not None:
+      if route is not None and shift.capitalize() == user.turno:
         if not route:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
         
@@ -453,7 +453,7 @@ def create_pass_contraturno():
     
     if linha and user and hr_par and hr_ret and surname and shift and tipo in dis:
       route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
-      if route is not None:
+      if route is not None and shift.capitalize() != user.turno:
         if not route:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
         

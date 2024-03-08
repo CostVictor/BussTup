@@ -33,4 +33,4 @@ def del_myPoint_fixed(type):
         db.session.rollback()
         print(f'Erro ao criar a passagem: {str(e)}')
 
-  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar excluir a passagem.'})
+  return jsonify({'error': True, 'title': 'Remoção Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir a passagem.'})

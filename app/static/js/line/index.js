@@ -644,7 +644,7 @@ function config_popup_route(obj_click, data = false) {
               const item = relacao.querySelector(`[id*="${dado}"]`);
               item.textContent = value;
 
-              if (role == "aluno") {
+              if (role == "aluno" && response.meus_pontos) {
                 const meu_ponto = response.meus_pontos[nome];
                 if (meu_ponto === dados.nome) {
                   item.classList.add("selected");
@@ -657,23 +657,6 @@ function config_popup_route(obj_click, data = false) {
               icon.classList.add("inactive");
               if (response.relacao && response.relacao !== "membro") {
                 icon.classList.remove("inactive");
-              }
-            } else {
-              if (response.meu_turno === information.turno_rota) {
-                relacao.onclick = function () {
-                  open_popup("config_rel_point_route", this);
-                };
-              } else {
-                relacao.onclick = function () {
-                  create_popup(
-                    "Comunicado",
-                    'Olá! Esta rota não pertence ao seu turno, portanto, seus pontos fixos estão disponíveis apenas para visualização. Se desejar definir um ponto como contraturno, selecione o botão "Definir contraturno".',
-                    "Ok",
-                    "warning",
-                    "",
-                    "#1468d6"
-                  );
-                };
               }
             }
 
@@ -737,17 +720,19 @@ function config_popup_relationship(data) {
           del.classList.remove("inactive");
         }
       } else {
-        const btn_cadastrar = document.getElementById(
-          "config_rel_point_route_cadastrar"
-        );
-        const btn_sair = document.getElementById("config_rel_point_route_sair");
-
-        btn_cadastrar.classList.add("inactive");
-        btn_sair.classList.add("inactive");
-        if (response.cadastrado) {
-          btn_sair.classList.remove("inactive");
-        } else {
-          btn_cadastrar.classList.remove("inactive");
+        if (!response.contraturno) {
+          const btn_cadastrar = document.getElementById(
+            "config_rel_point_route_cadastrar"
+          );
+          const btn_sair = document.getElementById("config_rel_point_route_sair");
+  
+          btn_cadastrar.classList.add("inactive");
+          btn_sair.classList.add("inactive");
+          if (response.cadastrado) {
+            btn_sair.classList.remove("inactive");
+          } else {
+            btn_cadastrar.classList.remove("inactive");
+          }
         }
       }
     });

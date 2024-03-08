@@ -145,7 +145,7 @@
 
         {% if role == 'aluno' %}
         <div id="config_route_btn_contraturno" class="page__container justify">
-          <div class="line__container--btn add margin_top" onclick="">
+          <div class="line__container--btn add margin_top" onclick="open_popup('options_contraturno', this)">
             <p class="line__text">Definir contraturno</p>
           </div>
         </div>
@@ -252,14 +252,15 @@
         </div>
 
         {% else %}
+        <h1 class="page__division"></h1>
         <div id="config_rel_point_route_cadastrar" class="page__container justify inactive">
-          <div class="line__container--btn add space" onclick="confirm_register_in()">
+          <div class="line__container--btn add" onclick="confirm_register_in()">
             <p class="line__text">Cadastrar-me neste ponto</p>
           </div>
         </div>
 
         <div id="config_rel_point_route_sair" class="page__container justify inactive">
-          <div class="line__container--btn del space" onclick="open_popup('confirm_del_mypoint')">
+          <div class="line__container--btn del" onclick="open_popup('confirm_del_mypoint')">
             <p class="line__text remove">Cancelar meu cadastro</p>
           </div>
         </div>
