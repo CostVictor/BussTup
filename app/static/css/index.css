@@ -121,6 +121,10 @@ body {
   margin-bottom: calc(0.5vw + 0.5vh + 1vmin);
 }
 
+.margin_bottom.big {
+  margin-bottom: calc(1.5vw + 1.5vh + 1vmin);
+}
+
 
 .scroll_vertical {
   display: flex;

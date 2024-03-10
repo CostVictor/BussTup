@@ -291,7 +291,7 @@ function config_popup_point(name_point) {
           const info = turnos[turno];
           btn.querySelector("p").textContent = info.quantidade;
           criar_aluno(info.alunos, container_turno, response, model_aluno);
-          criar_aluno(info.container, container_contraturno, response, model_aluno);
+          criar_aluno(info.contraturno, container_contraturno, response, model_aluno);
         }
       } else {
         close_popup("config_point");

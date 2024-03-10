@@ -449,7 +449,10 @@ def create_pass_contraturno():
     hr_par = data['time_par']; hr_ret = data['time_ret']
     surname = data['surname']; tipo = data['type'].lower()
     shift = data['shift']
+
     dis = ['partida', 'retorno']
+    if user.turno != 'Noturno':
+      dis.remove('partida' if user.turno == 'Matutino' else 'retorno')
     
     if linha and user and hr_par and hr_ret and surname and shift and tipo in dis:
       route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
@@ -470,7 +473,8 @@ def create_pass_contraturno():
           .filter(db.and_(
             Ponto.nome == data['name_point'],
             Parada.Ponto_id == Ponto.id,
-            Parada.Rota_codigo == route.codigo
+            Parada.Rota_codigo == route.codigo,
+            Parada.tipo == tipo
           ))
           .first()
         )
@@ -485,20 +489,45 @@ def create_pass_contraturno():
 
           new_contraturno = Passagem(**info)
           if check_passagem:
-            try:
-              db.session.delete(check_passagem)
-              db.session.commit()
+            linha_atual = check_passagem.parada.rota.linha.codigo
+            if linha_atual == linha.codigo:
+              try:
+                db.session.delete(check_passagem)
+                db.session.commit()
 
-              with db.session.begin_nested():
-                db.session.add(new_contraturno)
-              db.session.commit()
+                with db.session.begin_nested():
+                  db.session.add(new_contraturno)
+                db.session.commit()
 
-              return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto de contraturno.'})
+                return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto de contraturno.'})
+              
+              except Exception as e:
+                db.session.rollback()
+                print(f'Erro ao criar a passagem: {str(e)}')
             
-            except Exception as e:
-              db.session.rollback()
-              print(f'Erro ao criar a passagem: {str(e)}')
-          
+            else:
+              passagens = (
+                Passagem.query.filter_by(
+                  Aluno_id=user.id,
+                  passagem_fixa=True
+                )
+                .all()
+              )
+              try:
+                for passagem in passagens:
+                  db.session.delete(passagem)
+                db.session.commit()
+
+                with db.session.begin_nested():
+                  db.session.add(new_contraturno)
+                db.session.commit()
+
+                return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto de contraturno para esta linha. Todos os vínculos com a linha anterior foram removidos. Certifique-se de configurar sua rota fixa.'})
+              
+              except Exception as e:
+                db.session.rollback()
+                print(f'Erro ao criar a passagem: {str(e)}')
+
           else:
             try:
               db.session.add(new_contraturno)

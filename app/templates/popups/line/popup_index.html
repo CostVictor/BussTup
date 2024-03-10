@@ -20,7 +20,7 @@
 
         {% if role == 'aluno' %}
         <div id="config_route_aviso_cadastrar" class="inactive">
-          <p class="text info center fundo cinza">Não vinculado</p>
+          <p class="text info center fundo cinza">Defina seus pontos fixos</p>
           <p class="text info fundo justify margin_top">Para efetuar o cadastro, selecione os locais desejados para ida
             e volta na área "Pontos" da rota.</p>
           <h1 class="page__division"></h1>
@@ -144,15 +144,20 @@
         </div>
 
         {% if role == 'aluno' %}
-        <div id="config_route_btn_contraturno" class="page__container justify">
-          <div class="line__container--btn add margin_top" onclick="open_popup('options_contraturno', this)">
+        <div id="config_route_btn_contraturno" class="page__container space justify">
+          <div class="line__container--btn add" onclick="open_popup('options_contraturno', this)">
             <p class="line__text">Definir contraturno</p>
           </div>
         </div>
 
-        <div id="config_route_contraturno_container" class="page__container inactive">
-          <p class="text secundario fundo">Contraturno:</p>
-          <p id="config_route_contraturno" class="text secundario content fundo"></p>
+        <div id="config_route_contraturno_container" class="space inactive">
+          <p class="text secundario emphasis center">Meu contraturno</p>
+          <div class="page__container">
+            <div class="scroll_horizontal max_width">
+              <p id="config_route_contraturno" class="text secundario content fundo max_width center nowrap"></p>
+            </div>
+            <i class="bi bi-trash3 page__icon content del" onclick="open_popup('confirm_del_mycontraturno')"></i>
+          </div>
         </div>
 
         {% else %}
@@ -252,7 +257,7 @@
         </div>
 
         {% else %}
-        <h1 class="page__division"></h1>
+        <h1 id="config_rel_point_route_division" class="page__division"></h1>
         <div id="config_rel_point_route_cadastrar" class="page__container justify inactive">
           <div class="line__container--btn add" onclick="confirm_register_in()">
             <p class="line__text">Cadastrar-me neste ponto</p>

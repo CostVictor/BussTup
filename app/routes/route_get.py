@@ -42,11 +42,13 @@ def get_association():
   response = {'conf': False}
 
   if current_user.roles[0].name == 'aluno':
-    if Passagem.query.filter_by(
+    if (
+      Passagem.query.filter_by(
       Aluno_id=current_user.primary_key,
-      passagem_fixa=True,
-      passagem_contraturno=False
-    ).first():
+      passagem_fixa=True
+      )
+      .first()
+    ):
       response['conf'] = True
   else:
     user = return_my_user()
@@ -66,11 +68,13 @@ def get_lines():
   if query:
     user = return_my_user()
     if role == 'aluno':
-      passagem = Passagem.query.filter_by(
+      passagem = (
+        Passagem.query.filter_by(
         Aluno_id=user.id,
-        passagem_fixa=True,
-        passagem_contraturno=False
-      ).first()
+        passagem_fixa=True
+        )
+        .first()
+      )
       if passagem:
         data['minha_linha'] = passagem.parada.ponto.linha.nome
 
@@ -321,8 +325,11 @@ def get_interface_route(name_line):
               retorno['minhas_rotas']['turno'].append(info)
           else: retorno['minhas_rotas']['contraturno'].append(info)
         
-        for tipo in list_posibility:
-          retorno['mensagens'].append(f'Aviso: Você não definiu seu ponto fixo de {tipo.capitalize()}.')
+        if len(list_posibility) == 1:
+          retorno['mensagens'].append(f'Aviso: Você não definiu seu ponto fixo de {list_posibility[0].capitalize()}.')
+
+        elif len(list_posibility) == 2:
+          retorno['mensagens'].append(f'Aviso: Você não definiu sua rota fixa.')
         
         if not retorno['minhas_rotas']['contraturno']:
           retorno['mensagens'].append('Aviso: Você não definiu sua rota de Contraturno.')
@@ -565,9 +572,9 @@ def get_point(name_line, name_point):
         dict_ponto = return_dict(ponto, not_includes=['id', 'Linha_codigo'])
         retorno['info'] = dict_ponto
         retorno['utilizacao'] = {'rotas': []}
-        retorno['turnos']['Matutino'] = {'alunos': [], 'contraturno': []}
-        retorno['turnos']['Vespertino'] = {'alunos': [], 'contraturno': []}
-        retorno['turnos']['Noturno'] = {'alunos': [], 'contraturno': []}
+        retorno['turnos']['Matutino'] = {'ids_turno': [], 'ids_contraturno': [], 'alunos': [], 'contraturno': []}
+        retorno['turnos']['Vespertino'] = {'ids_turno': [], 'ids_contraturno': [], 'alunos': [], 'contraturno': []}
+        retorno['turnos']['Noturno'] = {'ids_turno': [], 'ids_contraturno': [], 'alunos': [], 'contraturno': []}
 
         if not dict_ponto['linkGPS']:
           dict_ponto['linkGPS'] = 'Não definido'
@@ -614,19 +621,24 @@ def get_point(name_line, name_point):
             Passagem.Aluno_id == Aluno.id
           ))
           .order_by(Aluno.nome)
-          .group_by(Aluno.id)
           .all()
         )
 
         for value in values:
           passagem, aluno = value
           if passagem.passagem_contraturno:
-            retorno['turnos'][aluno.turno]['contraturno'].append(aluno.nome)
-          else: retorno['turnos'][aluno.turno]['alunos'].append(aluno.nome)
+            if aluno.id not in retorno['turnos'][aluno.turno]['ids_contraturno']:
+              retorno['turnos'][aluno.turno]['contraturno'].append(aluno.nome)
+              retorno['turnos'][aluno.turno]['ids_contraturno'].append(aluno.id)
+          else:
+            if aluno.id not in retorno['turnos'][aluno.turno]['ids_turno']:
+              retorno['turnos'][aluno.turno]['alunos'].append(aluno.nome)
+              retorno['turnos'][aluno.turno]['ids_turno'].append(aluno.id)
 
         for turno in retorno['turnos']:
           local = retorno['turnos'][turno]
-          local['quantidade'] = count_list([local['alunos'], local['contraturno']], 'cadastrado', list_unique=False)
+          local['quantidade'] = count_list([local['alunos'], local['contraturno']], 'cadastro', list_unique=False)
+          del local['ids_turno']; del local['ids_contraturno']
 
         return jsonify(retorno)
 
@@ -675,6 +687,7 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
           retorno['meu_turno'] = user.turno
           retorno['msg_cadastrar'] = False
           retorno['msg_contraturno'] = False
+          retorno['btn_contraturno'] = False
           retorno['msg_incompleta'] = False
 
           if user.turno == rota.turno:
@@ -737,10 +750,17 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
 
             if parada_contraturno:
               rota_contraturno = parada_contraturno.rota
-              if rota_contraturno.codigo == rota.codigo:
-                retorno['meu_contraturno'] = parada_contraturno.ponto.nome
-              else: retorno['msg_contraturno'] = True
-            else: retorno['msg_contraturno'] = True
+              if rota_contraturno.linha.codigo == linha.codigo:
+                if rota_contraturno.codigo == rota.codigo:
+                  retorno['meu_contraturno'] = f'{parada_contraturno.tipo.capitalize()} ~> {parada_contraturno.ponto.nome}'
+                else:
+                  retorno['btn_contraturno'] = True
+              else:
+                retorno['msg_contraturno'] = True
+                retorno['btn_contraturno'] = True
+            else:
+              retorno['msg_contraturno'] = True
+              retorno['btn_contraturno'] = True
 
         for tipo in ['partida', 'retorno']:
           values = db.session.query(Parada, Ponto).filter(

@@ -121,7 +121,9 @@
 
     <div class="popup__container--content">
       <div id="confirm_register_in_point_msg" class="inactive">
-        <p class="popup__text secundario justify">Seu cadastro será efetuado neste ponto. Você será identificado(a) como participante da linha para os motoristas. Estes terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
+        <p class="popup__text secundario justify">Seu cadastro será efetuado neste ponto. Você será identificado(a) como participante da linha para os motoristas.</p>
+        <h1 class="page__division"></h1>
+        <p class="popup__text secundario justify">Os motoristas desta linha terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
       </div>
 
       <div id="confirm_register_in_point_change" class="inactive">
@@ -129,7 +131,9 @@
       </div>
 
       <div id="confirm_register_in_point_new_line" class="inactive">
-        <p class="popup__text secundario justify">Você possui vínculo com outra linha. Ao prosseguir, todos os vínculos com a linha anterior serão removidos, e você será cadastrado(a) neste ponto, tornando-se participante desta linha. Os motoristas da mesma terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
+        <p class="popup__text secundario justify">Você possui vínculo com outra linha. Ao prosseguir, todos os vínculos com a linha anterior serão removidos, e você será cadastrado(a) neste ponto, tornando-se participante desta linha.</p>
+        <h1 class="page__division"></h1>
+        <p class="popup__text secundario justify">Os motoristas desta linha terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
       </div>
     </div>
 
@@ -148,7 +152,7 @@
     </header>
 
     <div class="popup__container--content">
-      <p class="popup__text secundario justify">Ao prosseguir, você irá remover o vínculo selecionado. Esta ação retira a visualização de sua participação no trajeto especificado.</p>
+      <p class="popup__text secundario justify">Ao prosseguir, você irá remover o vínculo fixo selecionado. Esta ação retira a visualização de sua participação no trajeto especificado.</p>
     </div>
 
     <footer class="popup__container--footer">
@@ -167,7 +171,9 @@
 
     <div class="popup__container--content">
       <div id="confirm_register_contraturno_msg" class="inactive">
-        <p class="popup__text secundario justify">Seu cadastro de contraturno será efetuado neste ponto. Você será identificado(a) como participante nos registros de contraturno desta rota. Os motoristas desta linha terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
+        <p class="popup__text secundario justify">Seu cadastro de contraturno será efetuado neste ponto. Você será identificado(a) como participante nos registros de contraturno desta rota.</p>
+        <h1 class="page__division"></h1>
+        <p class="popup__text secundario justify">Os motoristas desta linha terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
       </div>
       
       <div id="confirm_register_contraturno_change" class="inactive">
@@ -175,13 +181,15 @@
       </div>
 
       <div id="confirm_register_contraturno_new_line" class="inactive">
-        <p class="popup__text secundario justify">Você já possui um vínculo de contraturno em outra linha. Ao prosseguir, todos os vínculos com a linha anterior serão removidos, e este ponto será definido como seu novo ponto de contraturno, tornando-se participante desta linha. Os motoristas da mesma terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
+        <p class="popup__text secundario justify">Você já possui um vínculo de contraturno em outra linha. Ao prosseguir, todos os vínculos com a linha anterior serão removidos, e este ponto será definido como seu novo ponto de contraturno, tornando você participante desta linha.</p>
+        <h1 class="page__division"></h1>
+        <p class="popup__text secundario justify">Os motoristas desta linha terão acesso às suas informações para fins didáticos de funcionamento e estatística.</p>
       </div>
     </div>
 
     <footer class="popup__container--footer">
-      <button class="popup__btn cancel" onclick="close_popup('confirm_del_mypoint')">Cancelar</button>
-      <button class="popup__btn" onclick="del_myPoint_fixed()">Confirmar</button>
+      <button class="popup__btn cancel" onclick="close_popup('confirm_register_contraturno')">Cancelar</button>
+      <button class="popup__btn" onclick="register_in_point_contraturno()">Confirmar</button>
     </footer>
   </div>
 </section>
@@ -211,7 +219,25 @@
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('options_contraturno')">Voltar</button>
-      <button class="popup__btn" onclick="">Confirmar</button>
+      <button class="popup__btn" onclick="confirm_register_in(true)">Cadastrar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="confirm_del_mycontraturno" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Confirmação</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <p class="popup__text secundario justify">Ao prosseguir, você irá remover seu vínculo de contraturno. Esta ação retira a visualização de sua participação no trajeto especificado.</p>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('confirm_del_mycontraturno')">Cancelar</button>
+      <button class="popup__btn" onclick="del_myPoint_contraturno()">Confirmar</button>
     </footer>
   </div>
 </section>

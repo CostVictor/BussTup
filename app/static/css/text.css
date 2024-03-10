@@ -54,6 +54,7 @@
 }
 
 .text.secundario {
+  transition: background-color 0.2s ease-in-out;
   font-size: calc(0.93vw + 0.9vh + 1vmin);
   margin: calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin) calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin);
 }

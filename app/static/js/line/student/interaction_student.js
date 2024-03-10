@@ -43,9 +43,10 @@ function action_popup(popup, card, id, obj_click) {
   }
 }
 
-const local = document.getElementById("popup_local");
 function check_help() {
-  const popups = local.querySelectorAll('section[id*="help_me_cadastro"]');
+  const popups = local_popup.querySelectorAll(
+    'section[id*="help_me_cadastro"]'
+  );
   if (popups.length) {
     return true;
   }
@@ -53,7 +54,9 @@ function check_help() {
 }
 
 function close_help() {
-  const popups = local.querySelectorAll('section[id*="help_me_cadastro"]');
+  const popups = local_popup.querySelectorAll(
+    'section[id*="help_me_cadastro"]'
+  );
   popups.forEach((popup) => {
     close_popup(popup.id);
   });
@@ -73,7 +76,7 @@ function check_state(init = false, check = true) {
 
           if (!response.finished) {
             let popup_id = `help_me_cadastro_${type}`;
-            if (!local.querySelector(`#${popup_id}`)) {
+            if (!local_popup.querySelector(`#${popup_id}`)) {
               close_help();
               open_popup(popup_id);
             } else {
@@ -134,7 +137,7 @@ function check_state(init = false, check = true) {
             } else {
               create_popup(
                 "Assistente",
-                "<> Prontinho! Você já fez todas as configurações necessárias. Agora, aproveite ao máximo os nossos recursos!",
+                "<> Prontinho! Você já fez todas as configurações necessárias. Agora, aproveite ao máximo os nossos recursos.",
                 "Claro!!",
                 "success"
               );
@@ -158,45 +161,66 @@ function check_state(init = false, check = true) {
 }
 
 function confirm_register_in(contraturno = false) {
-  const popup = local.querySelector("#config_rel_point_route");
   const name_line = document.getElementById("interface_nome").textContent;
-  data = {
-    principal: contraturno
-      ? [name_line]
-      : [name_line, extract_info(popup, "tipo")],
-  };
-  fetch(
-    `/check_register_in${contraturno ? "_contraturno" : ""}` +
-      generate_url_dict(data),
-    {
-      method: "GET",
-    }
-  )
-    .then((response) => response.json())
-    .then((response) => {
-      if (!response.error) {
-        const id = contraturno
-          ? "confirm_register_contraturno"
-          : "confirm_register_in_point";
-        open_popup(id);
+  let execute = true;
+  let data = {};
 
-        if (response.change) {
-          if (response.new_line) {
-            document
-              .getElementById(id + "_new_line")
-              .classList.remove("inactive");
+  if (contraturno) {
+    const popup = local_popup.querySelector("#options_contraturno");
+    if (!popup.querySelector('[class*="selected"]')) {
+      execute = false;
+    }
+
+    data = {
+      principal: [name_line],
+    };
+  } else {
+    const popup = local_popup.querySelector("#config_rel_point_route");
+    data = {
+      principal: [name_line, extract_info(popup, "tipo")],
+    };
+  }
+
+  if (execute) {
+    fetch(
+      `/check_register_in${contraturno ? "_contraturno" : ""}` +
+        generate_url_dict(data),
+      {
+        method: "GET",
+      }
+    )
+      .then((response) => response.json())
+      .then((response) => {
+        if (!response.error) {
+          const id = contraturno
+            ? "confirm_register_contraturno"
+            : "confirm_register_in_point";
+          open_popup(id);
+
+          if (response.change) {
+            if (response.new_line) {
+              document
+                .getElementById(id + "_new_line")
+                .classList.remove("inactive");
+            } else {
+              document
+                .getElementById(id + "_change")
+                .classList.remove("inactive");
+            }
           } else {
-            document
-              .getElementById(id + "_change")
-              .classList.remove("inactive");
+            document.getElementById(id + "_msg").classList.remove("inactive");
           }
         } else {
-          document.getElementById(id + "_msg").classList.remove("inactive");
+          create_popup(response.title, response.text);
         }
-      } else {
-        create_popup(response.title, response.text);
-      }
-    });
+      });
+  } else {
+    create_popup(
+      "Nenhuma Opção Selecionada",
+      "Selecione uma opção de ponto disponível.",
+      "Voltar"
+    );
+  }
 }
 
 function register_in_point_fixed() {
@@ -264,8 +288,17 @@ function del_myPoint_fixed() {
 }
 
 function register_in_point_contraturno() {
+  const popup = local_popup.querySelector("#options_contraturno");
   const data = return_data_route();
   let execute = true;
+
+  const option = popup.querySelector('[id*="nome"][class*="selected"]');
+  if (option) {
+    data.type = option.id.includes("partida") ? "partida" : "retorno";
+    data.name_point = option.textContent;
+  } else {
+    execute = false;
+  }
 
   if (execute) {
     fetch("/create_pass_contraturno", {
@@ -276,12 +309,45 @@ function register_in_point_contraturno() {
       .then((response) => response.json())
       .then((response) => {
         if (!response.error) {
-          console.log(response);
+          local_popup.removeChild(local_popup.querySelector('#options_contraturno'))
+          close_popup("confirm_register_contraturno");
+          create_popup(response.title, response.text, "Ok", "success");
+
+          loadInterfaceRoutes(data.name_line);
+          config_popup_route(
+            null,
+            return_data_route(null, (format_dict_url = true))
+          );
         } else {
           create_popup(response.title, response.text);
         }
       });
+  } else {
+    create_popup(
+      "Nenhuma Opção Selecionada",
+      "Selecione uma opção de ponto disponível.",
+      "Voltar"
+    );
   }
+}
+
+function del_myPoint_contraturno() {
+  const name_line = document.getElementById("interface_nome").textContent;
+  fetch("/del_myPoint_contraturno", { method: "DELETE" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        create_popup(response.title, response.text, "Ok", "success");
+        close_popup("confirm_del_mycontraturno");
+        config_popup_route(
+          null,
+          return_data_route(null, (format_dict_url = true))
+        );
+        loadInterfaceRoutes(name_line);
+      } else {
+        create_popup(response.title, response.text);
+      }
+    });
 }
 
 function config_popup_contraturno() {
@@ -299,20 +365,22 @@ function config_popup_contraturno() {
           const local = document.getElementById(
             `options_contraturno_container_${shift}`
           );
-          const container = local.querySelector('div')
+          const container = local.querySelector("div");
 
           const local_reverse = document.getElementById(
-            `options_contraturno_container_${shift === 'partida' ? 'retorno' : 'partida'}`
+            `options_contraturno_container_${
+              shift === "partida" ? "retorno" : "partida"
+            }`
           );
-          const container_reverse = local_reverse.querySelector('div')
-          
-          local.classList.remove('inactive')
+          const container_reverse = local_reverse.querySelector("div");
+
+          local.classList.remove("inactive");
           container.innerHTML = "";
 
           const options = data[shift];
           for (index in options) {
             const option = model_option.cloneNode(true);
-            option.id = container.id + `-ponto_${index}`;
+            option.id = local.id + `-ponto_${index}`;
 
             ids = option.querySelectorAll(`[id*="${model_option.id}"]`);
             ids.forEach((value) => {
@@ -323,11 +391,11 @@ function config_popup_contraturno() {
               const info = options[index][dado];
               option.querySelector(`[id*="${dado}"]`).textContent = info;
             }
-            
-            option.removeAttribute('onclick')
-            option.onclick = function() {
-              popup_selectOption_span(this, [container_reverse])
-            }
+
+            option.removeAttribute("onclick");
+            option.onclick = function () {
+              popup_selectOption_span(this, [container_reverse]);
+            };
 
             option.classList.remove("inactive");
             container.appendChild(option);

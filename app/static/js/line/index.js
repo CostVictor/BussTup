@@ -461,7 +461,7 @@ function loadInterfaceRoutes(name_line) {
 
             local_msgs.innerHTML = "";
             const mensagens = response.mensagens;
-            if (mensagens) {
+            if (mensagens.length) {
               for (index in mensagens) {
                 const text = document.createElement("p");
                 text.className = "text info fundo cinza";
@@ -550,11 +550,15 @@ function config_popup_route(obj_click, data = false) {
           const btn_contraturno = document.getElementById(
             "config_route_btn_contraturno"
           );
+          const container_contraturno = document.getElementById(
+            "config_route_contraturno_container"
+          );
 
           msg_cadastrar.classList.add("inactive");
           msg_incompleta.classList.add("inactive");
           msg_contraturno.classList.add("inactive");
           btn_contraturno.classList.add("inactive");
+          container_contraturno.classList.add("inactive");
           if (response.msg_cadastrar) {
             msg_cadastrar.classList.remove("inactive");
           } else {
@@ -565,7 +569,17 @@ function config_popup_route(obj_click, data = false) {
 
             if (response.msg_contraturno) {
               msg_contraturno.classList.remove("inactive");
+            }
+            
+            if (response.btn_contraturno) {
               btn_contraturno.classList.remove("inactive");
+            }
+            
+            if (response.meu_contraturno) {
+              container_contraturno.classList.remove("inactive");
+              container_contraturno.querySelector(
+                "#config_route_contraturno"
+              ).textContent = response.meu_contraturno;
             }
           }
         } else {
@@ -724,8 +738,10 @@ function config_popup_relationship(data) {
           const btn_cadastrar = document.getElementById(
             "config_rel_point_route_cadastrar"
           );
-          const btn_sair = document.getElementById("config_rel_point_route_sair");
-  
+          const btn_sair = document.getElementById(
+            "config_rel_point_route_sair"
+          );
+
           btn_cadastrar.classList.add("inactive");
           btn_sair.classList.add("inactive");
           if (response.cadastrado) {
@@ -733,6 +749,10 @@ function config_popup_relationship(data) {
           } else {
             btn_cadastrar.classList.remove("inactive");
           }
+        } else {
+          document
+            .getElementById("config_rel_point_route_division")
+            .classList.add("inactive");
         }
       }
     });

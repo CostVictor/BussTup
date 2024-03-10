@@ -112,11 +112,13 @@ def return_dict(obj, not_includes=[]):
 def return_relationship(code_line):
   if code_line:
     if current_user.roles[0].name == 'aluno':
-      passagem = Passagem.query.filter_by(
+      passagem = (
+        Passagem.query.filter_by(
         Aluno_id=current_user.primary_key,
-        passagem_fixa=True,
-        passagem_contraturno=False
-      ).first()
+        passagem_fixa=True
+        )
+        .first()
+      )
 
       if passagem:
         line = passagem.parada.ponto.linha
