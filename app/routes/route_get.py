@@ -515,12 +515,13 @@ def get_interface_option_point_all(name_line, surname, shift, hr_par, hr_ret):
 
         user = return_my_user()
         if user.turno != 'Noturno':
+          tipo = 'retorno' if user.turno == 'Matutino' else 'partida'
           values = (
             db.session.query(Parada, Ponto)
             .filter(db.and_(
               Parada.Rota_codigo == rota.codigo,
               Parada.Ponto_id == Ponto.id,
-              Parada.tipo == 'retorno' if user.turno == 'Matutino' else 'Partida'
+              Parada.tipo == tipo
             ))
             .order_by(Parada.ordem)
             .all()
@@ -550,6 +551,54 @@ def get_interface_option_point_all(name_line, surname, shift, hr_par, hr_ret):
           retorno['data'][parada.tipo].append(info)
         
         return jsonify(retorno)
+
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
+
+
+@app.route("/get_interface-students/<name_line>", methods=['GET'])
+@login_required
+@roles_required("motorista")
+def get_students(name_line):
+  linha = Linha.query.filter_by(nome=name_line).first()
+  if linha:
+    retorno = {'error': False, 'relacao': return_relationship(linha.codigo)}
+    data = {'Matutino': {'alunos': []}, 'Vespertino': {'alunos': []}, 'Noturno': {'alunos': []}}
+    retorno['data'] = data
+
+    subquery = (
+      db.session.query(Parada.codigo).join(Rota)
+      .filter(db.and_(
+        Rota.Linha_codigo == linha.codigo,
+        Parada.Rota_codigo == Rota.codigo
+      ))
+      .subquery()
+    )
+    alunos = (
+      db.session.query(Aluno).join(Passagem)
+      .filter(db.and_(
+        Passagem.Parada_codigo.in_(subquery.select()),
+        Passagem.passagem_fixa == True,
+        Passagem.Aluno_id == Aluno.id
+      ))
+      .order_by(Aluno.nome)
+      .group_by(Aluno.id)
+      .all()
+    )
+
+    for aluno in alunos:
+      data[aluno.turno]['alunos'].append(aluno.nome)
+    
+    qnt_mat = len(data['Matutino']['alunos'])
+    qnt_ves = len(data['Vespertino']['alunos'])
+    qnt_not = len(data['Noturno']['alunos'])
+    qnt_total = qnt_mat + qnt_ves + qnt_not
+
+    retorno['quantidade'] = f'{qnt_total} {"cadastrado" if qnt_total == 1 else "cadastrados"}'
+    data['Matutino']['quantidade'] = f'{qnt_mat} {"cadastrado" if qnt_mat == 1 else "cadastrados"}'
+    data['Vespertino']['quantidade'] = f'{qnt_ves} {"cadastrado" if qnt_ves == 1 else "cadastrados"}'
+    data['Noturno']['quantidade'] = f'{qnt_not} {"cadastrado" if qnt_not == 1 else "cadastrados"}'
+
+    return jsonify(retorno)
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})
 
@@ -888,3 +937,86 @@ def get_aparence(name_line, surname_vehicle):
       return jsonify(retorno)
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações do veículo.'})
+
+
+@app.route("/get_student/<name_line>/<shift>/<name_student>", methods=['GET'])
+@login_required
+@roles_required("motorista")
+def get_stundet(name_line, shift, name_student):
+  name_point = request.args.get('name_point')
+  contraturno = request.args.get('contraturno')
+  pos = request.args.get('pos')
+
+  linha = Linha.query.filter_by(nome=name_line).first()
+  if linha and return_relationship(linha.codigo):
+    retorno = {'error': False}
+
+    if name_point:
+      ponto = Ponto.query.filter_by(Linha_codigo=linha.codigo, nome=name_point).first()
+      if ponto:
+        aluno = (
+          db.session.query(Aluno).join(Passagem).join(Parada)
+          .filter(db.and_(
+            Aluno.nome == name_student,
+            Aluno.turno == shift.capitalize(),
+            Passagem.Aluno_id == Aluno.id,
+            Passagem.passagem_fixa == True,
+            (Passagem.passagem_contraturno == True) if contraturno else True,
+            Passagem.Parada_codigo == Parada.codigo,
+            Parada.Ponto_id == ponto.id
+          ))
+          .all()
+        )
+
+        if aluno:
+          if len(aluno) > 1:
+            if pos and isinstance(pos, str) and pos.isdigit():
+              aluno = aluno[int(pos)]
+            else:
+              return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar o aluno. Por favor, recarregue a página e tente novamente.'})
+          else:
+            aluno = aluno[0]
+
+          retorno['data'] = return_dict(aluno, not_includes=['id', 'email'])
+          return jsonify(retorno)
+    
+    else:
+      keys = db.session.query(Rota.codigo).filter_by(Linha_codigo=linha.codigo).subquery()
+      not_include = (
+        db.session.query(Marcador_Exclusao.key_item)
+        .filter(db.and_(
+          Marcador_Exclusao.tabela == 'Rota',
+          Marcador_Exclusao.key_item.in_(keys.select())
+        ))
+        .subquery()
+      )
+
+      aluno = (
+        db.session.query(Aluno).join(Passagem).join(Parada).join(Rota)
+        .filter(db.and_(
+          Aluno.nome == name_student,
+          Aluno.turno == shift.capitalize(),
+          Passagem.Aluno_id == Aluno.id,
+          Passagem.passagem_fixa == True,
+          (Passagem.passagem_contraturno == True) if contraturno else True,
+          Passagem.Parada_codigo == Parada.codigo,
+          Parada.Rota_codigo == Rota.codigo,
+          Rota.Linha_codigo == linha.codigo,
+          db.not_(Rota.codigo.in_(not_include.select()))
+        ))
+        .all()
+      )
+
+      if aluno:
+        if len(aluno) > 1:
+          if pos and isinstance(pos, str) and pos.isdigit():
+            aluno = aluno[int(pos)]
+          else:
+            return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar o aluno. Por favor, recarregue a página e tente novamente.'})
+        else:
+          aluno = aluno[0]
+
+        retorno['data'] = return_dict(aluno, not_includes=['id', 'email'])
+        return jsonify(retorno)
+    
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações do aluno.'})

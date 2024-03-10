@@ -69,6 +69,7 @@ function loadInterfaceLine(name_line, load_complete = true) {
           loadInterfaceVehicle(name_line);
           if (response.role === "motorista") {
             loadInterfacePoints(name_line);
+            loadInterfaceStudents(name_line);
           }
           loadInterfaceRoutes(name_line);
         }
@@ -570,11 +571,11 @@ function config_popup_route(obj_click, data = false) {
             if (response.msg_contraturno) {
               msg_contraturno.classList.remove("inactive");
             }
-            
+
             if (response.btn_contraturno) {
               btn_contraturno.classList.remove("inactive");
             }
-            
+
             if (response.meu_contraturno) {
               container_contraturno.classList.remove("inactive");
               container_contraturno.querySelector(

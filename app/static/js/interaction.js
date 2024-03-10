@@ -231,7 +231,7 @@ function set_observerScroll(list_obj) {
   }
 }
 
-function action_container(obj_click, set_limit = false) {
+function action_container(obj_click, set_limit = false, visible_contante_scroll=true) {
   const icon = obj_click.querySelector("i");
   const container = document.getElementById(
     obj_click.id.replace("btn", "container")
@@ -272,11 +272,13 @@ function action_container(obj_click, set_limit = false) {
     container.scrollTop = 0;
     icon.classList.add("open");
 
-    if (container.className.includes("scroll")) {
-      if (set_limit) {
-        set_limitScroll(container, set_limit);
-      } else {
-        set_limitScroll(container);
+    if (visible_contante_scroll) {
+      if (container.className.includes("scroll")) {
+        if (set_limit) {
+          set_limitScroll(container, set_limit);
+        } else {
+          set_limitScroll(container);
+        }
       }
     }
   }
@@ -291,14 +293,16 @@ function action_container(obj_click, set_limit = false) {
     });
   }
 
-  elements.forEach((element) => {
-    if (element.className.includes("scroll")) {
-      element.scrollTop = 0;
-      element.classList.remove("inactive");
-      animate_itens(Array.from(element.children));
-      set_limitScroll(element, set_limit ? set_limit : 30);
-    }
-  });
+  if (visible_contante_scroll) {
+    elements.forEach((element) => {
+      if (element.className.includes("scroll")) {
+        element.scrollTop = 0;
+        element.classList.remove("inactive");
+        animate_itens(Array.from(element.children));
+        set_limitScroll(element, set_limit ? set_limit : 30);
+      }
+    });
+  }
 }
 
 function animateIconPassword(obj_click) {

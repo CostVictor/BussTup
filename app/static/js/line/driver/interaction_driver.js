@@ -32,10 +32,20 @@ function action_popup(popup, card, id, obj_click) {
   } else if (id === "config_motorista") {
     card.querySelector("h1").textContent = extract_info(obj_click, "nome");
   } else if (id === "config_aluno") {
-    card.querySelector(`p#${popup.id}_nome`).textContent = extract_info(
-      obj_click,
-      "title"
-    );
+    const nome = extract_info(obj_click, "nome");
+    const pos = obj_click.querySelector("span").textContent;
+    let turno = "Matutino";
+    let contraturno = false
+    if (obj_click.id.includes("Vespertino")) {
+      turno = "Vespertino";
+    } else if (obj_click.id.includes("Noturno")) {
+      turno = "Noturno";
+    }
+    if (obj_click.id.includes('contraturno')) {
+      contraturno = true
+    }
+    const name_point = document.getElementById("config_point_nome");
+    config_popup_aluno(nome, turno, pos, contraturno, name_point);
   } else if (id === "config_point") {
     config_popup_point(extract_info(obj_click, "nome"));
   } else if (id === "config_route") {
@@ -211,8 +221,36 @@ function loadInterfacePoints(name_line) {
     });
 }
 
+function loadInterfaceStudents(name_line) {
+  const model_aluno = models.querySelector("#interface_model_aluno");
+  fetch(`/get_interface-students/${encodeURIComponent(name_line)}`, {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        document.getElementById("interface_alunos_quant").textContent =
+          response.quantidade;
+        const data = response.data;
+
+        for (shift in data) {
+          document.getElementById(
+            `interface_alunos_${shift}_quantidade`
+          ).textContent = data[shift].quantidade;
+          const container = document.getElementById(
+            `interface_alunos_${shift}_container`
+          );
+          const alunos = data[shift].alunos;
+          criar_aluno(alunos, container, response, model_aluno);
+        }
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+      }
+    });
+}
+
 function criar_aluno(list_aluno, container, response, model_aluno) {
-  container.innerHTML = ''
+  container.innerHTML = "";
 
   for (index in list_aluno) {
     const aluno = model_aluno.cloneNode(true);
@@ -277,7 +315,7 @@ function config_popup_point(name_point) {
         const utilizacao_container = document.getElementById(
           "config_point_utilizacao_container"
         );
-        criar_rota(utilizacao.rotas, utilizacao_container, true)
+        criar_rota(utilizacao.rotas, utilizacao_container, true);
 
         for (turno in turnos) {
           const btn = document.getElementById(`config_point_${turno}_btn`);
@@ -291,10 +329,47 @@ function config_popup_point(name_point) {
           const info = turnos[turno];
           btn.querySelector("p").textContent = info.quantidade;
           criar_aluno(info.alunos, container_turno, response, model_aluno);
-          criar_aluno(info.contraturno, container_contraturno, response, model_aluno);
+          criar_aluno(
+            info.contraturno,
+            container_contraturno,
+            response,
+            model_aluno
+          );
         }
       } else {
         close_popup("config_point");
+        create_popup(response.title, response.text, "Voltar");
+      }
+    });
+}
+
+function config_popup_aluno(nome, turno, pos, contraturno, name_point = false) {
+  const name_line = document.getElementById("interface_nome").textContent;
+  const secondary = {};
+  if (name_point) {
+    secondary.name_point = name_point.textContent;
+  }
+  if (contraturno) {
+    secondary.contraturno = true
+  }
+  if (pos) {
+    secondary.pos = pos;
+  }
+  const data = {
+    principal: [name_line, turno, nome],
+    secondary: secondary,
+  };
+
+  fetch("/get_student" + generate_url_dict(data), { method: "GET" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const data = response.data
+        for (info in data) {
+          document.getElementById(`config_aluno_${info}`).textContent = data[info]
+        }
+      } else {
+        close_popup("config_aluno");
         create_popup(response.title, response.text, "Voltar");
       }
     });

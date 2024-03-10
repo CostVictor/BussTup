@@ -197,7 +197,7 @@
     {% if role == 'motorista' %}
     <section id="area_alunos" class="-enter- line__container--area">
       <h2 class="text title">Alunos e Tickets</h2>
-      <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
+      <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="action_container(this, false, false)">
         <h3 class="text secundario fundo">Alunos</h3>
         <h3 id="interface_alunos_quant" class="text secundario fundo max_width"></h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
@@ -206,25 +206,24 @@
       <div id="interface_alunos_container" class="scroll_vertical popup__container--scroll inactive">
         {% for turno in turnos %}
         <div id="interface_alunos_{{ turno }}_btn" class="page__container interaction pos_relative"
-          onclick="action_container(this)">
+          onclick="action_container(this, false, false)">
           <h3 class="text secundario emphasis">{{ turno }}</h3>
           <h3 id="interface_alunos_{{ turno }}_quantidade" class="text secundario fundo max_width"></h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
 
-        <div id="interface_alunos_{{ turno }}_container" class="scroll_vertical popup__container--scroll principal">
+        <div id="interface_alunos_{{ turno }}_container" class="scroll_vertical popup__container--scroll principal_big inactive">
         </div>
         {% endfor %}
       </div>
 
       <div id="interface_tickets_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
-        <h3 class="text secundario fundo max_width">Tickets</h3>
+        <h3 class="text secundario fundo">Tickets</h3>
+        <h3 class="text secundario fundo max_width">Em desenvolvimento</h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
       </div>
 
-      <div id="interface_tickets_container" class="scroll_vertical popup__container--scroll principal inactive">
-        <h3 class="text info center fundo cinza">Em desenvolvimento</h3>
-      </div>
+      <div id="interface_tickets_container" class="scroll_vertical popup__container--scroll principal inactive"></div>
     </section>
     {% endif %}
   </main>
@@ -240,5 +239,4 @@
   <script src="/static/js/line/student/interaction_student.js"></script>
   {% endif %}
 </body>
-
 </html>
