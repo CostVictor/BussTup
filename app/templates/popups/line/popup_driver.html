@@ -174,19 +174,18 @@
 <section id="del_vehicle" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header">
-      <h1 class="popup__title">Excluir veículo</h1>
+      <h1 class="popup__title">Excluir Veículo</h1>
     </header>
 
     <div class="popup__container--content">
-      <h4 class="popup__text">Ao proseguir, você irá excluir permanentemente:</h4>
+      <h4 class="text secundario justify">Ao proseguir, você irá excluir permanentemente:</h4>
       <h2 id="del_vehicle_surname" class="popup__text emphasis"></h2>
-      <h4 class="popup__text">Todas as rotas relacionadas a este veículo serão apagadas e o motorista ficará sem
-        veículo.</h4>
+      <h4 class="text secundario justify">O motorista associado a este veículo ficará sem relação, e as rotas relacionadas serão desativadas.</h4>
     </div>
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('del_vehicle')">Cancelar</button>
-      <button class="popup__btn">Excluir</button>
+      <button class="popup__btn" onclick="del_vehicle()">Excluir</button>
     </footer>
   </div>
 </section>
@@ -217,6 +216,24 @@
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('del_route')">Cancelar</button>
       <button class="popup__btn">Excluir</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="del_relationship_point_route" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Remover Relação Ponto</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <p class="text secundario justify">Ao proseguir, você irá excluir permanentemente a relação deste ponto no trajeto especificado. Todos os alunos cadastrados serão removidos e a ordem do trajeto será alterada.</p>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('del_relationship_point_route')">Cancelar</button>
+      <button class="popup__btn" onclick="del_relationship_point_route()">Excluir</button>
     </footer>
   </div>
 </section>

@@ -39,6 +39,13 @@ class Role(db.Model, RoleMixin):
   user = db.relationship('User', backref=db.backref('roles', cascade='all, delete'), lazy=True)
 
 
+class Contribuicao(db.Model):
+  __bind_key__ = 'db_session'
+  __tablename__ = 'Contribuicao'
+  User_id = db.Column(db.BigInteger, db.ForeignKey('User.id'), primary_key=True)
+  user = db.relationship('User', backref=db.backref('contribuicao', cascade='all, delete'), lazy=True)
+
+
 class Access_Device(db.Model):
   __bind_key__ = 'db_session'
   __tablename__ = 'Access_Device'
@@ -84,7 +91,7 @@ class Onibus(db.Model):
   Linha_codigo = db.Column(db.Integer, db.ForeignKey('Linha.codigo'), nullable=False)
   Motorista_id = db.Column(db.Integer, db.ForeignKey('Motorista.id'))
   linha = db.relationship('Linha', backref=db.backref('onibus', cascade='all, delete'), lazy=True)
-  motorista = db.relationship('Motorista', backref=db.backref('onibus', cascade='all, delete-orphan'), lazy=True)
+  motorista = db.relationship('Motorista', backref=db.backref('onibus'), lazy=True)
 
 
 class Rota(db.Model):
@@ -98,7 +105,7 @@ class Rota(db.Model):
   Linha_codigo = db.Column(db.BigInteger, db.ForeignKey('Linha.codigo'), nullable=False)
   Onibus_id = db.Column(db.BigInteger, db.ForeignKey('Onibus.id'))
   linha = db.relationship('Linha', backref=db.backref('rotas', cascade='all, delete'), lazy=True)
-  onibus = db.relationship('Onibus', backref=db.backref('rotas', cascade='all, delete-orphan'), lazy=True)
+  onibus = db.relationship('Onibus', backref=db.backref('rotas'), lazy=True)
 
 
 class Aluno(db.Model):

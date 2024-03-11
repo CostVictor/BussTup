@@ -74,7 +74,7 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 dias_semana = ('Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta')
 cursos = ('Agropecuária', 'Informática', 'Manutenção', 'Química')
 turnos = ('Matutino', 'Vespertino', 'Noturno')
-cidades = ('Apodi',)
+cidades = ('Apodi', 'Campo Grande', 'Caraúbas', 'Felipe Guerra', 'Itaú', 'Rodolfo Fernandes', 'Severiano Melo', 'Umarizal')
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~'''

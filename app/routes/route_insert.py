@@ -102,8 +102,6 @@ def create_vehicle():
           onibus = Onibus(**data)
           try:
             db.session.add(onibus)
-            db.session.commit()
-            
             with db.session.begin_nested():
               aparencia = Aparencia(**descricao, Onibus_id=onibus.id)
               db.session.add(aparencia)
@@ -133,8 +131,6 @@ def create_vehicle():
 
         try:
           db.session.add(onibus)
-          db.session.commit()
-
           with db.session.begin_nested():
             aparencia = Aparencia(**descricao, Onibus_id=onibus.id)
             db.session.add(aparencia)
@@ -353,7 +349,6 @@ def create_pass_fixed():
               if ponto_atual.nome != data['name_point']:
                 try:
                   db.session.delete(check_passagem)
-
                   with db.session.begin_nested():
                     db.session.add(new_passagem)
                   db.session.commit()
@@ -493,8 +488,6 @@ def create_pass_contraturno():
             if linha_atual == linha.codigo:
               try:
                 db.session.delete(check_passagem)
-                db.session.commit()
-
                 with db.session.begin_nested():
                   db.session.add(new_contraturno)
                 db.session.commit()
@@ -516,7 +509,6 @@ def create_pass_contraturno():
               try:
                 for passagem in passagens:
                   db.session.delete(passagem)
-                db.session.commit()
 
                 with db.session.begin_nested():
                   db.session.add(new_contraturno)

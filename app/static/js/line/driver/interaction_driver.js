@@ -35,14 +35,14 @@ function action_popup(popup, card, id, obj_click) {
     const nome = extract_info(obj_click, "nome");
     const pos = obj_click.querySelector("span").textContent;
     let turno = "Matutino";
-    let contraturno = false
+    let contraturno = false;
     if (obj_click.id.includes("Vespertino")) {
       turno = "Vespertino";
     } else if (obj_click.id.includes("Noturno")) {
       turno = "Noturno";
     }
-    if (obj_click.id.includes('contraturno')) {
-      contraturno = true
+    if (obj_click.id.includes("contraturno")) {
+      contraturno = true;
     }
     const name_point = document.getElementById("config_point_nome");
     config_popup_aluno(nome, turno, pos, contraturno, name_point);
@@ -97,7 +97,7 @@ function action_popup(popup, card, id, obj_click) {
   ) {
     card.querySelector("h2").textContent = extract_info(obj_click, "nome");
   } else if (id === "del_vehicle") {
-    card.querySelector(`h2#${id}_surname`).textContent = extract_info(
+    document.getElementById("del_vehicle_surname").textContent = extract_info(
       obj_click,
       "surname"
     );
@@ -350,7 +350,7 @@ function config_popup_aluno(nome, turno, pos, contraturno, name_point = false) {
     secondary.name_point = name_point.textContent;
   }
   if (contraturno) {
-    secondary.contraturno = true
+    secondary.contraturno = true;
   }
   if (pos) {
     secondary.pos = pos;
@@ -364,9 +364,10 @@ function config_popup_aluno(nome, turno, pos, contraturno, name_point = false) {
     .then((response) => response.json())
     .then((response) => {
       if (!response.error) {
-        const data = response.data
+        const data = response.data;
         for (info in data) {
-          document.getElementById(`config_aluno_${info}`).textContent = data[info]
+          document.getElementById(`config_aluno_${info}`).textContent =
+            data[info];
         }
       } else {
         close_popup("config_aluno");

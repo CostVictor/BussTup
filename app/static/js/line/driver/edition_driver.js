@@ -582,8 +582,8 @@ function edit_route(obj_reference, event = false) {
             action_container(btn_route);
           }
           loadInterfaceRoutes(data.name_line);
-          const local_popup = document.getElementById('popup_local')
-          local_popup.removeChild(local_popup.querySelector('#config_route'))
+          const local_popup = document.getElementById("popup_local");
+          local_popup.removeChild(local_popup.querySelector("#config_route"));
 
           close_popup(obj_reference.id.replace("formulario_", ""));
           create_popup(response.title, response.text, "Ok", "success");
@@ -659,4 +659,54 @@ function save_data_route() {
       }
     });
   close_popup("config_route");
+}
+
+function del_vehicle() {
+  const name_line = document.getElementById("interface_nome").textContent;
+  const surname = document.getElementById("del_vehicle_surname").textContent;
+  const data = {
+    principal: [name_line, surname],
+  };
+
+  fetch("/del_vehicle" + generate_url_dict(data), { method: "DELETE" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        close_popup("del_vehicle");
+        create_popup(response.title, response.text, "Ok", "success");
+        loadInterfaceVehicle(name_line);
+        loadInterfaceRoutes(name_line);
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+      }
+    });
+}
+
+function del_relationship_point_route() {
+  const data = return_data_route(null, (format_dict_url = true));
+  data.principal.push(
+    document.getElementById("config_rel_point_route_tipo").textContent,
+    document.getElementById("config_rel_point_route_nome").textContent
+  );
+
+  fetch("/del_relationship_point_route" + generate_url_dict(data), {
+    method: "DELETE",
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        local_popup.removeChild(
+          local_popup.querySelector("#config_rel_point_route")
+        );
+        close_popup("del_relationship_point_route");
+        create_popup(response.title, response.text, "Ok", "success");
+        config_popup_route(
+          null,
+          return_data_route(null, (format_dict_url = true))
+        );
+        loadInterfaceRoutes(name_line);
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+      }
+    });
 }

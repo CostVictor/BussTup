@@ -62,3 +62,74 @@ def del_myPoint_contraturno():
         print(f'Erro ao remover a passagem: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Remoção Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir a passagem.'})
+
+
+@app.route("/del_vehicle/<name_line>/<surname>", methods=['DELETE'])
+@login_required
+@roles_required("motorista")
+def del_vehicle(name_line, surname):
+  linha = Linha.query.filter_by(nome=name_line).first()
+  if linha:
+    relationship = return_relationship(linha.codigo)
+    if relationship and relationship != 'membro':
+      veiculo = Onibus.query.filter_by(Linha_codigo=linha.codigo, apelido=surname).first()
+      if veiculo:
+        try:
+          db.session.delete(veiculo)
+          db.session.commit()
+          return jsonify({'error': False, 'title': 'Veículo Excluído', 'text': f'Todos registros relacionados a <strong>{surname}</strong> foram excluídos.'})
+        
+        except Exception as e:
+          db.session.rollback()
+          print(f'Erro ao remover o veículo: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir o veículo.'})
+
+
+@app.route("/del_relationship_point_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type>/<name_point>", methods=['DELETE'])
+@login_required
+@roles_required("motorista")
+def del_relationship_point_route(name_line, surname, shift, hr_par, hr_ret, type, name_point):
+  pos = request.args.get('pos')
+  if name_line and surname and shift and hr_par and hr_ret and type and name_point:
+    linha = Linha.query.filter_by(nome=name_line).first()
+    if linha:
+      relationship = return_relationship(linha.codigo)
+      if relationship and relationship != 'membro':
+        rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, pos)
+        if rota is not None:
+          if not rota:
+            return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+
+          parada = (
+            db.session.query(Parada).join(Ponto)
+            .filter(db.and_(
+              Parada.tipo == type,
+              Parada.Rota_codigo == rota.codigo,
+              Parada.Ponto_id == Ponto.id,
+              Ponto.nome == name_point
+            ))
+            .first()
+          )
+
+          if parada:
+            try:
+              db.session.delete(parada)
+              with db.session.begin_nested():
+                paradas = (
+                  Parada.query.filter_by(Rota_codigo=rota.codigo, tipo=type)
+                  .order_by(Parada.ordem)
+                  .all()
+                )
+
+                for index, value in enumerate(paradas):
+                  value.ordem = index + 1
+              db.session.commit()
+
+              return jsonify({'error': False, 'title': 'Relação Removida', 'text': f'Todos os registros relacionados a <strong>{type.capitalize()} ~> {name_point}</strong> foram excluídos.'})
+            
+            except Exception as e:
+              db.session.rollback()
+              print(f'Erro ao remover o veículo: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Remoção Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar remover a relação do ponto.'})
