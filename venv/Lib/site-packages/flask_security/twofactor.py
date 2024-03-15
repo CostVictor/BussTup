@@ -5,17 +5,24 @@
     Flask-Security two_factor module
 
     :copyright: (c) 2016 by Gal Stainfeld, at Emedgene
-    :copyright: (c) 2019-2023 by J. Christopher Wagner (jwag).
+    :copyright: (c) 2019-2024 by J. Christopher Wagner (jwag).
 """
+
+from __future__ import annotations
 
 import typing as t
 
-from flask import current_app as app, redirect, request, session
+from flask import current_app, redirect, request, session
 
-from .forms import DummyForm, TwoFactorRescueForm
+from .forms import (
+    get_form_field_xlate,
+    DummyForm,
+    TwoFactorRescueForm,
+)
 from .proxies import _security, _datastore
 from .tf_plugin import TfPluginBase, tf_clean_session
 from .utils import (
+    _,
     SmsSenderFactory,
     base_render_json,
     config_value as cv,
@@ -75,7 +82,8 @@ def tf_send_security_token(user, method, totp_secret, phone_number):
         token_to_be_sent = None
 
     tf_security_token_sent.send(
-        app._get_current_object(),
+        current_app._get_current_object(),
+        _async_wrapper=current_app.ensure_sync,
         user=user,
         method=method,
         token=token_to_be_sent,
@@ -96,20 +104,26 @@ def complete_two_factor_process(user, primary_method, totp_secret, is_changing):
     if is_changing:
         completion_message = "TWO_FACTOR_CHANGE_METHOD_SUCCESSFUL"
         tf_profile_changed.send(
-            app._get_current_object(), user=user, method=primary_method
+            current_app._get_current_object(),
+            _async_wrapper=current_app.ensure_sync,
+            user=user,
+            method=primary_method,
         )
     # if we are logging in for the first time
     else:
         completion_message = "TWO_FACTOR_LOGIN_SUCCESSFUL"
         tf_code_confirmed.send(
-            app._get_current_object(), user=user, method=primary_method
+            current_app._get_current_object(),
+            _async_wrapper=current_app.ensure_sync,
+            user=user,
+            method=primary_method,
         )
         dologin = True
     token = _security.two_factor_plugins.tf_complete(user, dologin)
     return completion_message, token
 
 
-def set_rescue_options(form: TwoFactorRescueForm, user: "User") -> t.Dict[str, str]:
+def set_rescue_options(form: TwoFactorRescueForm, user: User) -> dict[str, str]:
     # Based on config - set up options for rescue.
     # Note that this modifies the passed in Form as well as returns
     # a dict that can be returned as part of a JSON response.
@@ -117,7 +131,9 @@ def set_rescue_options(form: TwoFactorRescueForm, user: "User") -> t.Dict[str, s
 
     if cv("TWO_FACTOR_RESCUE_EMAIL"):
         recovery_options["email"] = url_for_security("two_factor_rescue")
-        form.help_setup.choices.append(("email", "Send code via email"))
+        form.help_setup.choices.append(
+            ("email", get_form_field_xlate(_("Send code via email")))
+        )
 
     if (
         _security.support_mfa
@@ -126,7 +142,10 @@ def set_rescue_options(form: TwoFactorRescueForm, user: "User") -> t.Dict[str, s
     ):
         recovery_options["recovery_code"] = url_for_security("mf_recovery")
         form.help_setup.choices.append(
-            ("recovery_code", "Use previously downloaded recovery code")
+            (
+                "recovery_code",
+                get_form_field_xlate(_("Use previously downloaded recovery code")),
+            )
         )
     return recovery_options
 
@@ -135,7 +154,11 @@ def tf_disable(user):
     """Disable two factor for user"""
     tf_clean_session()
     _datastore.tf_reset(user)
-    tf_disabled.send(app._get_current_object(), user=user)
+    tf_disabled.send(
+        current_app._get_current_object(),
+        _async_wrapper=current_app.ensure_sync,
+        user=user,
+    )
 
 
 def is_tf_setup(user):
@@ -144,22 +167,23 @@ def is_tf_setup(user):
 
 
 class CodeTfPlugin(TfPluginBase):
-    def __init__(self, app: "flask.Flask"):
+    def __init__(self, app: flask.Flask):
         super().__init__(app)
 
     def create_blueprint(
-        self, app: "flask.Flask", bp: "flask.Blueprint", state: "Security"
+        self, app: flask.Flask, bp: flask.Blueprint, state: Security
     ) -> None:
         pass
 
-    def get_setup_methods(self, user: "User") -> t.List[t.Optional[str]]:
+    def get_setup_methods(self, user: User) -> list[str]:
         if is_tf_setup(user):
+            assert user.tf_primary_method is not None
             return [user.tf_primary_method]
         return []
 
     def tf_login(
-        self, user: "User", json_payload: t.Dict[str, t.Any], next_loc: t.Optional[str]
-    ) -> "ResponseValue":
+        self, user: User, json_payload: dict[str, t.Any], next_loc: str | None
+    ) -> ResponseValue:
         """Helper for two-factor authentication login
 
         This is called only when login/password have already been validated.
@@ -210,5 +234,4 @@ class CodeTfPlugin(TfPluginBase):
 
         # JSON response - Fake up a form - doesn't really matter which.
         form = DummyForm(formdata=None)
-        form.user = user
         return base_render_json(form, include_user=False, additional=json_payload)

@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from celery import Celery
 from datetime import timedelta
 import os
 
@@ -76,31 +75,6 @@ cursos = ('Agropecuária', 'Informática', 'Manutenção', 'Química')
 turnos = ('Matutino', 'Vespertino', 'Noturno')
 cidades = ('Apodi', 'Campo Grande', 'Caraúbas', 'Felipe Guerra', 'Itaú', 'Rodolfo Fernandes', 'Severiano Melo', 'Umarizal')
 
-
-'''~~~~~~~~~~~~~~~~~~~~~~'''
-''' ~~~~~~ Celery ~~~~~~ '''
-'''~~~~~~~~~~~~~~~~~~~~~~'''
-
-app.config['CELERY_BROKER_URL'] = 'pyamqp://guest:guest@localhost//'
-app.config['CELERY_RESULT_BACKEND'] = 'rpc://'
-
-def make_celery(app):
-  celery = Celery(
-    'BussTup',
-    backend=app.config['CELERY_RESULT_BACKEND'],
-    broker=app.config['CELERY_BROKER_URL']
-  )
-  celery.conf.update(app.config)
-
-  class ContextTask(celery.Task):
-    def __call__(self, *args, **kwargs):
-      with app.app_context():
-        return self.run(*args, **kwargs)
-
-  celery.Task = ContextTask
-  return celery
-
-celery = make_celery(app)
 limiter = Limiter(get_remote_address, app=app, storage_uri="memory://")
 
 from app.routes import route_action, route_insert, route_edit, route_get, route_render, route_delete
