@@ -2,6 +2,7 @@ from flask import render_template, request
 from flask_security import current_user, login_required
 from app import app, cursos, turnos, cidades, dias_semana
 from app.database import Linha, Marcador_Exclusao
+from app.tasks import teste
 
 
 @app.route("/")
@@ -45,3 +46,10 @@ def perfil_usuario():
   local_page = request.args.get('local_page')
   role = current_user.roles[0].name
   return render_template('blog/profile_user.html', role=role, local_page=local_page)
+
+
+@app.route("/teste")
+def teste_route():
+  teste.delay(1, 2)
+  print('ok')
+  return 'testando'
