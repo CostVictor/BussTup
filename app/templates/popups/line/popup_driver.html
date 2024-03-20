@@ -198,10 +198,9 @@
     </header>
 
     <div class="popup__container--content">
-      <h4 class="popup__text info">Ao proseguir, você irá excluir permanentemente esta rota. Todos os alunos cadastrados
-        serão removidos.</h4>
+      <h4 class="text secundario justify">Ao prosseguir, você irá excluir permanentemente esta rota. Todos os alunos, pontos e vínculos com veículos cadastrados serão removidos.</h4>
 
-      <form id="formulario_del_route" class="form__container--card max_width" method="post">
+      <form id="formulario_del_route" class="form__container--card max_width" onsubmit="del_route(event)">
         <h1 class="page__division"></h1>
         <h3 class="popup__text info space">Confirme a exclusão com sua senha:</h3>
         <div class="form__container--input first">
@@ -215,7 +214,7 @@
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('del_route')">Cancelar</button>
-      <button class="popup__btn">Excluir</button>
+      <button class="popup__btn" onclick="submit('formulario_del_route')">Excluir</button>
     </footer>
   </div>
 </section>

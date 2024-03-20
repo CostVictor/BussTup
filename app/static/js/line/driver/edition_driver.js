@@ -710,3 +710,31 @@ function del_relationship_point_route() {
       }
     });
 }
+
+function del_route(event) {
+  event.preventDefault();
+  const data = return_data_route();
+  data.password = document.getElementById("del_route_conf").value.trim();
+
+  fetch("/del_route", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const btn_route = document.getElementById("interface_rotas_btn");
+        action_container(btn_route);
+
+        local_popup.removeChild(local_popup.querySelector("#config_route"));
+        close_popup("del_route");
+        create_popup(response.title, response.text, "Ok", "success");
+
+        loadInterfaceRoutes(data.name_line);
+        loadInterfaceStudents(data.name_line);
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+      }
+    });
+}

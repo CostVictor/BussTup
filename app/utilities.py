@@ -243,6 +243,15 @@ def check_permission(data, permission='adm'):
               del data['name_line']
               return 'autorizado'
             return 'senha incorreta'
+        
+        elif permission == 'adm' and 'password' in data:
+          if relationship.adm:
+            if bcrypt.checkpw(data['password'].encode('utf-8'), current_user.password_hash):
+              data['Linha_codigo'] = code_line
+              del data['name_line']
+              return 'autorizado'
+            return 'senha incorreta'
+          
         else:
           if relationship.adm:
             data['Linha_codigo'] = code_line

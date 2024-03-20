@@ -86,6 +86,40 @@ def del_vehicle(name_line, surname):
   return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir o veículo.'})
 
 
+@app.route("/del_route", methods=['POST'])
+@login_required
+@roles_required("motorista")
+def del_route():
+  data = request.get_json()
+  if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data and 'password' in data:
+    permission = check_permission(data)
+    hr_par = data['time_par']; hr_ret = data['time_ret']
+    surname = data['surname']
+
+    if permission == 'autorizado':
+      if hr_par and hr_ret and surname:
+        rota = return_route(data['Linha_codigo'], surname, data['shift'], hr_par, hr_ret, data['pos'])
+
+        if rota is not None:
+          if not rota:
+            return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+            
+          try:
+            db.session.delete(rota)
+            db.session.commit()
+
+            return jsonify({'error': False, 'title': 'Rota Excluída', 'text': f'Todas as relações com veículos, pontos e vínculos de alunos relacionados a esta rota foram excluídos.'})
+          
+          except Exception as e:
+            db.session.rollback()
+            print(f'Erro ao excluir a rota: {str(e)}')
+    
+    elif permission == 'senha incorreta':
+      return jsonify({'error': True, 'title': 'Senha Incorreta', 'text': 'A senha especificada está incorreta. A edição não pôde ser concluída.'})
+  
+  return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir a rota.'})
+
+
 @app.route("/del_relationship_point_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type>/<name_point>", methods=['DELETE'])
 @login_required
 @roles_required("motorista")
