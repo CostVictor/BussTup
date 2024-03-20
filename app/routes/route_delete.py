@@ -5,6 +5,31 @@ from app.database import *
 from app import app
 
 
+@app.route("/del_line", methods=['POST'])
+@login_required
+@roles_required("motorista")
+def del_line():
+  data = request.get_json()
+  if data and 'name_line' in data and 'password' in data:
+    permission = check_permission(data, permission='dono')
+
+    if permission == 'autorizado':
+      linha = Linha.query.filter_by(codigo=data['Linha_codigo']).first()
+      try:
+        db.session.delete(linha)
+        db.session.commit()
+        return jsonify({'error': False, 'title': 'Veículo Excluído', 'text': f'Esta linha foi excluída e todos os registros associados foram apagados. Você será redirecionado(a) para a página principal.'})
+      
+      except Exception as e:
+        db.session.rollback()
+        print(f'Erro ao remover o veículo: {str(e)}')
+    
+    elif permission == 'senha incorreta':
+      return jsonify({'error': True, 'title': 'Senha Incorreta', 'text': 'A senha especificada está incorreta. A edição não pôde ser concluída.'})
+      
+  return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir a linha.'})
+
+
 @app.route("/del_myPoint_fixed/<type>", methods=['DELETE'])
 @login_required
 @roles_required("aluno")
@@ -84,6 +109,28 @@ def del_vehicle(name_line, surname):
           print(f'Erro ao remover o veículo: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir o veículo.'})
+
+
+@app.route("/del_point/<name_line>/<name_point>", methods=['DELETE'])
+@login_required
+@roles_required("motorista")
+def del_point(name_line, name_point):
+  linha = Linha.query.filter_by(nome=name_line).first()
+  if linha:
+    relationship = return_relationship(linha.codigo)
+    if relationship and relationship != 'membro':
+      ponto = Ponto.query.filter_by(nome=name_point, Linha_codigo=linha.codigo).first()
+      if ponto:
+        try:
+          db.session.delete(ponto)
+          db.session.commit()
+          return jsonify({'error': False, 'title': 'Ponto Excluído', 'text': f'Todos registros relacionados a <strong>{name_point.capitalize()}</strong> foram excluídos.'})
+        
+        except Exception as e:
+          db.session.rollback()
+          print(f'Erro ao remover o veículo: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir o ponto.'})
 
 
 @app.route("/del_route", methods=['POST'])

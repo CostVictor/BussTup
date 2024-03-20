@@ -738,3 +738,51 @@ function del_route(event) {
       }
     });
 }
+
+function del_point(event) {
+  event.preventDefault();
+  const name_line = document.getElementById("interface_nome").textContent;
+  const name_point = document.getElementById("del_ponto_nome").textContent;
+  const data = { principal: [name_line, name_point] };
+
+  fetch("/del_point" + generate_url_dict(data), { method: "DELETE" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const btn_point = document.getElementById("interface_pontos_btn");
+        action_container(btn_point);
+
+        local_popup.removeChild(local_popup.querySelector("#config_point"));
+        close_popup("del_ponto");
+        create_popup(response.title, response.text, "Ok", "success");
+
+        loadInterfacePoints(name_line);
+        loadInterfaceStudents(name_line);
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+      }
+    });
+}
+
+function del_line(event) {
+  event.preventDefault();
+  const name_line = document.getElementById("interface_nome").textContent;
+  const password = document.getElementById("del_linha_conf").value.trim();
+  const data = { name_line: name_line, password: password };
+
+  fetch("/del_line", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+  .then((response) => response.json())
+  .then((response) => {
+    if (!response.error) {
+      local_popup.removeChild(local_popup.querySelector("#config_line"));
+      close_popup("del_linha");
+      create_popup(response.title, response.text, "Ok", "success", "page_user?local=linhas");
+    } else {
+      create_popup(response.title, response.text, "Voltar");
+    }
+  });
+}

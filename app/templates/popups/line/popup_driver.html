@@ -1031,13 +1031,12 @@
     </header>
 
     <div class="popup__container--content">
-      <h4 class="popup__text info">Ao proseguir, você irá excluir permanentemente:</h4>
+      <h4 class="text secundario justify">Ao proseguir, você irá excluir permanentemente:</h4>
       <h2 id="del_linha_nome" class="popup__text emphasis"></h2>
-      <h4 class="popup__text info">Tudo referente a esta linha será excluido. Os motoristas e alunos relacionados serão
-        removidos.</h4>
+      <h4 class="text secundario justify">Tudo referente a esta linha será excluido. Os motoristas e alunos relacionados serão removidos.</h4>
 
       <h1 class="page__division"></h1>
-      <form id="formulario_del_linha" class="form__container--card max_width" method="post">
+      <form id="formulario_del_linha" class="form__container--card max_width" onsubmit="del_line(event)">
         <h3 class="popup__text info space">Confirme a exclusão com sua senha:</h3>
         <div class="form__container--input first">
           <input id="del_linha_conf" class="form__input input_password white input_notIcon" type="password" required>
@@ -1050,7 +1049,7 @@
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('del_linha')">Cancelar</button>
-      <button class="popup__btn">Excluir</button>
+      <button class="popup__btn" onclick="submit('formulario_del_linha')">Excluir</button>
     </footer>
   </div>
 </section>
@@ -1063,15 +1062,14 @@
     </header>
 
     <div class="popup__container--content">
-      <h4 class="popup__text info">Ao proseguir, você irá excluir permanentemente:</h4>
+      <h4 class="text secundario justify">Ao proseguir, você irá excluir permanentemente:</h4>
       <h2 id="del_ponto_nome" class="popup__text emphasis"></h2>
-      <h4 class="popup__text info">Os alunos cadastrados serão removidos, e a sequência das rotas que contêm este ponto
-        será alterada.</h4>
+      <h4 class="text secundario justify">Os alunos cadastrados serão removidos, e a sequência das rotas que contêm este ponto será alterada.</h4>
     </div>
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('del_ponto')">Cancelar</button>
-      <button class="popup__btn">Excluir</button>
+      <button class="popup__btn" onclick="del_point(event)">Excluir</button>
     </footer>
   </div>
 </section>
