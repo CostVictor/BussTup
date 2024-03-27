@@ -401,3 +401,9 @@
 .form__option:hover {
   background-color: var(--branco_quaternario);
 }
+
+.from__division {
+  border-bottom: var(--cinza_quaternario) solid 1px;
+  margin: calc(1vw + 1vh + 1vmin) 0;
+  width: 80%;
+}

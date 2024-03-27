@@ -58,7 +58,7 @@ from .forms import (
     VerifyForm,
     unique_identity_attribute,
 )
-from .mail_util import MailUtil
+from .mail_util import MailUtil, EmailValidateException
 from .oauth_glue import OAuthGlue
 from .oauth_provider import FsOAuthProvider
 from .password_util import PasswordUtil
@@ -136,4 +136,4 @@ from .webauthn import (
 )
 from .webauthn_util import WebauthnUtil
 
-__version__ = "5.4.2"
+__version__ = "5.4.3"

@@ -9,6 +9,18 @@ from app import app, turnos, dias_semana
 
 db = SQLAlchemy(app)
 
+
+class SendEmail(db.Model):
+  __bind_key__ = 'db_session'
+  __tablename__ = 'SendEmail'
+  id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+  to = db.Column(db.Integer, nullable=False)
+  type = db.Column(db.Enum('acesso', 'criar', 'recuperar'), nullable=False)
+  name = db.Column(db.String(100), nullable=False)
+  text = db.Column(db.String(255), nullable=False)
+  data = db.Column(db.JSON)
+
+
 class Restriction(db.Model):
   __bind_key__ = 'db_session'
   __tablename__ = 'Restriction'

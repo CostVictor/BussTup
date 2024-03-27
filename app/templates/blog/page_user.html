@@ -41,7 +41,7 @@
     <section id="aba_agenda" class="page__container--aba">
       <div id="not_line_agenda" class="inactive">
         <div class="page__container title -enter-">
-          <h1 id="nome_linha" class="text principal">Não vinculado</h1>
+          <h1 class="text principal">Agenda ~ Não vinculado</h1>
         </div>
 
 
@@ -49,9 +49,7 @@
 
       <div id="area_agenda" class="page__container column">
         <div class="page__container title -enter-">
-          <h1 id="nome_linha" class="text principal">Nome da linha</h1>
-          <h1 class="text principal">~</h1>
-          <h1 id="cidade_linha" class="text principal">Cidade</h1>
+          <h1 class="text principal">Agenda</h1>
         </div>
 
         {% if role == 'aluno' %}
@@ -141,7 +139,7 @@
     <section id="aba_rota" class="page__container--aba">
       <div id="not_line_rota" class="inactive">
         <div class="page__container title -enter-">
-          <h1 id="nome_linha" class="text principal">Não vinculado</h1>
+          <h1 class="text principal">Rotas ~ Não vinculado</h1>
         </div>
 
         
@@ -150,43 +148,35 @@
       <div id="area_rota" class="page__container column inactive">
         {% if role == 'motorista' %}
         <div class="page__container title -enter-">
-          <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
-          <h1 class="text principal">></h1>
           <h1 class="text principal">Rotas</h1>
         </div>
 
         <h2 class="text title -enter-">Minhas rotas</h2>
         <div id="minhas_rota">
-          <div id="sem_veiculo" class="-enter-">
+          <div id="sem_veiculo" class="-enter- inactive">
             <p class="text secundario emphasis">Você não possui relação com nenhum veículo.</p>
             <p class="text secundario fundo">Defina um veículo para ter acesso ao controle de funcionamento de uma rota.</p>
           </div>
 
-          <div id="sem_rota" class="inactive">
+          <div id="sem_rota" class="-enter- inactive">
             <p class="text secundario emphasis">Seu veículo não possui nenhuma rota definida.</p>
             <p class="text secundario fundo">Crie uma rota para conseguir iniciar um trajeto.</p>
           </div>
 
           <div id="minha_rota_area" class="-enter-"></div>
-          <h1 class="page__division -enter-"></h1>
+          <h1 id="minhas_rota_division" class="page__division -enter- inactive"></h1>
         </div>
 
         {% else %}
         <div class="page__container title -enter-">
-          <h1 id="area_rota_nome" class="text principal">Nome da linha</h1>
-          <h1 class="text principal">></h1>
-          <h1 class="text principal">Rota</h1>
+          <h1 class="text principal">Rotas</h1>
         </div>
         <h2 class="text title -enter-">Minha rota</h2>
         <div id="minha_rota_area" class="-enter-"></div>
         <h1 class="page__division -enter-"></h1>
         {% endif %}
 
-        {% for index in range(3) %}
-        <div id="rotas_{{ turnos[index] }}">
-          <h2 class="text title -enter-">{{ turnos[index] }}</h2>
-        </div>
-        {% endfor %}
+        <div id="rotas_local"></div>
       </div>
     </section>
 
@@ -220,7 +210,7 @@
     <section id="aba_chat" class="page__container--aba">
       <div id="not_line_chat" class="inactive">
         <div class="page__container title -enter-">
-          <h1 id="nome_linha" class="text principal">Não vinculado</h1>
+          <h1 class="text principal">Chat ~ Não vinculado</h1>
         </div>
 
         
@@ -228,8 +218,6 @@
 
       <div id="area_chat" class="page__container column inactive">
         <div class="page__container title -enter-">
-          <h1 id="area_chat_nome_linha" class="text principal">Nome da linha</h1>
-          <h1 class="text principal">></h1>
           <h1 class="text principal">Chat</h1>
         </div>
 

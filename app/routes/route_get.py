@@ -58,6 +58,57 @@ def get_association():
   return jsonify(response)
 
 
+@app.route("/get_routes", methods=['GET'])
+@login_required
+def get_routes():
+  retorno = {'error': False, 'data': {}}
+  user = return_my_user()
+
+  if user:
+    role = current_user.roles[0].name
+    if role == 'motorista':
+      local_minhas_rotas = {}
+      retorno['data']['minhas_rotas'] = local_minhas_rotas
+      retorno['possui_veiculo'] = False
+
+      if user.onibus:
+        retorno['possui_veiculo'] = True
+
+      minhas_rotas = (
+        db.session.query(Linha, Rota).join(Onibus)
+        .filter(db.and_(
+          Onibus.Motorista_id == user.id,
+          Rota.Onibus_id == Onibus.id,
+          Rota.Linha_codigo == Linha.codigo
+        ))
+        .order_by(Linha.nome, Rota.horario_partida, Onibus.apelido)
+        .all()
+      )
+
+      for linha, rota in minhas_rotas:
+        if linha.nome not in local_minhas_rotas:
+          local_minhas_rotas[linha.nome] = []
+
+        info = {
+          'turno': rota.turno,
+          'horario_partida': format_time(rota.horario_partida),
+          'horario_retorno': format_time(rota.horario_retorno),
+          'quantidade': count_part_route(rota.codigo)
+        }
+
+        veiculo = rota.onibus
+        surname = 'Sem veículo'
+        motorista = 'Desativada'
+
+        if veiculo:
+          surname = veiculo.apelido
+          motorista = 'Nenhum'
+          if veiculo.motorista:
+            motorista = veiculo.motorista.nome
+        info['apelido'] = surname
+        info['motorista'] = motorista
+
+
 @app.route("/get_lines", methods=['GET'])
 @login_required
 def get_lines():

@@ -1387,6 +1387,7 @@ class Security:
             "render_template",
             "totp_cls",
             "webauthn_util_cls",
+            "datetime_factory",
         ]
         for attr in attr_names:
             if ov := kwargs.get(attr, cv(attr.upper(), app, strict=False)):
@@ -1634,6 +1635,7 @@ class Security:
 
         # If they don't want ALL mechanisms protected, then they must
         # set WTF_CSRF_CHECK_DEFAULT=False so that our decorators get control.
+        # And our decorators use csrf.protect()
         if cv("CSRF_PROTECT_MECHANISMS", app=app) != AUTHN_MECHANISMS:
             if not csrf:
                 # This isn't good.
