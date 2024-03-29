@@ -79,6 +79,25 @@ CREATE TABLE IF NOT EXISTS `busstup_session`.`SendEmail` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `busstup_session`.`AccessToken`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busstup_session`.`AccessToken` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `type` ENUM('recuperacao', 'confirmacao') NOT NULL DEFAULT 'recuperacao',
+  `valid` TINYINT NOT NULL DEFAULT 1,
+  `token` VARCHAR(255) NOT NULL,
+  `User_id` BIGINT(20) NOT NULL,
+  PRIMARY KEY (`id`, `User_id`),
+  INDEX `fk_AccessToken_User1_idx` (`User_id` ASC),
+  CONSTRAINT `fk_AccessToken_User1`
+    FOREIGN KEY (`User_id`)
+    REFERENCES `busstup_session`.`User` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

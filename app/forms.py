@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, HiddenField
+from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
 
 
@@ -11,7 +11,6 @@ class FormConfirm(FlaskForm):
 
 class FormReplaceUser(FlaskForm):
   novo_usuario = StringField('Novo usuário de Login', validators=[Length(min=10)])
-  senha_conf = PasswordField('Senha', validators=[DataRequired()])
 
 
 class FormReplacePassword(FlaskForm):

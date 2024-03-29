@@ -2,9 +2,15 @@ from flask import Flask
 from datetime import timedelta
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_jwt_extended import JWTManager
+from flask_mail import Mail
 import os
 
 app = Flask(__name__)
+
+app.config['SERVER_NAME'] = 'localhost:5000'
+app.config['APPLICATION_ROOT'] = '/'
+app.config['PREFERRED_URL_SCHEME'] = 'http'
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -58,6 +64,20 @@ app.config['SECURITY_RESET_PASSWORD_LOGIN_VIEW'] = 'auth.login'
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ Email ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~'''
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'btupmessage@gmail.com'
+app.config['MAIL_PASSWORD'] = 'Access@8busstup$4message01'
+
+mail = Mail(app)
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Cookie ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~'''
 
@@ -65,6 +85,19 @@ app.config['SESSION_COOKIE_NAME'] = 'btup$session@8401M'
 # app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 
+
+'''~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ WebToken ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~'''
+
+jwt = JWTManager(app)
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ Cheduler ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~'''
+
+app.config['SCHEDULER_API_ENABLED'] = True
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Variable ~~~~~~ '''

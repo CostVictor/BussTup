@@ -16,17 +16,7 @@ class SendEmail(db.Model):
   id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
   to = db.Column(db.Integer, nullable=False)
   type = db.Column(db.Enum('acesso', 'criar', 'recuperar'), nullable=False)
-  name = db.Column(db.String(100), nullable=False)
-  text = db.Column(db.String(255), nullable=False)
-  data = db.Column(db.JSON)
-
-
-class Restriction(db.Model):
-  __bind_key__ = 'db_session'
-  __tablename__ = 'Restriction'
-  codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-  ip_acesso = db.Column(db.String(32), nullable=False)
-  tentativas = db.Column(db.Integer, nullable=False)
+  data = db.Column(db.JSON, nullable=False)
 
   
 class User(db.Model, UserMixin):
@@ -58,13 +48,15 @@ class Contribuicao(db.Model):
   user = db.relationship('User', backref=db.backref('contribuicao', cascade='all, delete'), lazy=True)
 
 
-class Access_Device(db.Model):
+class AccessToken(db.Model):
   __bind_key__ = 'db_session'
-  __tablename__ = 'Access_Device'
-  codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-  dispositivo = db.Column(db.String(60), nullable=False)
+  __tablename__ = 'AccessToken'
+  id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+  type = db.Column(db.Enum('recuperacao', 'confirmacao'), nullable=False, default='recuperacao')
+  valid = db.Column(db.Boolean, nullable=False, default=True)
+  token = db.Column(db.String(255), nullable=False)
   User_id = db.Column(db.BigInteger, db.ForeignKey('User.id'), nullable=False)
-  user = db.relationship('User', backref=db.backref('devices', cascade='all, delete'), lazy=True)
+  user = db.relationship('User', backref=db.backref('tokens', cascade='all, delete'), lazy=True)
 
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
