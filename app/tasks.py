@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, decode_token
 from flask_apscheduler import APScheduler
 from flask_mail import Message
 from flask import render_template, url_for
@@ -11,8 +11,8 @@ sched = APScheduler()
 sched.init_app(app)
 
 
-@sched.task('interval', seconds=5)
-def teste():
+@sched.task('interval', id='enviar_email', seconds=5, max_instances=1)
+def enviar_email():
   with app.app_context():
     email = SendEmail.query.first()
     if email:
@@ -21,8 +21,25 @@ def teste():
         user = User.query.filter_by(id=data['id']).first()
 
         if user:
-          check = AccessToken.query.filter_by(User_id=user.id, type='recuperacao', valid=True).first()
-          if not check:
+          check = AccessToken.query.filter_by(User_id=user.id, type='recuperacao').first()
+          criar_token = True
+
+          if check:
+            try:
+              decode_token(check)
+              criar_token = False
+            except: 
+              with db.session.begin_nested():
+                try:
+                  db.session.delete(check)
+                  db.session.commit()
+
+                except Exception as e:
+                  db.session.rollback()
+                  criar_token = False
+                  print(f'Erro ao remover token inválido: {str(e)}')
+
+          if criar_token:
             validade = timedelta(minutes=10)
             token = create_access_token(user.id, additional_claims={'dado': data['dado']}, expires_delta=validade)
             register_token = AccessToken(token=token, User_id=user.id)
@@ -32,7 +49,8 @@ def teste():
               'models/model_email.html',
               url=url_for('recuperar', token=token, _external=True),
               type=email.type,
-              nome=data['nome']
+              nome=data['nome'],
+              dado=data['dado']
             )
 
             try:

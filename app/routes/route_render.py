@@ -1,7 +1,9 @@
-from flask import render_template, request, jsonify, flash
+from flask import render_template, request, jsonify, flash, redirect, url_for
 from flask_security import current_user, login_required
 from app import app, cursos, turnos, cidades, dias_semana
-from flask_jwt_extended import decode_token, get_jwt_identity, get_jwt
+from app.utilities import check_valid_password
+from flask_jwt_extended import decode_token
+from app.tasks import sched
 from app.database import *
 from app.forms import *
 import bcrypt
@@ -11,6 +13,8 @@ import bcrypt
 @app.route("/index")
 @app.route("/login")
 def index():
+  if not sched.running:
+    sched.start()
   return render_template('auth/login.html')
 
 
@@ -52,61 +56,73 @@ def perfil_usuario():
 
 @app.route("/recover/<token>", methods=['GET', 'POST'])
 def recuperar(token):
+  finalizado = False
   try:
     decode = decode_token(token)
-    user = User.query.filter_by(id=decode['identity']).first()
-
+    user = User.query.filter_by(id=decode['sub']).first()
     if user:
       check_token = AccessToken.query.filter_by(
-        User_id=user.id, type='recuperacao', token=token, valid=True
+        User_id=user.id, type='recuperacao', token=token
       ).first()
 
       if check_token:
         if decode['dado'] == 'usuario':
+          texto = 'Defina seu novo usuário:'
           form = FormReplaceUser()
 
           if form.validate_on_submit():
-            new_user = form.data.novo_usuario
+            new_user = form.novo_usuario.data
 
             if check_dis_login(new_user):
               try:
                 user.login = new_user
-                check_token.valid = False
+                db.session.delete(check_token)
                 db.session.commit()
-                flash('Seu usuário foi alterado com sucesso.', 'success')
+                finalizado = True
 
               except Exception as e:
                 db.session.rollback()
                 print(f'Erro ao alterar o dado do usuário: {str(e)}')
             
-            flash('O nome de usuário definido não atende aos critérios de cadastro para ser utilizado como login. Por favor, escolha outro nome.', 'info')
+            else:
+              flash('O nome de usuário definido não atende aos critérios de cadastro para ser utilizado como login. Por favor, escolha outro nome.', 'info')
 
         else:
+          texto = 'Defina sua nova senha:'
           form = FormReplacePassword()
 
           if form.validate_on_submit():
-            new_password = form.data.nova_senha
-            try:
-              user.password_hash = bcrypt.hashpw(
-                new_password.encode('utf-8'), bcrypt.gensalt()
-              )
-              check_token.valid = False
-              db.session.commit()
-              flash('Sua senha foi alterada com sucesso.', 'success')
+            new_password = form.nova_senha.data
+            if check_valid_password(new_password):
+              try:
+                user.password_hash = bcrypt.hashpw(
+                  new_password.encode('utf-8'), bcrypt.gensalt()
+                )
+                db.session.delete(check_token)
+                db.session.commit()
+                finalizado = True
 
-            except Exception as e:
-              db.session.rollback()
-              print(f'Erro ao alterar o dado do usuário: {str(e)}')
+              except Exception as e:
+                db.session.rollback()
+                print(f'Erro ao alterar o dado do usuário: {str(e)}')
 
-        return render_template("blog/recover.html", token=token, form=form, dado=decode['dado'])
+            else:
+              flash('A senha especificada não é válida. Ela deve conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial.', 'info')
+          
+          else:
+            if form.senha_conf.errors:
+              flash('A senha especificada na confirmação é diferente da senha definida.')
+
+        return render_template("blog/recover.html", token=token, form=form, texto=texto, dado=decode['dado'], finalizado=finalizado)
       
     return jsonify({'mensagem': 'Token inválido'}), 401
   
-  except:
+  except Exception as e:
+    print(f'Erro ao validar o token: {str(e)}')
     check = AccessToken.query.filter_by(token=token).first()
     if check:
       try:
-        check.valid = False
+        db.session.delete(check)
         db.session.commit()
 
       except Exception as e:

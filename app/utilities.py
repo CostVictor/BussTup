@@ -297,6 +297,28 @@ def check_myRoute(shift):
   return None
 
 
+def check_valid_password(password: str):
+  uper = False; lower = False
+  number = False; simbol = False
+
+  if len(password) >= 10:
+    for c in password:
+      if c.isupper():
+        uper = True
+
+      elif c.islower():
+        lower = True
+      
+      elif c.isdigit():
+        number = True
+      
+      elif not c.isalnum():
+        simbol = True
+  
+  return (uper and lower and number and simbol)
+
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~~ Count ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''

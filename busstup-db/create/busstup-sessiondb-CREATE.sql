@@ -85,11 +85,11 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `busstup_session`.`AccessToken` (
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `type` ENUM('recuperacao', 'confirmacao') NOT NULL DEFAULT 'recuperacao',
-  `valid` TINYINT NOT NULL DEFAULT 1,
-  `token` VARCHAR(255) NOT NULL,
+  `token` TEXT NOT NULL,
   `User_id` BIGINT(20) NOT NULL,
   PRIMARY KEY (`id`, `User_id`),
   INDEX `fk_AccessToken_User1_idx` (`User_id` ASC),
+  UNIQUE INDEX `token_UNIQUE` (`token` ASC),
   CONSTRAINT `fk_AccessToken_User1`
     FOREIGN KEY (`User_id`)
     REFERENCES `busstup_session`.`User` (`id`)

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document E-mail</title>
+    <title>Document BussTup E-mail</title>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
@@ -15,73 +15,55 @@
         padding: 0;
         box-sizing: border-box;
       }
-      body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      .body {
         background-color: white;
         font-family: "Poppins", Arial, Helvetica, sans-serif;
         min-width: 360px;
         max-width: 600px;
+        margin: 0 auto 40px auto;
+        text-align: center;
+      }
+      .header {
+        width: 90%;
+        align-items: center;
+        margin: 70px auto 0 auto;
+      }
+      .h1 {
+        margin-top: 20px;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 17px;
+        color: #013983;
         margin: 0 auto;
       }
-      header {
-        display: flex;
-        height: 15vh;
-        width: 90%;
-        justify-content: space-around;
-        align-items: center;
-        margin-top: 70px;
-      }
-      img {
-        width: 220px;
-        padding: 5.5%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f0f6ff;
-        border-radius: 0 50px 50px 50px;
-        font-size: 20px;
-      }
-      h1 {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 23px;
-        padding-left: 15px;
-        border-left: #013983 solid 1px;
-        color: #013983;
-      }
-      p {
+      .p {
         padding: 1.3% 2%;
         color: #013983;
         background-color: #fafafa;
-        font-size: 18px;
+        font-size: 13px;
         border-radius: 15px;
         text-align: justify;
       }
-      div {
+      .div {
         width: 90%;
-        margin-top: 10px;
+        margin: 10px auto 0 auto;
         display: flex;
       }
-      a {
-        display: flex;
-        justify-content: center;
+      .a {
         font-family: Arial, Helvetica, sans-serif;
-        padding: 15px;
-        margin: 50px 0 50px 0;
-        font-size: 20px;
+        text-decoration: none;
+        padding: 10px;
+        margin: 50px auto 50px auto;
+        font-size: 13px;
         border: none;
         border-radius: 30px;
         letter-spacing: 0.05rem;
         background-color: #1560c3;
-        color: #fafafa;
-        width: 80%;
       }
       .big_marginTop {
         margin-top: 40px;
       }
       .division {
-        margin: 40px 0;
+        margin: 40px auto;
         border: none;
         border-bottom: #b3b3b345 solid 1px;
         width: 90%;
@@ -92,119 +74,84 @@
       .space {
         margin-left: 10px;
       }
-
-      @media only screen and (max-width: 500px) {
-        img {
-          width: 180px;
-          font-size: 18px;
-          border-radius: 0 40px 40px 40px;
-        }
-        h1 {
-          font-size: 20px;
-        }
-        p {
-          font-size: 16px;
-        }
-        a {
-          margin: 40px 0 40px 0;
-          font-size: 18px;
-          padding: 13px;
-        }
-        .division {
-          margin: 28px 0;
-        }
-      }
-      @media only screen and (max-width: 425px) {
-        img {
-          width: 150px;
-          font-size: 15px;
-          border-radius: 0 30px 30px 30px;
-        }
-        h1 {
-          font-size: 18px;
-        }
-        p {
-          font-size: 14px;
-        }
-        a {
-          margin: 30px 0 30px 0;
-          font-size: 15px;
-          padding: 10px;
-        }
-        .big_marginTop {
-          margin-top: 30px;
-        }
-        .division {
-          margin: 18px 0;
-        }
-      }
     </style>
   </head>
 
-  <body>
-    <header>
-      <img class="form__img" src="/static/img/logo_busstup.png" alt="Logo do BussTup"/>
-      <h1>Olá {{ nome }}!</h1>
+  <body class="body">
+    <header class="header" style="display: flex; justify-content: center;">
+      <h1 class="h1">Olá {{ nome }}!</h1>
     </header>
-    <h1 class="division"></h1>
-    
+    <h1 class="h1 division"></h1>
+
     {% if type == 'recuperar' %}
-    <div>
-      <p>
-        Recebemos sua solicitação de recuperação de conta no BussTup e estamos
+    <div class="div">
+      <p class="p">
+        Recebemos sua solicitação de recuperação de {{dado}} no BussTup e estamos
         aqui para ajudar você a recuperar o acesso.
       </p>
     </div>
 
-    <div>
-      <p>Siga para o nosso site para finalizar a recuperação da conta:</p>
+    <div class="div">
+      <p class="p">
+        Siga para o nosso site para finalizar a recuperação da conta:
+      </p>
     </div>
 
-    <a href="{{ url }}">Continuar no site</a>
+    <div class="div">
+      <a class="a" href="{{ url }}" style="color: #fafafa">Continuar pelo site</a>
+    </div>
 
-    <p>Não foi você? Ignore este e-mail</p>
+    <div class="div">
+      <p class="p" style="font-size: 10;">Não foi você? Ignore este e-mail</p>
+    </div>
 
     {% elif type == 'acesso' %}
-    <div>
-      <p>Você está recebendo um pedido de participação em sua linha.</p>
+    <div class="div">
+      <p class="p">
+        Você está recebendo um pedido de participação em sua linha.
+      </p>
     </div>
 
-    <div>
-      <p>Ignore este e-mail se desejar recusar.</p>
+    <div class="div">
+      <p class="p">Ignore este e-mail se desejar recusar.</p>
     </div>
 
-    <div class="big_marginTop">
-      <p>Motorista que pediu:</p>
-      <p class="emphasis space">{{ solicitante }}</p>
+    <div class="div big_marginTop">
+      <p class="p">Motorista que pediu:</p>
+      <p class="p emphasis space">{{ solicitante }}</p>
     </div>
 
-    <div>
-      <p>Linha de ocorrência:</p>
-      <p class="emphasis space">{{ local }}</p>
+    <div class="div">
+      <p class="p">Linha de ocorrência:</p>
+      <p class="p emphasis space">{{ local }}</p>
     </div>
-
-    <a href="{{ url }}">Confirmar pelo site</a>
+    
+    <div class="div">
+      <a class="a" href="{{ url }}" style="color: #fafafa;">Confirmar pelo site</a>
+    </div>
     {% else %}
 
-    <div>
-      <p>Um usuário está solicitando uma conta de motorista.</p>
+    <div class="div">
+      <p class="p">Um usuário está solicitando uma conta de motorista.</p>
     </div>
 
-    <div>
-      <p>Ignore este e-mail se desejar recusar.</p>
+    <div class="div">
+      <p class="p">Ignore este e-mail se desejar recusar.</p>
     </div>
 
-    <div class="big_marginTop">
-      <p>Nome do usuário:</p>
-      <p class="emphasis space">{{ solicitante }}</p>
+    <div class="div big_marginTop">
+      <p class="p">Nome do usuário:</p>
+      <p class="p emphasis space">{{ solicitante }}</p>
     </div>
 
-    <div>
-      <p>Telefone do solicitante:</p>
-      <p class="emphasis space">{{ telefone }}</p>
+    <div class="div">
+      <p class="p">Telefone do solicitante:</p>
+      <p class="p emphasis space">{{ telefone }}</p>
     </div>
 
-    <a href="{{ url }}">Confirmar pelo site</a>
+    <div class="div">
+      <a class="a" href="{{ url }}" style="color: #fafafa;">Confirmar pelo site</a>
+    </div>
     {% endif %}
   </body>
 </html>

@@ -10,9 +10,11 @@ class FormConfirm(FlaskForm):
 
 
 class FormReplaceUser(FlaskForm):
-  novo_usuario = StringField('Novo usuário de Login', validators=[Length(min=10)])
+  novo_usuario = StringField('Novo usuário de Login', validators=[DataRequired(), Length(min=10)])
+  botao = SubmitField('Salvar')
 
 
 class FormReplacePassword(FlaskForm):
-  nova_senha = StringField('Nova senha', validators=[Length(min=10)])
-  senha_conf = PasswordField('Confirmar senha', validators=[DataRequired(), EqualTo('nova_senha', 'A senha de confirmação é diferente da senha definida.')])
+  nova_senha = PasswordField('Nova senha', validators=[DataRequired(), Length(min=10)])
+  senha_conf = PasswordField('Confirmar senha', validators=[DataRequired(), EqualTo('nova_senha', message='A senha de confirmação é diferente da senha definida.')])
+  botao = SubmitField('Salvar')

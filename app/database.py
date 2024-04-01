@@ -53,7 +53,6 @@ class AccessToken(db.Model):
   __tablename__ = 'AccessToken'
   id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
   type = db.Column(db.Enum('recuperacao', 'confirmacao'), nullable=False, default='recuperacao')
-  valid = db.Column(db.Boolean, nullable=False, default=True)
   token = db.Column(db.String(255), nullable=False)
   User_id = db.Column(db.BigInteger, db.ForeignKey('User.id'), nullable=False)
   user = db.relationship('User', backref=db.backref('tokens', cascade='all, delete'), lazy=True)

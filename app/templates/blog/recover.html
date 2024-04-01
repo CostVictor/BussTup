@@ -1,9 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recuperar Conta</title>
+    <link rel="icon" href="/static/img/icon_busstup.png" />
+    <link rel="stylesheet" href="/static/css/form.css" />
+    <link rel="stylesheet" href="/static/css/index.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+
+    <style>
+      li {
+        color: var(--vermelho_terciario);
+        list-style-type: none;
+        font-size: 1.2em;
+      }
+
+      a {
+        width: 50%;
+        text-decoration: none;
+        padding: 1rem;
+        background-color: var(--azul_primario);
+        color: var(--branco_secundario);
+        border-radius: 20px;
+        text-align: center;
+      }
+    </style>
   </head>
-  <body></body>
+  <body
+    onload="enterInterface('recover')"
+    style="background-color: var(--branco_secundario)"
+  >
+    <p class="hidden_point">.</p>
+    <main class="form__container--content register">
+      {% if finalizado %}
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <h1 class="text--select" style="font-size: 2.2rem; margin-bottom: 3rem;">Alteração concluída</h1>
+        <a href="{{ url_for('index') }}">Ir para o login</a>
+      </div>
+      {% else %}
+      <h1 class="form__text_title">Recuperar Conta</h1>
+
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+          <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% endwith %}
+
+      <section class="form__container--card">
+        <h2 class="text--select">{{ texto }}</h2>
+      </section>
+      <form
+        class="form__container--card scroll_vertical"
+        accept=""
+        method="POST"
+      >
+        {{ form.hidden_tag() }}
+        {% if dado == 'usuario' %}
+        <div class="form__container--input">
+          {{ form.novo_usuario(class="form__input input_notIcon") }} 
+          {{ form.novo_usuario.label(class="form__label label_notIcon") }}
+        </div>
+        {% else %}
+        <div class="form__container--input_double">
+          <div class="form__container--input max_width first">
+            {{ form.nova_senha(class="form__input input_notIcon double") }} 
+            {{ form.nova_senha.label(class="form__label label_notIcon") }}
+          </div>
+
+          <div class="form__container--input max_width first">
+            {{ form.senha_conf(class="form__input input_notIcon double reverse") }} 
+            {{ form.senha_conf.label(class="form__label label_notIcon") }}
+          </div>
+        </div>
+        {% endif %} 
+        {{ form.botao(class="form__btn margin_bottom btn_scroll margin_auto") }}
+      </form>
+      {% endif %}
+    </main>
+    <script src="/static/js/interface.js"></script>
+    <script src="/static/js/interaction.js"></script>
+  </body>
 </html>

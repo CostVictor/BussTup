@@ -125,6 +125,11 @@ body {
   margin-bottom: calc(1.5vw + 1.5vh + 1vmin);
 }
 
+.margin_auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 
 .scroll_vertical {
   display: flex;

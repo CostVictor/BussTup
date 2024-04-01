@@ -8,7 +8,7 @@ import os
 
 app = Flask(__name__)
 
-app.config['SERVER_NAME'] = 'localhost:5000'
+app.config['SERVER_NAME'] = '127.0.0.1:5000'
 app.config['APPLICATION_ROOT'] = '/'
 app.config['PREFERRED_URL_SCHEME'] = 'http'
 
@@ -67,12 +67,14 @@ app.config['SECURITY_RESET_PASSWORD_LOGIN_VIEW'] = 'auth.login'
 ''' ~~~~~~ Email ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~'''
 
+app.config['MAIL_DEFAULT_SENDER'] = 'btupmessage@gmail.com'
+app.config['MAIL_USERNAME'] = 'btupmessage@gmail.com'
+app.config['MAIL_PASSWORD'] = 'gjacxbkpgbcflvfo'
+
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = 'btupmessage@gmail.com'
-app.config['MAIL_PASSWORD'] = 'Access@8busstup$4message01'
 
 mail = Mail(app)
 
