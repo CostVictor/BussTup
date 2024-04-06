@@ -76,6 +76,12 @@ function return_bool_selected(container_options) {
   return false;
 }
 
+function return_text_bool_selected(container_options) {
+  let option_selected =
+    container_options.querySelector("i.selected").parentNode;
+  return option_selected.querySelector("p").textContent;
+}
+
 function return_btn_open(btn) {
   const icon = btn.querySelector("i");
   if (icon.className.includes("open")) {

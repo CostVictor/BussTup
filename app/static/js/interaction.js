@@ -231,7 +231,11 @@ function set_observerScroll(list_obj) {
   }
 }
 
-function action_container(obj_click, set_limit = false, visible_contante_scroll=true) {
+function action_container(
+  obj_click,
+  set_limit = false,
+  visible_contante_scroll = true
+) {
   const icon = obj_click.querySelector("i");
   const container = document.getElementById(
     obj_click.id.replace("btn", "container")
@@ -340,7 +344,7 @@ function popup_close_animate(popup) {
   }, 200);
 }
 
-function open_popup(id, obj_click = false) {
+function open_popup(id, obj_click = false, jquery = true) {
   const popups = document.importNode(templates_popup.content, true);
   const popup = popups.querySelector(`#${id}`);
 
@@ -371,7 +375,7 @@ function open_popup(id, obj_click = false) {
       popup_enter_animate(popup);
     }, 55);
 
-    if (!window.location.href.includes("profile")) {
+    if (jquery && !window.location.href.includes("profile")) {
       $(function () {
         $(".sortable").each(function () {
           setSortable($(this));

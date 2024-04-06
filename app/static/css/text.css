@@ -211,3 +211,13 @@
   margin-left: calc(0.1vw + 0.1vh + 1vmin);
   color: var(--azul_terciario);
 }
+
+.text--button {
+  display: flex;
+  border: 0;
+  cursor: pointer;
+  
+  margin: calc(0.3vw + 0.2vh + 1vmin) 0;
+  background-color: var(--branco_secundario);
+  color: var(--azul_terciario);
+}

@@ -96,6 +96,12 @@ def format_register(dadosAdquiridos):
             erro_text = 'O turno definido não está presente entre as opções disponíveis.'
             inconsistencia = True
             break
+        
+        elif campo == 'email':
+          if return_user_email(dado):
+            erro_text = 'O e-mail definido não está disponível para utilização.'
+            inconsistencia = True
+            break
   else: return None
 
   return inconsistencia, erro_title, erro_text, data
@@ -225,6 +231,31 @@ def return_options_route(linha, user):
   return retorno
 
 
+def return_user_email(email: str):
+  check_aluno = Aluno.query.filter_by(email=email).first()
+  check_motorista = Motorista.query.filter_by(email=email).first()
+  retorno = {}
+
+  if check_aluno:
+    retorno['principal'] = check_aluno
+    retorno['sessao'] = (
+      User.query.filter_by(primary_key=check_aluno.id)
+      .first()
+    )
+
+  elif check_motorista:
+    retorno['principal'] = check_motorista
+    retorno['sessao'] = (
+      db.session.query(User)
+      .filter_by(primary_key=check_motorista.id)
+      .first()
+    )
+  
+  if retorno:
+    return retorno
+  return None
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~~ Check ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -316,7 +347,6 @@ def check_valid_password(password: str):
         simbol = True
   
   return (uper and lower and number and simbol)
-
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''

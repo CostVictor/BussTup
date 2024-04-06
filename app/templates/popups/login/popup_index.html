@@ -1,0 +1,38 @@
+<section id="popup_recover" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Recuperar Conta</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <h2 class="text secundario justify">Olá! Parece que você esqueceu uma de suas credenciais. Não se preocupe, vamos te ajudar a recuperá-la! Por favor, indique qual foi a credencial perdida e digite seu endereço de e-mail abaixo para iniciarmos o processo de recuperação da sua conta.</h2>
+      <h1 class="from__division max"></h1>
+
+      <form id="formulario_popup_recover" onsubmit="recoverAccount(event)">
+        <h3 class="popup__text question first">O que deseja recuperar?</h3>
+        <div id="popup_recover_options" class="popup__container--options">
+          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+            <i class="bi bi-circle popup__icon ratio"></i>
+            <p class="popup__text content input">Usuário</p>
+          </div>
+  
+          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+            <p class="popup__text content input">Senha</p>
+          </div>
+        </div>
+  
+        <h3 class="popup__text question">Informe o E-mail utilizado na conta:</h3>
+        <div class="form__container--input">
+          <input id="popup_recover_email" class="form__input white input_notIcon" type="email" name="email" required>
+          <label class="form__label intense label_notIcon" for="popup_recover_email">E-mail</label>
+        </div>
+      </form>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('popup_recover')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_popup_recover')">Solicitar</button>
+    </footer>
+  </div>
+</section>

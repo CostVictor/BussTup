@@ -24,7 +24,7 @@ app.config['SQLALCHEMY_BINDS'] = {
 
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
   'pool_size': 5,
-  'max_overflow': 5   
+  'max_overflow': 5
 }
 
 app.config['SQLALCHEMY_BINDS_OPTIONS'] = {

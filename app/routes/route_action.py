@@ -1,10 +1,10 @@
 from flask_security import login_user, logout_user, login_required, roles_required
-from app import app, limiter
+from flask_jwt_extended import decode_token
 from flask import request, jsonify
+from app import app, limiter
 from app.utilities import *
 from app.database import *
 import bcrypt
-
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~ Session ~~~~~~~ '''
@@ -213,3 +213,52 @@ def check_register_in_contraturno(name_line):
     return retorno
 
   return jsonify({'error': True, 'title': 'Relação não identificada', 'text': 'Ocorreu um erro inesperado ao tentar identificar a relação do usuário.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ Recover ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/schedule_recover", methods=['POST'])
+def recuperar_conta():
+  data = request.get_json()
+  if 'recover' in data and 'email' in data:
+    user = return_user_email(data['email'])
+    recover = 'usuario' if data['recover'] == 'Usuário' else 'senha'
+
+    if user:
+      check = AccessToken.query.filter_by(User_id=user['sessao'].id, type='recuperacao').first()
+      agendar = True
+      if check:
+        token = check.token
+        try:
+          decode = decode_token(token)
+          if decode['dado'] != recover:
+            db.session.delete(check)
+          else:
+            agendar = False
+
+        except:
+          db.session.delete(check)
+
+      if agendar:
+        nome = user['principal'].nome.split(' ')
+        nome = ' '.join(nome[:2]) if len(nome) >= 2 else nome[0]
+
+        info = {
+          'id': user['sessao'].id,
+          'dado': recover,
+          'nome': nome
+        }
+        agendamento = SendEmail(to=data['email'], type='recuperar', data=info)
+        try:
+          db.session.add(agendamento)
+          db.session.commit()
+        
+        except Exception as e:
+          db.session.rollback()
+          print (f'Erro ao agendar o email: {str(e)}')
+      
+    return jsonify({'error': False, 'title': 'Solicitação Concluída', 'text': 'Um e-mail será enviado para você em alguns instantes.'})
+
+  return jsonify({'error': True, 'title': 'Erro de Recuperação', 'text': 'Os dados fornecidos estão incompletos.'})

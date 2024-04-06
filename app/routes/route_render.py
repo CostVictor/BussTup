@@ -1,4 +1,4 @@
-from flask import render_template, request, jsonify, flash, redirect, url_for
+from flask import render_template, request, jsonify, flash
 from flask_security import current_user, login_required
 from app import app, cursos, turnos, cidades, dias_semana
 from app.utilities import check_valid_password

@@ -407,3 +407,7 @@
   margin: calc(1vw + 1vh + 1vmin) 0;
   width: 80%;
 }
+
+.from__division.max {
+  width: 100%;
+}
