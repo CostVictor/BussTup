@@ -8,9 +8,9 @@ import os
 
 app = Flask(__name__)
 
-app.config['SERVER_NAME'] = '127.0.0.1:5000'
-app.config['APPLICATION_ROOT'] = '/'
-app.config['PREFERRED_URL_SCHEME'] = 'http'
+# app.config['SERVER_NAME'] = '127.0.0.1:5000'
+# app.config['APPLICATION_ROOT'] = '/'
+# app.config['PREFERRED_URL_SCHEME'] = 'http'
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -33,6 +33,7 @@ app.config['SQLALCHEMY_BINDS_OPTIONS'] = {
     'max_overflow': 2
   }
 }
+
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Security ~~~~~~ '''
@@ -100,6 +101,7 @@ jwt = JWTManager(app)
 '''~~~~~~~~~~~~~~~~~~~~~~'''
 
 app.config['SCHEDULER_API_ENABLED'] = True
+
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Variable ~~~~~~ '''

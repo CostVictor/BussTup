@@ -23,6 +23,7 @@
   </template>
 
   <template id="templates_popup">
+    {% include "/popups/page/popup_index.html" %}
     {% if role == 'motorista' %}
     {% include "/popups/page/popup_driver.html" %}
     {% else %}
@@ -43,8 +44,6 @@
         <div class="page__container title -enter-">
           <h1 class="text principal">Agenda ~ Não vinculado</h1>
         </div>
-
-
       </div>
 
       <div id="area_agenda" class="page__container column">
@@ -146,12 +145,12 @@
       </div>
 
       <div id="area_rota" class="page__container column inactive">
-        {% if role == 'motorista' %}
         <div class="page__container title -enter-">
           <h1 class="text principal">Rotas</h1>
         </div>
-
         <h2 class="text title -enter-">Minhas rotas</h2>
+
+        {% if role == 'motorista' %}
         <div id="minhas_rota">
           <div id="sem_veiculo" class="-enter- inactive">
             <p class="text secundario emphasis">Você não possui relação com nenhum veículo.</p>
@@ -163,20 +162,19 @@
             <p class="text secundario fundo">Crie uma rota para conseguir iniciar um trajeto.</p>
           </div>
 
-          <div id="minha_rota_area" class="-enter-"></div>
-          <h1 id="minhas_rota_division" class="page__division -enter- inactive"></h1>
+          <div id="minha_rota_area"></div>
+          <h1 class="page__division -enter-"></h1>
         </div>
+        <div id="rotas_local"></div>
 
         {% else %}
-        <div class="page__container title -enter-">
-          <h1 class="text principal">Rotas</h1>
+        <div id="minhas_rota">
+          <span id="minhas_rotas_msg"></span>
+          <div id="minha_rota_area" class="-enter-"></div>
+          <h1 class="page__division -enter-"></h1>
         </div>
-        <h2 class="text title -enter-">Minha rota</h2>
-        <div id="minha_rota_area" class="-enter-"></div>
-        <h1 class="page__division -enter-"></h1>
+        <div id="rotas_local" class="-enter-"></div>
         {% endif %}
-
-        <div id="rotas_local"></div>
       </div>
     </section>
 
@@ -212,8 +210,6 @@
         <div class="page__container title -enter-">
           <h1 class="text principal">Chat ~ Não vinculado</h1>
         </div>
-
-        
       </div>
 
       <div id="area_chat" class="page__container column inactive">
@@ -223,8 +219,7 @@
 
         <h2 class="text title -enter-">Aviso</h2>
         <p class="text secundario justify emphasis -enter-">O recurso de chat ainda está em desenvolvimento.</p>
-        <p class="text secundario justify fundo -enter-">Estamos trabalhando para permitir uma linha de comunicação
-        estável para todos os usuários.</p>
+        <p class="text secundario justify fundo -enter-">Estamos trabalhando para permitir uma linha de comunicação estável para todos os usuários.</p>
       </div>
     </section>
   </main>

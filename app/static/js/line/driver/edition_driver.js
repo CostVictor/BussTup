@@ -616,8 +616,10 @@ function edit_horario_relationship() {
     .then((response) => response.json())
     .then((response) => {
       if (!response.error) {
+        const local_popup = document.getElementById("popup_local");
+        local_popup.removeChild(local_popup.querySelector("#config_rel_point_route"));
+
         close_popup("edit_horario_relacao_ponto_rota");
-        close_popup("config_rel_point_route");
         config_popup_route(
           null,
           return_data_route(null, (format_dict_url = true))

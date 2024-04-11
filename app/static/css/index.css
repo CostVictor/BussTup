@@ -20,6 +20,7 @@
   --vermelho_primario: #ff7272;
   --vermelho_secundario: #ff72721b;
   --vermelho_terciario: #ff0000b7;
+  --vermelho_intenso: rgba(223, 0, 0, 0.85);
   --amarelo_primario: #ffe959;
 
   --size_16px: calc(0.7vw + 1vh + 1vmin);

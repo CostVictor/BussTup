@@ -1,0 +1,104 @@
+<section id="summary_line" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title"></h1>
+    </header>
+
+    <div class="popup__container--content">
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('summary_line')">Fechar</button>
+      <button class="popup__btn">Acessar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="summary_route" class="popup__container--shadow inactive">
+  <span id="summary_route_span_turno" class="inactive"></span>
+  <span id="summary_route_span_partida" class="inactive"></span>
+  <span id="summary_route_span_retorno" class="inactive"></span>
+
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Rota</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <h1 id="summary_route_estado" class="popup__text_local big"></h1>
+      <div class="page__container">
+        <p class="text secundario fundo">Linha:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_route_linha" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Motorista:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_route_motorista" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Veículo:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_route_veiculo" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Capacidade veículo:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_route_capacidade" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Horários:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_route_horarios" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
+
+      <h3 class="popup__text question">Previsão do dia</h3>
+      <p class="text secundario fundo justify margin_bottom">Inclui contraturnos e diárias</p>
+
+      <div class="page__container">
+        <p class="text secundario emphasis">Partida:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_route_previsao_partida" class="text secundario content fundo nowrap"></p>
+        </div>
+        {% if role == 'motorista' %}
+        <span id="summary_route_partida_lotado" class="popup__text_sinal button" onclick="open_popup('notice_migrate', false, false)">
+          Lotado
+          <i style="margin-left: 5px;" class="bi bi-hand-index-thumb"></i>
+        </span>
+        {% else %}
+        <span id="summary_route_partida_lotado" class="popup__text_sinal inactive">Lotado</span>
+        {% endif %}
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario emphasis">Retorno:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_route_previsao_retorno" class="text secundario content fundo nowrap"></p>
+        </div>
+        {% if role == 'motorista' %}
+        <span id="summary_route_retorno_lotado" class="popup__text_sinal button" onclick="open_popup('notice_migrate', false, false)">
+          Lotado
+          <i style="margin-left: 5px;" class="bi bi-hand-index-thumb"></i>
+        </span>
+        {% else %}
+        <span id="summary_route_retorno_lotado" class="popup__text_sinal inactive">Lotado</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('summary_route')">Fechar</button>
+      <button class="popup__btn" onclick="redirect_page('summary_route', 'route')">Acessar</button>
+    </footer>
+  </div>
+</section>

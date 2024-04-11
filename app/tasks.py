@@ -3,7 +3,7 @@ from flask_apscheduler import APScheduler
 from flask_mail import Message
 from flask import render_template, url_for
 from app import app, mail
-from datetime import timedelta
+from datetime import datetime, timedelta
 from app.database import *
 
 
@@ -11,7 +11,6 @@ sched = APScheduler()
 sched.init_app(app)
 
 
-@sched.task('interval', id='enviar_email', seconds=5, max_instances=1)
 def enviar_email():
   with app.app_context():
     email = SendEmail.query.first()
@@ -54,10 +53,10 @@ def enviar_email():
             )
 
             try:
-              mail.send(msg)
-              db.session.add(register_token)
               db.session.delete(email)
+              db.session.add(register_token)
               db.session.commit()
+              mail.send(msg)
             
             except Exception as e:
               db.session.rollback()
@@ -71,3 +70,6 @@ def enviar_email():
           except Exception as e:
             db.session.rollback()
             print(f'Erro ao remover email repetido: {str(e)}')
+    
+    moment = datetime.now() + timedelta(seconds=2)
+    sched.add_job('enviar_email', enviar_email, trigger='date', run_date=moment)

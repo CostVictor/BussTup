@@ -302,15 +302,27 @@ function enterInterface(type, args = null, dalay = 0) {
   }, dalay);
 }
 
-function closeInterface(type, redirect = false, args = false) {
+function closeInterface(type, redirect = false, args = false, add_url = []) {
   let elements = null;
 
   function redirect_page(local, dalay = 0) {
     if (local) {
       setTimeout(() => {
-        window.location.href = `/${local}`;
+        if (!add_url.length) {
+          window.location.href = `/${local}`;
+        } else {
+          const url = add_url.reduce((acc, value) => `${acc}/${encodeURIComponent(value)}`, `/${local}`)
+          window.location.href = url;
+        }
       }, dalay);
     }
+  }
+
+  const popups = Array.from(document.getElementById("popup_local").children);
+  if (popups.length) {
+    popups.forEach((element) => {
+      close_popup(element.id);
+    });
   }
 
   switch (type) {

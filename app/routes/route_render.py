@@ -3,7 +3,8 @@ from flask_security import current_user, login_required
 from app import app, cursos, turnos, cidades, dias_semana
 from app.utilities import check_valid_password
 from flask_jwt_extended import decode_token
-from app.tasks import sched
+from app.tasks import sched, enviar_email
+from datetime import datetime, timedelta
 from app.database import *
 from app.forms import *
 import bcrypt
@@ -15,6 +16,8 @@ import bcrypt
 def index():
   if not sched.running:
     sched.start()
+    moment = datetime.now() + timedelta(seconds=2)
+    sched.add_job('enviar_email', enviar_email, trigger='date', run_date=moment)
   return render_template('auth/login.html')
 
 

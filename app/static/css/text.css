@@ -84,6 +84,10 @@
   margin-bottom: calc(1vw + 1vh + 1vmin);
 }
 
+.text.secundario.margin_top {
+  margin-top: calc(1vw + 1vh + 1vmin);
+}
+
 .text.secundario.rigth {
   margin-left: auto;
   margin-right: calc(0.65vw + 0.65vh + 1vmin);
@@ -220,4 +224,5 @@
   margin: calc(0.3vw + 0.2vh + 1vmin) 0;
   background-color: var(--branco_secundario);
   color: var(--azul_terciario);
+  font-size: calc(0.6vw + 0.7vh + 1vmin);
 }

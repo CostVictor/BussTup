@@ -1,6 +1,7 @@
 from flask_security import login_required, roles_required, current_user
 from flask import request, jsonify
 from collections import deque
+from datetime import date
 from app.utilities import *
 from app.database import *
 from app import app
@@ -66,37 +67,122 @@ def get_routes():
 
   if user:
     role = current_user.roles[0].name
+    retorno['role'] = role
+    
     if role == 'motorista':
-      local_minhas_rotas = {}
-      retorno['data']['minhas_rotas'] = local_minhas_rotas
+      minhas_rotas = {}
+      rotas = {}
+      retorno['data']['minhas_rotas'] = minhas_rotas
+      retorno['data']['rotas'] = rotas
       retorno['possui_veiculo'] = False
 
       if user.onibus:
         retorno['possui_veiculo'] = True
 
-      minhas_rotas = (
-        db.session.query(Linha, Rota).join(Onibus)
+      subquery = (
+        db.session.query(Linha.codigo).join(Membro)
         .filter(db.and_(
-          Onibus.Motorista_id == user.id,
-          Rota.Onibus_id == Onibus.id,
-          Rota.Linha_codigo == Linha.codigo
+          Membro.Motorista_id == user.id,
+          Linha.codigo == Membro.Linha_codigo
+        ))
+        .subquery()
+      )
+      todas_as_rotas = (
+        db.session.query(Linha, Rota, Onibus)
+        .filter(db.and_(
+          Linha.codigo.in_(subquery.select()),
+          Rota.Linha_codigo == Linha.codigo,
+          Rota.Onibus_id == Onibus.id
         ))
         .order_by(Linha.nome, Rota.horario_partida, Onibus.apelido)
-        .all()
       )
 
-      for linha, rota in minhas_rotas:
-        if linha.nome not in local_minhas_rotas:
-          local_minhas_rotas[linha.nome] = []
+      for linha, rota, onibus in todas_as_rotas:
+        motorista = onibus.motorista
+
+        if motorista:
+          estado = 'Inativa'
+          if rota.em_partida:
+            estado = 'Em partida'
+          elif rota.em_retorno:
+            estado = 'Em retorno'
+
+          info = {
+            'line': linha.nome,
+            'turno': rota.turno,
+            'horario_partida': format_time(rota.horario_partida),
+            'horario_retorno': format_time(rota.horario_retorno),
+            'quantidade': count_part_route(rota.codigo),
+            'apelido': onibus.apelido,
+            'motorista': motorista.nome,
+            'estado': estado
+          }
+
+          if motorista.id == user.id:
+            if linha.nome not in minhas_rotas:
+              minhas_rotas[linha.nome] = []
+            
+            if linha.nome not in rotas:
+              rotas[linha.nome] = []
+
+            minhas_rotas[linha.nome].append(info)
+            rotas[linha.nome].append(info)
+          
+          else:
+            if linha.nome not in rotas:
+              rotas[linha.nome] = []
+
+            rotas[linha.nome].append(info)
+    
+    else:
+      minhas_rotas = []
+      rotas = []
+      retorno['data']['minhas_rotas'] = minhas_rotas
+      retorno['data']['rotas'] = rotas
+      retorno['msg'] = []
+
+      rota_fixa = (
+        db.session.query(Rota).join(Parada).join(Passagem)
+        .filter(db.and_(
+          Passagem.passagem_fixa == True,
+          Passagem.passagem_contraturno == False,
+          Passagem.Aluno_id == user.id,
+          Parada.codigo == Passagem.Parada_codigo,
+          Rota.codigo == Parada.Rota_codigo
+        ))
+        .first()
+      )
+      rota_contraturno = (
+        db.session.query(Rota).join(Parada).join(Passagem)
+        .filter(db.and_(
+          Passagem.passagem_fixa == True,
+          Passagem.passagem_contraturno == True,
+          Passagem.Aluno_id == user.id,
+          Parada.codigo == Passagem.Parada_codigo,
+          Rota.codigo == Parada.Rota_codigo
+        ))
+        .first()
+      )
+      linha_codigo = None
+
+      if rota_fixa:
+        linha_codigo = rota_fixa.linha.codigo
+
+        estado = 'Inativa'
+        if rota_fixa.em_partida:
+          estado = 'Em partida'
+        elif rota_fixa.em_retorno:
+          estado = 'Em retorno'
 
         info = {
-          'turno': rota.turno,
-          'horario_partida': format_time(rota.horario_partida),
-          'horario_retorno': format_time(rota.horario_retorno),
-          'quantidade': count_part_route(rota.codigo)
+          'line': rota_fixa.linha.nome,
+          'turno': rota_fixa.turno,
+          'horario_partida': format_time(rota_fixa.horario_partida),
+          'horario_retorno': format_time(rota_fixa.horario_retorno),
+          'quantidade': count_part_route(rota_fixa.codigo),
+          'estado': estado
         }
-
-        veiculo = rota.onibus
+        veiculo = rota_fixa.onibus
         surname = 'Sem veículo'
         motorista = 'Desativada'
 
@@ -107,6 +193,83 @@ def get_routes():
             motorista = veiculo.motorista.nome
         info['apelido'] = surname
         info['motorista'] = motorista
+
+        minhas_rotas.append(info)
+
+      else:
+        retorno['msg'].append('Você não definiu sua rota fixa.')
+      
+      if rota_contraturno:
+        if not linha_codigo:
+          linha_codigo = rota_contraturno.linha.codigo
+        
+        estado = 'Inativa'
+        if rota_contraturno.em_partida:
+          estado = 'Em partida'
+        elif rota_contraturno.em_retorno:
+          estado = 'Em retorno'
+
+        info = {
+          'line': rota_contraturno.linha.nome,
+          'turno': rota_contraturno.turno,
+          'horario_partida': format_time(rota_contraturno.horario_partida),
+          'horario_retorno': format_time(rota_contraturno.horario_retorno),
+          'quantidade': count_part_route(rota_contraturno.codigo),
+          'estado': estado
+        }
+        veiculo = rota_contraturno.onibus
+        surname = 'Sem veículo'
+        motorista = 'Desativada'
+
+        if veiculo:
+          surname = veiculo.apelido
+          motorista = 'Nenhum'
+          if veiculo.motorista:
+            motorista = veiculo.motorista.nome
+        info['apelido'] = surname
+        info['motorista'] = motorista
+
+        minhas_rotas.append(info)
+
+      else:
+        retorno['msg'].append('Você não definiu sua rota de contraturno.')
+      
+      if linha_codigo:
+        todas_as_rotas = (
+          db.session.query(Rota, Onibus)
+          .filter(db.and_(
+            Rota.Onibus_id == Onibus.id,
+            Onibus.Motorista_id.isnot(None),
+            Rota.Linha_codigo == linha_codigo
+          ))
+          .order_by(Rota.horario_partida, Onibus.apelido)
+          .all()
+        )
+
+        for rota, onibus in todas_as_rotas:
+          estado = 'Inativa'
+          if rota.em_partida:
+            estado = 'Em partida'
+          elif rota.em_retorno:
+            estado = 'Em retorno'
+
+          rotas.append({
+            'line': rota.linha.nome,
+            'turno': rota.turno,
+            'horario_partida': format_time(rota.horario_partida),
+            'horario_retorno': format_time(rota.horario_retorno),
+            'quantidade': count_part_route(rota.codigo),
+            'apelido': onibus.apelido,
+            'motorista': onibus.motorista.nome,
+            'estado': estado
+          })
+      
+      else:
+        return jsonify({'error': True, 'title': 'Erro de Identificação', 'text': 'Ocorreu um erro inesperado ao identificar a linha.'})
+
+    return jsonify(retorno)
+  
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações das rotas.'})
 
 
 @app.route("/get_lines", methods=['GET'])
@@ -144,6 +307,40 @@ def get_lines():
 
   else: data['identify'] = False
   return jsonify(data)
+
+
+@app.route("/get_summary_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>")
+@login_required
+def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
+  role = current_user.roles[0].name
+  linha = Linha.query.filter_by(nome=name_line).first()
+  if linha:
+    relationship = return_relationship(linha.codigo)
+    rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+
+    if relationship and relationship != 'não participante' and rota:
+      veiculo = rota.onibus
+      capacidade = veiculo.capacidade if veiculo else 'Indefinido'
+
+      data = {}
+      retorno = {'error': False, 'role': role, 'capacidade': capacidade, 'data': data}
+
+      estado = 'Inativa'
+      if rota.em_partida:
+        estado = 'Em partida'
+      elif rota.em_retorno:
+        estado = 'Em retorno'
+      retorno['estado'] = estado
+
+      for tipo in ['partida', 'retorno']:
+        registro = Registro_Rota.query.filter_by(
+          data=date.today(), tipo=tipo, Rota_codigo=rota.codigo
+        ).first()
+        data[f'previsao_{tipo}'] = registro.previsao_pessoas if registro else 50
+      
+      return jsonify(retorno)
+
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da rota. Por favor, recarregue a página e tente novamente.'})
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -383,7 +580,7 @@ def get_interface_route(name_line):
           retorno['mensagens'].append(f'Aviso: Você não definiu sua rota fixa.')
         
         if not retorno['minhas_rotas']['contraturno']:
-          retorno['mensagens'].append('Aviso: Você não definiu sua rota de Contraturno.')
+          retorno['mensagens'].append('Aviso: Você não definiu sua rota de contraturno.')
 
     return jsonify(retorno)
 

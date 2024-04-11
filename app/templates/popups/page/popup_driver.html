@@ -62,3 +62,40 @@
     </footer>
   </div>
 </section>
+
+
+<section id="notice_migrate" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Recurso de Migração</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <p class="text secundario justify">Este recurso permite que qualquer motorista da linha possa realizar a transferência de passageiros de um veículo lotado para outro disponível, mesmo que não seja o condutor atual do veículo. Recomenda-se a comunicação entre os motoristas envolvidos antes de realizar essa ação.</p>
+      <h1 class="page__division"></h1>
+      <p class="text secundario justify">Essa ação não é permanente; o recurso cria uma diária no veículo selecionado correspondente à rota do veículo lotado, sendo válida apenas para o dia da migração. Os passageiros podem cancelar a diária se desejarem.</p>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('notice_migrate')">Voltar</button>
+      <button class="popup__btn" onclick="open_popup('migrate_capacity', false, false)">Proseguir</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="migrate_capacity" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Recurso de Migração</h1>
+    </header>
+
+    <div class="popup__container--content">
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('migrate_capacity')">Voltar</button>
+      <button class="popup__btn">Migrar</button>
+    </footer>
+  </div>
+</section>

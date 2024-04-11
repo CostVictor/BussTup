@@ -336,6 +336,11 @@ function criar_rota(
             if (JSON.stringify(item) === JSON.stringify(dados)) {
               route.classList.add("selected");
             }
+          } else {
+            delete compare[pos].quantidade;
+            if (JSON.stringify(compare[pos]) === JSON.stringify(dados)) {
+              route.classList.add("selected");
+            }
           }
         }
       } else {

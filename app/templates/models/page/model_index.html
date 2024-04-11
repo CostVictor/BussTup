@@ -2,6 +2,9 @@
   <h2 class="text title big_space"></h2>
 </div>
 
+<div id="model_local" class="-enter- inactive">
+  <h2 class="text secundario emphasis margin_bottom"></h2>
+</div>
 
 <div id="model_line" class="page__container--line inactive" onclick="closeInterface('page_user', 'line', this)">
   <div class="page__container--line_content">
@@ -24,22 +27,27 @@
 </div>
 
 
-<div id="model_interface_rota" class="popup__container--input inactive" onclick="open_popup('config_route', this)">
-  <span id="model_interface_rota_number" class="inactive"></span>
+<div id="model_route" class="popup__container--input space_top inactive" onclick="open_popup('summary_route', this, false)">
+  <span id="model_route_line" class="inactive"></span>
   <div class="popup__input_big">
     <div class="popup__local">
-      <p id="model_interface_rota_apelido" class="popup__text_local first"></p>
+      <p id="model_route_apelido" class="popup__text_local first"></p>
       <p class="popup__text_local">></p>
-      <p id="model_interface_rota_motorista" class="popup__text_local"></p>
+      <p id="model_route_motorista" class="popup__text_local"></p>
     </div>
 
     <div class="popup__local">
-      <p id="model_interface_rota_turno" class="popup__text_local first"></p>
+      <p id="model_route_turno" class="popup__text_local first"></p>
       <p class="popup__text_local">></p>
-      <p id="model_interface_rota_horario_partida" class="popup__text_local"></p>
+      <p id="model_route_horario_partida" class="popup__text_local"></p>
       <p class="popup__text_local">~</p>
-      <p id="model_interface_rota_horario_retorno" class="popup__text_local"></p>
+      <p id="model_route_horario_retorno" class="popup__text_local"></p>
+    </div>
+
+    <div class="popup__local">
+      <p class="popup__text_local min">Estado:</p>
+      <p id="model_route_estado" class="popup__text_local min"></p>
     </div>
   </div>
-  <p id="model_interface_rota_quantidade" class="popup__text_local display"></p>
+  <p id="model_route_quantidade" class="popup__text_local display"></p>
 </div>
