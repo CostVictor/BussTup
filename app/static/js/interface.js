@@ -308,14 +308,13 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
   function redirect_page(local, dalay = 0) {
     if (local) {
       setTimeout(() => {
-        if (!add_url.length) {
-          window.location.href = `/${local}`;
-        } else {
-          const url = add_url.reduce((acc, value) => `${acc}/${encodeURIComponent(value)}`, `/${local}`)
-          window.location.href = url;
-        }
+        window.location.href = `/${local}`;
       }, dalay);
     }
+  }
+
+  if (add_url.length) {
+    redirect = add_url.reduce((acc, value) => `${acc}/${encodeURIComponent(value)}`, redirect)
   }
 
   const popups = Array.from(document.getElementById("popup_local").children);
@@ -370,8 +369,9 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
       header_close.style.opacity = 0;
 
       if (redirect === "line") {
+        const popup = document.getElementById('summary_line')
         let info = {
-          principal: [extract_info(args, "nome")],
+          principal: [extract_info(popup, "nome")],
           secondary: { local_page: aba_atual },
         };
         redirect += generate_url_dict(info);

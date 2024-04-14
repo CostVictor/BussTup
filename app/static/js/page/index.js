@@ -33,6 +33,9 @@ function action_popup(popup, card, id, obj_click) {
     ).textContent = `${shift} > ${hr_par} ~ ${hr_ret}`;
     load_popup_route(popup);
   } else if (id === "summary_line") {
+    const name_line = extract_info(obj_click, "nome");
+    document.getElementById("summary_line_nome").textContent = name_line;
+    load_popup_line(card, name_line);
   }
 }
 
@@ -351,6 +354,30 @@ function load_popup_route(popup) {
     });
 }
 
+function load_popup_line(card, name_line) {
+  fetch(`/get_summary_line/${encodeURIComponent(name_line)}`, { method: "GET" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        if (!response.paga) {
+          document
+            .getElementById("summary_line_paga")
+            .classList.add("inactive");
+          document
+            .getElementById("summary_line_gratuita")
+            .classList.remove("inactive");
+        }
+        const data = response.data;
+        for (info in data) {
+          card.querySelector(`[id*="${info}"]`).textContent = data[info];
+        }
+      } else {
+        create_popup(response.title, response.text, "Ok");
+        close_popup("summary_line");
+      }
+    });
+}
+
 function replaceAba(btn_click, id = "") {
   let name_aba = id;
   let execute = true;
@@ -429,11 +456,9 @@ function checkLine(name_aba, obj_aba) {
     });
 }
 
-function redirect_page(id_obj, local) {
-  if (id_obj === "summary_route") {
-    const obj = document.getElementById(id_obj);
-  } else {
-  }
+function redirect_page_to_route() {
+  const data = return_data_route(document.getElementById('summary_route'))
+  closeInterface('page_user', 'route', false, Object.values(data))
 }
 
 function return_data_route(obj) {

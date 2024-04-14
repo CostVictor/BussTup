@@ -1,15 +1,63 @@
 <section id="summary_line" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header">
-      <h1 class="popup__title"></h1>
+      <h1 id="summary_line_nome" class="popup__title"></h1>
     </header>
 
     <div class="popup__container--content">
+      <div id="summary_line_gratuita" class="inactive">
+        <h2 id="summary_line_gratuita" class="text secundario emphasis justify">Linha gratuita</h2>
+      </div>
+
+      <div id="summary_line_paga">
+        <div class="page__container">
+          <p class="text secundario fundo">Valor da cartela:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_line_valor_cartela" class="text secundario content fundo nowrap"></p>
+          </div>
+        </div>
+  
+        <div class="page__container">
+          <p class="text secundario fundo">Valor da diária:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_line_valor_diaria" class="text secundario content fundo nowrap"></p>
+          </div>
+        </div>
+      </div>
+      <h1 class="page__division"></h1>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Local:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_line_local" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Dono da linha:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_line_dono" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Motoristas:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_line_qnt_motoristas" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario fundo">Veículos:</p>
+        <div class="scroll_horizontal">
+          <p id="summary_line_qnt_veiculos" class="text secundario content fundo nowrap"></p>
+        </div>
+      </div>
     </div>
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('summary_line')">Fechar</button>
-      <button class="popup__btn">Acessar</button>
+      <button class="popup__btn" onclick="closeInterface('page_user', 'line')">Acessar</button>
     </footer>
   </div>
 </section>
@@ -98,7 +146,7 @@
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('summary_route')">Fechar</button>
-      <button class="popup__btn" onclick="redirect_page('summary_route', 'route')">Acessar</button>
+      <button class="popup__btn" onclick="redirect_page_to_route()">Acessar</button>
     </footer>
   </div>
 </section>

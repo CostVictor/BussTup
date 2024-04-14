@@ -1,6 +1,7 @@
 from flask_security import current_user
 from app import cursos, turnos
 from sqlalchemy import func
+from datetime import date
 from app.database import *
 import bcrypt
 
@@ -231,6 +232,12 @@ def return_options_route(linha, user):
   return retorno
 
 
+def return_ignore_route(shift):
+  if shift == 'Matutino':
+    return 'retorno'
+  return 'partida'
+
+
 def return_user_email(email: str):
   check_aluno = Aluno.query.filter_by(email=email).first()
   check_motorista = Motorista.query.filter_by(email=email).first()
@@ -381,3 +388,69 @@ def count_part_route(route_code, formated=True):
   if formated:
     return f"{quantidade} {'pessoa' if quantidade == 1 else 'pessoas'}"
   return quantidade
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~~~ Modify ~~~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+def modify_forecast_route(rota, tipo):
+  reject_contraturno = (tipo == return_ignore_route(rota.turno))
+  today = date.today()
+
+  not_includes = (
+    db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada)
+    .filter(db.and_(
+      Passagem.Parada_codigo == Parada.codigo,
+      Parada.Rota_codigo != rota.codigo,
+      Parada.tipo == tipo,
+      Passagem.passagem_fixa == False,
+      Passagem.data == today
+    ))
+    .subquery()
+  )
+
+  count = (
+    db.session.query(func.count(func.distinct(Passagem.Aluno_id)))
+    .join(Aluno).join(Registro_Aluno).join(Parada)
+    .filter(db.and_(
+      Parada.Rota_codigo == rota.codigo,
+      Parada.tipo == tipo,
+
+      Passagem.Parada_codigo == Parada.codigo,
+      Aluno.id == Passagem.Aluno_id,
+      Registro_Aluno.Aluno_id == Aluno.id,
+      
+      db.not_(Aluno.id.in_(not_includes.select())),
+      Registro_Aluno.data == today,
+      db.or_(
+        db.and_(
+          Passagem.passagem_fixa == True,
+          Registro_Aluno.faltara == False,
+          db.or_(
+            (
+              db.and_(
+                Aluno.turno == rota.turno,
+                db.not_(Registro_Aluno.contraturno)
+              )
+              if reject_contraturno
+              else (Aluno.turno == rota.turno)
+            ),
+            db.and_(
+              Aluno.turno != rota.turno,
+              Registro_Aluno.contraturno
+            )
+          )
+        ),
+        db.and_(
+          db.not_(Passagem.passagem_fixa),
+          Passagem.data == today
+        )
+      )
+    ))
+    .scalar()
+  )
+  
+  registro_alvo = Registro_Rota.query.filter_by(data=today, tipo=tipo).first()
+  registro_alvo.previsao_pessoas = count
+  db.session.commit()

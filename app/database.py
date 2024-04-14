@@ -1,6 +1,7 @@
 from flask_security import Security, UserMixin, RoleMixin, SQLAlchemyUserDatastore, current_user
 from flask_sqlalchemy import SQLAlchemy
 from app import app, turnos, dias_semana
+from datetime import date
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -192,7 +193,6 @@ class Registro_Parada(db.Model):
   codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
   data = db.Column(db.Date, nullable=False)
   veiculo_passou = db.Column(db.Boolean, nullable=False, default=False)
-  quantidade_no_veiculo = db.Column(db.Integer, nullable=False)
   Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
   parada = db.relationship('Parada', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 
@@ -202,8 +202,8 @@ class Registro_Rota(db.Model):
   codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
   data = db.Column(db.Date, nullable=False)
   tipo = db.Column(db.Enum('partida', 'retorno'), nullable=False)
-  quantidade_pessoas = db.Column(db.Integer, nullable=False)
-  previsao_pessoas = db.Column(db.Integer, nullable=False)
+  quantidade_pessoas = db.Column(db.Integer, nullable=False, default=0)
+  previsao_pessoas = db.Column(db.Integer, nullable=False, default=0)
   Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), nullable=False)
   rota = db.relationship('Rota', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 
@@ -213,6 +213,7 @@ class Passagem(db.Model):
   codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
   passagem_fixa = db.Column(db.Boolean, nullable=False)
   passagem_contraturno = db.Column(db.Boolean, nullable=False)
+  migracao = db.Column(db.Boolean, nullable=False, default=False)
   pediu_espera = db.Column(db.Boolean, nullable=False, default=False)
   data = db.Column(db.Date)
   Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
@@ -257,6 +258,10 @@ def create_user(data):
   try:
     db.session.add(user)
     with db.session.begin_nested():
+      if role == 'aluno':
+        register = Registro_Aluno(data=date.today(), Aluno_id=user.id)
+        db.session.add(register)
+
       user_session = user_datastore.create_user(login=login, password_hash=password_hash, primary_key=user.id)
       role_user = user_datastore.create_role(name=role)
       user_datastore.add_role_to_user(user_session, role_user)

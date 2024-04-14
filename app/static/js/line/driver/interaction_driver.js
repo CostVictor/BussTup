@@ -370,6 +370,8 @@ function config_popup_aluno(nome, turno, pos, contraturno, name_point = false) {
             data[info];
         }
       } else {
+        const local_popup = document.getElementById("popup_local");
+        local_popup.removeChild(local_popup.querySelector("#config_rel_point_route"));
         close_popup("config_aluno");
         create_popup(response.title, response.text, "Voltar");
       }

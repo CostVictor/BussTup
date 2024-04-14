@@ -1,7 +1,7 @@
 from flask import render_template, request, jsonify, flash
 from flask_security import current_user, login_required
 from app import app, cursos, turnos, cidades, dias_semana
-from app.utilities import check_valid_password
+from app.utilities import check_valid_password, return_relationship, return_route, return_ignore_route
 from flask_jwt_extended import decode_token
 from app.tasks import sched, enviar_email
 from datetime import datetime, timedelta
@@ -9,6 +9,7 @@ from app.database import *
 from app.forms import *
 import bcrypt
 
+from sqlalchemy import func
 
 @app.route("/")
 @app.route("/index")
@@ -37,6 +38,25 @@ def pag_usuario():
   return render_template('blog/page_user.html', role=role, turnos=turnos, dias_semana=dias_semana, cidades=cidades, local=local)
 
 
+@app.route("/route/<name_line>/<surname>/<shift>/<time_par>/<time_ret>")
+@login_required
+def pag_rota(name_line, surname, shift, time_par, time_ret):
+  local_page = request.args.get('local_page')
+  linha = Linha.query.filter_by(nome=name_line).first()
+
+  if linha and not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first():
+    relationship = return_relationship(linha.codigo)
+    
+    if relationship and relationship != 'não participante':
+      role = current_user.roles[0].name
+      rota = return_route(linha.codigo, surname, shift, time_par, time_ret, None)
+
+      if rota:
+        return render_template('blog/route.html', name_line=name_line, role=role, local_page=local_page, rota=rota)
+
+  return 'Rota não encontrada.'
+
+
 @app.route("/line/<name_line>")
 @login_required
 def pag_linha(name_line):
@@ -45,7 +65,9 @@ def pag_linha(name_line):
 
   if linha and not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first():
     role = current_user.roles[0].name
+
     return render_template('blog/line.html', name_line=name_line, role=role, turnos=turnos, cidades=cidades, local_page=local_page)
+  
   return 'Linha não encontrada.'
 
 
@@ -132,3 +154,8 @@ def recuperar(token):
         print(f'Erro ao invalidar o token: {str(e)}')
 
     return jsonify({'mensagem': 'Token inválido'}), 401
+
+
+
+@app.route("/teste")
+def teste():...

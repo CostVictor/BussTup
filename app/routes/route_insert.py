@@ -1,6 +1,7 @@
 from flask_security import login_required, roles_required, current_user
 from app import app, limiter, cidades, turnos
 from flask import request, jsonify
+from datetime import date
 from app.utilities import *
 from app.database import *
 
@@ -199,6 +200,11 @@ def create_route():
         rota = Rota(**data)
         try:
           db.session.add(rota)
+          with db.session.begin_nested():
+            registro_rota_partida = Registro_Rota(data=date.today(), tipo='partida', Rota_codigo=rota.codigo)
+            registro_rota_retorno = Registro_Rota(data=date.today(), tipo='retorno', Rota_codigo=rota.codigo)
+            db.session.add(registro_rota_partida)
+            db.session.add(registro_rota_retorno)
           db.session.commit()
 
           return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada para o veículo: <strong>{vehicle.apelido}</strong>.'})
@@ -210,6 +216,11 @@ def create_route():
         rota = Rota(**data)
         try:
           db.session.add(rota)
+          with db.session.begin_nested():
+            registro_rota_partida = Registro_Rota(data=date.today(), tipo='partida', Rota_codigo=rota.codigo)
+            registro_rota_retorno = Registro_Rota(data=date.today(), tipo='retorno', Rota_codigo=rota.codigo)
+            db.session.add(registro_rota_partida)
+            db.session.add(registro_rota_retorno)
           db.session.commit()
 
           return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': 'A rota foi adicionada à sua linha como desativada e não estará visível para os alunos até que um veículo seja definido. Manteremos esta rota em um local reservado para que você possa configurá-la.'})
@@ -353,6 +364,7 @@ def create_pass_fixed():
                     db.session.add(new_passagem)
                   db.session.commit()
 
+                  modify_forecast_route(route, tipo)
                   return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong>. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong>, caso não possua.'})
                 
                 except Exception as e:
@@ -378,6 +390,7 @@ def create_pass_fixed():
                   db.session.add(new_passagem)
                 db.session.commit()
 
+                modify_forecast_route(route, tipo)
                 if linha.codigo == code_line:
                   return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; suas relações fixas na rota anterior foram removidas. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta rota.'})
 
@@ -423,6 +436,7 @@ def create_pass_fixed():
 
               db.session.add(new_passagem)
               db.session.commit()
+              modify_forecast_route(route, tipo)
               return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': text})
             
             except Exception as e:

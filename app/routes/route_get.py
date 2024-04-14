@@ -309,7 +309,7 @@ def get_lines():
   return jsonify(data)
 
 
-@app.route("/get_summary_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>")
+@app.route("/get_summary_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>", methods=['GET'])
 @login_required
 def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
   role = current_user.roles[0].name
@@ -336,11 +336,53 @@ def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
         registro = Registro_Rota.query.filter_by(
           data=date.today(), tipo=tipo, Rota_codigo=rota.codigo
         ).first()
-        data[f'previsao_{tipo}'] = registro.previsao_pessoas if registro else 50
+        data[f'previsao_{tipo}'] = registro.previsao_pessoas
       
       return jsonify(retorno)
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da rota. Por favor, recarregue a página e tente novamente.'})
+
+
+@app.route("/get_summary_line/<name_line>", methods=['GET'])
+@login_required
+def get_summary_line(name_line):
+  linha = Linha.query.filter_by(nome=name_line).first()
+  if linha and not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first():
+    retorno = {
+      'error': False,
+      'paga': linha.paga,
+      'data': {
+        'local': linha.cidade
+      }
+    }
+    if linha.paga:
+      retorno['data']['valor_cartela'] = f'R$ {format_money(linha.valor_cartela)}'
+      retorno['data']['valor_diaria'] = f'R$ {format_money(linha.valor_diaria)}'
+
+    contador_motorista = 0
+    for membro in linha.membros:
+      motorista = membro.motorista
+      contador_motorista += 1
+
+      if membro.dono:
+        retorno['data']['dono'] = motorista.nome
+
+    retorno['data']['qnt_motorista'] = (
+      f'{contador_motorista} {"disponíveis" if contador_motorista != 1 else "disponível"}'
+    )
+    
+    qnt_veiculo = (
+      db.session.query(func.count(Onibus.id))
+      .filter(Onibus.Linha_codigo == linha.codigo)
+      .scalar()
+    )
+    retorno['data']['qnt_veiculo'] = (
+      f'{qnt_veiculo if qnt_veiculo else 0} {"disponíveis" if qnt_veiculo != 1 else "disponível"}'
+    )
+
+    return jsonify(retorno)
+  
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha. Por favor, recarregue a página e tente novamente.'})
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -1206,7 +1248,7 @@ def get_stundet(name_line, shift, name_student):
           db.session.query(Aluno).join(Passagem).join(Parada)
           .filter(db.and_(
             Aluno.nome == name_student,
-            Aluno.turno == shift.capitalize(),
+            (Aluno.turno == shift.capitalize()) if not contraturno else True,
             Passagem.Aluno_id == Aluno.id,
             Passagem.passagem_fixa == True,
             (Passagem.passagem_contraturno == True) if contraturno else True,
@@ -1243,7 +1285,7 @@ def get_stundet(name_line, shift, name_student):
         db.session.query(Aluno).join(Passagem).join(Parada).join(Rota)
         .filter(db.and_(
           Aluno.nome == name_student,
-          Aluno.turno == shift.capitalize(),
+          (Aluno.turno == shift.capitalize()) if not contraturno else True,
           Passagem.Aluno_id == Aluno.id,
           Passagem.passagem_fixa == True,
           (Passagem.passagem_contraturno == True) if contraturno else True,
