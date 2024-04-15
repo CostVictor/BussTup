@@ -146,7 +146,7 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `busstup`.`contraturno_fixo` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `dia_fixo` ENUM('Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta') NOT NULL,
+  `dia_fixo` INT NOT NULL CHECK(`dia_fixo` IN (1, 2, 3, 4, 5)),
   `Aluno_id` BIGINT(20) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_Contraturno_Fixo_Aluno1_idx` (`Aluno_id` ASC),
@@ -355,6 +355,7 @@ CREATE TABLE IF NOT EXISTS `busstup`.`registro_rota` (
   `tipo` ENUM('partida', 'retorno') NOT NULL,
   `quantidade_pessoas` INT(11) NOT NULL DEFAULT 0,
   `previsao_pessoas` INT(11) NOT NULL DEFAULT 0,
+  `atualizar` TINYINT NOT NULL DEFAULT 0,
   `Rota_codigo` BIGINT(20) NOT NULL,
   PRIMARY KEY (`codigo`),
   INDEX `fk_Registro_Rota_Rota1_idx` (`Rota_codigo` ASC),

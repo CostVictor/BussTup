@@ -92,10 +92,12 @@ function action_popup(popup, card, id, obj_click) {
   } else if (
     id === "promover_motorista" ||
     id === "rebaixar_motorista" ||
-    id === "del_ponto" ||
     id === "del_linha"
   ) {
     card.querySelector("h2").textContent = extract_info(obj_click, "nome");
+  } else if (id === "del_ponto") {
+    card.querySelector("h2").textContent =
+      document.getElementById("config_point_nome").textContent;
   } else if (id === "del_vehicle") {
     document.getElementById("del_vehicle_surname").textContent = extract_info(
       obj_click,
@@ -371,7 +373,9 @@ function config_popup_aluno(nome, turno, pos, contraturno, name_point = false) {
         }
       } else {
         const local_popup = document.getElementById("popup_local");
-        local_popup.removeChild(local_popup.querySelector("#config_rel_point_route"));
+        local_popup.removeChild(
+          local_popup.querySelector("#config_rel_point_route")
+        );
         close_popup("config_aluno");
         create_popup(response.title, response.text, "Voltar");
       }

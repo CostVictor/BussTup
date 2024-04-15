@@ -552,3 +552,16 @@ function submit(form_id = false) {
     }
   }
 }
+
+function popup_button_load(popup_id, value = false) {
+  const popup = document.getElementById(popup_id);
+  if (popup) {
+    const footer = popup.querySelector("footer");
+    const childrens = Array.from(footer.children);
+    if (childrens.length > 1) {
+      childrens[1].textContent = value ? value : "Aguarde...";
+    } else {
+      childrens[0].textContent = value ? value : "Aguarde...";
+    }
+  }
+}

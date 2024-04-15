@@ -96,6 +96,7 @@ function loadInterfaceDriver(name_line) {
             local_motorista.removeChild(element);
           }
         });
+        local_motorista.removeChild(local_motorista.querySelector("span"));
 
         const model_motorista = models.querySelector("#model_motorista");
         for (tipo in data) {
@@ -211,6 +212,7 @@ function loadInterfaceVehicle(name_line) {
         const division_local = document.getElementById(
           "area_vehicle_division_vehicle"
         );
+        const local_vehicle = document.getElementById("area_vehicle");
 
         const com_mot = response.data.com_condutor;
         const sem_mot = response.data.sem_condutor;
@@ -231,8 +233,22 @@ function loadInterfaceVehicle(name_line) {
           if (response.relacao && response.relacao !== "membro") {
             btn_add.classList.remove("inactive");
             if (com_mot.length || sem_mot.length) {
+              local_vehicle.removeChild(local_vehicle.querySelector("span"));
               division.classList.remove("inactive");
+            } else {
+              const text = local_vehicle.querySelector("span");
+              text.textContent = "Nenhum veículo cadastrado";
+              text.className =
+                "text secundario fundo cinza justify margin_bottom";
             }
+          }
+        } else {
+          if (com_mot.length || sem_mot.length) {
+            local_vehicle.removeChild(local_vehicle.querySelector("span"));
+          } else {
+            const text = local_vehicle.querySelector("span");
+            text.textContent = "Nenhum veículo cadastrado";
+            text.className = "text secundario fundo cinza justify";
           }
         }
       } else {
@@ -393,7 +409,7 @@ function config_popup_routes_vehicle(surname_vehicle) {
         } else {
           const text = document.createElement("p");
           text.className = "text info center fundo cinza";
-          text.textContent = "Nenhuma Rota Encontrada";
+          text.textContent = "Nenhuma rota encontrada";
           container.appendChild(text);
         }
       } else {
@@ -454,9 +470,11 @@ function loadInterfaceRoutes(name_line) {
           criar_rota(desativas, local_desativas);
           criar_rota(ativas, local_ativas);
         } else {
+          const area_rotas = document.getElementById("area_rotas");
           const local_minhas_rotas = document.getElementById(
             "interface_rotas_minhas_rotas"
           );
+
           if (response.relacao === "participante") {
             local_minhas_rotas.classList.remove("inactive");
             const local_msgs = local_minhas_rotas.querySelector("span");
@@ -464,6 +482,16 @@ function loadInterfaceRoutes(name_line) {
               "interface_rotas_division"
             );
             const minhas_rotas = response.minhas_rotas;
+
+            const span_txt = document.getElementById("area_rotas_span_text");
+            if (span_txt) {
+              if (Object.values(minhas_rotas).length || ativas.length) {
+                area_rotas.removeChild(span_txt);
+              } else {
+                span_txt.textContent = "Nenhuma rota cadastrada";
+                span_txt.className = "text secundario fundo cinza justify";
+              }
+            }
 
             local_msgs.innerHTML = "";
             const mensagens = response.mensagens;
@@ -504,6 +532,14 @@ function loadInterfaceRoutes(name_line) {
           } else {
             local_minhas_rotas.classList.add("inactive");
             criar_rota(ativas, local_ativas);
+
+            if (ativas.length) {
+              area_rotas.removeChild(area_rotas.querySelector("span"));
+            } else {
+              const span_txt = area_rotas.querySelector("span");
+              span_txt.textContent = "Nenhuma rota cadastrada";
+              span_txt.className = "text secundario fundo cinza justify";
+            }
           }
         }
       } else {

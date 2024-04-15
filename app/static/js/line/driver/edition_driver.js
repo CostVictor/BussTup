@@ -17,12 +17,14 @@ function create_vehicle() {
 
     if (!motorista_selected) {
       execute = false;
-      var title = "Nenhuma Opção Selecionada";
+      var title = "Nenhuma opção selecionada";
       var text = "Selecione uma opção de motorista disponível.";
     }
   }
 
   if (execute) {
+    popup_button_load("add_vehicle");
+
     fetch("/create_vehicle", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -44,6 +46,7 @@ function create_vehicle() {
           loadInterfaceVehicle(name_line);
         } else {
           create_popup(response.title, response.text, "Voltar");
+          popup_button_load("add_vehicle", "Adicionar");
         }
       });
   } else {
@@ -74,6 +77,7 @@ function create_point(event) {
     delete data.tempo_tolerancia;
   }
 
+  popup_button_load("add_point");
   fetch("/create_point", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -87,6 +91,7 @@ function create_point(event) {
         loadInterfacePoints(name_line);
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("add_point", "Criar");
       }
     });
 }
@@ -116,7 +121,7 @@ function create_route(event) {
       var vehicle = surname_selected.split(" ")[0];
     } else {
       execute = false;
-      var title = "Nenhuma Opção Selecionada";
+      var title = "Nenhuma opção selecionada";
       var text = "Selecione uma opção de veículo disponível.";
     }
   } else {
@@ -132,6 +137,7 @@ function create_route(event) {
       name_line: name_line,
     };
 
+    popup_button_load("add_route");
     fetch("/create_route", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -145,6 +151,7 @@ function create_route(event) {
           loadInterfaceRoutes(name_line);
         } else {
           create_popup(response.title, response.text, "Voltar");
+          popup_button_load("add_route", "Criar");
         }
       });
   } else {
@@ -169,7 +176,7 @@ function create_stop(event) {
   let option_selected = return_bool_selected(container_options);
   if (!point_selected) {
     execute = false;
-    var title = "Nenhum Ponto Selecionado";
+    var title = "Nenhum ponto selecionado";
     var text = "Por favor, selecione uma opção disponível para proseguir.";
   } else if (option_selected) {
     if (!horario_ponto_reverso) {
@@ -188,6 +195,7 @@ function create_stop(event) {
       data["time_pas_2"] = horario_ponto_reverso;
     }
 
+    popup_button_load("add_point_route");
     fetch("/create_stop", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -209,6 +217,7 @@ function create_stop(event) {
       });
   } else {
     create_popup(title, text, "Voltar");
+    popup_button_load("add_point_route", "Adicionar");
   }
 }
 
@@ -249,6 +258,7 @@ function edit_line(form_submit, event) {
   }
 
   if (execute) {
+    popup_button_load(`edit_${field}_line`);
     fetch("/edit_line", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -277,6 +287,7 @@ function edit_line(form_submit, event) {
           }
         } else {
           create_popup(response.title, response.text, "Voltar");
+          popup_button_load(`edit_${field}_line`, "Alterar");
         }
       });
   } else {
@@ -304,6 +315,7 @@ function edit_config_line_bool(obj_click) {
       config_bool(obj_click.parentNode, "Não");
     }
 
+    popup_button_load("config_line");
     fetch("/edit_line", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -318,8 +330,10 @@ function edit_config_line_bool(obj_click) {
         if (!response.error) {
           loadInterfaceLine(name_line, false);
           content.classList.remove("inactive");
+          popup_button_load("config_line", "Fechar");
         } else {
           create_popup(response.title, response.text, "Voltar");
+          popup_button_load("config_line", "Fechar");
         }
       });
   }
@@ -336,6 +350,7 @@ function edit_capacidade_veiculo(event) {
     .getElementById("edit_vehicle_capacidade_new")
     .value.trim();
 
+  popup_button_load("edit_vehicle_capacidade");
   fetch("/edit_vehicle", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -354,6 +369,7 @@ function edit_capacidade_veiculo(event) {
         loadInterfaceVehicle(name_line);
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("edit_vehicle_capacidade", "Salvar");
       }
     });
 }
@@ -369,11 +385,12 @@ function edit_motorista_veiculo() {
 
   if (!options_selected) {
     create_popup(
-      "Nenhuma Opção Selecionada",
+      "Nenhuma opção selecionada",
       "Por favor, selecione uma opção disponível.",
       "Voltar"
     );
   } else {
+    popup_button_load("edit_vehicle_motorista");
     fetch("/edit_vehicle", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -393,6 +410,7 @@ function edit_motorista_veiculo() {
           loadInterfaceRoutes(name_line);
         } else {
           create_popup(response.title, response.text, "Voltar");
+          popup_button_load("edit_vehicle_motorista", "Salvar");
         }
       });
   }
@@ -409,6 +427,7 @@ function edit_surname_vehicle(event) {
     .getElementById("edit_vehicle_surname_new")
     .value.trim();
 
+  popup_button_load("edit_vehicle_surname");
   fetch("/edit_vehicle", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -427,6 +446,7 @@ function edit_surname_vehicle(event) {
         loadInterfaceVehicle(name_line);
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("edit_vehicle_surname", "Salvar");
       }
     });
 }
@@ -440,6 +460,7 @@ function save_data_description() {
   const text = local.querySelector("textarea");
 
   if (text) {
+    popup_button_load("aparence_vehicle", "Salvando...");
     fetch("/edit_aparence", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -472,6 +493,7 @@ function edit_aparence(obj_click, event) {
   field = field[field.length - 1];
   const new_value = obj_click.querySelector('[id*="new"]').value.trim();
 
+  popup_button_load("edit_aparence_" + field);
   fetch("/edit_aparence", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -490,6 +512,7 @@ function edit_aparence(obj_click, event) {
         create_popup(response.title, response.text, "Ok", "success");
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("edit_aparence_" + field, "Salvando");
       }
     });
 }
@@ -507,6 +530,7 @@ function edit_point(form_submit, event) {
   const name_line = document.getElementById("interface_nome").textContent;
   const name_point = document.getElementById("config_point_nome").textContent;
 
+  popup_button_load("edit_point_" + field);
   fetch("/edit_point", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -527,6 +551,7 @@ function edit_point(form_submit, event) {
           new_value;
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("edit_point_" + field, "Salvar");
       }
     });
 }
@@ -554,7 +579,7 @@ function edit_route(obj_reference, event = false) {
         .split(" ")[0];
     } else {
       create_popup(
-        "Nenhuma Opção Selecionada",
+        "Nenhuma opção selecionada",
         "Por favor, selecione uma opção disponível.",
         "Voltar"
       );
@@ -569,6 +594,7 @@ function edit_route(obj_reference, event = false) {
     data["field"] = field;
     data["new_value"] = new_value;
 
+    popup_button_load(obj_reference.id.replace("formulario_", ""));
     fetch("/edit_route", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -589,6 +615,10 @@ function edit_route(obj_reference, event = false) {
           create_popup(response.title, response.text, "Ok", "success");
         } else {
           create_popup(response.title, response.text, "Voltar");
+          popup_button_load(
+            obj_reference.id.replace("formulario_", ""),
+            "Alterar"
+          );
         }
       });
   }
@@ -608,6 +638,7 @@ function edit_horario_relationship() {
   data["field"] = "horario_passagem";
   data["new_value"] = new_horario;
 
+  popup_button_load("edit_horario_relacao_ponto_rota");
   fetch("/edit_relationship-ponto", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -617,7 +648,9 @@ function edit_horario_relationship() {
     .then((response) => {
       if (!response.error) {
         const local_popup = document.getElementById("popup_local");
-        local_popup.removeChild(local_popup.querySelector("#config_rel_point_route"));
+        local_popup.removeChild(
+          local_popup.querySelector("#config_rel_point_route")
+        );
 
         close_popup("edit_horario_relacao_ponto_rota");
         config_popup_route(
@@ -627,6 +660,7 @@ function edit_horario_relationship() {
         create_popup(response.title, response.text, "Ok", "success");
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("edit_horario_relacao_ponto_rota", "Alterar");
       }
     });
 }
@@ -649,6 +683,7 @@ function save_data_route() {
     data.retorno.push(extract_info(parada, "nome"));
   });
 
+  popup_button_load("config_route", "Salvando...");
   fetch("/edit_order_stop", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -670,6 +705,7 @@ function del_vehicle() {
     principal: [name_line, surname],
   };
 
+  popup_button_load("del_vehicle");
   fetch("/del_vehicle" + generate_url_dict(data), { method: "DELETE" })
     .then((response) => response.json())
     .then((response) => {
@@ -680,6 +716,7 @@ function del_vehicle() {
         loadInterfaceRoutes(name_line);
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("del_vehicle", "Excluir");
       }
     });
 }
@@ -691,6 +728,7 @@ function del_relationship_point_route() {
     document.getElementById("config_rel_point_route_nome").textContent
   );
 
+  popup_button_load("del_relationship_point_route");
   fetch("/del_relationship_point_route" + generate_url_dict(data), {
     method: "DELETE",
   })
@@ -709,6 +747,7 @@ function del_relationship_point_route() {
         loadInterfaceRoutes(name_line);
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("del_relationship_point_route", "Excluir");
       }
     });
 }
@@ -718,6 +757,7 @@ function del_route(event) {
   const data = return_data_route();
   data.password = document.getElementById("del_route_conf").value.trim();
 
+  popup_button_load("del_route");
   fetch("/del_route", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -737,6 +777,7 @@ function del_route(event) {
         loadInterfaceStudents(data.name_line);
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("del_route", "Excluir");
       }
     });
 }
@@ -747,6 +788,7 @@ function del_point(event) {
   const name_point = document.getElementById("del_ponto_nome").textContent;
   const data = { principal: [name_line, name_point] };
 
+  popup_button_load("del_ponto");
   fetch("/del_point" + generate_url_dict(data), { method: "DELETE" })
     .then((response) => response.json())
     .then((response) => {
@@ -762,6 +804,7 @@ function del_point(event) {
         loadInterfaceStudents(name_line);
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("del_ponto", "Excluir");
       }
     });
 }
@@ -772,19 +815,27 @@ function del_line(event) {
   const password = document.getElementById("del_linha_conf").value.trim();
   const data = { name_line: name_line, password: password };
 
+  popup_button_load("del_linha");
   fetch("/del_line", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   })
-  .then((response) => response.json())
-  .then((response) => {
-    if (!response.error) {
-      local_popup.removeChild(local_popup.querySelector("#config_line"));
-      close_popup("del_linha");
-      create_popup(response.title, response.text, "Ok", "success", "page_user?local=linhas");
-    } else {
-      create_popup(response.title, response.text, "Voltar");
-    }
-  });
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        local_popup.removeChild(local_popup.querySelector("#config_line"));
+        close_popup("del_linha");
+        create_popup(
+          response.title,
+          response.text,
+          "Ok",
+          "success",
+          "page_user?local=linhas"
+        );
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+        popup_button_load("del_linha", "Excluir");
+      }
+    });
 }

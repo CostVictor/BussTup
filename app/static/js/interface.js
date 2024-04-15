@@ -143,7 +143,7 @@ function include_options_container(
         } else if (!option_nenhum) {
           const text = document.createElement("p");
           text.className = "text info center fundo cinza";
-          text.textContent = "Nenhuma Opção Disponível";
+          text.textContent = "Nenhuma opção disponível";
           container.appendChild(text);
         }
       } else {
@@ -314,7 +314,10 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
   }
 
   if (add_url.length) {
-    redirect = add_url.reduce((acc, value) => `${acc}/${encodeURIComponent(value)}`, redirect)
+    redirect = add_url.reduce(
+      (acc, value) => `${acc}/${encodeURIComponent(value)}`,
+      redirect
+    );
   }
 
   const popups = Array.from(document.getElementById("popup_local").children);
@@ -369,7 +372,7 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
       header_close.style.opacity = 0;
 
       if (redirect === "line") {
-        const popup = document.getElementById('summary_line')
+        const popup = document.getElementById("summary_line");
         let info = {
           principal: [extract_info(popup, "nome")],
           secondary: { local_page: aba_atual },

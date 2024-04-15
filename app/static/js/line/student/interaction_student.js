@@ -216,7 +216,7 @@ function confirm_register_in(contraturno = false) {
       });
   } else {
     create_popup(
-      "Nenhuma Opção Selecionada",
+      "Nenhuma opção selecionada",
       "Selecione uma opção de ponto disponível.",
       "Voltar"
     );
@@ -229,6 +229,7 @@ function register_in_point_fixed() {
   data.type = extract_info(popup_point, "tipo");
   data.name_point = extract_info(popup_point, "nome");
 
+  popup_button_load("confirm_register_in_point");
   fetch("/create_pass_fixed", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -252,6 +253,7 @@ function register_in_point_fixed() {
           .classList.remove("inactive");
       } else {
         create_popup(response.title, response.text);
+        popup_button_load("confirm_register_in_point", "Confirmar");
       }
     });
 }
@@ -263,6 +265,7 @@ function del_myPoint_fixed() {
     "tipo"
   );
 
+  popup_button_load("confirm_del_mypoint");
   fetch("/del_myPoint_fixed/" + encodeURIComponent(type), { method: "DELETE" })
     .then((response) => response.json())
     .then((response) => {
@@ -283,6 +286,7 @@ function del_myPoint_fixed() {
         loadInterfaceRoutes(name_line);
       } else {
         create_popup(response.title, response.text);
+        popup_button_load("confirm_del_mypoint", "Confirmar");
       }
     });
 }
@@ -301,6 +305,7 @@ function register_in_point_contraturno() {
   }
 
   if (execute) {
+    popup_button_load("confirm_register_contraturno");
     fetch("/create_pass_contraturno", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -309,7 +314,9 @@ function register_in_point_contraturno() {
       .then((response) => response.json())
       .then((response) => {
         if (!response.error) {
-          local_popup.removeChild(local_popup.querySelector('#options_contraturno'))
+          local_popup.removeChild(
+            local_popup.querySelector("#options_contraturno")
+          );
           close_popup("confirm_register_contraturno");
           create_popup(response.title, response.text, "Ok", "success");
 
@@ -320,11 +327,12 @@ function register_in_point_contraturno() {
           );
         } else {
           create_popup(response.title, response.text);
+          popup_button_load("confirm_register_contraturno", "Confirmar");
         }
       });
   } else {
     create_popup(
-      "Nenhuma Opção Selecionada",
+      "Nenhuma opção selecionada",
       "Selecione uma opção de ponto disponível.",
       "Voltar"
     );
@@ -333,6 +341,8 @@ function register_in_point_contraturno() {
 
 function del_myPoint_contraturno() {
   const name_line = document.getElementById("interface_nome").textContent;
+  popup_button_load("confirm_del_mycontraturno");
+
   fetch("/del_myPoint_contraturno", { method: "DELETE" })
     .then((response) => response.json())
     .then((response) => {
@@ -346,6 +356,7 @@ function del_myPoint_contraturno() {
         loadInterfaceRoutes(name_line);
       } else {
         create_popup(response.title, response.text);
+        popup_button_load("confirm_del_mycontraturno", "Confirmar");
       }
     });
 }

@@ -317,7 +317,13 @@ def create_pass_fixed():
       if route is not None and shift.capitalize() == user.turno:
         if not route:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
-        
+
+        record = (
+          Registro_Rota.query
+          .filter_by(Rota_codigo=route.codigo, tipo=tipo, data=date.today())
+          .first()
+        )
+
         dis.remove(tipo)
         reverse = dis[0]
         check_passagem = (
@@ -362,9 +368,10 @@ def create_pass_fixed():
                   db.session.delete(check_passagem)
                   with db.session.begin_nested():
                     db.session.add(new_passagem)
+
+                  record.atualizar = True
                   db.session.commit()
 
-                  modify_forecast_route(route, tipo)
                   return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong>. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong>, caso não possua.'})
                 
                 except Exception as e:
@@ -388,9 +395,10 @@ def create_pass_fixed():
 
                 with db.session.begin_nested():
                   db.session.add(new_passagem)
+                
+                record.atualizar = True
                 db.session.commit()
 
-                modify_forecast_route(route, tipo)
                 if linha.codigo == code_line:
                   return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; suas relações fixas na rota anterior foram removidas. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta rota.'})
 
@@ -435,8 +443,8 @@ def create_pass_fixed():
                     text = f'Você definiu seu ponto fixo de <strong>{tipo.capitalize()}</strong> em outra rota; seu ponto de <strong>{reverse.capitalize()}</strong> na rota anterior foi removido.'
 
               db.session.add(new_passagem)
+              record.atualizar = True
               db.session.commit()
-              modify_forecast_route(route, tipo)
               return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': text})
             
             except Exception as e:

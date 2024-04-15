@@ -1,7 +1,7 @@
 from flask_security import current_user
 from app import cursos, turnos
 from sqlalchemy import func
-from datetime import date
+from datetime import date, timedelta
 from app.database import *
 import bcrypt
 
@@ -111,6 +111,21 @@ def format_register(dadosAdquiridos):
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~~ Return ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+def return_dates_week():
+  today = date.today()
+  week_day = today.weekday()
+
+  if week_day == 5 or week_day == 6:
+    day_reference = today + timedelta(days=(7 - week_day))
+  else: day_reference = today - timedelta(days=week_day)
+
+  dates = []
+  for index in range(5):
+    dates.append(day_reference + timedelta(days=index))
+
+  return dates
+
 
 def return_dict(obj, not_includes=[]):
   return {name: value for name, value in vars(obj).items() if name not in not_includes and not name.startswith('_')}
@@ -394,9 +409,9 @@ def count_part_route(route_code, formated=True):
 ''' ~~~~~~~~ Modify ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
-def modify_forecast_route(rota, tipo):
+def modify_forecast_route(rota, tipo, day=False):
   reject_contraturno = (tipo == return_ignore_route(rota.turno))
-  today = date.today()
+  day = date.today() if not day else day
 
   not_includes = (
     db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada)
@@ -405,7 +420,7 @@ def modify_forecast_route(rota, tipo):
       Parada.Rota_codigo != rota.codigo,
       Parada.tipo == tipo,
       Passagem.passagem_fixa == False,
-      Passagem.data == today
+      Passagem.data == day
     ))
     .subquery()
   )
@@ -422,7 +437,7 @@ def modify_forecast_route(rota, tipo):
       Registro_Aluno.Aluno_id == Aluno.id,
       
       db.not_(Aluno.id.in_(not_includes.select())),
-      Registro_Aluno.data == today,
+      Registro_Aluno.data == day,
       db.or_(
         db.and_(
           Passagem.passagem_fixa == True,
@@ -444,13 +459,14 @@ def modify_forecast_route(rota, tipo):
         ),
         db.and_(
           db.not_(Passagem.passagem_fixa),
-          Passagem.data == today
+          Passagem.data == day
         )
       )
     ))
     .scalar()
   )
   
-  registro_alvo = Registro_Rota.query.filter_by(data=today, tipo=tipo).first()
+  registro_alvo = Registro_Rota.query.filter_by(data=day, tipo=tipo).first()
   registro_alvo.previsao_pessoas = count
+  registro_alvo.atualizar = False
   db.session.commit()

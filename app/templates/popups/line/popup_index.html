@@ -43,13 +43,13 @@
         <div class="page__container">
           <p class="text secundario fundo">Motorista:</p>
           <div class="scroll_horizontal">
-            <p id="config_route_motorista" class="text secundario content fundo nowrap"></p>
+            <p id="config_route_motorista" class="text secundario content fundo nowrap">Carregando...</p>
           </div>
         </div>
 
         <div class="page__container">
           <p class="text secundario fundo">Ônibus:</p>
-          <p id="config_route_onibus" class="text secundario content fundo nowrap"></p>
+          <p id="config_route_onibus" class="text secundario content fundo nowrap">Carregando...</p>
           {% if role == 'motorista' %}
           <i class="bi bi-pencil-square page__icon content inactive"
             onclick="open_popup('edit_route_onibus', this)"></i>
@@ -58,7 +58,7 @@
 
         <div class="page__container">
           <p class="text secundario fundo">Turno:</p>
-          <p id="config_route_turno_rota" class="text secundario content fundo"></p>
+          <p id="config_route_turno_rota" class="text secundario content fundo">Carregando...</p>
           {% if role == 'motorista' %}
           <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_turno')"></i>
           {% endif %}
@@ -66,7 +66,7 @@
 
         <div class="page__container">
           <p class="text secundario fundo">Horário de partida:</p>
-          <p id="config_route_horario_partida" class="text secundario content fundo"></p>
+          <p id="config_route_horario_partida" class="text secundario content fundo">Carregando...</p>
 
           {% if role == 'motorista' %}
           <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_partida')"></i>
@@ -75,7 +75,7 @@
 
         <div class="page__container">
           <p class="text secundario fundo">Horário de retorno:</p>
-          <p id="config_route_horario_retorno" class="text secundario content fundo"></p>
+          <p id="config_route_horario_retorno" class="text secundario content fundo">Carregando...</p>
 
           {% if role == 'motorista' %}
           <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_route_retorno')"></i>
@@ -100,7 +100,7 @@
         <div id="config_route_pontos_container_partida_btn" class="page__container interaction pos_relative"
           onclick="action_container(this, 50)">
           <h3 class="text secundario emphasis">Partida</h3>
-          <h3 id="config_route_pontos_quantidade_partida" class="text secundario fundo max_width"></h3>
+          <h3 id="config_route_pontos_quantidade_partida" class="text secundario fundo max_width">Carregando...</h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
 
@@ -123,7 +123,7 @@
         <div id="config_route_pontos_container_retorno_btn" class="page__container interaction pos_relative"
           onclick="action_container(this, 50)">
           <h3 class="text secundario emphasis">Retorno</h3>
-          <h3 id="config_route_pontos_quantidade_retorno" class="text secundario fundo max_width"></h3>
+          <h3 id="config_route_pontos_quantidade_retorno" class="text secundario fundo max_width">Carregando...</h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
 
@@ -154,7 +154,7 @@
           <p class="text secundario emphasis center">Meu contraturno</p>
           <div class="page__container">
             <div class="scroll_horizontal max_width">
-              <p id="config_route_contraturno" class="text secundario content fundo max_width center nowrap"></p>
+              <p id="config_route_contraturno" class="text secundario content fundo max_width center nowrap">Carregando...</p>
             </div>
             <i class="bi bi-trash3 page__icon content del" onclick="open_popup('confirm_del_mycontraturno')"></i>
           </div>
@@ -193,32 +193,32 @@
       <div class="scroll_vertical popup__container--scroll principal_max">
         <div class="page__container">
           <p class="text secundario fundo">Tipo:</p>
-          <p id="config_rel_point_route_tipo" class="text secundario content fundo"></p>
+          <p id="config_rel_point_route_tipo" class="text secundario content fundo">Carregando...</p>
         </div>
 
         <div class="page__container">
           <p class="text secundario fundo">Nome:</p>
           <div class="scroll_horizontal">
-            <p id="config_rel_point_route_nome" class="text secundario content fundo nowrap"></p>
+            <p id="config_rel_point_route_nome" class="text secundario content fundo nowrap">Carregando...</p>
           </div>
         </div>
 
         <div class="page__container">
           <p class="text secundario fundo">Link GPS:</p>
           <div class="scroll_horizontal">
-            <p id="config_rel_point_route_linkGPS" class="text secundario fundo content nowrap"></p>
+            <p id="config_rel_point_route_linkGPS" class="text secundario fundo content nowrap">Carregando...</p>
           </div>
           <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
         </div>
 
         <div class="page__container">
           <p class="text secundario fundo">Ordem de passagem:</p>
-          <p id="config_rel_point_route_ordem" class="text secundario content fundo"></p>
+          <p id="config_rel_point_route_ordem" class="text secundario content fundo">Carregando...</p>
         </div>
 
         <div class="page__container">
           <p class="text secundario fundo nowrap">Horário de passagem:</p>
-          <p id="config_rel_point_route_horario" class="text secundario nowrap content fundo"></p>
+          <p id="config_rel_point_route_horario" class="text secundario nowrap content fundo">Carregando...</p>
 
           {% if role == 'motorista' %}
           <i class="bi bi-pencil-square page__icon content inactive"
@@ -231,7 +231,7 @@
         <div id="config_rel_point_route_turno_btn" class="page__container interaction pos_relative"
           onclick="action_container(this)">
           <h3 class="text secundario emphasis nowrap">Do turno</h3>
-          <h3 id="config_rel_point_route_turno_quantidade" class="text secundario fundo max_width"></h3>
+          <h3 id="config_rel_point_route_turno_quantidade" class="text secundario fundo max_width">Carregando...</h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
 
@@ -242,7 +242,7 @@
         <div id="config_rel_point_route_contraturno_btn" class="page__container interaction pos_relative"
           onclick="action_container(this)">
           <h3 class="text secundario emphasis nowrap">Contraturno</h3>
-          <h3 id="config_rel_point_route_contraturno_quantidade" class="text secundario fundo max_width"></h3>
+          <h3 id="config_rel_point_route_contraturno_quantidade" class="text secundario fundo max_width">Carregando...</h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
 
@@ -290,7 +290,7 @@
       <div class="scroll_vertical popup__container--scroll principal_big">
         <div class="page__container">
           <p class="text secundario fundo">Cor do veículo:</p>
-          <p id="aparence_vehicle_color" class="text secundario content fundo"></p>
+          <p id="aparence_vehicle_color" class="text secundario content fundo">Carregando...</p>
           {% if role == 'motorista' %}
           <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_aparence_cor')"></i>
           {% endif %}
@@ -298,7 +298,7 @@
   
         <div class="page__container">
           <p class="text secundario fundo">Modelo:</p>
-          <p id="aparence_vehicle_model" class="text secundario content fundo"></p>
+          <p id="aparence_vehicle_model" class="text secundario content fundo">Carregando...</p>
           {% if role == 'motorista' %}
           <i class="bi bi-pencil-square page__icon content inactive" onclick="open_popup('edit_aparence_modelo')"></i>
           {% endif %}
@@ -309,9 +309,9 @@
           <p class="text secundario fundo">Descrição:</p>
         </div>
         {% if role == 'motorista' %}
-        <span id="aparence_vehicle_description"></span>
+        <span id="aparence_vehicle_description">Carregando...</span>
         {% else %}
-        <p id="aparence_vehicle_description" class="text secundario content fundo justify"></p>
+        <p id="aparence_vehicle_description" class="text secundario content fundo justify">Carregando...</p>
         {% endif %}
       </div>
     </div>

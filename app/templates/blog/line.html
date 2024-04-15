@@ -47,7 +47,7 @@
       onclick="closeInterface('line', 'page_user', '{{ local_page }}')"></i>
     <h1 id="interface_nome" class="text title no_marge no_border">{{ name_line }}</h1>
     <h1 class="text title no_marge no_border">~</h1>
-    <h1 id="interface_cidade" class="text title no_marge no_border"></h1>
+    <h1 id="interface_cidade" class="text title no_marge no_border">Carregando...</h1>
 
     {% if role == 'motorista' %}
     <i id="interface_config" class="bi bi-gear line__icon--header inactive"
@@ -92,7 +92,7 @@
         <p class="text secundario fundo">Valor da cartela:</p>
         <div class="text secundario fundo">
           <p class="text secundario content container space">R$</p>
-          <p id="interface_valor_cartela" class="text secundario content container"></p>
+          <p id="interface_valor_cartela" class="text secundario content container">...</p>
         </div>
         {% if role == 'motorista' %}
         <i id="edit_valor_cartela" class="bi bi-pencil-square page__icon content inactive"
@@ -104,7 +104,7 @@
         <p class="text secundario fundo">Valor da diária:</p>
         <div class="text secundario fundo">
           <p class="text secundario content container space">R$</p>
-          <p id="interface_valor_diaria" class="text secundario content container"></p>
+          <p id="interface_valor_diaria" class="text secundario content container">...</p>
         </div>
         {% if role == 'motorista' %}
         <i id="edit_valor_diaria" class="bi bi-pencil-square page__icon content inactive"
@@ -115,10 +115,12 @@
 
     <section id="area_motoristas" class="-enter- line__container--area">
       <h2 class="text title">Motoristas</h2>
+      <span class="text secundario emphasis justify">Carregando...</span>
     </section>
 
     <section id="area_vehicle" class="-enter- line__container--area">
       <h2 class="text title">Veículos</h2>
+      <span class="text secundario emphasis justify">Carregando...</span>
       <div id="area_vehicle_content_sem_condutor"></div>
       <h1 id="area_vehicle_division_vehicle" class="page__division min_space inactive"></h1>
       <div id="area_vehicle_content_com_condutor"></div>
@@ -136,6 +138,7 @@
     <section id="area_rotas" class="-enter- line__container--area">
       {% if role == 'aluno' %}
       <h2 class="text title big_space">Rotas</h2>
+      <span id="area_rotas_span_text" lass="text secundario emphasis justify">Carregando...</span>
       <div id="interface_rotas_minhas_rotas" class="inactive">
         <span></span>
         <div id="interface_rotas_minhas_rotas_turno" class="margin_bottom big inactive">
@@ -155,7 +158,7 @@
       <h2 class="text title">Pontos e Rotas</h2>
       <div id="interface_pontos_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
         <h3 class="text secundario emphasis">Pontos</h3>
-        <h3 id="interface_pontos_quantidade" class="text secundario fundo max_width"></h3>
+        <h3 id="interface_pontos_quantidade" class="text secundario fundo max_width">Carregando...</h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
       </div>
 
@@ -172,7 +175,7 @@
 
       <div id="interface_rotas_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
         <h3 class="text secundario emphasis">Rotas</h3>
-        <h3 id="interface_rotas_quantidade" class="text secundario fundo max_width"></h3>
+        <h3 id="interface_rotas_quantidade" class="text secundario fundo max_width">Carregando...</h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
       </div>
 
@@ -199,7 +202,7 @@
       <h2 class="text title">Alunos e Tickets</h2>
       <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="action_container(this, false, false)">
         <h3 class="text secundario fundo">Alunos</h3>
-        <h3 id="interface_alunos_quant" class="text secundario fundo max_width"></h3>
+        <h3 id="interface_alunos_quant" class="text secundario fundo max_width">Carregando...</h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
       </div>
 
@@ -208,7 +211,7 @@
         <div id="interface_alunos_{{ turno }}_btn" class="page__container interaction pos_relative"
           onclick="action_container(this, false, false)">
           <h3 class="text secundario emphasis">{{ turno }}</h3>
-          <h3 id="interface_alunos_{{ turno }}_quantidade" class="text secundario fundo max_width"></h3>
+          <h3 id="interface_alunos_{{ turno }}_quantidade" class="text secundario fundo max_width">Carregando...</h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
 

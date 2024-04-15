@@ -4,6 +4,7 @@ from flask_mail import Message
 from flask import render_template, url_for
 from app import app, mail
 from datetime import datetime, timedelta
+from app.utilities import return_dates_week
 from app.database import *
 
 
@@ -73,3 +74,23 @@ def enviar_email():
     
     moment = datetime.now() + timedelta(seconds=2)
     sched.add_job('enviar_email', enviar_email, trigger='date', run_date=moment)
+
+
+@sched.task('cron', id='criar_registro_aluno', day_of_week='sat', hour=0)
+def criar_registro_aluno():
+  with app.app_context():
+    dates = return_dates_week()
+    not_record = Aluno.query.all()
+
+    if not_record:
+      for user in not_record:
+        contraturnos_fixos = (
+          db.session.query(Contraturno_Fixo.dia_fixo)
+          .filter_by(Aluno_id=user.id).all()
+        )
+
+        for value in dates:
+          contraturno = (value.weekday() in contraturnos_fixos)
+          db.session.add(Registro_Aluno(data=value, Aluno_id=user.id, contraturno=contraturno))
+          
+      db.session.commit()

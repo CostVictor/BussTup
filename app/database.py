@@ -1,7 +1,6 @@
 from flask_security import Security, UserMixin, RoleMixin, SQLAlchemyUserDatastore, current_user
 from flask_sqlalchemy import SQLAlchemy
-from app import app, turnos, dias_semana
-from datetime import date
+from app import app, turnos
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
@@ -173,7 +172,7 @@ class Cartela_Ticket(db.Model):
 class Contraturno_Fixo(db.Model):
   __tablename__ = 'Contraturno_Fixo'
   id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-  dia_fixo = db.Column(db.Enum(*dias_semana), nullable=False)
+  dia_fixo = db.Column(db.Integer, db.CheckConstraint('dia_fixo in (1, 2, 3, 4, 5)'), nullable=False)
   Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
   aluno = db.relationship('Aluno', backref=db.backref('contraturnos_fixos', cascade='all, delete'), lazy=True)
 
@@ -204,6 +203,7 @@ class Registro_Rota(db.Model):
   tipo = db.Column(db.Enum('partida', 'retorno'), nullable=False)
   quantidade_pessoas = db.Column(db.Integer, nullable=False, default=0)
   previsao_pessoas = db.Column(db.Integer, nullable=False, default=0)
+  atualizar = db.Column(db.Boolean, nullable=False, default=False)
   Rota_codigo = db.Column(db.BigInteger, db.ForeignKey('Rota.codigo'), nullable=False)
   rota = db.relationship('Rota', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 
@@ -259,8 +259,10 @@ def create_user(data):
     db.session.add(user)
     with db.session.begin_nested():
       if role == 'aluno':
-        register = Registro_Aluno(data=date.today(), Aluno_id=user.id)
-        db.session.add(register)
+        from app.utilities import return_dates_week
+        dates = return_dates_week()
+        for value in dates:
+          db.session.add(Registro_Aluno(data=value, Aluno_id=user.id))
 
       user_session = user_datastore.create_user(login=login, password_hash=password_hash, primary_key=user.id)
       role_user = user_datastore.create_role(name=role)
