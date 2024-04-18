@@ -385,6 +385,183 @@ def get_summary_line(name_line):
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha. Por favor, recarregue a página e tente novamente.'})
 
 
+@app.route("/get_stops_student", methods=['GET'])
+@login_required
+@roles_required("aluno")
+def get_stops_student():
+  user = return_my_user()
+  if user:
+    data = {'fixa': {'msg': [], 'paradas': deque()}, 'diaria': {'msg': None, 'paradas': []}}
+    retorno = {'error': False, 'data': data}
+    passagens = (
+      db.session.query(Linha, Rota, Parada, Passagem)
+      .filter(db.and_(
+        Rota.Linha_codigo == Linha.codigo,
+        Parada.Rota_codigo == Rota.codigo,
+        Passagem.Parada_codigo == Parada.codigo,
+        Passagem.Aluno_id == user.id
+      ))
+      .order_by(
+        db.case([(Parada.tipo.like("%partida%"), 1)], else_=0),
+        Passagem.data
+      )
+      .all()
+    )
+
+    tipos = ['partida', 'retorno', 'contraturno']
+    for linha, rota, parada, passagem in passagens:
+      veiculo = rota.onibus
+      info = {
+        'linha': linha.nome,
+        'veiculo': veiculo.apelido if veiculo else 'Nenhum',
+        'parada': parada.ponto.nome,
+        'horario': parada.horario,
+        'tipo': parada.tipo
+      }
+
+      if passagem.passagem_fixa:
+        if passagem.passagem_contraturno:
+          info['data'] = 'fixo - contraturno'
+          data['fixa']['paradas'].append(info)
+          tipos.remove('contraturno')
+        else:
+          info['data'] = 'fixo'
+          data['fixa']['paradas'].appendleft(info)
+          tipos.remove(info['tipo'])
+      else:
+        info_date = format_data(passagem.data)
+        data['diaria']['paradas'].append(info)
+
+        if passagem.migracao:
+          info['data'] = f'{info_date} - migração'
+          data['diaria']['msg'] = 'Migração: Seu motorista alterou o veículo que você usará no dia e trajeto especificado devido a uma lotação identificada em seu veículo habitual naquele dia.'
+        else: info['data'] = info_date
+    
+    for tipo in tipos:
+      data['fixa']['msg'].append(f'Você não definiu seu ponto de {tipo}.')
+    data['fixa']['paradas'] = list(data['fixa']['paradas'])
+
+    return jsonify(retorno)
+  
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar os dados do aluno. Por favor, recarregue a página e tente novamente.'})
+
+
+@app.route("/get_schedule_student", methods=['GET'])
+@login_required
+@roles_required("aluno")
+def get_schedule_student():
+  user = return_my_user()
+  if user:
+    data = {}
+    retorno = {'error': False, 'data': data}
+    dates = return_dates_week()
+
+    diarias = (
+      db.session.query(Rota.turno, Parada.tipo, Passagem.data)
+      .filter(db.and_(
+        Passagem.Aluno_id == user.id,
+        Passagem.passagem_fixa == False,
+        Passagem.data.in_(dates),
+        Passagem.Parada_codigo == Parada.codigo,
+        Parada.Rota_codigo == Rota.codigo
+      ))
+      .order_by(
+        db.case([(Parada.tipo.like("%partida%"), 0)], else_=1)
+      )
+      .all()
+    )
+
+    registros = (
+      db.session.query(Registro_Aluno)
+      .filter(db.and_(
+        Registro_Aluno.Aluno_id == user.id,
+        Registro_Aluno.data.in_(dates)
+      ))
+      .order_by(Registro_Aluno.data)
+      .all()
+    )
+
+    for registro in registros:
+      info = {
+        'data': format_data(registro.data),
+        'faltara': return_str_bool(registro.faltara),
+        'contraturno': return_str_bool(registro.contraturno) if not registro.faltara else 'Não',
+        'diarias': []
+      }
+
+      check_diarias = [diaria for diaria in diarias if registro.data in diaria]
+      for turno, tipo, _ in check_diarias:
+        if turno == user.turno:
+          info['diarias'].append(tipo.capitalize())
+          if tipo == 'partida':
+            info['faltara'] = 'Sim'
+          info['contraturno'] = 'Não'
+
+      data[return_day_week(registro.data.weekday())] = info
+    
+    return jsonify(retorno)
+  
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar os dados do aluno. Por favor, recarregue a página e tente novamente.'})
+
+
+@app.route("/get_crowded", methods=['GET'])
+@login_required
+@roles_required("motorista")
+def get_crowded():
+  user = return_my_user()
+  if user:
+    data = {}
+    retorno = {'error': False, 'data': data}
+    subquery = (
+      db.session.query(Linha.codigo).join(Membro)
+      .filter(db.and_(
+        Membro.Motorista_id == user.id,
+        Linha.codigo == Membro.Linha_codigo
+      ))
+      .subquery()
+    )
+    todas_as_rotas = (
+      db.session.query(Linha, Rota, Registro_Rota, Onibus)
+      .filter(db.and_(
+        Linha.codigo.in_(subquery.select()),
+        Rota.Linha_codigo == Linha.codigo,
+        Registro_Rota.Rota_codigo == Rota.codigo,
+        Onibus.id == Rota.Onibus_id,
+
+        Onibus.Motorista_id.isnot(None),
+        Registro_Rota.previsao_pessoas > Onibus.capacidade
+      ))
+      .order_by(Registro_Rota.data, Linha.nome, Rota.horario_partida)
+      .all()
+    )
+
+    for line, route, record, onibus in todas_as_rotas:
+      if line.nome not in data:
+        data[line.nome] = []
+      
+      info = {
+        'turno': route.turno,
+        'horario_partida': format_time(route.horario_partida),
+        'horario_retorno': format_time(route.horario_retorno),
+        'motorista': onibus.motorista.nome,
+        'veiculo': onibus.apelido,
+        'capacidade': onibus.capacidade,
+        'previsao': record.previsao_pessoas
+      }
+      data[line.nome].append(info)
+
+    return jsonify(retorno)
+
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar os dados de previsão. Por favor, recarregue a página e tente novamente.'})
+
+
+@app.route("/get_forecast_route", methods=['GET'])
+@login_required
+def get_forecast():
+  user = return_my_user()
+  if user:...
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~ GET Interface Line ~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''

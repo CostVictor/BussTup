@@ -186,6 +186,9 @@ def create_route():
     permission = check_permission(data)
     if permission == 'autorizado' and 'horario_partida' in data and 'horario_retorno' in data:
       vehicle = Onibus.query.filter_by(Linha_codigo=data['Linha_codigo'], apelido=data.pop('surname')).first()
+      dates = return_dates_week()
+      today = date.today()
+
       if vehicle:
         data['Onibus_id'] = vehicle.id
         hr_par = data['horario_partida']
@@ -201,10 +204,13 @@ def create_route():
         try:
           db.session.add(rota)
           with db.session.begin_nested():
-            registro_rota_partida = Registro_Rota(data=date.today(), tipo='partida', Rota_codigo=rota.codigo)
-            registro_rota_retorno = Registro_Rota(data=date.today(), tipo='retorno', Rota_codigo=rota.codigo)
-            db.session.add(registro_rota_partida)
-            db.session.add(registro_rota_retorno)
+            for value in dates:
+              atualizar = (value >= today)
+              for type in ['partida', 'retorno']:
+                db.session.add(Registro_Rota(
+                  Rota_codigo=rota.codigo, data=value, tipo=type, atualizar=atualizar
+                ))
+
           db.session.commit()
 
           return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': f'A rota foi adicionada para o veículo: <strong>{vehicle.apelido}</strong>.'})
@@ -217,10 +223,13 @@ def create_route():
         try:
           db.session.add(rota)
           with db.session.begin_nested():
-            registro_rota_partida = Registro_Rota(data=date.today(), tipo='partida', Rota_codigo=rota.codigo)
-            registro_rota_retorno = Registro_Rota(data=date.today(), tipo='retorno', Rota_codigo=rota.codigo)
-            db.session.add(registro_rota_partida)
-            db.session.add(registro_rota_retorno)
+            for value in dates:
+              atualizar = (value >= today)
+              for type in ['partida', 'retorno']:
+                db.session.add(Registro_Rota(
+                  Rota_codigo=rota.codigo, data=value, tipo=type, atualizar=atualizar
+                ))
+
           db.session.commit()
 
           return jsonify({'error': False, 'title': 'Rota Cadastrada', 'text': 'A rota foi adicionada à sua linha como desativada e não estará visível para os alunos até que um veículo seja definido. Manteremos esta rota em um local reservado para que você possa configurá-la.'})

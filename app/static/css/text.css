@@ -18,6 +18,11 @@
   margin-right: 0;
 }
 
+.text.point {
+  margin-left: calc(0.5vw + 0.5vh + 1vmin);
+  font-size: calc(0.6vw + 0.6vh + 1vmin);
+}
+
 .text.info.center {
   align-items: center;
   justify-content: center;

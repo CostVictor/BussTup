@@ -47,32 +47,27 @@
       </div>
 
       <div id="area_agenda" class="page__container column">
+        {% if role == 'aluno' %}
         <div class="page__container title -enter-">
           <h1 class="text principal">Agenda</h1>
         </div>
 
-        {% if role == 'aluno' %}
-        <h1 class="text title -enter-">Meu ponto</h1>
-        <div class="page__container -enter-">
-          <p class="text secundario emphasis">Motorista</p>
-          <p id="motorista_nome" class="text secundario content fundo">Nome do motorista</p>
+        <h1 class="text title -enter-">Meus pontos</h1>
+        <div id="area_agenda_diaria" class="-enter- inactive">
+          <h2 class="text secundario fundo justify">Diária marcada</h2>
+          <span></span>
+          <div id="area_agenda_diaria_local"></div>
+          <h1 class="page__division"></h1>
         </div>
 
-        <div class="-enter-">
-          <div class="page__container pos_relative">
-            <p class="text secundario emphasis">Ponto</p>
-            <p id="nome_ponto" class="text secundario emphasis max_width">Nome do ponto</p>
-            <i class="bi bi-pencil-square page__icon content absolute" onclick="open_popup('edit_ponto')"></i>
-          </div>
+        <div id="area_agenda_pontos" class="-enter-">
+          <span id="area_agenda_pontos_msg"></span>
+          <span id="area_agenda_pontos_loading" class="text secundario emphasis justify">Carregando...</span>
+          <div id="area_agenda_pontos_local"></div>
+        </div>
 
-          <div class="page__container space_itens">
-            <p class="text secundario emphasis">Ordem</p>
-            <p id="ordem_ponto" class="text secundario content fundo">1</p>
-            <p class="text secundario emphasis">Horário</p>
-            <p id="horario_ponto" class="text secundario content fundo">07h</p>
-            <p class="text secundario emphasis">Localização</p>
-            <i id="localizacao_ponto" class="bi bi-pin-map page__icon content location"></i>
-          </div>
+        <div class="page__btn_redirect -enter-" onclick="">
+          <p class="text secundario justify">Alterar meus dados fixos</p>
         </div>
 
         <h1 class="text title -enter-">Minha semana</h1>
@@ -84,7 +79,7 @@
 
           <div class="page__container -enter-">
             <p class="text secundario fundo">Contraturno fixo:</p>
-            <p id="contaturnos_fixos" class="text secundario content fundo">Nenhum</p>
+            <p id="contaturnos_fixos" class="text secundario content fundo">Carregando...</p>
             <i class="bi bi-pencil-square page__icon content" onclick="open_popup('edit_contraturno')"></i>
           </div>
 
@@ -95,43 +90,41 @@
                 <h1 class="text terciario">{{ dias_semana[index] }}</h1>
                 <i class="bi bi-pencil-square page__icon card"></i>
               </div>
-
-              <div class="page__container--card_body">
+              
+              <span class="text secundario justify" style="margin-top: calc(1.5vw + 2vh + 1vmin);">Carregando...</span>
+              <div class="page__container--card_body inactive">
                 <div class="page__container">
                   <p class="text terciario">Data:</p>
-                  <p id="data_{{ dias_semana[index] }}" class="text terciario content">27/11/2023</p>
+                  <p id="data_{{ dias_semana[index] }}" class="text terciario content"></p>
                 </div>
 
                 <div class="page__container">
                   <p class="text terciario">Irá faltar:</p>
-                  <p id="falta_{{ dias_semana[index] }}" class="text terciario content">Não</p>
+                  <p id="falta_{{ dias_semana[index] }}" class="text terciario content"></p>
                 </div>
 
                 <div class="page__container">
                   <p class="text terciario">Contraturno:</p>
-                  <p id="contraturno_{{ dias_semana[index] }}" class="text terciario content">Não</p>
+                  <p id="contraturno_{{ dias_semana[index] }}" class="text terciario content"></p>
                 </div>
 
-                <div class="page__container inactive">
-                  <p class="text terciario">Ponto subida:</p>
-                  <p id="pSubida_{{ dias_semana[index] }}" class="text terciario content"></p>
-                </div>
-
-                <div class="page__container inactive">
-                  <p class="text terciario">Ponto descida:</p>
-                  <p id="pDescida_{{ dias_semana[index] }}" class="text terciario content"></p>
+                <div id="{{ dias_semana[index] }}_container" class="inactive">
+                  <h1 class="page__division min_space"></h1>
+                  <div id="{{ dias_semana[index] }}_area_diaria"></div>
                 </div>
               </div>
             </div>
             {% endfor %}
           </div>
         </div>
-        {% endif %}
+        {% else %}
+        <div class="page__container title -enter-">
+          <h1 class="text principal">Registros</h1>
+        </div>
 
-        <h1 class="text title -enter-">Previsão do ônibus</h1>
-        <p class="text secundario justify emphasis -enter-">O recurso de previsão ainda está em desenvolvimento.</p>
-        <p class="text secundario justify fundo -enter-">Estamos trabalhando para oferecer informações precisas e em
-          tempo real.</p>
+        <h1 class="text title -enter-">Trajetos Lotados</h1>
+        
+        {% endif %}
       </div>
     </section>
 
@@ -162,18 +155,26 @@
             <p class="text secundario fundo">Crie uma rota para conseguir iniciar um trajeto.</p>
           </div>
 
-          <div id="minha_rota_area"></div>
+          <div id="minha_rota_area">
+            <span class="text secundario emphasis justify -enter-">Carregando...</span>
+          </div>
           <h1 class="page__division -enter-"></h1>
         </div>
-        <div id="rotas_local"></div>
+        <div id="rotas_local">
+          <span class="text secundario emphasis justify -enter-">Carregando...</span>
+        </div>
 
         {% else %}
         <div id="minhas_rota">
           <span id="minhas_rotas_msg"></span>
-          <div id="minha_rota_area" class="-enter-"></div>
+          <div id="minha_rota_area" class="-enter-">
+            <span class="text secundario emphasis justify">Carregando...</span>
+          </div>
           <h1 class="page__division -enter-"></h1>
         </div>
-        <div id="rotas_local" class="-enter-"></div>
+        <div id="rotas_local" class="-enter-">
+          <span class="text secundario emphasis justify">Carregando...</span>
+        </div>
         {% endif %}
       </div>
     </section>
@@ -201,7 +202,9 @@
         </div>
         {% endif %}
 
-        <div id="local_linhas"></div>
+        <div id="local_linhas">
+          <span class="text secundario emphasis justify margin_top -enter-">Carregando...</span>
+        </div>
       </div>
     </section>
 

@@ -13,14 +13,14 @@
         <div class="page__container">
           <p class="text secundario fundo">Valor da cartela:</p>
           <div class="scroll_horizontal">
-            <p id="summary_line_valor_cartela" class="text secundario content fundo nowrap">Carregando ...</p>
+            <p id="summary_line_valor_cartela" class="text secundario content fundo nowrap">Carregando...</p>
           </div>
         </div>
   
         <div class="page__container">
           <p class="text secundario fundo">Valor da diária:</p>
           <div class="scroll_horizontal">
-            <p id="summary_line_valor_diaria" class="text secundario content fundo nowrap">Carregando ...</p>
+            <p id="summary_line_valor_diaria" class="text secundario content fundo nowrap">Carregando...</p>
           </div>
         </div>
       </div>
@@ -29,28 +29,28 @@
       <div class="page__container">
         <p class="text secundario fundo">Local:</p>
         <div class="scroll_horizontal">
-          <p id="summary_line_local" class="text secundario content fundo nowrap">Carregando ...</p>
+          <p id="summary_line_local" class="text secundario content fundo nowrap">Carregando...</p>
         </div>
       </div>
 
       <div class="page__container">
         <p class="text secundario fundo">Dono da linha:</p>
         <div class="scroll_horizontal">
-          <p id="summary_line_dono" class="text secundario content fundo nowrap">Carregando ...</p>
+          <p id="summary_line_dono" class="text secundario content fundo nowrap">Carregando...</p>
         </div>
       </div>
 
       <div class="page__container">
         <p class="text secundario fundo">Motoristas:</p>
         <div class="scroll_horizontal">
-          <p id="summary_line_qnt_motoristas" class="text secundario content fundo nowrap">Carregando ...</p>
+          <p id="summary_line_qnt_motoristas" class="text secundario content fundo nowrap">Carregando...</p>
         </div>
       </div>
 
       <div class="page__container">
         <p class="text secundario fundo">Veículos:</p>
         <div class="scroll_horizontal">
-          <p id="summary_line_qnt_veiculos" class="text secundario content fundo nowrap">Carregando ...</p>
+          <p id="summary_line_qnt_veiculos" class="text secundario content fundo nowrap">Carregando...</p>
         </div>
       </div>
     </div>
@@ -74,73 +74,81 @@
     </header>
 
     <div class="popup__container--content">
-      <h1 id="summary_route_estado" class="popup__text_local big"></h1>
-      <div class="page__container">
-        <p class="text secundario fundo">Linha:</p>
-        <div class="scroll_horizontal">
-          <p id="summary_route_linha" class="text secundario content fundo nowrap">Carregando ...</p>
-        </div>
-      </div>
-
-      <div class="page__container">
-        <p class="text secundario fundo">Motorista:</p>
-        <div class="scroll_horizontal">
-          <p id="summary_route_motorista" class="text secundario content fundo nowrap">Carregando ...</p>
-        </div>
-      </div>
-
-      <div class="page__container">
-        <p class="text secundario fundo">Veículo:</p>
-        <div class="scroll_horizontal">
-          <p id="summary_route_veiculo" class="text secundario content fundo nowrap">Carregando ...</p>
-        </div>
-      </div>
-
-      <div class="page__container">
-        <p class="text secundario fundo">Capacidade veículo:</p>
-        <div class="scroll_horizontal">
-          <p id="summary_route_capacidade" class="text secundario content fundo nowrap">Carregando ...</p>
-        </div>
-      </div>
-
-      <div class="page__container">
-        <p class="text secundario fundo">Horários:</p>
-        <div class="scroll_horizontal">
-          <p id="summary_route_horarios" class="text secundario content fundo nowrap">Carregando ...</p>
-        </div>
-      </div>
-
-      <h3 id="summary_route_dia_previsao" class="popup__text question"></h3>
-      <p class="text secundario fundo justify margin_bottom">Inclui contraturnos e diárias</p>
-
-      <div class="page__container">
-        <p class="text secundario emphasis">Partida:</p>
-        <div class="scroll_horizontal">
-          <p id="summary_route_previsao_partida" class="text secundario content fundo nowrap">Carregando ...</p>
-        </div>
-        {% if role == 'motorista' %}
-        <span id="summary_route_partida_lotado" class="popup__text_sinal button" onclick="open_popup('notice_migrate', false, false)">
-          Lotado
-          <i style="margin-left: 5px;" class="bi bi-hand-index-thumb"></i>
+      <div class="scroll_vertical popup__container--scroll principal_max">
+        <span>
+          <h1 id="summary_route_estado" class="popup__text_local big">teste</h1>
         </span>
-        {% else %}
-        <span id="summary_route_partida_lotado" class="popup__text_sinal inactive">Lotado</span>
-        {% endif %}
-      </div>
-
-      <div class="page__container">
-        <p class="text secundario emphasis">Retorno:</p>
-        <div class="scroll_horizontal">
-          <p id="summary_route_previsao_retorno" class="text secundario content fundo nowrap">Carregando ...</p>
+        <div class="page__container">
+          <p class="text secundario fundo">Linha:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_route_linha" class="text secundario content fundo nowrap">Carregando...</p>
+          </div>
         </div>
-        {% if role == 'motorista' %}
-        <span id="summary_route_retorno_lotado" class="popup__text_sinal button" onclick="open_popup('notice_migrate', false, false)">
-          Lotado
-          <i style="margin-left: 5px;" class="bi bi-hand-index-thumb"></i>
-        </span>
-        {% else %}
-        <span id="summary_route_retorno_lotado" class="popup__text_sinal inactive">Lotado</span>
-        {% endif %}
+  
+        <div class="page__container">
+          <p class="text secundario fundo">Motorista:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_route_motorista" class="text secundario content fundo nowrap">Carregando...</p>
+          </div>
+        </div>
+  
+        <div class="page__container">
+          <p class="text secundario fundo">Veículo:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_route_veiculo" class="text secundario content fundo nowrap">Carregando...</p>
+          </div>
+        </div>
+  
+        <div class="page__container">
+          <p class="text secundario fundo">Capacidade veículo:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_route_capacidade" class="text secundario content fundo nowrap">Carregando...</p>
+          </div>
+        </div>
+  
+        <div class="page__container">
+          <p class="text secundario fundo">Horários:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_route_horarios" class="text secundario content fundo nowrap">Carregando...</p>
+          </div>
+        </div>
+  
+        <h3 id="summary_route_dia_previsao" class="popup__text question">Carregando...</h3>
+        <p class="text secundario fundo justify margin_bottom">Inclui contraturnos e diárias</p>
+  
+        <div class="page__container">
+          <p class="text secundario emphasis">Partida:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_route_previsao_partida" class="text secundario content fundo nowrap">Carregando...</p>
+          </div>
+          {% if role == 'motorista' %}
+          <span id="summary_route_partida_lotado" class="popup__text_sinal button" onclick="open_popup('notice_migrate', false, false)">
+            Lotado
+            <i style="margin-left: 5px;" class="bi bi-hand-index-thumb"></i>
+          </span>
+          {% else %}
+          <span id="summary_route_partida_lotado" class="popup__text_sinal inactive">Lotado</span>
+          {% endif %}
+        </div>
+  
+        <div class="page__container">
+          <p class="text secundario emphasis">Retorno:</p>
+          <div class="scroll_horizontal">
+            <p id="summary_route_previsao_retorno" class="text secundario content fundo nowrap">Carregando...</p>
+          </div>
+          {% if role == 'motorista' %}
+          <span id="summary_route_retorno_lotado" class="popup__text_sinal button" onclick="open_popup('notice_migrate', false, false)">
+            Lotado
+            <i style="margin-left: 5px;" class="bi bi-hand-index-thumb"></i>
+          </span>
+          {% else %}
+          <span id="summary_route_retorno_lotado" class="popup__text_sinal inactive">Lotado</span>
+          {% endif %}
+        </div>
+
+        <div class="page__btn_redirect" onclick="">
+          <p class="text secundario justify" style="text-align: center;">Ver previsão completa</p>
+        </div>
       </div>
     </div>
 

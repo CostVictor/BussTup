@@ -4,7 +4,7 @@ from flask_mail import Message
 from flask import render_template, url_for
 from app import app, mail
 from datetime import datetime, timedelta
-from app.utilities import return_dates_week
+from app.utilities import return_dates_week, modify_forecast_route
 from app.database import *
 
 
@@ -83,14 +83,52 @@ def criar_registro_aluno():
     not_record = Aluno.query.all()
 
     if not_record:
-      for user in not_record:
-        contraturnos_fixos = (
-          db.session.query(Contraturno_Fixo.dia_fixo)
-          .filter_by(Aluno_id=user.id).all()
-        )
+      with db.session.begin_nested():
+        for user in not_record:
+          contraturnos_fixos = (
+            db.session.query(Contraturno_Fixo.dia_fixo)
+            .filter_by(Aluno_id=user.id).all()
+          )
 
-        for value in dates:
-          contraturno = (value.weekday() in contraturnos_fixos)
-          db.session.add(Registro_Aluno(data=value, Aluno_id=user.id, contraturno=contraturno))
+          for value in dates:
+            contraturno = (value.weekday() in contraturnos_fixos)
+            db.session.add(Registro_Aluno(data=value, Aluno_id=user.id, contraturno=contraturno))
+            
+      db.session.commit()
+
+
+@sched.task('cron', id='criar_registro_rota', day_of_week='sat', hour=0)
+def criar_registro_rota():
+  with app.app_context():
+    dates = return_dates_week()
+    not_record = Rota.query.all()
+
+    if not_record:
+      with db.session.begin_nested():
+        for route in not_record:
+          for value in dates:
+            for type in ['partida', 'retorno']:
+              db.session.add(Registro_Rota(data=value, Rota_codigo=route.codigo, tipo=type))
+
+      db.session.commit()
+
+
+@sched.task('cron', id='calcular_previsao', day_of_week='sat', hour=1)
+def calcular_previsao():
+  with app.app_context():
+    dates = return_dates_week()
+    data = (
+      db.session.query(Rota, Registro_Rota)
+      .filter(db.and_(
+        Registro_Rota.Rota_codigo == Rota.codigo,
+        Registro_Rota.data.in_(dates)
+      ))
+      .all()
+    )
+
+    if data:
+      with db.session.begin_nested():
+        for route, record in data:
+          modify_forecast_route(route, record, commit=False)
           
       db.session.commit()

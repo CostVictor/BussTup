@@ -9,8 +9,6 @@ from app.tasks import *
 from app.forms import *
 import bcrypt
 
-from app.utilities import return_dates_week
-
 
 @app.route("/")
 @app.route("/index")

@@ -176,7 +176,15 @@ function loadLines() {
         if (minha_linha_area) {
           minha_linha_area.innerHTML = "";
         }
-        local_linhas.innerHTML = "";
+        if (!Object.keys(response.cidades).length) {
+          const text_span = local_linhas.querySelector('span')
+          if (text_span) {
+            text_span.textContent = 'Nehuma linha encontrada'
+            text_span.className = 'text secundario fundo cinza justify margin_top -enter-'
+          }
+        } else {
+          local_linhas.innerHTML = "";
+        }
 
         const model_regiao = models.querySelector("#model_regiao");
         for (cidade in response.cidades) {
@@ -232,8 +240,24 @@ function loadRoutes() {
         const area_rotas = document.getElementById("rotas_local");
 
         if (response.role === "motorista") {
-          area_rotas.innerHTML = "";
           area_minhas_rotas.innerHTML = "";
+          if (!Object.keys(data.minhas_rotas).length) {
+            if (!response.possui_veiculo) {
+              document.getElementById('sem_veiculo').classList.remove('inactive')
+            } else {
+              document.getElementById('sem_rota').classList.remove('inactive')
+            }
+          }
+
+          if (!Object.keys(data.rotas).length) {
+            const text_span = area_rotas.querySelector('span')
+            if (text_span) {
+              text_span.textContent = 'Nenhuma rota válida encontrada'
+              text_span.className = 'text secundario fundo cinza justify -enter-'
+            }
+          } else {
+            area_rotas.innerHTML = "";
+          }
 
           const model_regiao = models.querySelector("#model_regiao");
           const model_local = models.querySelector("#model_local");

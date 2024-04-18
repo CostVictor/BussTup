@@ -16,11 +16,14 @@
   --azul_terciario: #013983;
   --azul_quaternario: rgba(6, 66, 149, 0.64);
   --azul_quintenario: #1560c3;
-  --verde_primario: #008e80;
+  --verde_primario: #017da7;
+  --verde_secundario: #70ceeb;
+  --roxo_primario: #b4a1f8;
+  --roxo_secundario: #573eb4;
   --vermelho_primario: #ff7272;
   --vermelho_secundario: #ff72721b;
   --vermelho_terciario: #ff0000b7;
-  --vermelho_intenso: rgba(223, 0, 0, 0.85);
+  --vermelho_intenso: #cc1602;
   --amarelo_primario: #ffe959;
 
   --size_16px: calc(0.7vw + 1vh + 1vmin);

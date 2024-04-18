@@ -31,7 +31,18 @@ def format_time(time, reverse=False):
   return f'{hr} h'
 
 
-def format_data():...
+def format_data(data, reverse=False):
+  if reverse:
+    today = date.today()
+    data = data.split('/')
+
+    if today.month == 12:
+      year = (today.year + 1) if data[1] == '01' else today.year
+    else: year = today.year
+
+    return date(year, int(data[1]), int(data[0]))
+
+  return f'{data.day}/{data.month}'
 
 
 def capitalize(name, role):
@@ -130,6 +141,19 @@ def return_dates_week():
 def return_dict(obj, not_includes=[]):
   return {name: value for name, value in vars(obj).items() if name not in not_includes and not name.startswith('_')}
 
+
+def return_str_bool(boolean: bool):
+  if boolean: return 'Sim'
+  return 'Não'
+
+
+def return_day_week(value: str | int, reverse=False):
+  days = {0: 'Segunda', 1: 'Terça', 2: 'Quarta', 3: 'Quinta', 4: 'Sexta'}
+  days_reverse = {'Segunda': 0, 'Terça': 1, 'Quarta': 2, 'Quinta': 3, 'Sexta': 4}
+
+  if reverse:
+    return days_reverse[value]
+  return days[value]
 
 def return_relationship(code_line):
   if code_line:
@@ -409,16 +433,19 @@ def count_part_route(route_code, formated=True):
 ''' ~~~~~~~~ Modify ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
-def modify_forecast_route(rota, tipo, day=False):
-  reject_contraturno = (tipo == return_ignore_route(rota.turno))
-  day = date.today() if not day else day
+def modify_forecast_route(route, record, commit=True):
+  type = record.tipo
+  day = record.data
 
+  reject_contraturno = (type == return_ignore_route(route.turno))
   not_includes = (
-    db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada)
+    db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada).join(Rota)
     .filter(db.and_(
+      Parada.Rota_codigo == Rota.codigo,
       Passagem.Parada_codigo == Parada.codigo,
-      Parada.Rota_codigo != rota.codigo,
-      Parada.tipo == tipo,
+      Rota.turno == route.turno,
+      Parada.Rota_codigo != route.codigo,
+      Parada.tipo == type,
       Passagem.passagem_fixa == False,
       Passagem.data == day
     ))
@@ -429,8 +456,8 @@ def modify_forecast_route(rota, tipo, day=False):
     db.session.query(func.count(func.distinct(Passagem.Aluno_id)))
     .join(Aluno).join(Registro_Aluno).join(Parada)
     .filter(db.and_(
-      Parada.Rota_codigo == rota.codigo,
-      Parada.tipo == tipo,
+      Parada.Rota_codigo == route.codigo,
+      Parada.tipo == type,
 
       Passagem.Parada_codigo == Parada.codigo,
       Aluno.id == Passagem.Aluno_id,
@@ -445,14 +472,14 @@ def modify_forecast_route(rota, tipo, day=False):
           db.or_(
             (
               db.and_(
-                Aluno.turno == rota.turno,
+                Aluno.turno == route.turno,
                 db.not_(Registro_Aluno.contraturno)
               )
               if reject_contraturno
-              else (Aluno.turno == rota.turno)
+              else (Aluno.turno == route.turno)
             ),
             db.and_(
-              Aluno.turno != rota.turno,
+              Aluno.turno != route.turno,
               Registro_Aluno.contraturno
             )
           )
@@ -466,7 +493,8 @@ def modify_forecast_route(rota, tipo, day=False):
     .scalar()
   )
   
-  registro_alvo = Registro_Rota.query.filter_by(data=day, tipo=tipo).first()
-  registro_alvo.previsao_pessoas = count
-  registro_alvo.atualizar = False
-  db.session.commit()
+  record.previsao_pessoas = count
+  record.atualizar = False
+
+  if commit:
+    db.session.commit()
