@@ -172,7 +172,7 @@ class Cartela_Ticket(db.Model):
 class Contraturno_Fixo(db.Model):
   __tablename__ = 'Contraturno_Fixo'
   id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-  dia_fixo = db.Column(db.Integer, db.CheckConstraint('dia_fixo in (1, 2, 3, 4, 5)'), nullable=False)
+  dia_fixo = db.Column(db.Integer, db.CheckConstraint('dia_fixo in (0, 1, 2, 3, 4)'), nullable=False)
   Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
   aluno = db.relationship('Aluno', backref=db.backref('contraturnos_fixos', cascade='all, delete'), lazy=True)
 

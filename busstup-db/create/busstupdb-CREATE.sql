@@ -146,7 +146,7 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `busstup`.`contraturno_fixo` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `dia_fixo` INT NOT NULL CHECK(`dia_fixo` IN (1, 2, 3, 4, 5)),
+  `dia_fixo` INT NOT NULL CHECK(`dia_fixo` IN (0, 1, 2, 3, 4)),
   `Aluno_id` BIGINT(20) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_Contraturno_Fixo_Aluno1_idx` (`Aluno_id` ASC),

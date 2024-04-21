@@ -8,6 +8,10 @@
   pointer-events: none;
 }
 
+.text.inactive {
+  display: none;
+}
+
 .text.margin_top {
   margin-top: calc(0.5vw + 0.5vh + 1vmin);
 }
@@ -96,6 +100,14 @@
 .text.secundario.rigth {
   margin-left: auto;
   margin-right: calc(0.65vw + 0.65vh + 1vmin);
+}
+
+.text.secundario.nowrap {
+  text-wrap: nowrap;
+}
+
+.text.secundario.overfow {
+  overflow-y: auto;
 }
 
 .text.terciario {

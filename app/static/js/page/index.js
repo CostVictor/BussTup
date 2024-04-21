@@ -12,33 +12,6 @@ observer_header.observe(header);
 const templates_model = document.getElementById("templates_model");
 const models = document.importNode(templates_model.content, true);
 
-function action_popup(popup, card, id, obj_click) {
-  if (id === "summary_route") {
-    const name_line = extract_info(obj_click, "line");
-    const shift = extract_info(obj_click, "turno");
-    const hr_par = extract_info(obj_click, "horario_partida");
-    const hr_ret = extract_info(obj_click, "horario_retorno");
-    const surname = extract_info(obj_click, "apelido");
-    const driver = extract_info(obj_click, "motorista");
-
-    popup.querySelector("#summary_route_span_turno").textContent = shift;
-    popup.querySelector("#summary_route_span_partida").textContent = hr_par;
-    popup.querySelector("#summary_route_span_retorno").textContent = hr_ret;
-
-    popup.querySelector("#summary_route_linha").textContent = name_line;
-    popup.querySelector("#summary_route_motorista").textContent = driver;
-    popup.querySelector("#summary_route_veiculo").textContent = surname;
-    popup.querySelector(
-      "#summary_route_horarios"
-    ).textContent = `${shift} > ${hr_par} ~ ${hr_ret}`;
-    load_popup_route(popup);
-  } else if (id === "summary_line") {
-    const name_line = extract_info(obj_click, "nome");
-    document.getElementById("summary_line_nome").textContent = name_line;
-    load_popup_line(card, name_line);
-  }
-}
-
 function create_lines(local, list_datas, minha_linha = false) {
   const model_linha = models.querySelector(`#model_line`);
   for (index_linha in list_datas) {
@@ -170,21 +143,14 @@ function loadLines() {
   fetch("/get_lines", { method: "GET" })
     .then((response) => response.json())
     .then((response) => {
+      const local_linhas = document.getElementById("local_linhas");
+
       if (response.identify) {
-        const local_linhas = document.getElementById("local_linhas");
         const minha_linha_area = document.getElementById("minha_linha_area");
         if (minha_linha_area) {
           minha_linha_area.innerHTML = "";
         }
-        if (!Object.keys(response.cidades).length) {
-          const text_span = local_linhas.querySelector('span')
-          if (text_span) {
-            text_span.textContent = 'Nehuma linha encontrada'
-            text_span.className = 'text secundario fundo cinza justify margin_top -enter-'
-          }
-        } else {
-          local_linhas.innerHTML = "";
-        }
+        local_linhas.innerHTML = "";
 
         const model_regiao = models.querySelector("#model_regiao");
         for (cidade in response.cidades) {
@@ -208,6 +174,13 @@ function loadLines() {
         }
         const elements = divs[2].querySelectorAll('[class*="-enter-"]');
         animate_itens(elements, "fadeDown", 0.7, 0);
+      } else {
+        const text_span = local_linhas.querySelector("span");
+        if (text_span) {
+          text_span.textContent = "Nenhuma linha encontrada";
+          text_span.className =
+            "text secundario fundo cinza justify margin_top -enter-";
+        }
       }
 
       if (response.role === "motorista") {
@@ -243,17 +216,20 @@ function loadRoutes() {
           area_minhas_rotas.innerHTML = "";
           if (!Object.keys(data.minhas_rotas).length) {
             if (!response.possui_veiculo) {
-              document.getElementById('sem_veiculo').classList.remove('inactive')
+              document
+                .getElementById("sem_veiculo")
+                .classList.remove("inactive");
             } else {
-              document.getElementById('sem_rota').classList.remove('inactive')
+              document.getElementById("sem_rota").classList.remove("inactive");
             }
           }
 
           if (!Object.keys(data.rotas).length) {
-            const text_span = area_rotas.querySelector('span')
+            const text_span = area_rotas.querySelector("span");
             if (text_span) {
-              text_span.textContent = 'Nenhuma rota válida encontrada'
-              text_span.className = 'text secundario fundo cinza justify -enter-'
+              text_span.textContent = "Nenhuma rota válida encontrada";
+              text_span.className =
+                "text secundario fundo cinza justify -enter-";
             }
           } else {
             area_rotas.innerHTML = "";
@@ -469,6 +445,7 @@ function checkLine(name_aba, obj_aba) {
         }
 
         if (name_aba === "agenda") {
+          loadSchedule();
         } else if (name_aba === "rota") {
           loadRoutes();
         } else if (name_aba === "linhas") {
@@ -481,8 +458,8 @@ function checkLine(name_aba, obj_aba) {
 }
 
 function redirect_page_to_route() {
-  const data = return_data_route(document.getElementById('summary_route'))
-  closeInterface('page_user', 'route', false, Object.values(data))
+  const data = return_data_route(document.getElementById("summary_route"));
+  closeInterface("page_user", "route", false, Object.values(data));
 }
 
 function return_data_route(obj) {

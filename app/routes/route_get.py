@@ -44,10 +44,7 @@ def get_association():
 
   if current_user.roles[0].name == 'aluno':
     if (
-      Passagem.query.filter_by(
-      Aluno_id=current_user.primary_key,
-      passagem_fixa=True
-      )
+      Passagem.query.filter_by(Aluno_id=current_user.primary_key)
       .first()
     ):
       response['conf'] = True
@@ -414,8 +411,8 @@ def get_stops_student():
       info = {
         'linha': linha.nome,
         'veiculo': veiculo.apelido if veiculo else 'Nenhum',
-        'parada': parada.ponto.nome,
-        'horario': parada.horario,
+        'nome_ponto': parada.ponto.nome,
+        'horario': format_time(parada.horario_passagem),
         'tipo': parada.tipo
       }
 
@@ -481,11 +478,33 @@ def get_schedule_student():
       .all()
     )
 
+    contraturnos_fixos = (
+      Contraturno_Fixo.query.filter_by(Aluno_id=user.id)
+      .order_by(Contraturno_Fixo.dia_fixo).all()
+    )
+    contraturnos_fixos = [
+      return_day_week(int(record.dia_fixo))[:3]
+      for record in contraturnos_fixos
+    ]
+
+    if contraturnos_fixos:
+      if len(contraturnos_fixos) == 5:
+        contraturnos_fixos = 'Todos os dias'
+      elif len(contraturnos_fixos) == 2:
+        contraturnos_fixos = ' e '.join(contraturnos_fixos)
+      elif len(contraturnos_fixos) >= 3:
+        ultimo = contraturnos_fixos.pop()
+        contraturnos_fixos = ', '.join(contraturnos_fixos) + f' e {ultimo}'
+      else: contraturnos_fixos = contraturnos_fixos[0]
+    else: contraturnos_fixos = 'Nenhum'
+    retorno['contraturno_fixo'] = contraturnos_fixos
+
     for registro in registros:
       info = {
         'data': format_data(registro.data),
         'faltara': return_str_bool(registro.faltara),
         'contraturno': return_str_bool(registro.contraturno) if not registro.faltara else 'Não',
+        'valida': check_valid_date(registro.data),
         'diarias': []
       }
 

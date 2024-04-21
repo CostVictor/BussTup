@@ -372,11 +372,19 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
       header_close.style.opacity = 0;
 
       if (redirect === "line") {
-        const popup = document.getElementById("summary_line");
-        let info = {
-          principal: [extract_info(popup, "nome")],
-          secondary: { local_page: aba_atual },
-        };
+        let info = {}
+        if (args) {
+          info = {
+            principal: [args],
+            secondary: { local_page: aba_atual },
+          };
+        } else {
+          const popup = document.getElementById("summary_line");
+          info = {
+            principal: [extract_info(popup, "nome")],
+            secondary: { local_page: aba_atual },
+          };
+        }
         redirect += generate_url_dict(info);
       } else {
         redirect += `?local_page=${encodeURIComponent(aba_atual)}`;

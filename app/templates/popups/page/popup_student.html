@@ -72,7 +72,7 @@
       <h2 class="popup__text">Selecione seus dias fixos:</h2>
       <div id="content_local_contraturno" class="scroll_vertical no_borderY popup__container--scroll principal">
         {% for index in range(5) %}
-        <div class="popup__input checkbox hidden" onclick="popup_confirmBox(this)">
+        <div class="popup__input checkbox" onclick="popup_confirmBox(this)">
           <i class="bi bi-circle popup__icon ratio"></i>
           <p class="popup__text input">{{ dias_semana[index] }}</p>
         </div>
@@ -83,7 +83,7 @@
     <h4 class="popup__text info space">Você pode selecionar mais de uma opção.</h4>
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('edit_contraturno')">Cancelar</button>
-      <button class="popup__btn">Salvar</button>
+      <button class="popup__btn" onclick="edit_contraturno_fixo()">Salvar</button>
     </footer>
   </div>
 </section>

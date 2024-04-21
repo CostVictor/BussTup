@@ -1,7 +1,8 @@
 from flask_security import current_user
 from app import cursos, turnos
 from sqlalchemy import func
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+from app import dias_semana
 from app.database import *
 import bcrypt
 
@@ -42,7 +43,7 @@ def format_data(data, reverse=False):
 
     return date(year, int(data[1]), int(data[0]))
 
-  return f'{data.day}/{data.month}'
+  return str(data.day).zfill(2) + '/' + str(data.month).zfill(2)
 
 
 def capitalize(name, role):
@@ -123,7 +124,7 @@ def format_register(dadosAdquiridos):
 ''' ~~~~~~~~ Return ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
-def return_dates_week():
+def return_dates_week(only_valid=False):
   today = date.today()
   week_day = today.weekday()
 
@@ -133,7 +134,12 @@ def return_dates_week():
 
   dates = []
   for index in range(5):
-    dates.append(day_reference + timedelta(days=index))
+    value = day_reference + timedelta(days=index)
+    if only_valid:
+      if value >= today:
+        dates.append(value)
+    else:
+      dates.append(value)
 
   return dates
 
@@ -148,12 +154,10 @@ def return_str_bool(boolean: bool):
 
 
 def return_day_week(value: str | int, reverse=False):
-  days = {0: 'Segunda', 1: 'Terça', 2: 'Quarta', 3: 'Quinta', 4: 'Sexta'}
-  days_reverse = {'Segunda': 0, 'Terça': 1, 'Quarta': 2, 'Quinta': 3, 'Sexta': 4}
-
   if reverse:
-    return days_reverse[value]
-  return days[value]
+    return dias_semana.index(value)
+  return dias_semana[value]
+
 
 def return_relationship(code_line):
   if code_line:
@@ -393,6 +397,20 @@ def check_valid_password(password: str):
         simbol = True
   
   return (uper and lower and number and simbol)
+
+
+def check_valid_date(date, hour=0, minute=0):
+  now = datetime.now()
+  if hour or minute:
+    if (
+      datetime(*date, hour, minute) >= now
+    ):
+      return True
+  else:
+    if date >= now.date():
+      return True
+  
+  return False
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''

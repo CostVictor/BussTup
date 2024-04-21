@@ -1,0 +1,26 @@
+function edit_contraturno_fixo() {
+  const container = document.getElementById("content_local_contraturno");
+  const selected = container.querySelectorAll('[class*="selected"]');
+  const data = [];
+  selected.forEach((element) => {
+    data.push(element.parentNode.querySelector("p").textContent);
+  });
+
+  popup_button_load("edit_contraturno");
+  fetch("/edit_contraturno_fixo", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        close_popup("edit_contraturno");
+        create_popup(response.title, response.text, "Ok", "success");
+        loadWeek();
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+        popup_button_load("edit_contraturno", "Salvar");
+      }
+    });
+}

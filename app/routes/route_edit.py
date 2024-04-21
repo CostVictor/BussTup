@@ -68,6 +68,66 @@ def edit_perfil():
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ Edit Page ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/edit_contraturno_fixo", methods=['PUT'])
+@login_required
+@roles_required("aluno")
+def edit_contraturno_fixo():
+  data = request.get_json()
+  execute = True
+
+  if data:
+    for dia in data:
+      if dia not in dias_semana:
+        execute = False; break
+
+  if execute:
+    key = current_user.primary_key
+
+    contraturnos = (
+      Contraturno_Fixo.query
+      .filter_by(Aluno_id=key).all()
+    )
+    registros = (
+      db.session.query(Registro_Aluno)
+      .filter(db.and_(
+        Registro_Aluno.Aluno_id == key,
+        Registro_Aluno.data.in_(return_dates_week())
+      ))
+      .order_by(Registro_Aluno.data)
+      .all()
+    )
+
+    try:
+      today = date.today()
+      for record in contraturnos:
+        if registros[record.dia_fixo].data >= today:
+          registros[record.dia_fixo].contraturno = False
+        db.session.delete(record)
+      
+      for dia in data:
+        week_day = return_day_week(dia, reverse=True)
+        if registros[week_day].data >= today:
+          registros[week_day].contraturno = True
+
+        db.session.add(Contraturno_Fixo(
+          dia_fixo=week_day,
+          Aluno_id=key
+        ))
+
+      db.session.commit()
+      return jsonify({'error': False, 'title': 'Contraturno fixo atualizado', 'text': ''})
+
+    except Exception as e:
+      db.session.rollback()
+      print(f'Erro ao salvar o contraturno fixo: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Edit Line ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 

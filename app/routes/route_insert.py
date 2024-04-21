@@ -327,9 +327,13 @@ def create_pass_fixed():
         if not route:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
 
+        dia = date.today()
+        if dia.weekday() == 5 or dia.weekday() == 6:
+          dia = dia + timedelta(7 - dia.weekday())
+
         record = (
           Registro_Rota.query
-          .filter_by(Rota_codigo=route.codigo, tipo=tipo, data=date.today())
+          .filter_by(Rota_codigo=route.codigo, tipo=tipo, data=dia)
           .first()
         )
 

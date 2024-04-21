@@ -115,6 +115,15 @@ body {
   cursor: pointer;
 }
 
+.page__container--card.blocked {
+  background-color: var(--cinza_quaternario);
+  cursor: auto;
+}
+
+.page__container--card.blocked:hover {
+  scale: 1;
+}
+
 .page__container--card.white {
   background-color: var(--branco_terciario);
 }
@@ -247,6 +256,7 @@ body {
   display: flex;
   justify-content: center;
   flex-grow: 1;
+  max-width: 58%;
 }
 
 .page__container--point_type {

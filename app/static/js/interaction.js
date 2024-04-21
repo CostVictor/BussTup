@@ -565,3 +565,36 @@ function popup_button_load(popup_id, value = false) {
     }
   }
 }
+
+function criar_visualizacao_parada(model, list, container) {
+  for (index in list) {
+    const parada = model.cloneNode(true);
+    parada.id = `${container.id}-parada_${index}`;
+
+    ids = parada.querySelectorAll(`[id*="${model.id}"]`);
+    ids.forEach((item) => {
+      item.id = item.id.replace(model.id, parada.id);
+    });
+
+    const data = list[index];
+    for (info in data) {
+      const value = data[info];
+      const tag = parada.querySelector(`[id*="${info}"]`);
+      tag.textContent = value;
+
+      if (info === "data") {
+        if (value.includes("fixo")) {
+          const icon = parada.querySelector(`#${parada.id}_icon_fixed`);
+          icon.classList.remove("inactive");
+          icon.classList.add(value.includes("-") ? "verde" : "roxo");
+          parada.querySelector(`#${parada.id}_point`).classList.add("fixed");
+          tag.parentNode.classList.add("fixed");
+        } else if (container.id.includes("diaria")) {
+          console.log("ok");
+        }
+      }
+    }
+    parada.classList.remove("inactive");
+    container.appendChild(parada);
+  }
+}
