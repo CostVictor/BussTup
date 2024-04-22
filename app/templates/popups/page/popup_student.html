@@ -92,78 +92,55 @@
 <section id="edit_dia" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header">
-      <h1 id="dia" class="popup__title"></h1>
+      <h1 id="dia" class="popup__title">Carregando...</h1>
     </header>
 
     <div class="popup__container--content">
       <div class="page__container margin_bottom">
         <h4 class="popup__text">Data:</h4>
-        <h4 id="data_dia" class="popup__text"></h4>
+        <h4 id="data_dia" class="popup__text">Carregando...</h4>
       </div>
       <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_big">
-        <h3 class="popup__text question first">Irá faltar no dia?</h3>
+        <div id="edit_dia_msg" class="inactive">
+          <span></span>
+          <h1 class="page__division"></h1>
+        </div>
+
+        <div class="page__container">
+          <h3 class="popup__text question first">Faltará no dia?</h3>
+          <i id="edit_dia_faltara_blocked" class="bi bi-person-lock popup__text question first inactive" style="border: none;"></i>
+        </div>
         <div id="options_falta" class="popup__container--options">
-          <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
+          <div class="popup__input checkbox bool">
             <i class="bi bi-circle popup__icon ratio"></i>
             <p class="popup__text content input">Sim</p>
           </div>
-          <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
+          <div class="popup__input checkbox bool">
             <i class="bi bi-check2-circle popup__icon ratio selected"></i>
             <p class="popup__text content input">Não</p>
           </div>
         </div>
-
-        <h3 class="popup__text question">Irá ficar contraturno?</h3>
+        
+        <div class="page__container">
+          <h3 class="popup__text question">Ficará contraturno?</h3>
+          <i id="edit_dia_contraturno_blocked" class="bi bi-person-lock popup__text question inactive" style="border: none;"></i>
+        </div>
         <div id="options_contraturno" class="popup__container--options">
-          <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
+          <div class="popup__input checkbox bool">
             <i class="bi bi-circle popup__icon ratio"></i>
             <p class="popup__text content input">Sim</p>
           </div>
-          <div class="popup__input checkbox bool" onclick="popup_selectOption(this)">
+          <div class="popup__input checkbox bool">
             <i class="bi bi-check2-circle popup__icon ratio selected"></i>
             <p class="popup__text content input">Não</p>
           </div>
         </div>
-
-        <h3 class="popup__text question">Deseja subir em outro local?</h3>
-        <div id="options_subida" class="popup__container--options">
-          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
-            <i class="bi bi-circle popup__icon ratio"></i>
-            <p class="popup__text content input">Sim</p>
-          </div>
-
-          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
-            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-            <p class="popup__text content input">Não</p>
-          </div>
-        </div>
-
-        <h3 id="options_subida_title" class="popup__text info space inactive">Selecione o local de subida:</h3>
-        <div id="options_subida_container"
-          class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
-
-        <h3 class="popup__text question">Deseja descer em outro local?</h3>
-        <div id="options_retorno" class="popup__container--options">
-          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
-            <i class="bi bi-circle popup__icon ratio"></i>
-            <p class="popup__text content input">Sim</p>
-          </div>
-
-          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
-            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
-            <p class="popup__text content input">Não</p>
-          </div>
-        </div>
-
-        <h3 id="options_retorno_title" class="popup__text info space inactive">Selecione o local de descida:</h3>
-        <div id="options_retorno_container"
-          class="scroll_vertical init_top no_borderY popup__container--scroll inactive"></div>
       </div>
     </div>
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('edit_dia')">Cancelar</button>
-      <button class="popup__btn">Salvar</button>
+      <button class="popup__btn" onclick="edit_dia()">Salvar</button>
     </footer>
   </div>
 </section>

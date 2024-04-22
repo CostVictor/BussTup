@@ -90,6 +90,17 @@ function return_btn_open(btn) {
   return false;
 }
 
+function set_selected_bool(option, text_selected) {
+  const childrens = Array.from(option.children);
+  for (index in childrens) {
+    const element = childrens[index];
+    if (element.querySelector("p").textContent === text_selected) {
+      popup_selectOption(element);
+      break;
+    }
+  }
+}
+
 function include_options_container(
   container,
   option,
@@ -372,7 +383,7 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
       header_close.style.opacity = 0;
 
       if (redirect === "line") {
-        let info = {}
+        let info = {};
         if (args) {
           info = {
             principal: [args],

@@ -127,6 +127,39 @@ def edit_contraturno_fixo():
   return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
 
 
+@app.route("/edit_day", methods=['PUT'])
+@login_required
+@roles_required("aluno")
+def edit_day():
+  data = request.get_json()
+  user = return_my_user()
+  dates = return_dates_week(only_valid=True)
+
+  if user and data and 'faltara' in data and 'contraturno' in data and 'data' in data:
+    try:
+      dia = format_data(data['data'], reverse=True)
+      if dia in dates:
+        record = Registro_Aluno.query.filter_by(
+          Aluno_id=user.id, data=dia
+        ).first()
+        if record:
+          if data['faltara']:
+            record.faltara = True
+            record.contraturno = False
+          else:
+            record.faltara = False
+            record.contraturno = data['contraturno']
+          
+          db.session.commit()
+          return jsonify({'error': False, 'title': f'{return_day_week(dia.weekday())} atualizada', 'text': ''})
+
+    except Exception as e:
+      db.session.rollback()
+      print(f'Erro ao salvar o dia: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Edit Line ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''

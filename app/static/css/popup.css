@@ -367,6 +367,11 @@
   cursor: pointer;
 }
 
+.popup__input.checkbox.blocked {
+  cursor: auto;
+  background-color: var(--cinza_quaternario);
+}
+
 .popup__input.checkbox.bool {
   width: 45%;
 }
