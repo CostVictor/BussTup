@@ -470,10 +470,22 @@ function loadInterfaceRoutes(name_line) {
           criar_rota(desativas, local_desativas);
           criar_rota(ativas, local_ativas);
         } else {
+          const diarias = response.diarias;
           const area_rotas = document.getElementById("area_rotas");
           const local_minhas_rotas = document.getElementById(
             "interface_rotas_minhas_rotas"
           );
+          const local_diarias = document.getElementById(
+            "interface_rotas_diaria"
+          );
+          local_diarias_container = local_diarias.querySelector("div");
+          local_diarias_container.innerHTML = "";
+
+          if (diarias.length) {
+            local_minhas_rotas.classList.remove("inactive");
+            local_diarias.classList.remove("inactive");
+            criar_rota(diarias, local_diarias_container);
+          }
 
           if (response.relacao === "participante") {
             local_minhas_rotas.classList.remove("inactive");
@@ -530,7 +542,9 @@ function loadInterfaceRoutes(name_line) {
               minhas_rotas.contraturno,
             ]);
           } else {
-            local_minhas_rotas.classList.add("inactive");
+            if (!diarias.length) {
+              local_minhas_rotas.classList.add("inactive");
+            }
             criar_rota(ativas, local_ativas);
 
             if (ativas.length) {

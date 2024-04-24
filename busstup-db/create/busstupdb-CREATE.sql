@@ -282,7 +282,8 @@ CREATE TABLE IF NOT EXISTS `busstup`.`passagem` (
   `codigo` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `passagem_fixa` TINYINT(4) NOT NULL,
   `passagem_contraturno` TINYINT(4) NOT NULL,
-  `migracao` TINYINT NOT NULL DEFAULT 0,
+  `migracao_lotado` TINYINT NOT NULL DEFAULT 0,
+  `migracao_manutencao` TINYINT NOT NULL DEFAULT 0,
   `pediu_espera` TINYINT(4) NOT NULL DEFAULT 0,
   `data` DATE NULL DEFAULT NULL,
   `Parada_codigo` BIGINT(20) NOT NULL,
@@ -328,12 +329,11 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `busstup`.`registro_parada`
+-- Table `busstup`.`registro_passagem`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `busstup`.`registro_parada` (
+CREATE TABLE IF NOT EXISTS `busstup`.`registro_passagem` (
   `codigo` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `data` DATE NOT NULL,
-  `veiculo_passou` TINYINT(4) NOT NULL DEFAULT 0,
+  `data` DATETIME NOT NULL,
   `Parada_codigo` BIGINT(20) NOT NULL,
   PRIMARY KEY (`codigo`),
   INDEX `fk_Registro_Parada_Parada1_idx` (`Parada_codigo` ASC),
@@ -366,6 +366,24 @@ CREATE TABLE IF NOT EXISTS `busstup`.`registro_rota` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
+
+
+-- -----------------------------------------------------
+-- Table `busstup`.`manutencao`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busstup`.`manutencao` (
+  `codigo` BIGINT NOT NULL AUTO_INCREMENT,
+  `data_inicio` DATETIME NOT NULL,
+  `data_fim` DATETIME NOT NULL,
+  `onibus_id` BIGINT(20) NOT NULL,
+  PRIMARY KEY (`codigo`),
+  INDEX `fk_manutencao_onibus1_idx` (`onibus_id` ASC),
+  CONSTRAINT `fk_manutencao_onibus1`
+    FOREIGN KEY (`onibus_id`)
+    REFERENCES `busstup`.`onibus` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

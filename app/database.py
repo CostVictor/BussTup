@@ -187,11 +187,10 @@ class Membro(db.Model):
   motorista = db.relationship('Motorista', backref=db.backref('linhas', cascade='all, delete'), lazy=True)
 
 
-class Registro_Parada(db.Model):
-  __tablename__ = 'Registro_Parada'
+class Registro_Passagem(db.Model):
+  __tablename__ = 'Registro_Passagem'
   codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-  data = db.Column(db.Date, nullable=False)
-  veiculo_passou = db.Column(db.Boolean, nullable=False, default=False)
+  data = db.Column(db.DateTime, nullable=False)
   Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
   parada = db.relationship('Parada', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 
@@ -213,7 +212,8 @@ class Passagem(db.Model):
   codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
   passagem_fixa = db.Column(db.Boolean, nullable=False)
   passagem_contraturno = db.Column(db.Boolean, nullable=False)
-  migracao = db.Column(db.Boolean, nullable=False, default=False)
+  migracao_lotado = db.Column(db.Boolean, nullable=False, default=False)
+  migracao_manutencao = db.Column(db.Boolean, nullable=False, default=False)
   pediu_espera = db.Column(db.Boolean, nullable=False, default=False)
   data = db.Column(db.Date)
   Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
@@ -236,6 +236,15 @@ class Marcador_Exclusao(db.Model):
   id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
   tabela = db.Column(db.String(20), nullable=False)
   key_item = db.Column(db.BigInteger, nullable=False)
+
+
+class Manutencao(db.Model):
+  __tablename__ = 'Manutencao'
+  codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+  data_inicio = db.Column(db.DateTime, nullable=True)
+  data_fim = db.Column(db.DateTime, nullable=True)
+  Onibus_id = db.Column(db.BigInteger, db.ForeignKey('Onibus.id'))
+  onibus = db.relationship('Onibus', backref=db.backref('manutencoes'), lazy=True)
 
 
 with app.app_context():

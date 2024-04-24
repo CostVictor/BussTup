@@ -327,14 +327,24 @@ def create_pass_fixed():
         if not route:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
 
-        dia = date.today()
-        if dia.weekday() == 5 or dia.weekday() == 6:
-          dia = dia + timedelta(7 - dia.weekday())
-
-        record = (
-          Registro_Rota.query
-          .filter_by(Rota_codigo=route.codigo, tipo=tipo, data=dia)
-          .first()
+        dates = return_dates_week(only_valid=True)
+        dates_contraturno = (
+          db.session.query(Registro_Aluno.data)
+          .filter(db.and_(
+            Registro_Aluno.Aluno_id == user.id,
+            Registro_Aluno.contraturno == True,
+            Registro_Aluno.data.in_(dates)
+          ))
+          .all()
+        )
+        records = (
+          db.session.query(Registro_Rota)
+          .filter(db.and_(
+            Registro_Rota.Rota_codigo == route.codigo,
+            Registro_Rota.tipo == tipo,
+            Registro_Rota.data.in_(dates)
+          ))
+          .all()
         )
 
         dis.remove(tipo)
@@ -381,8 +391,6 @@ def create_pass_fixed():
                   db.session.delete(check_passagem)
                   with db.session.begin_nested():
                     db.session.add(new_passagem)
-
-                  record.atualizar = True
                   db.session.commit()
 
                   return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong>. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong>, caso não possua.'})
@@ -397,11 +405,63 @@ def create_pass_fixed():
                 db.session.query(Passagem)
                 .filter(db.and_(
                   Passagem.passagem_fixa == True,
-                  Passagem.passagem_contraturno == False if linha.codigo == code_line else True,
+                  (Passagem.passagem_contraturno == False) if linha.codigo == code_line else True,
                   Passagem.Aluno_id == user.id
                 ))
                 .all()
               )
+
+              check_veicle = (rota_atual.onibus.id != route.onibus.id)
+              rotas_migracoes = []
+              if linha.codigo != code_line or check_veicle:
+                migracoes = (
+                  db.session.query(Passagem, Rota).join(Parada)
+                  .filter(db.and_(
+                    db.or_(
+                      Passagem.migracao_lotado == True,
+                      Passagem.migracao_manutencao == True
+                    ),
+                    Passagem.Aluno_id == user.id,
+                    Passagem.Parada_codigo == Parada.codigo,
+                    Parada.Rota_codigo == Rota.codigo
+                  ))
+                  .all()
+                )
+                for migracao, rota in migracoes:
+                  if migracao.data.in_(dates):
+                    rotas_migracoes.append(rota.codigo)
+                  db.session.delete(migracao)
+
+              route_contraturno = [passagem.parada.rota.codigo for passagem in passagens if passagem.passagem_contraturno]
+              records_ant = (
+                db.session.query(Registro_Rota)
+                .filter(db.and_(
+                  (
+                    (Registro_Rota.Rota_codigo == rota_atual.codigo) 
+                    if linha.codigo == code_line 
+                    else db.or_(
+                      db.and_(
+                        db.or_(
+                          Registro_Rota.Rota_codigo == rota_atual.codigo,
+                          Registro_Rota.Rota_codigo.in_(rotas_migracoes)
+                        ),
+                        db.not_(db.and_(
+                          Registro_Rota.tipo == return_ignore_route(user.turno),
+                          Registro_Rota.data.in_(dates_contraturno)
+                        ))
+                      ),
+                      db.and_(
+                        Registro_Rota.Rota_codigo == route_contraturno[0],
+                        Registro_Rota.tipo == return_ignore_route(user.turno),
+                        Registro_Rota.data.in_(dates_contraturno)
+                      ) if route_contraturno else False
+                    )
+                  ),
+                  Registro_Rota.data.in_(dates)
+                ))
+                .all()
+              )
+
               try:
                 for passagem in passagens:
                   db.session.delete(passagem)
@@ -409,7 +469,8 @@ def create_pass_fixed():
                 with db.session.begin_nested():
                   db.session.add(new_passagem)
                 
-                record.atualizar = True
+                for record in records + records_ant:
+                  set_update_record_route(record)
                 db.session.commit()
 
                 if linha.codigo == code_line:
@@ -439,7 +500,45 @@ def create_pass_fixed():
               if check_passagem:
                 rota_check = check_passagem.parada.rota
                 if rota_check.codigo != route.codigo:
-                  db.session.delete(check_passagem)
+                  check_veicle = (rota_check.onibus.id != route.onibus.id)
+                  rotas_migracoes = []
+                  if rota_check.linha.codigo != linha.codigo or check_veicle:
+                    migracoes = (
+                      db.session.query(Passagem, Rota).join(Parada)
+                      .filter(db.and_(
+                        db.or_(
+                          Passagem.migracao_lotado == True,
+                          Passagem.migracao_manutencao == True
+                        ),
+                        Passagem.Aluno_id == user.id,
+                        Passagem.Parada_codigo == Parada.codigo,
+                        Parada.Rota_codigo == Rota.codigo
+                      ))
+                      .all()
+                    )
+                    for migracao, rota in migracoes:
+                      if migracao.data.in_(dates):
+                        rotas_migracoes.append(rota.codigo)
+                      db.session.delete(migracao)
+
+                  record_ant_fixed = (
+                    db.session.query(Registro_Rota)
+                    .filter(db.and_(
+                      db.or_(
+                        Registro_Rota.Rota_codigo == rota_check.codigo,
+                        Registro_Rota.Rota_codigo.in_(rotas_migracoes)
+                      ),
+                      db.not_(db.and_(
+                        Registro_Rota.tipo == return_ignore_route(user.turno),
+                        Registro_Rota.data.in_(dates_contraturno)
+                      )),
+                      Registro_Rota.data.in_(dates)
+                    ))
+                    .all()
+                  )
+                  for record in record_ant_fixed:
+                    set_update_record_route(record)
+
                   if rota_check.linha.codigo != linha.codigo:
                     contraturno = (
                       Passagem.query.filter_by(
@@ -449,14 +548,31 @@ def create_pass_fixed():
                       )
                       .first()
                     )
+
                     if contraturno:
+                      record_ant_contraturno = (
+                        db.session.query(Registro_Rota)
+                        .filter(db.and_(
+                          Registro_Rota.Rota_codigo == contraturno.parada.rota.codigo,
+                          Registro_Rota.tipo == return_ignore_route(user.turno),
+                          Registro_Rota.data.in_(dates_contraturno)
+                        ))
+                        .all()
+                      )
+                      for record in record_ant_contraturno:
+                        set_update_record_route(record)
                       db.session.delete(contraturno)
+
                     text = f'Você definiu seu ponto fixo de <strong>{tipo.capitalize()}</strong> em outra linha; todas os seus vínculos com a linha anterior foram removidos. Defina seu novo ponto de <strong>{reverse.capitalize()}</strong> e <strong>Contraturno</strong> nesta nova linha.'
                   else:
                     text = f'Você definiu seu ponto fixo de <strong>{tipo.capitalize()}</strong> em outra rota; seu ponto de <strong>{reverse.capitalize()}</strong> na rota anterior foi removido.'
+                  
+                  db.session.delete(check_passagem)
 
               db.session.add(new_passagem)
-              record.atualizar = True
+              for record in records:
+                set_update_record_route(record)
+
               db.session.commit()
               return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': text})
             
@@ -489,6 +605,17 @@ def create_pass_contraturno():
       if route is not None and shift.capitalize() != user.turno:
         if not route:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+
+        dates = return_dates_week(only_valid=True)
+        dates_contraturno = (
+          db.session.query(Registro_Aluno.data)
+          .filter(db.and_(
+            Registro_Aluno.Aluno_id == user.id,
+            Registro_Aluno.contraturno == True,
+            Registro_Aluno.data.in_(dates)
+          ))
+          .all()
+        )
         
         check_passagem = (
           Passagem.query.filter_by(
@@ -519,9 +646,26 @@ def create_pass_contraturno():
 
           new_contraturno = Passagem(**info)
           if check_passagem:
-            linha_atual = check_passagem.parada.rota.linha.codigo
+            rota_atual = check_passagem.parada.rota
+            linha_atual = rota_atual.linha.codigo
+
             if linha_atual == linha.codigo:
+              records = (
+                db.session.query(Registro_Rota)
+                .filter(db.and_(
+                  db.or_(
+                    Registro_Rota.Rota_codigo == route.codigo,
+                    Registro_Rota.Rota_codigo == rota_atual.codigo
+                  ),
+                  Registro_Rota.tipo == return_ignore_route(user.turno),
+                  Registro_Rota.data.in_(dates_contraturno)
+                ))
+                .all()
+              )
               try:
+                for record in records:
+                  set_update_record_route(record)
+
                 db.session.delete(check_passagem)
                 with db.session.begin_nested():
                   db.session.add(new_contraturno)
@@ -535,13 +679,51 @@ def create_pass_contraturno():
             
             else:
               passagens = (
-                Passagem.query.filter_by(
-                  Aluno_id=user.id,
-                  passagem_fixa=True
-                )
+                db.session.query(Passagem)
+                .filter(db.and_(
+                  Passagem.Aluno_id == user.id,
+                  db.or_(
+                    Passagem.passagem_fixa == True,
+                    Passagem.migracao_lotado == True,
+                    Passagem.migracao_manutencao == True
+                  )
+                ))
+                .all()
+              )
+
+              route_fixed = [
+                passagem.parada.rota.codigo for passagem in passagens 
+                if passagem.passagem_fixa or 
+                (passagem.data in dates and (passagem.migracao_lotado or passagem.migracao_manutencao))
+              ]
+              records = (
+                db.session.query(Registro_Rota)
+                .filter(db.and_(
+                  db.or_(
+                    db.and_(
+                      Registro_Rota.tipo == return_ignore_route(user.turno),
+                      Registro_Rota.data.in_(dates_contraturno),
+                      db.or_(
+                        Registro_Rota.Rota_codigo == route.codigo,
+                        Registro_Rota.Rota_codigo == rota_atual.codigo
+                      )
+                    ),
+                    db.and_(
+                      Registro_Rota.Rota_codigo.in_(route_fixed),
+                      db.not_(db.and_(
+                        Registro_Rota.tipo == return_ignore_route(user.turno),
+                        Registro_Rota.data.in_(dates_contraturno)
+                      ))
+                    )
+                  ),
+                  Registro_Rota.data.in_(dates)
+                ))
                 .all()
               )
               try:
+                for record in records:
+                  set_update_record_route(record)
+
                 for passagem in passagens:
                   db.session.delete(passagem)
 
@@ -556,8 +738,67 @@ def create_pass_contraturno():
                 print(f'Erro ao criar a passagem: {str(e)}')
 
           else:
+            check_passagem = (
+              db.session.query(Rota, Passagem).join(Parada)
+              .filter(db.and_(
+                Passagem.Aluno_id == user.id,
+                Passagem.passagem_fixa == True,
+                Passagem.Parada_codigo == Parada.codigo,
+                Parada.Rota_codigo == Rota.codigo,
+                Rota.Linha_codigo != linha.codigo,
+              ))
+              .all()
+            )
             try:
+              route_fixed = []
+              if check_passagem:
+                for rota, passagem in check_passagem:
+                  route_fixed.append(rota.codigo)
+                  db.session.delete(passagem)
+                
+                migracoes = (
+                  db.session.query(Rota, Passagem).join(Parada)
+                  .filter(db.and_(
+                    Passagem.Aluno_id == user.id,
+                    Passagem.Parada_codigo == Parada.codigo,
+                    Parada.Rota_codigo == Rota.codigo,
+                    db.or_(
+                      Passagem.migracao_lotado == True,
+                      Passagem.migracao_manutencao == True
+                    )
+                  ))
+                  .all()
+                )
+
+                for rota, migracao in migracoes:
+                  route_fixed.append(rota.codigo)
+                  db.session.delete(migracao)
+              
+              records = (
+                db.session.query(Registro_Rota)
+                .filter(db.and_(
+                  db.or_(
+                    db.and_(
+                      Registro_Rota.tipo == return_ignore_route(user.turno),
+                      Registro_Rota.data.in_(dates_contraturno),
+                      Registro_Rota.Rota_codigo == route.codigo
+                    ),
+                    db.and_(
+                      Registro_Rota.Rota_codigo.in_(route_fixed),
+                      db.not_(db.and_(
+                        Registro_Rota.tipo == return_ignore_route(user.turno),
+                        Registro_Rota.data.in_(dates_contraturno)
+                      ))
+                    )
+                  ),
+                  Registro_Rota.data.in_(dates)
+                ))
+                .all()
+              )
+              for record in records:
+                set_update_record_route(record)
               db.session.add(new_contraturno)
+
               db.session.commit()
               return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': ''})
             

@@ -25,12 +25,9 @@
     </template>
 
     <template id="templates_popup">
-      {% include "/popups/page/popup_index.html" %} 
-      {% if role == 'motorista' %}
-      {% include "/popups/page/popup_driver.html" %} 
-      {% else %} 
-      {% include "/popups/page/popup_student.html" %} 
-      {% endif %}
+      {% include "/popups/page/popup_index.html" %} {% if role == 'motorista' %}
+      {% include "/popups/page/popup_driver.html" %} {% else %} {% include
+      "/popups/page/popup_student.html" %} {% endif %}
     </template>
 
     <header
@@ -105,7 +102,10 @@
               ></i>
             </div>
 
-            <div id="aba_agenda_scheduler" class="page__container scroll_horizontal -enter-">
+            <div
+              id="aba_agenda_scheduler"
+              class="page__container scroll_horizontal -enter-"
+            >
               {% for index in range(5) %}
               <div
                 id="card_{{ dias_semana[index] }}"
@@ -113,8 +113,14 @@
               >
                 <div class="page__container--card_title pos_relative">
                   <h1 class="text terciario">{{ dias_semana[index] }}</h1>
-                  <i id="card_{{ dias_semana[index] }}_edit" class="bi bi-pencil-square page__icon card"></i>
-                  <i id="card_{{ dias_semana[index] }}_blocked" class="bi bi-person-lock page__icon card title inactive"></i>
+                  <i
+                    id="card_{{ dias_semana[index] }}_edit"
+                    class="bi bi-pencil-square page__icon card"
+                  ></i>
+                  <i
+                    id="card_{{ dias_semana[index] }}_blocked"
+                    class="bi bi-person-lock page__icon card title inactive"
+                  ></i>
                 </div>
 
                 <span
@@ -123,34 +129,49 @@
                   style="margin-top: calc(1.5vw + 2vh + 1vmin)"
                   >Carregando...</span
                 >
-                <div id="{{ dias_semana[index] }}_card_body" class="page__container--card_body inactive">
+                <div
+                  id="{{ dias_semana[index] }}_card_body"
+                  class="page__container--card_body inactive"
+                >
                   <div class="page__container">
                     <p class="text terciario">Data:</p>
                     <p
                       id="data_{{ dias_semana[index] }}"
-                      class="text terciario content"
+                      class="text terciario"
                     ></p>
                   </div>
 
-                  <div class="page__container">
-                    <p class="text terciario">Irá faltar:</p>
-                    <p
-                      id="faltara_{{ dias_semana[index] }}"
-                      class="text terciario content"
-                    ></p>
-                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      flex-grow: 1;
+                      justify-content: center;
+                    "
+                  >
+                    <div class="page__container">
+                      <p class="text terciario">Irá faltar:</p>
+                      <p
+                        id="faltara_{{ dias_semana[index] }}"
+                        class="text terciario content"
+                      ></p>
+                    </div>
 
-                  <div class="page__container">
-                    <p class="text terciario">Contraturno:</p>
-                    <p
-                      id="contraturno_{{ dias_semana[index] }}"
-                      class="text terciario content"
-                    ></p>
-                  </div>
+                    <div class="page__container">
+                      <p class="text terciario">Contraturno:</p>
+                      <p
+                        id="contraturno_{{ dias_semana[index] }}"
+                        class="text terciario content"
+                      ></p>
+                    </div>
 
-                  <div id="{{ dias_semana[index] }}_container" class="inactive">
-                    <h1 class="page__division min_space"></h1>
-                    <div id="{{ dias_semana[index] }}_area_diaria"></div>
+                    <div
+                      id="{{ dias_semana[index] }}_container"
+                      class="inactive"
+                    >
+                      <h1 class="page__division min_space"></h1>
+                      <div id="{{ dias_semana[index] }}_area_diaria"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -179,8 +200,14 @@
           <div class="page__container title -enter-">
             <h1 class="text principal">Rotas</h1>
           </div>
-          <h2 class="text title -enter-">Minhas rotas</h2>
+          {% if role == 'aluno' %}
+          <div id="minha_rota_diaria" class="inactive">
+            <h2 class="text title -enter-">Rotas de diárias</h2>
+            <div></div>
+          </div>
+          {% endif %}
 
+          <h2 class="text title -enter-">Minhas rotas</h2>
           {% if role == 'motorista' %}
           <div id="minhas_rota">
             <div id="sem_veiculo" class="-enter- inactive">

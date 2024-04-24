@@ -134,10 +134,23 @@ def get_routes():
     else:
       minhas_rotas = []
       rotas = []
+      diarias = {}
       retorno['data']['minhas_rotas'] = minhas_rotas
       retorno['data']['rotas'] = rotas
+      retorno['data']['diarias'] = diarias
       retorno['msg'] = []
 
+      rotas_diarias = (
+        db.session.query(Linha, Rota).join(Parada).join(Passagem)
+        .filter(db.and_(
+          Passagem.passagem_fixa == False,
+          Passagem.Aluno_id == user.id,
+          Parada.codigo == Passagem.Parada_codigo,
+          Rota.codigo == Parada.Rota_codigo,
+          Rota.Linha_codigo == Linha.codigo
+        ))
+        .all()
+      )
       rota_fixa = (
         db.session.query(Rota).join(Parada).join(Passagem)
         .filter(db.and_(
@@ -161,6 +174,32 @@ def get_routes():
         .first()
       )
       linha_codigo = None
+
+      for linha, rota in rotas_diarias:
+        if linha.nome not in diarias:
+          diarias[linha.nome] = []
+        
+        info = {
+          'line': linha.nome,
+          'turno': rota.turno,
+          'horario_partida': format_time(rota.horario_partida),
+          'horario_retorno': format_time(rota.horario_retorno),
+          'quantidade': count_part_route(rota.codigo),
+          'estado': estado
+        }
+        veiculo = rota.onibus
+        surname = 'Sem veículo'
+        motorista = 'Desativada'
+
+        if veiculo:
+          surname = veiculo.apelido
+          motorista = 'Nenhum'
+          if veiculo.motorista:
+            motorista = veiculo.motorista.nome
+        info['apelido'] = surname
+        info['motorista'] = motorista
+
+        diarias[linha.nome].append(info)
 
       if rota_fixa:
         linha_codigo = rota_fixa.linha.codigo
@@ -429,9 +468,14 @@ def get_stops_student():
         info_date = format_data(passagem.data)
         data['diaria']['paradas'].append(info)
 
-        if passagem.migracao:
-          info['data'] = f'{info_date} - migração'
-          data['diaria']['msg'] = 'Migração: Seu motorista alterou o veículo que você usará no dia e trajeto especificado devido a uma lotação identificada em seu veículo habitual naquele dia.'
+        if passagem.migracao_lotado:
+          info['data'] = f'{info_date} - migrado devido lotação'
+          data['diaria']['msg'] = 'Lotado: Seu motorista alterou o veículo que você usará no dia e trajeto especificado devido a uma lotação identificada em seu veículo habitual naquele dia.'
+        
+        elif passagem.migracao_manutencao:
+          info['data'] = f'{info_date} - migrado devido manutenção'
+          data['diaria']['msg'] = 'Veículo em manutenção: Seu motorista alterou o veículo que você usará devido a um defeito encontrado em seu veículo habitual.'
+
         else: info['data'] = info_date
     
     for tipo in tipos:
@@ -739,8 +783,10 @@ def get_interface_route(name_line):
     retorno = {'error': False, 'relacao': return_relationship(linha.codigo)}
     retorno['ativas'] = []; retorno['desativas'] = []
     retorno['role'] = current_user.roles[0].name
+    code_routes = []
 
     for rota in rotas:
+      code_routes.append(rota.codigo)
       info = {
         'turno': rota.turno,
         'horario_partida': format_time(rota.horario_partida),
@@ -767,11 +813,46 @@ def get_interface_route(name_line):
     if retorno['role'] == 'aluno':
       del retorno['quantidade']
       del retorno['desativas']
+      retorno['diarias'] = []
+      user = return_my_user()
+
+      minhas_diarias = (
+        db.session.query(Parada).join(Passagem)
+        .filter(db.and_(
+          Passagem.Aluno_id == user.id,
+          Passagem.passagem_fixa == False,
+          Passagem.Parada_codigo == Parada.codigo,
+          Parada.Rota_codigo.in_(code_routes)
+        ))
+        .all()
+      )
+
+      for parada in minhas_diarias:
+        rota = parada.rota
+        info = {
+          'turno': rota.turno,
+          'horario_partida': format_time(rota.horario_partida),
+          'horario_retorno': format_time(rota.horario_retorno),
+          'quantidade': count_part_route(rota.codigo),
+        }
+
+        veiculo = rota.onibus
+        surname = 'Sem veículo'
+        motorista = 'Desativada'
+
+        if veiculo:
+          surname = veiculo.apelido
+          motorista = 'Nenhum'
+          if veiculo.motorista:
+            motorista = veiculo.motorista.nome
+        info['apelido'] = surname
+        info['motorista'] = motorista
+
+        retorno['diarias'].append(info)
 
       if retorno['relacao'] == 'participante':
         retorno['minhas_rotas'] = {'turno': [], 'contraturno': []}
         retorno['mensagens'] = []
-        user = return_my_user()
 
         minhas_paradas = (
           db.session.query(Parada).join(Passagem)

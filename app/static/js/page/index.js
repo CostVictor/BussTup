@@ -276,6 +276,8 @@ function loadRoutes() {
             area_rotas.appendChild(local);
           }
         } else {
+          const model_local = models.querySelector("#model_local");
+          const area_diarias = document.getElementById("minha_rota_diaria");
           const local_msg = document.getElementById("minhas_rotas_msg");
           local_msg.innerHTML = "";
 
@@ -288,6 +290,37 @@ function loadRoutes() {
               local_msg.appendChild(text);
             }
           }
+
+          const container_diarias = area_diarias.querySelector("div");
+          container_diarias.innerHTML = "";
+
+          if (Object.keys(data.diarias).length) {
+            area_diarias.classList.remove("inactive");
+            for (linha in data.diarias) {
+              const list = data.diarias[linha];
+              const container_diaria_local = model_local.cloneNode(true);
+              container_diaria_local.id = `${container_diarias.id}-${linha}`;
+              container_diaria_local.querySelector("h2").textContent = linha;
+              
+              if (Array.from(container_diarias.children).length) {
+                container_diaria_local.classList.add('margin_top')
+              }
+
+              create_routes(
+                list,
+                container_diaria_local,
+                false,
+                false,
+                false,
+                false
+              );
+              container_diaria_local.classList.remove('inactive')
+              container_diarias.appendChild(container_diaria_local)
+            }
+          } else {
+            area_diarias.classList.add("inactive");
+          }
+
           create_routes(data.minhas_rotas, area_minhas_rotas);
           create_routes(
             data.rotas,
@@ -296,6 +329,25 @@ function loadRoutes() {
             false,
             data.minhas_rotas
           );
+
+          if (!data.minhas_rotas.length) {
+            area_minhas_rotas.innerHTML = "";
+            const text = document.createElement("p");
+            text.className =
+              "text secundario fundo cinza justify margin_bottom -enter-";
+            text.textContent = "Você não possui nenhuma rota fixa.";
+            area_minhas_rotas.appendChild(text);
+            local_msg.innerHTML = "";
+          }
+
+          if (!data.rotas.length) {
+            area_rotas.innerHTML = "";
+            const text = document.createElement("p");
+            text.className =
+              "text secundario fundo cinza justify margin_bottom -enter-";
+            text.textContent = "Nenhuma rota válida encontrada.";
+            area_rotas.appendChild(text);
+          }
         }
         const elements = divs[1].querySelectorAll('[class*="-enter-"]');
         animate_itens(elements, "fadeDown", 0.7, 0);

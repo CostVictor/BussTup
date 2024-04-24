@@ -411,7 +411,7 @@ def check_valid_date(date, hour=0, minute=0):
       return True
   
   return False
-
+    
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~~ Count ~~~~~~~~ '''
@@ -448,14 +448,32 @@ def count_part_route(route_code, formated=True):
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
-''' ~~~~~~~~ Modify ~~~~~~~~ '''
+''' ~~~~~ Modify / Set ~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
+def set_update_record_route(record):
+  now = datetime.now()
+  route = record.rota
+  date = record.data
+  type_ = record.tipo
+
+  if now.date() < date:
+    record.atualizar = True
+  
+  elif date == now.date():
+    time = route.horario_partida if type_ == 'partida' else route.horario_retorno
+    date_time = datetime.combine(now.date(), time)
+    if now <= date_time + timedelta(hours=1):
+      record.atualizar = True
+    else: record.atualizar = False
+  else: record.atualizar = False
+
+
 def modify_forecast_route(route, record, commit=True):
-  type = record.tipo
+  type_ = record.tipo
   day = record.data
 
-  reject_contraturno = (type == return_ignore_route(route.turno))
+  reject_contraturno = (type_ == return_ignore_route(route.turno))
   not_includes = (
     db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada).join(Rota)
     .filter(db.and_(
@@ -463,7 +481,7 @@ def modify_forecast_route(route, record, commit=True):
       Passagem.Parada_codigo == Parada.codigo,
       Rota.turno == route.turno,
       Parada.Rota_codigo != route.codigo,
-      Parada.tipo == type,
+      Parada.tipo == type_,
       Passagem.passagem_fixa == False,
       Passagem.data == day
     ))
@@ -475,7 +493,7 @@ def modify_forecast_route(route, record, commit=True):
     .join(Aluno).join(Registro_Aluno).join(Parada)
     .filter(db.and_(
       Parada.Rota_codigo == route.codigo,
-      Parada.tipo == type,
+      Parada.tipo == type_,
 
       Passagem.Parada_codigo == Parada.codigo,
       Aluno.id == Passagem.Aluno_id,
