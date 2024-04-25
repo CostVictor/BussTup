@@ -415,7 +415,7 @@ def create_pass_fixed():
               rotas_migracoes = []
               if linha.codigo != code_line or check_veicle:
                 migracoes = (
-                  db.session.query(Passagem, Rota).join(Parada)
+                  db.session.query(Passagem, Parada, Rota)
                   .filter(db.and_(
                     db.or_(
                       Passagem.migracao_lotado == True,
@@ -427,7 +427,7 @@ def create_pass_fixed():
                   ))
                   .all()
                 )
-                for migracao, rota in migracoes:
+                for migracao, _, rota in migracoes:
                   if migracao.data.in_(dates):
                     rotas_migracoes.append(rota.codigo)
                   db.session.delete(migracao)
@@ -504,7 +504,7 @@ def create_pass_fixed():
                   rotas_migracoes = []
                   if rota_check.linha.codigo != linha.codigo or check_veicle:
                     migracoes = (
-                      db.session.query(Passagem, Rota).join(Parada)
+                      db.session.query(Passagem, Parada, Rota)
                       .filter(db.and_(
                         db.or_(
                           Passagem.migracao_lotado == True,
@@ -516,7 +516,7 @@ def create_pass_fixed():
                       ))
                       .all()
                     )
-                    for migracao, rota in migracoes:
+                    for migracao, _, rota in migracoes:
                       if migracao.data.in_(dates):
                         rotas_migracoes.append(rota.codigo)
                       db.session.delete(migracao)
@@ -739,7 +739,7 @@ def create_pass_contraturno():
 
           else:
             check_passagem = (
-              db.session.query(Rota, Passagem).join(Parada)
+              db.session.query(Rota, Parada, Passagem)
               .filter(db.and_(
                 Passagem.Aluno_id == user.id,
                 Passagem.passagem_fixa == True,
@@ -752,12 +752,12 @@ def create_pass_contraturno():
             try:
               route_fixed = []
               if check_passagem:
-                for rota, passagem in check_passagem:
+                for rota, _, passagem in check_passagem:
                   route_fixed.append(rota.codigo)
                   db.session.delete(passagem)
                 
                 migracoes = (
-                  db.session.query(Rota, Passagem).join(Parada)
+                  db.session.query(Rota, Parada, Passagem)
                   .filter(db.and_(
                     Passagem.Aluno_id == user.id,
                     Passagem.Parada_codigo == Parada.codigo,
@@ -770,7 +770,7 @@ def create_pass_contraturno():
                   .all()
                 )
 
-                for rota, migracao in migracoes:
+                for rota, _, migracao in migracoes:
                   route_fixed.append(rota.codigo)
                   db.session.delete(migracao)
               

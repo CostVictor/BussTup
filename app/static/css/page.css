@@ -154,6 +154,24 @@ body {
   display: none;
 }
 
+.page__container--card_content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.page__container--card_content.span {
+  align-items: center;
+  font-size: calc(0.93vw + 0.9vh + 1vmin);
+  width: calc(8.5vw + 9vh + 1vmin);
+  color: var(--azul_terciario);
+}
+
+.page__container--card_content.inactive {
+  display: none;
+}
+
 .page__container--aba {
   display: flex;
   flex-direction: column;

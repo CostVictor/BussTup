@@ -141,19 +141,13 @@
                     ></p>
                   </div>
 
-                  <div
-                    style="
-                      display: flex;
-                      flex-direction: column;
-                      flex-grow: 1;
-                      justify-content: center;
-                    "
-                  >
+                  <span id="{{ dias_semana[index] }}_span_feriado" class="page__container--card_content span inactive">Feriado</span>
+                  <div id="{{ dias_semana[index] }}_card_content" class="page__container--card_content inactive">
                     <div class="page__container">
                       <p class="text terciario">Irá faltar:</p>
                       <p
                         id="faltara_{{ dias_semana[index] }}"
-                        class="text terciario content"
+                        class="text terciario"
                       ></p>
                     </div>
 
@@ -161,7 +155,7 @@
                       <p class="text terciario">Contraturno:</p>
                       <p
                         id="contraturno_{{ dias_semana[index] }}"
-                        class="text terciario content"
+                        class="text terciario"
                       ></p>
                     </div>
 

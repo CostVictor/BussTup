@@ -399,16 +399,18 @@ def check_valid_password(password: str):
   return (uper and lower and number and simbol)
 
 
-def check_valid_date(date, hour=0, minute=0):
+def check_valid_datetime(date: datetime.date, time=False, add_limit=0):
   now = datetime.now()
-  if hour or minute:
-    if (
-      datetime(*date, hour, minute) >= now
-    ):
-      return True
-  else:
-    if date >= now.date():
-      return True
+
+  if date > now.date():
+    return True
+  
+  elif date == now.date():
+    if time:
+      time_check = datetime.combine(date, time)
+      if now <= time_check + timedelta(hours=add_limit):
+        return True
+    else: return True
   
   return False
     

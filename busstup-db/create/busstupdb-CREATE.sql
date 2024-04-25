@@ -386,6 +386,25 @@ CREATE TABLE IF NOT EXISTS `busstup`.`manutencao` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `busstup`.`registro_linha`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busstup`.`registro_linha` (
+  `codigo` BIGINT NOT NULL AUTO_INCREMENT,
+  `funcionamento` TINYINT NOT NULL DEFAULT 1,
+  `feriado` TINYINT NOT NULL DEFAULT 0,
+  `data` DATE NOT NULL,
+  `linha_codigo` INT(11) NOT NULL,
+  PRIMARY KEY (`codigo`),
+  INDEX `fk_calendario_linha1_idx` (`linha_codigo` ASC),
+  CONSTRAINT `fk_calendario_linha1`
+    FOREIGN KEY (`linha_codigo`)
+    REFERENCES `busstup`.`linha` (`codigo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;

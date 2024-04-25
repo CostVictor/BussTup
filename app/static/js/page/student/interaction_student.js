@@ -171,6 +171,28 @@ function loadWeek() {
                 icon_card_edit.classList.add("inactive");
                 icon_card_blocked.classList.remove("inactive");
               }
+            } else if (key.includes("content")) {
+              const new_key = key.split("_");
+              if (value) {
+                container
+                  .querySelector(`#${new_key[new_key.length - 1]}_${day}`)
+                  .classList.add("content");
+              } else {
+                container
+                .querySelector(`#${new_key[new_key.length - 1]}_${day}`)
+                .classList.remove("content");
+              }
+            } else if (key === 'feriado') {
+              const card_content = document.getElementById(`${day}_card_content`)
+              const span_feriado = document.getElementById(`${day}_span_feriado`)
+
+              if (value) {
+                card_content.classList.add('inactive')
+                span_feriado.classList.remove('inactive')
+              } else {
+                card_content.classList.remove('inactive')
+                span_feriado.classList.add('inactive')
+              }
             } else {
               container.querySelector(`#${key}_${day}`).textContent = value;
             }
@@ -217,75 +239,102 @@ function config_popup_day() {
   const diarias_card = Array.from(
     document.getElementById(`${day}_area_diaria`).children
   );
-  let blocked_faltara = false
-  let blocked_contraturno = false
+  
+  const container = document.getElementById("edit_dia_msg");
+  const span_msg = container.querySelector("span");
+  container.classList.add("inactive");
+  span_msg.innerHTML = "";
+
+  const icon_blocked_faltara = document.getElementById(
+    "edit_dia_faltara_blocked"
+  );
+  const icon_blocked_contraturno = document.getElementById(
+    "edit_dia_contraturno_blocked"
+  );
+  const optios_faltara = document.getElementById("options_falta");
+  const optios_contraturno = document.getElementById("options_contraturno");
+
+  let blocked_faltara = false;
+  let blocked_contraturno = false;
 
   if (diarias_card.length) {
-    const container = popup.querySelector("edit_dia_msg");
     container.classList.remove("inactive");
-
-    diarias_card.forEach(element => {
+    diarias_card.forEach((element) => {
       const text = document.createElement("p");
-      text.className = "text secundario empasis justify";
-      container.querySelector("span").appendChild(text);
+      text.className = "text secundario fundo justify";
+      span_msg.appendChild(text);
 
-      if (element.id.includes('partida')) {
-        text.textContent = 'Você possui uma diária do tipo partida marcada para este dia.'
-        blocked_faltara = true
+      if (element.id.includes("partida")) {
+        set_selected_bool(optios_faltara, "Sim");
+        set_selected_bool(optios_contraturno, "Não");
+        text.textContent =
+          "Você possui uma diária do tipo partida marcada para este dia.";
+        blocked_faltara = true;
+        blocked_contraturno = true;
       } else {
-        text.textContent = 'Você possui uma diária do tipo retorno marcada para este dia.'
-        blocked_contraturno = true
+        set_selected_bool(optios_contraturno, "Não");
+        text.textContent =
+          "Você possui uma diária do tipo retorno marcada para este dia.";
+        blocked_contraturno = true;
       }
-    })
+    });
   }
-  const icon_blocked_faltara = document.getElementById('edit_dia_faltara_blocked')
-  const icon_blocked_contraturno = document.getElementById('edit_dia_contraturno_blocked')
-  const optios_faltara = document.getElementById('options_falta')
-  const optios_contraturno = document.getElementById('options_contraturno')
+
+  const p_faltara = document.getElementById(`faltara_${day}`);
+  const p_contraturno = document.getElementById(`contraturno_${day}`);
+  if (!p_faltara.className.includes("content")) {
+    container.classList.remove("inactive");
+    blocked_faltara = true;
+    const text = document.createElement("p");
+    text.className = "text secundario fundo justify";
+    text.textContent =
+      "A opção de falta foi bloqueada pois o horário limite de alteração foi atingido.";
+    span_msg.appendChild(text);
+  }
+
+  if (!p_contraturno.className.includes("content")) {
+    container.classList.remove("inactive");
+    blocked_contraturno = true;
+    const text = document.createElement("p");
+    text.className = "text secundario fundo justify";
+    text.textContent =
+      "A opção de contraturno foi bloqueada pois o horário limite de alteração foi atingido.";
+    span_msg.appendChild(text);
+  }
 
   if (blocked_faltara) {
-    icon_blocked_faltara.classList.remove('inactive')
-    icon_blocked_contraturno.classList.remove('inactive')
-    set_selected_bool(optios_faltara, 'Sim')
-    set_selected_bool(optios_contraturno, 'Não')
-    
-    Array.from(optios_faltara.children).forEach(element => {
-      element.classList.add('blocked')
-    })
-    Array.from(optios_contraturno.children).forEach(element => {
-      element.classList.add('blocked')
-    })
-    
-  } else if (blocked_contraturno || return_bool_selected(optios_faltara)) {
-    icon_blocked_contraturno.classList.remove('inactive')
-    set_selected_bool(optios_contraturno, 'Não')
-
-    Array.from(optios_faltara.children).forEach(element => {
-      element.onclick = function() {
-        popup_selectOption(this)
-        config_popup_day()
-      }
-    })
-    Array.from(optios_contraturno.children).forEach(element => {
-      element.classList.add('blocked')
-    })
-    
+    icon_blocked_faltara.classList.remove("inactive");
+    Array.from(optios_faltara.children).forEach((element) => {
+      element.classList.add("blocked");
+    });
   } else {
-    icon_blocked_faltara.classList.add('inactive')
-    icon_blocked_contraturno.classList.add('inactive')
+    icon_blocked_faltara.classList.add("inactive");
+    Array.from(optios_faltara.children).forEach((element) => {
+      element.classList.remove("blocked");
+      element.onclick = function () {
+        popup_selectOption(this);
+        config_popup_day();
+      };
+    });
+  }
 
-    Array.from(optios_faltara.children).forEach(element => {
-      element.onclick = function() {
-        popup_selectOption(this)
-        config_popup_day()
-      }
-    })
-    Array.from(optios_contraturno.children).forEach(element => {
-      element.classList.remove('blocked')
-      element.onclick = function() {
-        popup_selectOption(this)
-        config_popup_day()
-      }
-    })
+  const state_faltara = return_bool_selected(optios_faltara);
+  if (blocked_contraturno || state_faltara) {
+    icon_blocked_contraturno.classList.remove("inactive");
+    Array.from(optios_contraturno.children).forEach((element) => {
+      element.classList.add("blocked");
+    });
+    if (state_faltara) {
+      set_selected_bool(optios_contraturno, "Não");
+    }
+  } else {
+    icon_blocked_contraturno.classList.add("inactive");
+    Array.from(optios_contraturno.children).forEach((element) => {
+      element.classList.remove("blocked");
+      element.onclick = function () {
+        popup_selectOption(this);
+        config_popup_day();
+      };
+    });
   }
 }

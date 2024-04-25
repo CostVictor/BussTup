@@ -1,6 +1,7 @@
 from flask_security import login_required, roles_required, current_user
 from app import app, cidades, turnos
 from flask import request, jsonify
+from datetime import time
 from app.utilities import *
 from app.database import *
 import bcrypt
@@ -85,6 +86,26 @@ def edit_contraturno_fixo():
 
   if execute:
     key = current_user.primary_key
+    user = return_my_user()
+
+    info_times = {
+      'contraturno': False
+    }
+    fixas = (
+      db.session.query(Parada, Passagem)
+      .filter(db.and_(
+        Passagem.Parada_codigo == Parada.codigo,
+        Passagem.passagem_fixa == True,
+        Passagem.Aluno_id == user.id
+      ))
+      .all()
+    )
+    for parada, passagem in fixas:
+      if passagem.passagem_contraturno:
+        if user.turno == 'Matutino':
+          info_times['contraturno'] = time(hour=12)
+        else:
+          info_times['contraturno'] = parada.horario_passagem
 
     contraturnos = (
       Contraturno_Fixo.query
@@ -101,15 +122,24 @@ def edit_contraturno_fixo():
     )
 
     try:
-      today = date.today()
       for record in contraturnos:
-        if registros[record.dia_fixo].data >= today:
+        check = check_valid_datetime(
+          registros[record.dia_fixo].data,
+          info_times['contraturno']
+        ) if info_times['contraturno'] else False
+
+        if check:
           registros[record.dia_fixo].contraturno = False
         db.session.delete(record)
       
       for dia in data:
         week_day = return_day_week(dia, reverse=True)
-        if registros[week_day].data >= today:
+        check = check_valid_datetime(
+          registros[week_day].data,
+          info_times['contraturno']
+        ) if info_times['contraturno'] else False
+
+        if check:
           registros[week_day].contraturno = True
 
         db.session.add(Contraturno_Fixo(

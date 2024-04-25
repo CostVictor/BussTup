@@ -1,7 +1,7 @@
 from flask_security import login_required, roles_required, current_user
 from flask import request, jsonify
 from collections import deque
-from datetime import date
+from datetime import date, time
 from app.utilities import *
 from app.database import *
 from app import app
@@ -496,6 +496,33 @@ def get_schedule_student():
     data = {}
     retorno = {'error': False, 'data': data}
     dates = return_dates_week()
+    code_line = None
+    info_times = {
+      'partida': False,
+      'contraturno': False
+    }
+    fixas = (
+      db.session.query(Parada, Passagem)
+      .filter(db.and_(
+        Passagem.Parada_codigo == Parada.codigo,
+        Passagem.passagem_fixa == True,
+        Passagem.Aluno_id == user.id
+      ))
+      .all()
+    )
+
+    for parada, passagem in fixas:
+      if code_line is None:
+        code_line = parada.rota.linha.codigo
+
+      if passagem.passagem_contraturno:
+        if user.turno == 'Matutino':
+          info_times['contraturno'] = time(hour=12)
+        else:
+          info_times['contraturno'] = parada.horario_passagem
+
+      elif parada.tipo == 'partida':
+        info_times['partida'] = parada.horario_passagem
 
     diarias = (
       db.session.query(Rota.turno, Parada.tipo, Passagem.data)
@@ -511,6 +538,15 @@ def get_schedule_student():
       )
       .all()
     )
+    feriados = (
+      db.session.query(Registro_Linha.data)
+      .filter(db.and_(
+        Registro_Linha.data.in_(dates),
+        Registro_Linha.Linha_codigo == code_line,
+        Registro_Linha.feriado == True
+      ))
+      .all()
+    ) if code_line is not None else []
 
     registros = (
       db.session.query(Registro_Aluno)
@@ -544,11 +580,23 @@ def get_schedule_student():
     retorno['contraturno_fixo'] = contraturnos_fixos
 
     for registro in registros:
+      value_partida = check_valid_datetime(
+        registro.data, info_times['partida']
+      ) if info_times['partida'] else True
+
+      value_contraturno = check_valid_datetime(
+        registro.data, info_times['contraturno']
+      ) if info_times['contraturno'] else True
+
+      feriado = [True for feriado in feriados if registro.data in feriado]
       info = {
         'data': format_data(registro.data),
         'faltara': return_str_bool(registro.faltara),
         'contraturno': return_str_bool(registro.contraturno) if not registro.faltara else 'Não',
-        'valida': check_valid_date(registro.data),
+        'valida': check_valid_datetime(registro.data) if not feriado else False,
+        'feriado': True if feriado else False,
+        'content_contraturno': value_contraturno,
+        'content_faltara': value_partida,
         'diarias': []
       }
 
