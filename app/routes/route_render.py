@@ -63,8 +63,9 @@ def pag_linha(name_line):
 
   if linha and not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first():
     role = current_user.roles[0].name
+    dates = [format_date(data) for data in return_dates_week()]
 
-    return render_template('blog/line.html', name_line=name_line, role=role, turnos=turnos, cidades=cidades, local_page=local_page)
+    return render_template('blog/line.html', name_line=name_line, role=role, turnos=turnos, dias_semana=dias_semana, cidades=cidades, dates=dates, local_page=local_page)
   
   return 'Linha não encontrada.'
 

@@ -158,11 +158,19 @@ function loadWeek() {
               const icon_card_blocked = document.getElementById(
                 `card_${day}_blocked`
               );
+              const card_content = document.getElementById(
+                `${day}_card_content`
+              );
+              const span_info = document.getElementById(`${day}_span_info`);
+
               icon_card_edit.classList.remove("inactive");
               icon_card_blocked.classList.add("inactive");
               card.classList.remove("blocked");
 
               if (value) {
+                card_content.classList.remove("inactive");
+                span_info.classList.add("inactive");
+
                 card.onclick = function () {
                   open_popup("edit_dia", this, false);
                 };
@@ -170,6 +178,10 @@ function loadWeek() {
                 card.classList.add("blocked");
                 icon_card_edit.classList.add("inactive");
                 icon_card_blocked.classList.remove("inactive");
+
+                card_content.classList.add("inactive");
+                span_info.classList.remove("inactive");
+                span_info.textContent = info["info"]
               }
             } else if (key.includes("content")) {
               const new_key = key.split("_");
@@ -179,21 +191,10 @@ function loadWeek() {
                   .classList.add("content");
               } else {
                 container
-                .querySelector(`#${new_key[new_key.length - 1]}_${day}`)
-                .classList.remove("content");
+                  .querySelector(`#${new_key[new_key.length - 1]}_${day}`)
+                  .classList.remove("content");
               }
-            } else if (key === 'feriado') {
-              const card_content = document.getElementById(`${day}_card_content`)
-              const span_feriado = document.getElementById(`${day}_span_feriado`)
-
-              if (value) {
-                card_content.classList.add('inactive')
-                span_feriado.classList.remove('inactive')
-              } else {
-                card_content.classList.remove('inactive')
-                span_feriado.classList.add('inactive')
-              }
-            } else {
+            } else if (key !== "info") {
               container.querySelector(`#${key}_${day}`).textContent = value;
             }
           }
@@ -239,7 +240,7 @@ function config_popup_day() {
   const diarias_card = Array.from(
     document.getElementById(`${day}_area_diaria`).children
   );
-  
+
   const container = document.getElementById("edit_dia_msg");
   const span_msg = container.querySelector("span");
   container.classList.add("inactive");

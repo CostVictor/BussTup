@@ -64,6 +64,31 @@ body {
   opacity: 0;
 }
 
+.page__container--card_info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--branco_primario);
+  width: calc(15vw + 15vh + 1vmin);
+  padding: calc(0.5vw + 0.5vh + 1vmin);
+  margin: calc(0.1vw + 0.1vh + 0.5vmin);
+  margin-bottom: calc(0.5vw + 0.5vh + 0.5vmin);
+  border-radius: 10px;
+}
+
+.page__container--card_info.blocked {
+  background-color: var(--cinza_quaternario);
+}
+
+.page__container--card_info.button {
+  transition: 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.page__container--card_info.button:hover {
+  scale: 1.03;
+}
+
 .page__container--icon {
   width: 100%;
   display: flex;
@@ -168,8 +193,21 @@ body {
   color: var(--azul_terciario);
 }
 
+.page__container--card_content.nowrap {
+  text-wrap: nowrap;
+}
+
 .page__container--card_content.inactive {
   display: none;
+}
+
+.page__container--calendar {
+  display: flex;
+  margin-top: calc(0.9vw + 0.9vh + 1vmin);
+  border-radius: 10px;
+  background-color: var(--branco_terciario);
+  width: 100%;
+  flex-grow: 1;
 }
 
 .page__container--aba {
@@ -431,6 +469,12 @@ body {
   color: var(--azul_terciario);
 }
 
+.page__icon.content.card_info {
+  padding: 0;
+  margin-left: calc(0.1vw + 0.1vh + 1vmin);
+  font-size: calc(0.3vw + 0.3vh + 1vmin);
+}
+
 .page__icon.content.del {
   display: flex;
   justify-content: center;
@@ -541,6 +585,57 @@ body {
   margin: calc(1vw + 1vh + 1vmin) calc(0.5vw + 0.5vh + 1vmin);
 }
 
+.page__division.card {
+  width: 100%;
+  margin: calc(0.1vw + 0.1vh + 0.5vmin) 0 calc(0.5vw + 0.5vh + 0.5vmin) 0;
+}
+
+
 .page__division.no_margin_top {
   margin-top: 0;
+}
+
+.page__item_calendar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  border-left: var(--cinza_quaternario) solid 0.06rem;
+}
+
+.page__text_calendar {
+  font-size: calc(0.6vw + 0.6vh + 1vmin);
+  margin-top: calc(0.1vw + 0.1vh + 0.5vmin);
+  color: var(--azul_terciario);
+}
+
+.page__text_calendar.border_bottom {
+  width: 75%;
+  text-align: center;
+  border-bottom: var(--cinza_quaternario) solid 0.06rem;
+}
+
+.page__item_calendar.first {
+  border: 0;
+}
+
+.page__color {
+  margin: calc(0.3vw + 0.3vh + 1vmin) 0;
+  width: 60%;
+  min-height: 10%;
+  border-radius: 10px;
+}
+
+.page__color.red {
+  background-color: var(--vermelho_intenso);
+}
+
+.page__color.green {
+  background-color: var(--verde_primario);
+}
+
+.page__color.yellow {
+  background-color: var(--amarelo_secundario);
 }

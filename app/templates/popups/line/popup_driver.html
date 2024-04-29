@@ -551,7 +551,7 @@
 <section id="config_point" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header pos_relative">
-      <h1 id="config_point_nome" class="popup__title"></h1>
+      <h1 id="config_point_nome" class="popup__title">Carregando...</h1>
       <i id="config_point_nome_edit" class="bi bi-pencil-square page__icon card title inactive"
         onclick="open_popup('edit_point_nome', this)"></i>
     </header>
@@ -588,6 +588,7 @@
           class="scroll_vertical popup__container--scroll inactive"></div>
 
         <h3 class="popup__text question">Alunos</h3>
+        <p class="text secundario fundo justify">Um aluno pode ter mais de um cadastro no mesmo ponto.</p>
         {% for turno in turnos %}
         <div id="config_point_{{ turno }}_btn" class="page__container interaction pos_relative"
           onclick="action_container(this)">
@@ -1070,6 +1071,51 @@
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('del_ponto')">Cancelar</button>
       <button class="popup__btn" onclick="del_point(event)">Excluir</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="edit_calendar" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 id="edit_calendar_title" class="popup__title"></h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div class="page__container">
+        <h3 class="popup__text question first">Linha em funcionamento?</h3>
+        <i id="edit_calendar_blocked_funcionamento" class="bi bi-person-lock popup__text question first" style="border: none;"></i>
+      </div>
+      <div id="edit_calendar_options_funcionando" class="popup__container--options">
+        <div class="popup__input checkbox bool">
+          <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+          <p class="popup__text content input">Sim</p>
+        </div>
+        
+        <div class="popup__input checkbox bool">
+          <i class="bi bi-circle popup__icon ratio"></i>
+          <p class="popup__text content input">Não</p>
+        </div>
+      </div>
+
+      <h3 class="popup__text question">Este dia é feriado?</h3>
+      <div id="edit_calendar_options_feriado" class="popup__container--options">
+        <div class="popup__input checkbox bool">
+          <i class="bi bi-circle popup__icon ratio"></i>
+          <p class="popup__text content input">Sim</p>
+        </div>
+        
+        <div class="popup__input checkbox bool">
+          <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+          <p class="popup__text content input">Não</p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('edit_calendar')">Cancelar</button>
+      <button class="popup__btn" onclick="edit_calendar()">Salvar</button>
     </footer>
   </div>
 </section>

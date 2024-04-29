@@ -250,7 +250,7 @@ class Manutencao(db.Model):
 class Registro_Linha(db.Model):
   __tablename__ = 'Registro_Linha'
   codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-  funcionamento = db.Column(db.Boolean, nullable=False, default=True)
+  funcionando = db.Column(db.Boolean, nullable=False, default=True)
   feriado = db.Column(db.Boolean, nullable=False, default=False)
   data = db.Column(db.Date, nullable=True)
   Linha_codigo = db.Column(db.Integer, db.ForeignKey('Linha.codigo'), nullable=False)

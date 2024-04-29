@@ -317,29 +317,52 @@ def get_lines():
 
   if query:
     user = return_my_user()
-    if role == 'aluno':
-      passagem = (
-        Passagem.query.filter_by(
-        Aluno_id=user.id,
-        passagem_fixa=True
+    if user:
+      if role == 'aluno':
+        passagem = (
+          Passagem.query.filter_by(
+          Aluno_id=user.id,
+          passagem_fixa=True
+          )
+          .first()
         )
-        .first()
-      )
-      if passagem:
-        data['minha_linha'] = passagem.parada.ponto.linha.nome
 
-    for result in query:
-      linha = result.linha
-      dict_linha = {'nome': linha.nome, 'ferias': linha.ferias, 'paga': linha.paga}
+        dates = return_dates_week(only_valid=True)
+        diarias = (
+          db.session.query(Linha, Rota, Parada, Passagem)
+          .filter(db.and_(
+            Rota.Linha_codigo == Linha.codigo,
+            Parada.Rota_codigo == Rota.codigo,
+            Passagem.Parada_codigo == Parada.codigo,
+            Passagem.Aluno_id == user.id,
+            Passagem.passagem_fixa == False,
+            Passagem.data.in_(dates)
+          ))
+          .all()
+        )
+        diarias = [
+          linha.codigo for linha, _, parada, passagem in diarias
+          if check_valid_datetime(passagem.data, parada.horario_passagem)
+        ]
 
-      if linha.cidade not in data['cidades']:
-        data['cidades'][linha.cidade] = []
+        if passagem:
+          data['minha_linha'] = passagem.parada.ponto.linha.nome
 
-      data['cidades'][linha.cidade].append(dict_linha)
-      dict_linha['dono'] = result.motorista.nome
+      for result in query:
+        linha = result.linha
+        dict_linha = {
+          'nome': linha.nome, 'ferias': linha.ferias, 
+          'paga': linha.paga, 'diaria': (linha.codigo in diarias) if role == 'aluno' else False
+        }
 
-      if role == 'motorista' and dict_linha['dono'] == user.nome:
-        data['minha_linha'].append(dict_linha)
+        if linha.cidade not in data['cidades']:
+          data['cidades'][linha.cidade] = []
+
+        data['cidades'][linha.cidade].append(dict_linha)
+        dict_linha['dono'] = result.motorista.nome
+
+        if role == 'motorista' and dict_linha['dono'] == user.nome:
+          data['minha_linha'].append(dict_linha)
 
   else: data['identify'] = False
   return jsonify(data)
@@ -384,16 +407,55 @@ def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
 def get_summary_line(name_line):
   linha = Linha.query.filter_by(nome=name_line).first()
   if linha and not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first():
+    dates = return_dates_week()
+    subquery = (
+      db.session.query(Parada.codigo).join(Rota)
+      .filter(db.and_(
+        Parada.Rota_codigo == Rota.codigo,
+        Rota.Linha_codigo == linha.codigo
+      ))
+      .subquery()
+    )
+    quantidade_aluno = (
+      db.session.query(func.count(func.distinct(Passagem.Aluno_id)))
+      .filter(db.and_(
+        Passagem.passagem_fixa == True,
+        Passagem.Parada_codigo.in_(subquery.select())
+      ))
+      .scalar()
+    )
+
+    records = (
+      db.session.query(Registro_Linha)
+      .filter(db.and_(
+        Registro_Linha.Linha_codigo == linha.codigo,
+        Registro_Linha.data.in_(dates)
+      ))
+      .all()
+    )
+
     retorno = {
       'error': False,
       'paga': linha.paga,
       'data': {
-        'local': linha.cidade
-      }
+        'local': linha.cidade,
+        'qnt_participantes': f'{quantidade_aluno} {"cadastrados" if quantidade_aluno != 1 else "cadastrado"}'
+      },
+      'calendario': {}
     }
     if linha.paga:
       retorno['data']['valor_cartela'] = f'R$ {format_money(linha.valor_cartela)}'
       retorno['data']['valor_diaria'] = f'R$ {format_money(linha.valor_diaria)}'
+    
+    for record in records:
+      color = 'green'
+      if not record.funcionando:
+        if record.feriado:
+          color = 'yellow'
+        else: color = 'red'
+      if linha.ferias and check_valid_datetime(record.data):
+        color = 'red'
+      retorno['calendario'][return_day_week(record.data.weekday())] = color
 
     contador_motorista = 0
     for membro in linha.membros:
@@ -429,6 +491,7 @@ def get_stops_student():
   if user:
     data = {'fixa': {'msg': [], 'paradas': deque()}, 'diaria': {'msg': None, 'paradas': []}}
     retorno = {'error': False, 'data': data}
+    msg_ferias = 'Sua linha está em período de férias.'
     passagens = (
       db.session.query(Linha, Rota, Parada, Passagem)
       .filter(db.and_(
@@ -456,6 +519,9 @@ def get_stops_student():
       }
 
       if passagem.passagem_fixa:
+        if linha.ferias and msg_ferias not in data['fixa']['msg']:
+          data['fixa']['msg'].append(msg_ferias)
+
         if passagem.passagem_contraturno:
           info['data'] = 'fixo - contraturno'
           data['fixa']['paradas'].append(info)
@@ -465,7 +531,7 @@ def get_stops_student():
           data['fixa']['paradas'].appendleft(info)
           tipos.remove(info['tipo'])
       else:
-        info_date = format_data(passagem.data)
+        info_date = format_date(passagem.data)
         data['diaria']['paradas'].append(info)
 
         if passagem.migracao_lotado:
@@ -496,7 +562,7 @@ def get_schedule_student():
     data = {}
     retorno = {'error': False, 'data': data}
     dates = return_dates_week()
-    code_line = None
+    line = None
     info_times = {
       'partida': False,
       'contraturno': False
@@ -512,8 +578,8 @@ def get_schedule_student():
     )
 
     for parada, passagem in fixas:
-      if code_line is None:
-        code_line = parada.rota.linha.codigo
+      if line is None:
+        line = parada.rota.linha
 
       if passagem.passagem_contraturno:
         if user.turno == 'Matutino':
@@ -538,17 +604,17 @@ def get_schedule_student():
       )
       .all()
     )
-    feriados = (
-      db.session.query(Registro_Linha.data)
+    registro_linha = (
+      db.session.query(Registro_Linha)
       .filter(db.and_(
         Registro_Linha.data.in_(dates),
-        Registro_Linha.Linha_codigo == code_line,
-        Registro_Linha.feriado == True
+        Registro_Linha.Linha_codigo == line.codigo,
       ))
+      .order_by(Registro_Linha.data)
       .all()
-    ) if code_line is not None else []
+    ) if line is not None else False
 
-    registros = (
+    registros_aluno = (
       db.session.query(Registro_Aluno)
       .filter(db.and_(
         Registro_Aluno.Aluno_id == user.id,
@@ -579,7 +645,7 @@ def get_schedule_student():
     else: contraturnos_fixos = 'Nenhum'
     retorno['contraturno_fixo'] = contraturnos_fixos
 
-    for registro in registros:
+    for index, registro in enumerate(registros_aluno):
       value_partida = check_valid_datetime(
         registro.data, info_times['partida']
       ) if info_times['partida'] else True
@@ -588,15 +654,26 @@ def get_schedule_student():
         registro.data, info_times['contraturno']
       ) if info_times['contraturno'] else True
 
-      feriado = [True for feriado in feriados if registro.data in feriado]
+      invalida = False
+      info_invalid = ''
+
+      if registro_linha:
+        record = registro_linha[index]
+        if not record.funcionando and not line.ferias:
+          invalida = True
+          if record.feriado:
+            info_invalid = 'Feriado'
+          else:
+            info_invalid = 'Fora de serviço'
+
       info = {
-        'data': format_data(registro.data),
+        'data': format_date(registro.data),
         'faltara': return_str_bool(registro.faltara),
         'contraturno': return_str_bool(registro.contraturno) if not registro.faltara else 'Não',
-        'valida': check_valid_datetime(registro.data) if not feriado else False,
-        'feriado': True if feriado else False,
+        'valida': check_valid_datetime(registro.data) if not invalida else False,
         'content_contraturno': value_contraturno,
         'content_faltara': value_partida,
+        'info': info_invalid,
         'diarias': []
       }
 
@@ -689,6 +766,35 @@ def get_interface_line(name_line):
     data['valor_diaria'] = format_money(linha.valor_diaria)
     retorno['data'] = data
 
+    dates = return_dates_week()
+    calendario = {}
+    retorno['calendario'] = calendario
+
+    records = (
+      db.session.query(Registro_Linha)
+      .filter(db.and_(
+        Registro_Linha.Linha_codigo == linha.codigo,
+        Registro_Linha.data.in_(dates)
+      ))
+      .order_by(Registro_Linha.data)
+      .all()
+    )
+
+    for index, date in enumerate(dates):
+      week_day = return_day_week(date.weekday())
+      calendario[week_day] = {'valida': False, 'info': 'Em atividade'}
+      if not records[index].funcionando:
+        if records[index].feriado:
+          calendario[week_day]['info'] = 'Feriado'
+        else:
+          calendario[week_day]['info'] = 'Fora de serviço'
+
+      if check_valid_datetime(date):
+        if linha.ferias:
+          calendario[week_day]['info'] = 'Férias'
+        else:
+          calendario[week_day]['valida'] = True
+          
     return jsonify(retorno)
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})

@@ -391,7 +391,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `busstup`.`registro_linha` (
   `codigo` BIGINT NOT NULL AUTO_INCREMENT,
-  `funcionamento` TINYINT NOT NULL DEFAULT 1,
+  `funcionando` TINYINT NOT NULL DEFAULT 1,
   `feriado` TINYINT NOT NULL DEFAULT 0,
   `data` DATE NOT NULL,
   `linha_codigo` INT(11) NOT NULL,

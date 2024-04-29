@@ -141,7 +141,7 @@
                     ></p>
                   </div>
 
-                  <span id="{{ dias_semana[index] }}_span_feriado" class="page__container--card_content span inactive">Feriado</span>
+                  <span id="{{ dias_semana[index] }}_span_info" class="page__container--card_content span nowrap inactive"></span>
                   <div id="{{ dias_semana[index] }}_card_content" class="page__container--card_content inactive">
                     <div class="page__container">
                       <p class="text terciario">Irá faltar:</p>
@@ -273,7 +273,7 @@
             <div class="page__container--line selected">
               <i
                 class="bi bi-plus-lg page__icon--box plus"
-                onclick="open_popup('create_line')"
+                onclick="open_popup('create_line', false, false)"
               ></i>
             </div>
           </div>

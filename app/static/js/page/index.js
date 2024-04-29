@@ -40,6 +40,12 @@ function create_lines(local, list_datas, minha_linha = false) {
         if (value) {
           ferias.classList.remove("inactive");
         }
+      } else if (data === "diaria") {
+        if (value) {
+          linha
+            .querySelector(`${linha.id}_icon_sched`)
+            .classList.remove("inactive");
+        }
       } else {
         const info = linha.querySelector(`[id*="${data}"]`);
         info.id = linha.id + "_" + data;
@@ -301,9 +307,9 @@ function loadRoutes() {
               const container_diaria_local = model_local.cloneNode(true);
               container_diaria_local.id = `${container_diarias.id}-${linha}`;
               container_diaria_local.querySelector("h2").textContent = linha;
-              
+
               if (Array.from(container_diarias.children).length) {
-                container_diaria_local.classList.add('margin_top')
+                container_diaria_local.classList.add("margin_top");
               }
 
               create_routes(
@@ -314,8 +320,8 @@ function loadRoutes() {
                 false,
                 false
               );
-              container_diaria_local.classList.remove('inactive')
-              container_diarias.appendChild(container_diaria_local)
+              container_diaria_local.classList.remove("inactive");
+              container_diarias.appendChild(container_diaria_local);
             }
           } else {
             area_diarias.classList.add("inactive");
@@ -422,6 +428,10 @@ function load_popup_line(card, name_line) {
         const data = response.data;
         for (info in data) {
           card.querySelector(`[id*="${info}"]`).textContent = data[info];
+        }
+        const calendar = response.calendario
+        for (day in calendar) {
+          document.getElementById(`summary_line_${day}_color`).classList.add(calendar[day])
         }
       } else {
         create_popup(response.title, response.text, "Ok");

@@ -295,6 +295,40 @@ function edit_line(form_submit, event) {
   }
 }
 
+function edit_calendar() {
+  const title = document
+    .getElementById("edit_calendar_title")
+    .textContent.split(" - ");
+  const data = {
+    date: title[title.length - 1],
+    name_line: document.getElementById("interface_nome").textContent,
+    funcionando: return_bool_selected(
+      document.getElementById("edit_calendar_options_funcionando")
+    ),
+    feriado: return_bool_selected(
+      document.getElementById("edit_calendar_options_feriado")
+    ),
+  };
+
+  popup_button_load("edit_calendar");
+  fetch("/edit_calendar", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        create_popup(response.title, response.text, "Ok", "success");
+        loadInterfaceLine(data.name_line, false);
+        close_popup("edit_calendar");
+      } else {
+        create_popup(response.title, response.text, "Voltar");
+        popup_button_load("edit_calendar", "Salvar");
+      }
+    });
+}
+
 function edit_config_line_bool(obj_click) {
   if (!obj_click.querySelector("i").className.includes("selected")) {
     const name_line = document.getElementById("interface_nome").textContent;

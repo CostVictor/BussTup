@@ -82,8 +82,25 @@
     </section>
 
     <section id="interface_ferias" class="-enter- line__container--aviso">
-      <h1 class="line__aviso">Linha de Férias</h1>
+      <h1 class="line__aviso">Linha de férias</h1>
       <h1 class="page__division"></h1>
+    </section>
+
+    <section id="area_calendario" class="-enter- line__container--area">
+      <h2 class="text title">Calendário da linha</h2>
+      <div class="scroll_horizontal">
+        {% for index in range(5) %}
+        <div id="card_{{ dias_semana[index] }}" class="page__container--card_info">
+          <div class="page__container">
+            <h2 id="{{ dias_semana[index] }}_date" class="text secundario justify nowrap" style="margin: 0;">{{ dias_semana[index][:3] }} - {{ dates[index] }}</h2>
+            <i id="{{ dias_semana[index] }}_icon_edit" class="bi bi-pencil-square page__icon content card_info inactive"></i>
+          </div>
+          <h1 class="page__division card"></h1>
+          <span id="span_load_{{ dias_semana[index] }}" class="text secundario">Carregando...</span>
+          <p id="{{ dias_semana[index] }}_info" class="text secundario justify nowrap inactive" style="margin: 0;"></p>
+        </div>
+        {% endfor %}
+      </div>
     </section>
 
     <section id="area_paga" class="-enter- line__container--area">

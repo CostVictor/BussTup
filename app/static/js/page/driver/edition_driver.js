@@ -45,6 +45,7 @@ function create_line(obj_form, event) {
   }
 
   if (execute) {
+    popup_button_load("create_line");
     fetch("/create_line", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

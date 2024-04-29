@@ -32,7 +32,7 @@ def format_time(time, reverse=False):
   return f'{hr} h'
 
 
-def format_data(data, reverse=False):
+def format_date(data, reverse=False):
   if reverse:
     today = date.today()
     data = data.split('/')

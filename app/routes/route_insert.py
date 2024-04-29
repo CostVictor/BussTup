@@ -48,12 +48,17 @@ def create_line():
           return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Já existe uma linha com o nome especificado.'})
 
       data['ferias'] = False
+      dates = return_dates_week()
       linha = Linha(**data)
       try:
         db.session.add(linha)
         with db.session.begin_nested():
+          for date in dates:
+            db.session.add(Registro_Linha(Linha_codigo=linha.codigo, data=date))
+            
           relacao = Membro(Linha_codigo=linha.codigo, Motorista_id=current_user.primary_key, dono=True, adm=True)
           db.session.add(relacao)
+
         db.session.commit()
         return jsonify({'error': False, 'title': 'Linha Cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado(a) como usuário dono.'})
 

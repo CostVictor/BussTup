@@ -166,9 +166,27 @@ def edit_day():
   dates = return_dates_week(only_valid=True)
 
   if user and data and 'faltara' in data and 'contraturno' in data and 'data' in data:
+    fixa = (
+      Passagem.query
+      .filter_by(Aluno_id=user.id, passagem_fixa=True)
+      .first()
+    )
+    code_line = fixa.parada.rota.linha.codigo if fixa else False
+    feriados = (
+      db.session.query(Registro_Linha.data)
+      .filter(db.and_(
+        Registro_Linha.data.in_(dates),
+        Registro_Linha.Linha_codigo == code_line,
+        Registro_Linha.feriado == True
+      ))
+      .all()
+    ) if code_line else []
+
     try:
-      dia = format_data(data['data'], reverse=True)
-      if dia in dates:
+      dia = format_date(data['data'], reverse=True)
+      check_feriado = [True for feriado in feriados if dia in feriado]
+
+      if dia in dates and not check_feriado:
         record = Registro_Aluno.query.filter_by(
           Aluno_id=user.id, data=dia
         ).first()
@@ -478,6 +496,40 @@ def edit_relationship_ponto():
             except Exception as e:
               db.session.rollback()
               print(f'Erro na edição da relação do ponto: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
+
+
+@app.route("/edit_calendar", methods=['PATCH'])
+@login_required
+@roles_required("motorista")
+def edit_calendar():
+  data = request.get_json()
+  if data and 'name_line' in data and 'date' in data and 'feriado' in data and 'funcionando' in data:
+    permission = check_permission(data)
+    date = format_date(data['date'], reverse=True)
+
+    if permission == 'autorizado' and check_valid_datetime(date):
+      line = Linha.query.filter_by(codigo=data['Linha_codigo']).first()
+      record = Registro_Linha.query.filter_by(Linha_codigo=data['Linha_codigo'], data=date).first()
+      if not line.ferias:
+        try:
+          if not data['funcionando']:
+            record.funcionando = False
+            if data['feriado']:
+              record.feriado = True
+            else:
+              record.feriado = False
+          else:
+            record.funcionando = True
+            record.feriado = False
+          
+          db.session.commit()
+          return jsonify({'error': False, 'title': 'Edição Concluída', 'text': ''})
+
+        except Exception as e:
+          db.session.rollback()
+          print(f'Erro na edição do calendário da linha: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar modificar a informação.'})
 

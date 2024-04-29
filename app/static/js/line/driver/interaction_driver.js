@@ -165,6 +165,32 @@ function action_popup(popup, card, id, obj_click) {
     document.getElementById("vehicle_utilities_routes_surname").textContent =
       surname_vehicle;
     config_popup_routes_vehicle(surname_vehicle);
+  } else if (id === "edit_calendar") {
+    const title = obj_click.querySelector('[id*="date"]');
+    const day = title.id.split("_")[0];
+    const date = title.textContent.split(" - ");
+    const info = document.getElementById(`${day}_info`).textContent;
+    document.getElementById("edit_calendar_title").textContent = `${day} - ${
+      date[date.length - 1]
+    }`;
+
+    const option_funcionando = document.getElementById(
+      "edit_calendar_options_funcionando"
+    );
+    const option_feriado = document.getElementById(
+      "edit_calendar_options_feriado"
+    );
+    if (info === "Em atividade") {
+      set_selected_bool(option_funcionando, "Sim");
+      set_selected_bool(option_feriado, "Não");
+    } else if (info === "Feriado") {
+      set_selected_bool(option_funcionando, "Não");
+      set_selected_bool(option_feriado, "Sim");
+    } else {
+      set_selected_bool(option_funcionando, "Não");
+      set_selected_bool(option_feriado, "Não");
+    }
+    config_popup_calendar();
   }
 }
 
@@ -422,3 +448,53 @@ $(function () {
     },
   });
 });
+
+function config_popup_calendar() {
+  const option_funcionando = document.getElementById(
+    "edit_calendar_options_funcionando"
+  );
+  const option_feriado = document.getElementById(
+    "edit_calendar_options_feriado"
+  );
+  const icon_blocked_funcionando = document.getElementById(
+    "edit_calendar_blocked_funcionamento"
+  );
+
+  if (return_bool_selected(option_feriado)) {
+    Array.from(option_funcionando.children).forEach((element) => {
+      element.classList.remove("blocked");
+      element.onclick = function () {};
+    });
+
+    set_selected_bool(option_funcionando, "Não");
+    icon_blocked_funcionando.classList.remove("inactive");
+    Array.from(option_funcionando.children).forEach((element) => {
+      element.classList.add("blocked");
+    });
+
+    Array.from(option_feriado.children).forEach((element) => {
+      element.classList.remove("blocked");
+      element.onclick = function () {
+        popup_selectOption(this);
+        config_popup_calendar();
+      };
+    });
+  } else {
+    icon_blocked_funcionando.classList.add("inactive");
+    Array.from(option_funcionando.children).forEach((element) => {
+      element.classList.remove("blocked");
+      element.onclick = function () {
+        popup_selectOption(this);
+        config_popup_calendar();
+      };
+    });
+
+    Array.from(option_feriado.children).forEach((element) => {
+      element.classList.remove("blocked");
+      element.onclick = function () {
+        popup_selectOption(this);
+        config_popup_calendar();
+      };
+    });
+  }
+}

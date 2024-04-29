@@ -32,6 +32,51 @@ function loadInterfaceLine(name_line, load_complete = true) {
           }
         }
 
+        const calendario = response.calendario;
+        for (dia in calendario) {
+          const conteudo = calendario[dia];
+          document.getElementById(`span_load_${dia}`).classList.add("inactive");
+          const info = document.getElementById(`${dia}_info`);
+          info.textContent = conteudo.info;
+          info.classList.remove("inactive");
+
+          const card = document.getElementById(`card_${dia}`);
+          if (conteudo.info === 'Em atividade') {
+            var color_border = 'var(--verde_primario)'
+          } else if (conteudo.info === 'Feriado') {
+            var color_border = 'var(--amarelo_secundario)'
+          } else {
+            var color_border = 'var(--vermelho_intenso)'
+          }
+
+          card.style.borderBottom = `${color_border} solid 0.2rem`
+
+          if (!conteudo.valida) {
+            card.classList.add("blocked");
+            document
+              .getElementById(`${dia}_icon_edit`)
+              .classList.add("inactive");
+            card.classList.remove("button");
+            card.onclick = function () {};
+          } else if (
+            response.role === "motorista" &&
+            response.relacao &&
+            response.relacao !== "membro" &&
+            conteudo.info !== "Férias"
+          ) {
+            card.classList.remove("blocked");
+            document
+              .getElementById(`${dia}_icon_edit`)
+              .classList.remove("inactive");
+            card.classList.add("button");
+            card.onclick = function () {
+              open_popup("edit_calendar", this, false);
+            };
+          } else {
+            card.classList.remove("blocked");
+          }
+        }
+
         for (dado in response.data) {
           if (dado === "paga") {
             const area_paga = document.getElementById("area_paga");
