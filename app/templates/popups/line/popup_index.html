@@ -83,15 +83,16 @@
         </div>
 
         {% if role == 'aluno' %}
+        <div id="config_route_diarias" class="inactive"></div>
         <div class="page__container justify">
-          <div class="line__container--btn add margin_top" onclick="">
-            <p class="line__text" onclick="open_popup('indisponivel')">Agendar uma diária</p>
+          <div class="line__container--btn add margin_top">
+            <p class="line__text" onclick="open_popup('sched_daily', this)">Agendar uma diária</p>
           </div>
         </div>
         {% endif %}
 
         <div class="page__container justify">
-          <div class="line__container--btn add margin_top" onclick="">
+          <div class="line__container--btn add margin_top">
             <p class="line__text" onclick="open_popup('indisponivel')">Ver previsão</p>
           </div>
         </div>
@@ -260,13 +261,13 @@
         <h1 id="config_rel_point_route_division" class="page__division"></h1>
         <div id="config_rel_point_route_cadastrar" class="page__container justify inactive">
           <div class="line__container--btn add" onclick="confirm_register_in()">
-            <p class="line__text">Cadastrar-me neste ponto</p>
+            <p class="line__text">Efetuar cadastro</p>
           </div>
         </div>
 
         <div id="config_rel_point_route_sair" class="page__container justify inactive">
           <div class="line__container--btn del" onclick="open_popup('confirm_del_mypoint')">
-            <p class="line__text remove">Cancelar meu cadastro</p>
+            <p class="line__text remove">Cancelar cadastro</p>
           </div>
         </div>
         {% endif %}

@@ -812,3 +812,100 @@ def create_pass_contraturno():
               print(f'Erro ao criar a passagem: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a passagem na rota.'})
+
+
+@app.route("/create_pass_daily", methods=['POST'])
+@login_required
+@roles_required("aluno")
+def create_pass_daily():
+  data = request.get_json()
+  if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data and 'date' in data and ('partida' in data or 'retorno' in data):
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    user = return_my_user()
+
+    hr_par = data['time_par']; hr_ret = data['time_ret']
+    surname = data['surname']; shift = data['shift']
+    date_ = [int(number) for number in data['date'].split('-')]
+    date_ = date(*date_)
+
+    if date_.weekday() in [5, 6]:
+      return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Você não pode agendar diárias em dias de Sábado ou Domingo.'})
+
+    date_limit = date.today() + timedelta(days=30)
+    if date_ > date_limit:
+      return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Você não pode agendar diárias com mais de 30 dias a partir da data de hoje.'})
+    
+    if linha and user and hr_par and hr_ret and surname and shift:
+      route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
+      if route is not None:
+        if not route:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+
+        types = []
+        execute = True
+
+        if 'partida' in data:
+          types.append('partida')
+        if 'retorno' in data:
+          types.append('retorno')
+        
+        try:
+          for type_ in types:
+            stop = (
+              db.session.query(Parada).join(Ponto)
+              .filter(db.and_(
+                Parada.Ponto_id == Ponto.id,
+                Parada.Rota_codigo == route.codigo,
+                Parada.tipo == type_,
+                Ponto.nome == data[type_]
+              ))
+              .first()
+            )
+
+            if stop:
+              combine = datetime.combine(date_, stop.horario_passagem)
+              time_ant = combine - timedelta(minutes=15)
+              time_dep = combine + timedelta(minutes=15)
+
+              check_indis = (
+                db.session.query(Parada, Passagem)
+                .filter(db.and_(
+                  Passagem.Parada_codigo == Parada.codigo,
+                  Passagem.Aluno_id == user.id,
+                  Passagem.passagem_fixa == False,
+                  Passagem.data == date_,
+                  Parada.horario_passagem.between(time_ant.time(), time_dep.time())
+                ))
+                .first()
+              )
+
+              if check_valid_datetime(date_, stop.horario_passagem):
+                if check_indis:
+                  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Você já possui uma diária marcada para a mesma data com horários muito próximos do(s) ponto(s) selecionado(s). Este agendamento foi interrompido para evitar conflito de horários.'})
+
+                db.session.add(Passagem(
+                  passagem_fixa=False,
+                  passagem_contraturno=False,
+                  Parada_codigo=stop.codigo,
+                  Aluno_id=user.id,
+                  data=date_
+                ))
+              else: 
+                execute = False
+                types = [value for value in types if value == type_]
+                break
+            else:
+              return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a passagem na rota.'})
+          
+          if execute:
+            db.session.commit()
+            return jsonify({'error': False, 'title': 'Diária agendada', 'text': f'Você marcou {"uma diária" if len(types) == 1 else "duas diárias"} para <strong>{return_day_week(date_.weekday())} {format_date(date_)}</strong>. Volte se desejar desfazer.'})
+          
+          else:
+            return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': f'A data fornecida não é válida para agendar uma diária de <strong>{types[0]}</strong> no ponto <strong>{data[types[0]]}</strong> pois o horário de funcionamento deste dia já passou.'})
+
+        except Exception as e:
+          db.session.rollback()
+          print(f'Erro ao criar a diaria: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a passagem na rota.'})

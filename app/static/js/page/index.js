@@ -21,29 +21,31 @@ function create_lines(local, list_datas, minha_linha = false) {
       linha.classList.add("first");
     }
 
+    ids = linha.querySelectorAll(`[id*="${model_linha.id}"]`);
+    ids.forEach((value) => {
+      value.id = value.id.replace(model_linha.id, linha.id);
+    });
+
     const dados = list_datas[index_linha];
     for (data in dados) {
       const value = dados[data];
 
       if (data === "paga") {
-        const pago = linha.querySelector("h1#model_line_paga");
-        const gratuito = linha.querySelector("h1#model_line_gratuita");
-        pago.id = pago.id.replace("model_line", linha.id);
-        gratuito.id = gratuito.id.replace("model_line", linha.id);
+        const pago = linha.querySelector('[id*="paga"]');
+        const gratuito = linha.querySelector('[id*="gratuita"]');
         if (!value) {
           pago.classList.add("inactive");
           gratuito.classList.remove("inactive");
         }
       } else if (data === "ferias") {
-        const ferias = linha.querySelector("h1#model_line_ferias");
-        ferias.id = ferias.id.replace("model_line", linha.id);
+        const ferias = linha.querySelector('[id*="ferias"]');
         if (value) {
           ferias.classList.remove("inactive");
         }
       } else if (data === "diaria") {
         if (value) {
           linha
-            .querySelector(`${linha.id}_icon_sched`)
+            .querySelector('[id*="icon_sched"]')
             .classList.remove("inactive");
         }
       } else {

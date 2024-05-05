@@ -2,6 +2,12 @@ body {
   align-items: center;
 }
 
+.page__container_card {
+  margin-top: calc(0.1vw + 0.1vh + 0.1vmin);
+  padding-top: calc(0.1vw + 0.1vh + 0.5vmin);
+  border-top: solid var(--cinza_quaternario) 0.06rem;
+}
+
 .page__container {
   display: flex;
   transition: 0.7s ease;
@@ -312,7 +318,7 @@ body {
   display: flex;
   justify-content: center;
   flex-grow: 1;
-  max-width: 58%;
+  max-width: 60%;
 }
 
 .page__container--point_type {

@@ -41,15 +41,15 @@ function loadInterfaceLine(name_line, load_complete = true) {
           info.classList.remove("inactive");
 
           const card = document.getElementById(`card_${dia}`);
-          if (conteudo.info === 'Em atividade') {
-            var color_border = 'var(--verde_primario)'
-          } else if (conteudo.info === 'Feriado') {
-            var color_border = 'var(--amarelo_secundario)'
+          if (conteudo.info === "Em atividade") {
+            var color_border = "var(--verde_primario)";
+          } else if (conteudo.info === "Feriado") {
+            var color_border = "var(--amarelo_secundario)";
           } else {
-            var color_border = 'var(--vermelho_intenso)'
+            var color_border = "var(--vermelho_intenso)";
           }
 
-          card.style.borderBottom = `${color_border} solid 0.2rem`
+          card.style.borderBottom = `${color_border} solid 0.2rem`;
 
           if (!conteudo.valida) {
             card.classList.add("blocked");
@@ -592,12 +592,31 @@ function loadInterfaceRoutes(name_line) {
             }
             criar_rota(ativas, local_ativas);
 
+            const local_msgs = local_minhas_rotas.querySelector("span");
+            local_msgs.innerHTML = "";
+
+            const local_turno = document.getElementById(
+              "interface_rotas_minhas_rotas_turno"
+            );
+            local_turno.querySelector("div").innerHTML = "";
+            local_turno.classList.add("inactive");
+
+            const local_contraturno = document.getElementById(
+              "interface_rotas_minhas_rotas_contraturno"
+            );
+            local_contraturno.querySelector("div").innerHTML = "";
+            local_contraturno.classList.add("inactive");
+
+            const span_txt = document.getElementById("area_rotas_span_text");
             if (ativas.length) {
-              area_rotas.removeChild(area_rotas.querySelector("span"));
+              if (span_txt) {
+                area_rotas.removeChild(span_txt);
+              }
             } else {
-              const span_txt = area_rotas.querySelector("span");
-              span_txt.textContent = "Nenhuma rota cadastrada";
-              span_txt.className = "text secundario fundo cinza justify";
+              if (span_txt) {
+                span_txt.textContent = "Nenhuma rota cadastrada";
+                span_txt.className = "text secundario fundo cinza justify";
+              }
             }
           }
         }
@@ -682,6 +701,57 @@ function config_popup_route(obj_click, data = false) {
                 "#config_route_contraturno"
               ).textContent = response.meu_contraturno;
             }
+          }
+
+          const container_diarias = document.getElementById(
+            "config_route_diarias"
+          );
+          container_diarias.classList.add("inactive");
+          container_diarias.innerHTML = "";
+
+          if (Object.keys(response.diarias).length) {
+            container_diarias.classList.remove("inactive");
+            const model_daily = models.querySelector('#model_interface_daily')
+
+            let container_division_first = document.createElement('h1')
+            container_division_first.className = 'page__division'
+            container_diarias.appendChild(container_division_first)
+
+            for (index in response.diarias) {
+              const data = response.diarias[index]
+              const container_date = document.createElement('div')
+              container_date.id = `${container_diarias.id}_${data.dayweek} ${data.date}`
+
+              const text_title = document.createElement('h1')
+              text_title.className = 'text secundario emphasis justify'
+              text_title.textContent = `Diárias | ${data.dayweek} ${data.date}`
+              container_date.appendChild(text_title)
+              
+              const dailys = data.data
+              for (index in dailys) {
+                const daily = model_daily.cloneNode(true)
+                const daily_info = daily.querySelector('p')
+                const daily_icon = daily.querySelector('i')
+
+                daily.id = `${container_date.id}-daily_${index}`
+                container_date.appendChild(daily)
+
+                const values = dailys[index]
+                daily_info.textContent = `${values.tipo} ~> ${values.nome}`
+
+                if (values.valid) {
+                  daily_icon.onclick = function() {
+                    open_popup('indisponivel')
+                  }
+                } else {
+                  daily_icon.className = 'bi bi-stopwatch-fill page__icon content'
+                }
+              }
+              container_diarias.appendChild(container_date)
+            }
+            const container_division_last = document.createElement('h1')
+            container_division_last.className = 'page__division'
+            container_diarias.appendChild(container_division_last)
           }
         } else {
           const route_division = document.getElementById("route_division");
@@ -787,9 +857,11 @@ function config_popup_route(obj_click, data = false) {
 }
 
 function config_popup_relationship(data) {
+  popup_button_load("config_route");
   fetch("/get_relationship-point" + generate_url_dict(data), { method: "GET" })
     .then((response) => response.json())
     .then((response) => {
+      popup_button_load("config_route", "Fechar");
       const data = response.data;
 
       for (dado in data) {

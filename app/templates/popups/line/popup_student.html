@@ -251,3 +251,64 @@
     </footer>
   </div>
 </section>
+
+
+<section id="sched_daily" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Agendamento</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
+        <p class="text secundario fundo margin_bottom">Estes pontos são os mesmos da rota atual.</p>
+
+        <h3 class="popup__text question first">Agendar partida?</h3>
+        <div id="sched_daily_op_partida" class="popup__container--options">
+          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+            <i class="bi bi-circle popup__icon ratio"></i>
+            <p class="popup__text content input">Sim</p>
+          </div>
+
+          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+            <p class="popup__text content input">Não</p>
+          </div>
+        </div>
+
+        <h3 id="sched_daily_op_partida_title" class="popup__text info space inactive">Selecione o local:</h3>
+        <div id="sched_daily_op_partida_container"
+          class="scroll_vertical popup__container--scroll inactive"></div>
+
+        <h3 class="popup__text question">Agendar retorno?</h3>
+        <div id="sched_daily_op_retorno" class="popup__container--options">
+          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+            <i class="bi bi-circle popup__icon ratio"></i>
+            <p class="popup__text content input">Sim</p>
+          </div>
+
+          <div class="popup__input checkbox bool" onclick="popup_selectOption(this, true)">
+            <i class="bi bi-check2-circle popup__icon ratio selected"></i>
+            <p class="popup__text content input">Não</p>
+          </div>
+        </div>
+
+        <h3 id="sched_daily_op_retorno_title" class="popup__text info space inactive">Selecione o local:</h3>
+        <div id="sched_daily_op_retorno_container"
+          class="scroll_vertical popup__container--scroll inactive"></div>
+
+        <h1 class="page__division"></h1>
+        <h3 class="popup__text question first">Quando será a diária?</h3>
+        <form id="formulario_sched_daily" class="margin_bottom" onsubmit="agendar_diaria()">
+          <input id="sched_daily_date" class="form__input input_notIcon white" type="date"
+            required>
+        </form>
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('sched_daily')">Cancelar</button>
+      <button class="popup__btn" onclick="submit('formulario_sched_daily')">Agendar</button>
+    </footer>
+  </div>
+</section>

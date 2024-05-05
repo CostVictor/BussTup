@@ -40,6 +40,8 @@ function action_popup(popup, card, id, obj_click) {
     config_popup_routes_vehicle(surname_vehicle);
   } else if (id === "options_contraturno") {
     config_popup_contraturno();
+  } else if (id === "sched_daily") {
+    config_popup_sched();
   }
 }
 
@@ -182,6 +184,7 @@ function confirm_register_in(contraturno = false) {
   }
 
   if (execute) {
+    popup_button_load("config_rel_point_route");
     fetch(
       `/check_register_in${contraturno ? "_contraturno" : ""}` +
         generate_url_dict(data),
@@ -191,6 +194,7 @@ function confirm_register_in(contraturno = false) {
     )
       .then((response) => response.json())
       .then((response) => {
+        popup_button_load("config_rel_point_route", "Fechar");
         if (!response.error) {
           const id = contraturno
             ? "confirm_register_contraturno"
@@ -221,144 +225,6 @@ function confirm_register_in(contraturno = false) {
       "Voltar"
     );
   }
-}
-
-function register_in_point_fixed() {
-  const data = return_data_route();
-  const popup_point = local_popup.querySelector("#config_rel_point_route");
-  data.type = extract_info(popup_point, "tipo");
-  data.name_point = extract_info(popup_point, "nome");
-
-  popup_button_load("confirm_register_in_point");
-  fetch("/create_pass_fixed", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  })
-    .then((response) => response.json())
-    .then((response) => {
-      if (!response.error) {
-        create_popup(response.title, response.text, "Ok", "success");
-        close_popup("confirm_register_in_point");
-        loadInterfaceRoutes(data.name_line);
-        config_popup_route(
-          null,
-          return_data_route(null, (format_dict_url = true))
-        );
-        document
-          .getElementById("config_rel_point_route_cadastrar")
-          .classList.add("inactive");
-        document
-          .getElementById("config_rel_point_route_sair")
-          .classList.remove("inactive");
-      } else {
-        create_popup(response.title, response.text);
-        popup_button_load("confirm_register_in_point", "Confirmar");
-      }
-    });
-}
-
-function del_myPoint_fixed() {
-  const name_line = document.getElementById("interface_nome").textContent;
-  const type = extract_info(
-    local_popup.querySelector("#config_rel_point_route"),
-    "tipo"
-  );
-
-  popup_button_load("confirm_del_mypoint");
-  fetch("/del_myPoint_fixed/" + encodeURIComponent(type), { method: "DELETE" })
-    .then((response) => response.json())
-    .then((response) => {
-      if (!response.error) {
-        document
-          .getElementById("config_rel_point_route_cadastrar")
-          .classList.remove("inactive");
-        document
-          .getElementById("config_rel_point_route_sair")
-          .classList.add("inactive");
-
-        create_popup(response.title, response.text, "Ok", "success");
-        close_popup("confirm_del_mypoint");
-        config_popup_route(
-          null,
-          return_data_route(null, (format_dict_url = true))
-        );
-        loadInterfaceRoutes(name_line);
-      } else {
-        create_popup(response.title, response.text);
-        popup_button_load("confirm_del_mypoint", "Confirmar");
-      }
-    });
-}
-
-function register_in_point_contraturno() {
-  const popup = local_popup.querySelector("#options_contraturno");
-  const data = return_data_route();
-  let execute = true;
-
-  const option = popup.querySelector('[id*="nome"][class*="selected"]');
-  if (option) {
-    data.type = option.id.includes("partida") ? "partida" : "retorno";
-    data.name_point = option.textContent;
-  } else {
-    execute = false;
-  }
-
-  if (execute) {
-    popup_button_load("confirm_register_contraturno");
-    fetch("/create_pass_contraturno", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        if (!response.error) {
-          local_popup.removeChild(
-            local_popup.querySelector("#options_contraturno")
-          );
-          close_popup("confirm_register_contraturno");
-          create_popup(response.title, response.text, "Ok", "success");
-
-          loadInterfaceRoutes(data.name_line);
-          config_popup_route(
-            null,
-            return_data_route(null, (format_dict_url = true))
-          );
-        } else {
-          create_popup(response.title, response.text);
-          popup_button_load("confirm_register_contraturno", "Confirmar");
-        }
-      });
-  } else {
-    create_popup(
-      "Nenhuma opção selecionada",
-      "Selecione uma opção de ponto disponível.",
-      "Voltar"
-    );
-  }
-}
-
-function del_myPoint_contraturno() {
-  const name_line = document.getElementById("interface_nome").textContent;
-  popup_button_load("confirm_del_mycontraturno");
-
-  fetch("/del_myPoint_contraturno", { method: "DELETE" })
-    .then((response) => response.json())
-    .then((response) => {
-      if (!response.error) {
-        create_popup(response.title, response.text, "Ok", "success");
-        close_popup("confirm_del_mycontraturno");
-        config_popup_route(
-          null,
-          return_data_route(null, (format_dict_url = true))
-        );
-        loadInterfaceRoutes(name_line);
-      } else {
-        create_popup(response.title, response.text);
-        popup_button_load("confirm_del_mycontraturno", "Confirmar");
-      }
-    });
 }
 
 function config_popup_contraturno() {
@@ -410,6 +276,49 @@ function config_popup_contraturno() {
 
             option.classList.remove("inactive");
             container.appendChild(option);
+          }
+        }
+      } else {
+        create_popup(response.title, response.text);
+      }
+    });
+}
+
+function config_popup_sched() {
+  const data = return_data_route(null, (format_dict_url = true));
+  fetch("/get_stops_route" + generate_url_dict(data), {
+    method: "GET",
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const data = response.data;
+        const model = models.querySelector("#model_option");
+
+        for (type in data) {
+          const container = document.getElementById(
+            `sched_daily_op_${type}_container`
+          );
+          const list = data[type];
+
+          if (list.length) {
+            for (index in list) {
+              const option = model.cloneNode(true);
+              option.id = `${container.id}-option_${index}`;
+              option.querySelector("p").textContent = `${
+                parseInt(index) + 1
+              } - ${list[index]}`;
+
+              option.classList.remove("inactive");
+              container.appendChild(option);
+            }
+          } else {
+            const nenhum = model.cloneNode(true);
+            nenhum.id = `${container.id}-option_nenhum`;
+            nenhum.querySelector("p").textContent = "Nenhum";
+
+            nenhum.classList.remove("inactive");
+            container.appendChild(nenhum);
           }
         }
       } else {

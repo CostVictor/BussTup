@@ -96,7 +96,6 @@ def get_routes():
 
       for linha, rota, onibus in todas_as_rotas:
         motorista = onibus.motorista
-
         if motorista:
           estado = 'Inativa'
           if rota.em_partida:
@@ -141,13 +140,14 @@ def get_routes():
       retorno['msg'] = []
 
       rotas_diarias = (
-        db.session.query(Linha, Rota).join(Parada).join(Passagem)
+        db.session.query(Linha, Rota, Parada, Passagem)
         .filter(db.and_(
           Passagem.passagem_fixa == False,
           Passagem.Aluno_id == user.id,
           Parada.codigo == Passagem.Parada_codigo,
           Rota.codigo == Parada.Rota_codigo,
-          Rota.Linha_codigo == Linha.codigo
+          Rota.Linha_codigo == Linha.codigo,
+          Linha.ferias == False
         ))
         .all()
       )
@@ -175,31 +175,53 @@ def get_routes():
       )
       linha_codigo = None
 
-      for linha, rota in rotas_diarias:
-        if linha.nome not in diarias:
-          diarias[linha.nome] = []
-        
-        info = {
-          'line': linha.nome,
-          'turno': rota.turno,
-          'horario_partida': format_time(rota.horario_partida),
-          'horario_retorno': format_time(rota.horario_retorno),
-          'quantidade': count_part_route(rota.codigo),
-          'estado': estado
-        }
-        veiculo = rota.onibus
-        surname = 'Sem veículo'
-        motorista = 'Desativada'
+      routes_includes = []
+      for linha, rota, parada, passagem in rotas_diarias:
+        if (
+          check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25)
+        ):
+          if rota.codigo not in routes_includes:
+            not_dis = (
+              db.session.query(Registro_Linha)
+              .filter(db.and_(
+                Registro_Linha.Linha_codigo == linha.codigo,
+                Registro_Linha.data == passagem.data,
+                Registro_Linha.funcionando == False
+              ))
+              .first()
+            )
+            if not linha.ferias and not not_dis:
+              routes_includes.append(rota.codigo)
+              if linha.nome not in diarias:
+                diarias[linha.nome] = []
 
-        if veiculo:
-          surname = veiculo.apelido
-          motorista = 'Nenhum'
-          if veiculo.motorista:
-            motorista = veiculo.motorista.nome
-        info['apelido'] = surname
-        info['motorista'] = motorista
+              estado = 'Inativa'
+              if rota.em_partida:
+                estado = 'Em partida'
+              elif rota.em_retorno:
+                estado = 'Em retorno'
+              
+              info = {
+                'line': linha.nome,
+                'turno': rota.turno,
+                'horario_partida': format_time(rota.horario_partida),
+                'horario_retorno': format_time(rota.horario_retorno),
+                'quantidade': count_part_route(rota.codigo),
+                'estado': estado
+              }
+              veiculo = rota.onibus
+              surname = 'Sem veículo'
+              motorista = 'Desativada'
 
-        diarias[linha.nome].append(info)
+              if veiculo:
+                surname = veiculo.apelido
+                motorista = 'Nenhum'
+                if veiculo.motorista:
+                  motorista = veiculo.motorista.nome
+              info['apelido'] = surname
+              info['motorista'] = motorista
+
+              diarias[linha.nome].append(info)
 
       if rota_fixa:
         linha_codigo = rota_fixa.linha.codigo
@@ -340,10 +362,23 @@ def get_lines():
           ))
           .all()
         )
-        diarias = [
-          linha.codigo for linha, _, parada, passagem in diarias
-          if check_valid_datetime(passagem.data, parada.horario_passagem)
-        ]
+
+        diarias_codes = []
+        for linha, _, parada, _passagem in diarias:
+          not_dis = (
+            db.session.query(Registro_Linha)
+            .filter(db.and_(
+              Registro_Linha.Linha_codigo == linha.codigo,
+              Registro_Linha.data == _passagem.data,
+              Registro_Linha.funcionando == False
+            ))
+            .first()
+          )
+          if (
+            check_valid_datetime(_passagem.data, parada.horario_passagem, add_limit=0.25)
+            and not linha.ferias and not not_dis
+          ):
+            diarias_codes.append(linha.codigo)
 
         if passagem:
           data['minha_linha'] = passagem.parada.ponto.linha.nome
@@ -352,7 +387,7 @@ def get_lines():
         linha = result.linha
         dict_linha = {
           'nome': linha.nome, 'ferias': linha.ferias, 
-          'paga': linha.paga, 'diaria': (linha.codigo in diarias) if role == 'aluno' else False
+          'paga': linha.paga, 'diaria': (linha.codigo in diarias_codes) if role == 'aluno' else False
         }
 
         if linha.cidade not in data['cidades']:
@@ -374,30 +409,57 @@ def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
   role = current_user.roles[0].name
   linha = Linha.query.filter_by(nome=name_line).first()
   if linha:
-    relationship = return_relationship(linha.codigo)
     rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+    if rota:
+      today = date.today()
+      relationship = return_relationship(linha.codigo)
 
-    if relationship and relationship != 'não participante' and rota:
-      veiculo = rota.onibus
-      capacidade = veiculo.capacidade if veiculo else 'Indefinido'
+      not_dis = (
+        db.session.query(Registro_Linha.data)
+        .filter(db.and_(
+          Registro_Linha.Linha_codigo == linha.codigo,
+          Registro_Linha.funcionando == False
+        ))
+        .all()
+      )
+      not_dis = [_date[0] for _date in not_dis]
 
-      data = {}
-      retorno = {'error': False, 'role': role, 'capacidade': capacidade, 'data': data}
-
-      estado = 'Inativa'
-      if rota.em_partida:
-        estado = 'Em partida'
-      elif rota.em_retorno:
-        estado = 'Em retorno'
-      retorno['estado'] = estado
-
-      for tipo in ['partida', 'retorno']:
-        registro = Registro_Rota.query.filter_by(
-          data=date.today(), tipo=tipo, Rota_codigo=rota.codigo
-        ).first()
-        data[f'previsao_{tipo}'] = registro.previsao_pessoas
+      check_daily = (
+        db.session.query(Parada, Passagem)
+        .filter(db.and_(
+          Passagem.Parada_codigo == Parada.codigo,
+          Parada.Rota_codigo == rota.codigo,
+          Passagem.Aluno_id == current_user.primary_key,
+          Passagem.passagem_fixa == False,
+          Passagem.data == today
+        ))
+        .first()
+      ) if role == 'aluno' else False
       
-      return jsonify(retorno)
+      if (
+        (relationship and relationship != 'não participante') or 
+        (not linha.ferias and today not in not_dis and check_daily)
+      ):
+        veiculo = rota.onibus
+        capacidade = veiculo.capacidade if veiculo else 'Indefinido'
+
+        data = {}
+        retorno = {'error': False, 'role': role, 'capacidade': capacidade, 'data': data}
+
+        estado = 'Inativa'
+        if rota.em_partida:
+          estado = 'Em partida'
+        elif rota.em_retorno:
+          estado = 'Em retorno'
+        retorno['estado'] = estado
+
+        for tipo in ['partida', 'retorno']:
+          registro = Registro_Rota.query.filter_by(
+            data=date.today(), tipo=tipo, Rota_codigo=rota.codigo
+          ).first()
+          data[f'previsao_{tipo}'] = registro.previsao_pessoas
+        
+        return jsonify(retorno)
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da rota. Por favor, recarregue a página e tente novamente.'})
 
@@ -492,6 +554,7 @@ def get_stops_student():
     data = {'fixa': {'msg': [], 'paradas': deque()}, 'diaria': {'msg': None, 'paradas': []}}
     retorno = {'error': False, 'data': data}
     msg_ferias = 'Sua linha está em período de férias.'
+
     passagens = (
       db.session.query(Linha, Rota, Parada, Passagem)
       .filter(db.and_(
@@ -501,8 +564,11 @@ def get_stops_student():
         Passagem.Aluno_id == user.id
       ))
       .order_by(
-        db.case([(Parada.tipo.like("%partida%"), 1)], else_=0),
-        Passagem.data
+        Passagem.data,
+        db.case([
+          (db.and_(Parada.tipo.like("%partida%"), Passagem.passagem_fixa == True), 1),
+          (db.and_(Parada.tipo.like("%retorno%"), Passagem.passagem_fixa == False), 1)
+        ], else_=0)
       )
       .all()
     )
@@ -523,7 +589,7 @@ def get_stops_student():
           data['fixa']['msg'].append(msg_ferias)
 
         if passagem.passagem_contraturno:
-          info['data'] = 'fixo - contraturno'
+          info['data'] = 'fixo | contraturno'
           data['fixa']['paradas'].append(info)
           tipos.remove('contraturno')
         else:
@@ -531,18 +597,33 @@ def get_stops_student():
           data['fixa']['paradas'].appendleft(info)
           tipos.remove(info['tipo'])
       else:
-        info_date = format_date(passagem.data)
-        data['diaria']['paradas'].append(info)
+        not_dis = (
+          db.session.query(Registro_Linha)
+          .filter(db.and_(
+            Registro_Linha.Linha_codigo == linha.codigo,
+            Registro_Linha.data == passagem.data,
+            Registro_Linha.funcionando == False
+          ))
+          .first()
+        )
+        if not linha.ferias and not not_dis:
+          today = date.today()
+          if check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25):
+            info_date = format_date(passagem.data)
+            day_week = return_day_week(passagem.data.weekday())
+            data['diaria']['paradas'].append(info)
 
-        if passagem.migracao_lotado:
-          info['data'] = f'{info_date} - migrado devido lotação'
-          data['diaria']['msg'] = 'Lotado: Seu motorista alterou o veículo que você usará no dia e trajeto especificado devido a uma lotação identificada em seu veículo habitual naquele dia.'
-        
-        elif passagem.migracao_manutencao:
-          info['data'] = f'{info_date} - migrado devido manutenção'
-          data['diaria']['msg'] = 'Veículo em manutenção: Seu motorista alterou o veículo que você usará devido a um defeito encontrado em seu veículo habitual.'
+            if passagem.data == today:
+              info['data'] = 'Hoje'
+            else: info['data'] = f'{day_week} - {info_date}'
 
-        else: info['data'] = info_date
+            if passagem.migracao_lotado:
+              info['data'] = f'{info["data"]} | migrado devido lotação'
+              data['diaria']['msg'] = 'Lotado: Seu motorista alterou o veículo que você usará no dia e trajeto especificado devido a uma lotação identificada em seu veículo habitual naquele dia.'
+            
+            elif passagem.migracao_manutencao:
+              info['data'] = f'{info["data"]} | migrado devido manutenção'
+              data['diaria']['msg'] = 'Veículo em manutenção: Seu motorista alterou o veículo que você usará devido a um defeito encontrado em seu veículo habitual.'
     
     for tipo in tipos:
       data['fixa']['msg'].append(f'Você não definiu seu ponto de {tipo}.')
@@ -677,13 +758,14 @@ def get_schedule_student():
         'diarias': []
       }
 
-      check_diarias = [diaria for diaria in diarias if registro.data in diaria]
-      for turno, tipo, _ in check_diarias:
-        if turno == user.turno:
-          info['diarias'].append(tipo.capitalize())
-          if tipo == 'partida':
-            info['faltara'] = 'Sim'
-          info['contraturno'] = 'Não'
+      if not invalida and (not line.ferias if line else True):
+        check_diarias = [diaria for diaria in diarias if registro.data in diaria]
+        for turno, tipo, _ in check_diarias:
+          if turno == user.turno:
+            info['diarias'].append(tipo.capitalize())
+            if tipo == 'partida':
+              info['faltara'] = 'Sim'
+            info['contraturno'] = 'Não'
 
       data[return_day_week(registro.data.weekday())] = info
     
@@ -971,7 +1053,7 @@ def get_interface_route(name_line):
       user = return_my_user()
 
       minhas_diarias = (
-        db.session.query(Parada).join(Passagem)
+        db.session.query(Parada, Passagem)
         .filter(db.and_(
           Passagem.Aluno_id == user.id,
           Passagem.passagem_fixa == False,
@@ -981,28 +1063,44 @@ def get_interface_route(name_line):
         .all()
       )
 
-      for parada in minhas_diarias:
-        rota = parada.rota
-        info = {
-          'turno': rota.turno,
-          'horario_partida': format_time(rota.horario_partida),
-          'horario_retorno': format_time(rota.horario_retorno),
-          'quantidade': count_part_route(rota.codigo),
-        }
+      routes_includes = []
+      for parada, passagem in minhas_diarias:
+        not_dis = (
+          db.session.query(Registro_Linha)
+          .filter(db.and_(
+            Registro_Linha.Linha_codigo == linha.codigo,
+            Registro_Linha.data == passagem.data,
+            Registro_Linha.funcionando == False
+          ))
+          .first()
+        )
+        if (
+          check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25)
+          and not linha.ferias and not not_dis
+        ):
+          rota = parada.rota
+          if rota.codigo not in routes_includes:
+            routes_includes.append(rota.codigo)
+            info = {
+              'turno': rota.turno,
+              'horario_partida': format_time(rota.horario_partida),
+              'horario_retorno': format_time(rota.horario_retorno),
+              'quantidade': count_part_route(rota.codigo),
+            }
 
-        veiculo = rota.onibus
-        surname = 'Sem veículo'
-        motorista = 'Desativada'
+            veiculo = rota.onibus
+            surname = 'Sem veículo'
+            motorista = 'Desativada'
 
-        if veiculo:
-          surname = veiculo.apelido
-          motorista = 'Nenhum'
-          if veiculo.motorista:
-            motorista = veiculo.motorista.nome
-        info['apelido'] = surname
-        info['motorista'] = motorista
+            if veiculo:
+              surname = veiculo.apelido
+              motorista = 'Nenhum'
+              if veiculo.motorista:
+                motorista = veiculo.motorista.nome
+            info['apelido'] = surname
+            info['motorista'] = motorista
 
-        retorno['diarias'].append(info)
+            retorno['diarias'].append(info)
 
       if retorno['relacao'] == 'participante':
         retorno['minhas_rotas'] = {'turno': [], 'contraturno': []}
@@ -1459,6 +1557,55 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
           retorno['msg_contraturno'] = False
           retorno['btn_contraturno'] = False
           retorno['msg_incompleta'] = False
+          retorno['diarias'] = {}
+
+          today = datetime.today()
+          diarias = (
+            db.session.query(Parada, Ponto, Passagem)
+            .filter(db.and_(
+              Parada.Rota_codigo == rota.codigo,
+              Ponto.id == Parada.Ponto_id,
+              Passagem.Parada_codigo == Parada.codigo,
+              Passagem.Aluno_id == user.id,
+              Passagem.passagem_fixa == False
+            ))
+            .order_by(
+              Passagem.data,
+              Ponto.nome,
+              db.case([(Parada.tipo.like("%partida%"), 0)], else_=1)
+            )
+            .all()
+          )
+          for parada, ponto, diaria in diarias:
+            not_dis = (
+              db.session.query(Registro_Linha)
+              .filter(db.and_(
+                Registro_Linha.Linha_codigo == linha.codigo,
+                Registro_Linha.data == diaria.data,
+                Registro_Linha.funcionando == False
+              ))
+              .first()
+            )
+            if (
+              check_valid_datetime(diaria.data, parada.horario_passagem, add_limit=0.25)
+              and not linha.ferias and not not_dis
+            ):
+              date = format_date(diaria.data)
+              if date == today:
+                date = 'Hoje'
+
+              if date not in retorno['diarias']:
+                retorno['diarias'][date] = {}
+                retorno['diarias'][date]['dayweek'] = return_day_week(diaria.data.weekday())
+                retorno['diarias'][date]['date'] = date
+                retorno['diarias'][date]['data'] = []
+                
+              retorno['diarias'][date]['data'].append({
+                'valid': check_valid_datetime(diaria.data, parada.horario_passagem),
+                'tipo': parada.tipo.capitalize(),
+                'nome': ponto.nome
+              })
+          retorno['diarias'] = [value for value in retorno['diarias'].values()]
 
           if user.turno == rota.turno:
             retorno['meus_pontos'] = {}
@@ -1551,6 +1698,39 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
           retorno['data'][tipo]['quantidade'] = count_list(values, 'definido')
 
         return jsonify(retorno)
+
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações da rota.'})
+
+
+@app.route("/get_stops_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>", methods=['GET'])
+@login_required
+def get_stops_route(name_line, surname, shift, hr_par, hr_ret):
+  pos = request.args.get('pos')
+
+  if name_line and shift and hr_par and hr_ret:
+    linha = Linha.query.filter_by(nome=name_line).first()
+    if linha:
+      retorno = {'error': False, 'data': {'partida': [], 'retorno': []}}
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, pos)
+
+      if rota is not None:
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+      paradas = (
+        db.session.query(Parada, Ponto).join(Rota)
+        .filter(db.and_(
+          Parada.Ponto_id == Ponto.id,
+          Parada.Rota_codigo == rota.codigo,
+        ))
+        .order_by(Parada.ordem)
+        .all()
+      )
+
+      for parada, ponto in paradas:
+        retorno['data'][parada.tipo].append(ponto.nome)
+      
+      return jsonify(retorno)
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações da rota.'})
 

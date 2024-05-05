@@ -86,6 +86,9 @@ function loadStops() {
             diarias.paradas,
             local_diarias
           );
+
+          const elements = divs[0].querySelectorAll('[class*="-enter-"]');
+          animate_itens(elements, "fadeDown", 0.7, 0);
         } else {
           document
             .getElementById("area_agenda_diaria")
@@ -144,10 +147,21 @@ function loadWeek() {
                 diaria_container.innerHTML = "";
 
                 for (index in value) {
+                  const div = document.createElement("div");
+                  div.className = 'page__container'
+                  div.id = `${day}-diaria_${value[index]}`
+
+                  const text_ = document.createElement("p");
+                  text_.className = "text terciario";
+                  text_.textContent = "Diária:";
+
                   const text = document.createElement("p");
                   text.className = "text terciario content";
                   text.textContent = value[index];
-                  diaria_container.appendChild(text);
+
+                  div.appendChild(text_);
+                  div.appendChild(text);
+                  diaria_container.appendChild(div);
                 }
               }
             } else if (key === "valida") {
@@ -179,9 +193,13 @@ function loadWeek() {
                 icon_card_edit.classList.add("inactive");
                 icon_card_blocked.classList.remove("inactive");
 
-                card_content.classList.add("inactive");
-                span_info.classList.remove("inactive");
-                span_info.textContent = info["info"]
+                if (info.info) {
+                  card_content.classList.add("inactive");
+                  span_info.classList.remove("inactive");
+                  span_info.textContent = info.info;
+                } else {
+                  card_content.classList.remove("inactive");
+                }
               }
             } else if (key.includes("content")) {
               const new_key = key.split("_");
@@ -265,7 +283,7 @@ function config_popup_day() {
       text.className = "text secundario fundo justify";
       span_msg.appendChild(text);
 
-      if (element.id.includes("partida")) {
+      if (element.id.includes("Partida")) {
         set_selected_bool(optios_faltara, "Sim");
         set_selected_bool(optios_contraturno, "Não");
         text.textContent =
@@ -284,23 +302,47 @@ function config_popup_day() {
   const p_faltara = document.getElementById(`faltara_${day}`);
   const p_contraturno = document.getElementById(`contraturno_${day}`);
   if (!p_faltara.className.includes("content")) {
+    const list_msg = Array.from(span_msg.children);
     container.classList.remove("inactive");
     blocked_faltara = true;
-    const text = document.createElement("p");
-    text.className = "text secundario fundo justify";
-    text.textContent =
-      "A opção de falta foi bloqueada pois o horário limite de alteração foi atingido.";
-    span_msg.appendChild(text);
+
+    if (list_msg.length) {
+      if (!list_msg[0].textContent.includes("diária")) {
+        const text = document.createElement("p");
+        text.className = "text secundario fundo justify";
+        text.textContent =
+          "A opção de falta foi bloqueada pois o horário limite de alteração foi atingido.";
+        span_msg.appendChild(text);
+      }
+    } else {
+      const text = document.createElement("p");
+      text.className = "text secundario fundo justify";
+      text.textContent =
+        "A opção de falta foi bloqueada pois o horário limite de alteração foi atingido.";
+      span_msg.appendChild(text);
+    }
   }
 
   if (!p_contraturno.className.includes("content")) {
+    const list_msg = Array.from(span_msg.children);
     container.classList.remove("inactive");
     blocked_contraturno = true;
-    const text = document.createElement("p");
-    text.className = "text secundario fundo justify";
-    text.textContent =
-      "A opção de contraturno foi bloqueada pois o horário limite de alteração foi atingido.";
-    span_msg.appendChild(text);
+
+    if (list_msg.length >= 2) {
+      if (!list_msg[1].textContent.includes("diária")) {
+        const text = document.createElement("p");
+        text.className = "text secundario fundo justify";
+        text.textContent =
+          "A opção de contraturno foi bloqueada pois o horário limite de alteração foi atingido.";
+        span_msg.appendChild(text);
+      }
+    } else {
+      const text = document.createElement("p");
+      text.className = "text secundario fundo justify";
+      text.textContent =
+        "A opção de contraturno foi bloqueada pois o horário limite de alteração foi atingido.";
+      span_msg.appendChild(text);
+    }
   }
 
   if (blocked_faltara) {

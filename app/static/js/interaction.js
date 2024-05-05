@@ -586,11 +586,15 @@ function criar_visualizacao_parada(model, list, container) {
         if (value.includes("fixo")) {
           const icon = parada.querySelector(`#${parada.id}_icon_fixed`);
           icon.classList.remove("inactive");
-          icon.classList.add(value.includes("-") ? "verde" : "roxo");
+          icon.classList.add(value.includes("|") ? "verde" : "roxo");
           parada.querySelector(`#${parada.id}_point`).classList.add("fixed");
           tag.parentNode.classList.add("fixed");
         } else if (container.id.includes("diaria")) {
-          console.log("ok");
+          const icon_redirect = parada.querySelector(`#${parada.id}_icon_redirect`)
+          icon_redirect.classList.remove('inactive')
+          icon_redirect.onclick = function() {
+            stop_redirect(data.linha)
+          }
         }
       }
     }

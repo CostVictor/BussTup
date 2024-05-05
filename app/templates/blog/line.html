@@ -29,6 +29,8 @@
     {% include "/models/line/model_index.html" %}
     {% if role == 'motorista' %}
     {% include "/models/line/model_driver.html" %}
+    {% else %}
+    {% include "/models/line/model_student.html" %}
     {% endif %}
   </template>
 
@@ -180,7 +182,7 @@
       <h2 class="text title">Pontos e Rotas</h2>
       <div id="interface_pontos_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
         <h3 class="text secundario emphasis">Pontos</h3>
-        <h3 id="interface_pontos_quantidade" class="text secundario fundo max_width">Carregando...</h3>
+        <h3 id="interface_pontos_quantidade" class="text secundario fundo max_width">Calculando...</h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
       </div>
 
@@ -197,7 +199,7 @@
 
       <div id="interface_rotas_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
         <h3 class="text secundario emphasis">Rotas</h3>
-        <h3 id="interface_rotas_quantidade" class="text secundario fundo max_width">Carregando...</h3>
+        <h3 id="interface_rotas_quantidade" class="text secundario fundo max_width">Calculando...</h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
       </div>
 
@@ -224,7 +226,7 @@
       <h2 class="text title">Alunos e Tickets</h2>
       <div id="interface_alunos_btn" class="page__container interaction pos_relative" onclick="action_container(this, false, false)">
         <h3 class="text secundario fundo">Alunos</h3>
-        <h3 id="interface_alunos_quant" class="text secundario fundo max_width">Carregando...</h3>
+        <h3 id="interface_alunos_quant" class="text secundario fundo max_width">Calculando...</h3>
         <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
       </div>
 
@@ -233,7 +235,7 @@
         <div id="interface_alunos_{{ turno }}_btn" class="page__container interaction pos_relative"
           onclick="action_container(this, false, false)">
           <h3 class="text secundario emphasis">{{ turno }}</h3>
-          <h3 id="interface_alunos_{{ turno }}_quantidade" class="text secundario fundo max_width">Carregando...</h3>
+          <h3 id="interface_alunos_{{ turno }}_quantidade" class="text secundario fundo max_width">Calculando...</h3>
           <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
         </div>
 
@@ -262,6 +264,7 @@
   <script src="/static/js/line/driver/edition_driver.js"></script>
   {% else %}
   <script src="/static/js/line/student/interaction_student.js"></script>
+  <script src="/static/js/line/student/edition_student.js"></script>
   {% endif %}
 </body>
 </html>
