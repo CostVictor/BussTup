@@ -312,3 +312,28 @@
     </footer>
   </div>
 </section>
+
+
+<section id="confirm_del_daily" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Confirmação</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <p class="popup__text secundario justify">Ao prosseguir, você irá excluir a diária:</p>
+      <div class="page__container justify">
+        <div class="page__container">
+          <p id="confirm_del_daily_date" class="text secundario emphasis"></p>
+          <p id="confirm_del_daily_type" class="text secundario emphasis"></p>
+          <p id="confirm_del_daily_name_point" class="text secundario emphasis"></p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('confirm_del_daily')">Cancelar</button>
+      <button class="popup__btn" onclick="deletar_diaria()">Confirmar</button>
+    </footer>
+  </div>
+</section>

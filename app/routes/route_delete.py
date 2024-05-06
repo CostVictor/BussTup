@@ -18,7 +18,7 @@ def del_line():
       try:
         db.session.delete(linha)
         db.session.commit()
-        return jsonify({'error': False, 'title': 'Veículo Excluído', 'text': f'Esta linha foi excluída e todos os registros associados foram apagados. Você será redirecionado(a) para a página principal.'})
+        return jsonify({'error': False, 'title': 'Linha Excluída', 'text': f'Esta linha foi excluída e todos os registros associados foram apagados. Você será redirecionado(a) para a página principal.'})
       
       except Exception as e:
         db.session.rollback()
@@ -214,3 +214,56 @@ def del_relationship_point_route(name_line, surname, shift, hr_par, hr_ret, type
               print(f'Erro ao remover o veículo: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Remoção Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar remover a relação do ponto.'})
+
+
+@app.route("/del_pass_daily", methods=['POST'])
+@login_required
+@roles_required("aluno")
+def del_pass_daily():
+  data = request.get_json()
+  if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'pos' in data and 'date' in data and 'type' in data and 'name_point' in data:
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    user = return_my_user()
+
+    hr_par = data['time_par']; hr_ret = data['time_ret']
+    surname = data['surname']; shift = data['shift']
+    date_ = format_date(data['date'], reverse=True)
+    
+    if linha and user and hr_par and hr_ret and surname and shift:
+      route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
+      if route is not None:
+        if not route:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+        pass_daily = (
+          db.session.query(Parada, Passagem).join(Ponto)
+          .filter(db.and_(
+            Ponto.nome == data['name_point'],
+            Parada.Ponto_id == Ponto.id,
+            Parada.tipo == data['type'],
+            Parada.Rota_codigo == route.codigo,
+            Passagem.Parada_codigo == Parada.codigo,
+            Passagem.Aluno_id == user.id,
+            Passagem.passagem_fixa == False,
+            Passagem.data == date_,
+            db.not_(db.or_(
+              Passagem.migracao_lotado == True,
+              Passagem.migracao_manutencao == True
+            ))
+          ))
+          .first()
+        )
+
+        if pass_daily:
+          parada, passagem = pass_daily
+          if check_valid_datetime(date_, parada.horario_passagem):
+            try:
+              db.session.delete(passagem)
+              db.session.commit()
+              return jsonify({'error': False, 'title': 'Diária Removida', 'text': f''})
+
+            except Exception as e:
+              db.session.rollback()
+              print(f'Erro ao remover a diária: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Remoção Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar remover a diária.'})

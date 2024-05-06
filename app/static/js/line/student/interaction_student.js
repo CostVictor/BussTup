@@ -42,6 +42,12 @@ function action_popup(popup, card, id, obj_click) {
     config_popup_contraturno();
   } else if (id === "sched_daily") {
     config_popup_sched();
+  } else if (id === 'confirm_del_daily') {
+    const date = obj_click.parentNode.parentNode.querySelector('h1').textContent.split(' ')
+    const info = obj_click.parentNode.querySelector('p').textContent.split(' ~> ')
+    document.getElementById('confirm_del_daily_date').textContent = date[date.length - 1]
+    document.getElementById('confirm_del_daily_type').textContent = info[0]
+    document.getElementById('confirm_del_daily_name_point').textContent = info[1]
   }
 }
 

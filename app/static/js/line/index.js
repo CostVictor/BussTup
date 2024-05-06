@@ -530,6 +530,8 @@ function loadInterfaceRoutes(name_line) {
             local_minhas_rotas.classList.remove("inactive");
             local_diarias.classList.remove("inactive");
             criar_rota(diarias, local_diarias_container);
+          } else {
+            local_diarias.classList.add("inactive");
           }
 
           if (response.relacao === "participante") {
@@ -740,11 +742,15 @@ function config_popup_route(obj_click, data = false) {
                 daily_info.textContent = `${values.tipo} ~> ${values.nome}`
 
                 if (values.valid) {
-                  daily_icon.onclick = function() {
-                    open_popup('indisponivel')
+                  if (values.edit) {
+                    daily_icon.onclick = function() {
+                      open_popup('confirm_del_daily', this)
+                    }
+                  } else {
+                    daily_icon.className = 'bi bi-person-lock page__icon content info'
                   }
                 } else {
-                  daily_icon.className = 'bi bi-stopwatch-fill page__icon content'
+                  daily_icon.className = 'bi bi-stopwatch page__icon content info'
                 }
               }
               container_diarias.appendChild(container_date)

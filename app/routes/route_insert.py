@@ -878,10 +878,28 @@ def create_pass_daily():
                 ))
                 .first()
               )
+              not_dis = (
+                db.session.query(Registro_Linha)
+                .filter(db.and_(
+                  Registro_Linha.Linha_codigo == linha.codigo,
+                  Registro_Linha.data == date_,
+                  Registro_Linha.funcionando == False
+                ))
+                .first()
+              )
 
               if check_valid_datetime(date_, stop.horario_passagem):
                 if check_indis:
                   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Você já possui uma diária marcada para a mesma data com horários muito próximos do(s) ponto(s) selecionado(s). Este agendamento foi interrompido para evitar conflito de horários.'})
+                
+                if linha.ferias:
+                  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Não é possível agendar diárias enquanto a linha estiver em período de férias.'})
+                
+                if not_dis:
+                  if not_dis.feriado:
+                    return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Não é possível agendar uma diária neste dia, pois a linha não estará em funcionamento devido a um feriado.'})
+                  
+                  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Não é possível agendar uma diária neste dia, pois a linha estará fora de serviço.'})
 
                 db.session.add(Passagem(
                   passagem_fixa=False,
@@ -890,7 +908,7 @@ def create_pass_daily():
                   Aluno_id=user.id,
                   data=date_
                 ))
-              else: 
+              else:
                 execute = False
                 types = [value for value in types if value == type_]
                 break
@@ -899,7 +917,7 @@ def create_pass_daily():
           
           if execute:
             db.session.commit()
-            return jsonify({'error': False, 'title': 'Diária agendada', 'text': f'Você marcou {"uma diária" if len(types) == 1 else "duas diárias"} para <strong>{return_day_week(date_.weekday())} {format_date(date_)}</strong>. Volte se desejar desfazer.'})
+            return jsonify({'error': False, 'title': 'Diária Agendada', 'text': f'Você marcou {"uma diária" if len(types) == 1 else "duas diárias"} para <strong>{return_day_week(date_.weekday())} {format_date(date_)}</strong>.'})
           
           else:
             return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': f'A data fornecida não é válida para agendar uma diária de <strong>{types[0]}</strong> no ponto <strong>{data[types[0]]}</strong> pois o horário de funcionamento deste dia já passou.'})

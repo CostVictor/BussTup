@@ -581,7 +581,7 @@ def get_stops_student():
         'veiculo': veiculo.apelido if veiculo else 'Nenhum',
         'nome_ponto': parada.ponto.nome,
         'horario': format_time(parada.horario_passagem),
-        'tipo': parada.tipo
+        'tipo': parada.tipo.capitalize()
       }
 
       if passagem.passagem_fixa:
@@ -595,7 +595,7 @@ def get_stops_student():
         else:
           info['data'] = 'fixo'
           data['fixa']['paradas'].appendleft(info)
-          tipos.remove(info['tipo'])
+          tipos.remove(info['tipo'].lower())
       else:
         not_dis = (
           db.session.query(Registro_Linha)
@@ -1060,6 +1060,7 @@ def get_interface_route(name_line):
           Passagem.Parada_codigo == Parada.codigo,
           Parada.Rota_codigo.in_(code_routes)
         ))
+        .order_by(Passagem.data)
         .all()
       )
 
@@ -1602,6 +1603,7 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
                 
               retorno['diarias'][date]['data'].append({
                 'valid': check_valid_datetime(diaria.data, parada.horario_passagem),
+                'edit': False if diaria.migracao_lotado or diaria.migracao_manutencao else True,
                 'tipo': parada.tipo.capitalize(),
                 'nome': ponto.nome
               })

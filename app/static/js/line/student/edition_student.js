@@ -207,3 +207,34 @@ function agendar_diaria() {
       });
   } else [create_popup(title, text)];
 }
+
+function deletar_diaria() {
+  const data = return_data_route(null);
+  data.type = document.getElementById("confirm_del_daily_type").textContent;
+  data.name_point = document.getElementById(
+    "confirm_del_daily_name_point"
+  ).textContent;
+  data.date = document.getElementById("confirm_del_daily_date").textContent;
+
+  popup_button_load("confirm_del_daily");
+  fetch("/del_pass_daily", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        create_popup(response.title, response.text, "Ok", "success");
+        close_popup("confirm_del_daily");
+        config_popup_route(
+          null,
+          return_data_route(null, (format_dict_url = true))
+        );
+        loadInterfaceRoutes(data.name_line);
+      } else {
+        create_popup(response.title, response.text);
+        popup_button_load("confirm_del_daily", "Confirmar");
+      }
+    });
+}
