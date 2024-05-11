@@ -449,3 +449,59 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
       break;
   }
 }
+
+function load_popup_forecast(data_route) {
+  fetch(`/get_forecast_route` + generate_url_dict(data_route), { method: "GET" })
+  .then((response) => response.json())
+  .then((response) => {
+    if (!response.error) {
+      const data = response.data
+      for (day in data) {
+        data_day = data[day]
+        info_day = data_day.info
+
+        const text_day = document.getElementById(`forecast_route_${day}_day`)
+        if (data_day.date_valid) {
+          if (data_day.today) {
+            text_day.classList.add('normal')
+          }
+        } else {
+          text_day.classList.add('gray')
+        }
+        document.getElementById(`forecast_route_${day}_date`).textContent = data_day.date
+
+        for (type in info_day) {
+          const span = document.getElementById(`forecast_route_${day}_span`)
+          const container = document.getElementById(`forecast_route_${day}_${type}`)
+          if (data_day.not_dis) {
+            container.classList.add('inactive')
+            span.textContent = data_day.msg
+            span.classList.remove('inactive')
+          } else {
+            span.textContent = ''
+            span.classList.add('inactive')
+            container.classList.remove('inactive')
+            
+            const value = container.querySelector('p')
+            value.textContent = info_day[type].qnt
+  
+            const color = info_day[type].color
+            if (color !== 'normal') {
+              value.classList.add(color)
+              if (response.role === 'motorista' && response.relacao !== 'membro') {
+                console.log('ok')
+              }
+            } else {
+              value.classList.remove('yellow')
+              value.classList.remove('red')
+            }
+          }
+        }
+      }
+      document.getElementById('forecast_route_msg').textContent = 'Dados em pessoas'
+    } else {
+      close_popup('forecast_route')
+      create_popup(response.title, response.text)
+    }
+  })
+}

@@ -22,6 +22,21 @@ function action_popup(popup, card, id, obj_click) {
     const name_line = extract_info(obj_click, "nome");
     document.getElementById("summary_line_nome").textContent = name_line;
     load_popup_line(card, name_line);
+  } else if (id === "notice_migrate") {
+    const span_type = document.getElementById("notice_migrate_type");
+    const span_date = document.getElementById("notice_migrate_date");
+
+    if (obj_click.id.includes("summary_route")) {
+      let type = obj_click.id.split("_");
+      type = type[type.length - 2];
+      span_type.textContent = type.trim();
+
+      let date = document
+        .getElementById("summary_route_dia_previsao")
+        .textContent.split(" ");
+      date = date[date.length - 1]
+      span_date.textContent = date
+    }
   }
 }
 

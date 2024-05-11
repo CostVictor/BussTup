@@ -590,15 +590,38 @@ function criar_visualizacao_parada(model, list, container) {
           parada.querySelector(`#${parada.id}_point`).classList.add("fixed");
           tag.parentNode.classList.add("fixed");
         } else if (container.id.includes("diaria")) {
-          const icon_redirect = parada.querySelector(`#${parada.id}_icon_redirect`)
-          icon_redirect.classList.remove('inactive')
-          icon_redirect.onclick = function() {
-            stop_redirect(data.linha)
-          }
+          const icon_redirect = parada.querySelector(
+            `#${parada.id}_icon_redirect`
+          );
+          icon_redirect.classList.remove("inactive");
+          icon_redirect.onclick = function () {
+            stop_redirect(data.linha);
+          };
         }
       }
     }
     parada.classList.remove("inactive");
     container.appendChild(parada);
+  }
+}
+
+function migrate_capacity(data_route) {
+  console.log(data_route)
+}
+
+function create_migrate_crowded(local) {
+  open_popup("migrate_capacity", false, false);
+  let data = null;
+  if (local === "page") {
+    data = return_data_route(document.getElementById("summary_route"));
+  } else if (local === "line") {
+    data = return_data_route(null);
+  }
+  data.type = document.getElementById('notice_migrate_type').textContent
+  data.date = document.getElementById('notice_migrate_date').textContent
+  
+  const button = document.getElementById('migrate_capacity_migrar')
+  button.onclick = function() {
+    migrate_capacity(data)
   }
 }

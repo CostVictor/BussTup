@@ -25,6 +25,7 @@
     </template>
 
     <template id="templates_popup">
+      {% include "/popups/popup_global.html" %}
       {% include "/popups/page/popup_index.html" %} {% if role == 'motorista' %}
       {% include "/popups/page/popup_driver.html" %} {% else %} {% include
       "/popups/page/popup_student.html" %} {% endif %}

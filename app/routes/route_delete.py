@@ -30,26 +30,56 @@ def del_line():
   return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir a linha.'})
 
 
-@app.route("/del_myPoint_fixed/<type>", methods=['DELETE'])
+@app.route("/del_myPoint_fixed/<_type>", methods=['DELETE'])
 @login_required
 @roles_required("aluno")
-def del_myPoint_fixed(type):
+def del_myPoint_fixed(_type):
   user = return_my_user()
 
-  if user and type:
+  if user and _type:
     passagem = (
       db.session.query(Passagem).join(Parada)
       .filter(db.and_(
         Passagem.Aluno_id == user.id,
         Passagem.passagem_fixa == True,
         Passagem.passagem_contraturno == False,
-        Parada.tipo == type
+        Parada.tipo == _type
       ))
       .first()
     )
     
     if passagem:
+      dates = return_dates_week()
+      records_fixed = (
+        db.session.query(Registro_Rota)
+        .filter(db.and_(
+          Registro_Rota.Rota_codigo == passagem.parada.rota.codigo,
+          Registro_Rota.data.in_(dates),
+          Registro_Rota.tipo == _type
+        ))
+        .all()
+      )
+
+      check_contraturno = (
+        db.session.query(Registro_Aluno)
+        .filter(db.and_(
+          Registro_Aluno.Aluno_id == user.id,
+          Registro_Aluno.contraturno == True,
+          Registro_Aluno.data.in_(dates)
+        ))
+        .all()
+      )
+      dates_contraturno = [value.data for value in check_contraturno]
+      ignore = return_ignore_route(user.turno)
+
       try:
+        for record in records_fixed:
+          if (
+            (not record.tipo == ignore or not record.data in dates_contraturno)
+            and check_valid_datetime(record.data)
+          ):
+            set_update_record_route(record)
+
         db.session.delete(passagem)
         db.session.commit()
         return jsonify({'error': False, 'title': 'Remoção Concluída', 'text': ''})
@@ -77,7 +107,39 @@ def del_myPoint_contraturno():
     )
 
     if passagem:
+      dates = return_dates_week()
+      parada = passagem.parada
+
+      records_fixed = (
+        db.session.query(Registro_Rota)
+        .filter(db.and_(
+          Registro_Rota.Rota_codigo == parada.rota.codigo,
+          Registro_Rota.data.in_(dates),
+          Registro_Rota.tipo == parada.tipo
+        ))
+        .all()
+      )
+
+      check_contraturno = (
+        db.session.query(Registro_Aluno)
+        .filter(db.and_(
+          Registro_Aluno.Aluno_id == user.id,
+          Registro_Aluno.contraturno == True,
+          Registro_Aluno.data.in_(dates)
+        ))
+        .all()
+      )
+      dates_contraturno = [value.data for value in check_contraturno]
+      ignore = return_ignore_route(user.turno)
+
       try:
+        for record in records_fixed:
+          if (
+            (record.tipo == ignore and record.data in dates_contraturno)
+            and check_valid_datetime(record.data)
+          ):
+            set_update_record_route(record)
+
         db.session.delete(passagem)
         db.session.commit()
         return jsonify({'error': False, 'title': 'Remoção Concluída', 'text': ''})
@@ -257,10 +319,82 @@ def del_pass_daily():
         if pass_daily:
           parada, passagem = pass_daily
           if check_valid_datetime(date_, parada.horario_passagem):
+            if route.turno == user.turno:
+              if parada.tipo == return_ignore_route(user.turno):
+                my_pass_fixed = (
+                  db.session.query(Passagem)
+                  .filter(db.and_(
+                    Passagem.Aluno_id == user.id,
+                    Passagem.passagem_fixa == True,
+                    Passagem.passagem_contraturno == False
+                  ))
+                  .first()
+                )
+                if my_pass_fixed:
+                  route_fixed = my_pass_fixed.parada.rota
+                  record_route_fixed = (
+                    db.session.query(Registro_Rota)
+                    .filter(db.and_(
+                      Registro_Rota.Rota_codigo == route_fixed.codigo,
+                      Registro_Rota.tipo == parada.tipo,
+                      Registro_Rota.data == passagem.data
+                    ))
+                    .first()
+                  )
+                  if record_route_fixed:
+                    set_update_record_route(record_route_fixed)
+            
+            else:
+              check_contraturno = (
+                db.session.query(Registro_Aluno)
+                .filter(db.and_(
+                  Registro_Aluno.Aluno_id == user.id,
+                  Registro_Aluno.contraturno == True,
+                  Registro_Aluno.data == date_
+                ))
+                .first()
+              )
+              if check_contraturno and parada.tipo == return_ignore_route(user.turno):
+                my_pass_contraturno = (
+                  db.session.query(Passagem)
+                  .filter(db.and_(
+                    Passagem.Aluno_id == user.id,
+                    Passagem.passagem_fixa == True,
+                    Passagem.passagem_contraturno == True
+                  ))
+                  .first()
+                )
+                if my_pass_contraturno:
+                  route_contraturno = my_pass_contraturno.parada.rota
+                  if route_contraturno.turno == route.turno:
+                    record_route_contraturno = (
+                      db.session.query(Registro_Rota)
+                      .filter(db.and_(
+                        Registro_Rota.Rota_codigo == route_contraturno.codigo,
+                        Registro_Rota.tipo == parada.tipo,
+                        Registro_Rota.data == passagem.data
+                      ))
+                      .first()
+                    )
+                    if record_route_contraturno:
+                      set_update_record_route(record_route_contraturno)
+
+            record_daily = (
+              db.session.query(Registro_Rota)
+              .filter(db.and_(
+                Registro_Rota.Rota_codigo == route.codigo,
+                Registro_Rota.tipo == parada.tipo,
+                Registro_Rota.data == passagem.data
+              ))
+              .first()
+            )
+            if record_daily:
+              set_update_record_route(record_daily)
+
             try:
               db.session.delete(passagem)
               db.session.commit()
-              return jsonify({'error': False, 'title': 'Diária Removida', 'text': f''})
+              return jsonify({'error': False, 'title': 'Diária Removida', 'text': ''})
 
             except Exception as e:
               db.session.rollback()

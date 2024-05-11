@@ -1,0 +1,89 @@
+<section id="forecast_route" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header pos_relative">
+      <h1 class="popup__title">Previsão da semana</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div class="page__container margin_bottom" style="display: flex; justify-content: center;">
+        <div class="popup__local_color first">
+          <p class="popup__color yellow"></p>
+          <p class="popup__color_legend">Quase lotado</p>
+        </div>
+
+        <div class="popup__local_color">
+          <p class="popup__color red"></p>
+          <p class="popup__color_legend">Lotado</p>
+        </div>
+      </div>
+      
+      {% for index in range(6) %}
+      {% if not index %}
+      <div class="page__container" style="border-bottom: var(--cinza_quaternario) solid 0.06rem;">
+        <p id="forecast_route_msg" class="popup__forecast_title min_title">Calculando...</p>
+        <h1 class="popup__forecast_data">Partida</h1>
+        <h1 class="popup__forecast_data">Retorno</h1>
+      </div>
+      {% else %}
+      <div id="forecast_route_{{ dias_semana[index - 1] }}" class="page__container">
+        <div class="popup__forecast_container title">
+          <h1 id="forecast_route_{{ dias_semana[index - 1] }}_day" class="popup__forecast_title content">{{ dias_semana[index - 1][:3] }}</h1>
+        </div>
+        <p id="forecast_route_{{ dias_semana[index - 1] }}_date" class="popup__forecast_title division">-</p>
+        <span id="forecast_route_{{ dias_semana[index - 1] }}_span" class="popup__forecast_title max inactive"></span>
+        <div id="forecast_route_{{ dias_semana[index - 1] }}_partida" class="popup__forecast_container">
+          <p class="popup__forecast_data content">-</p>
+        </div>
+        <div id="forecast_route_{{ dias_semana[index - 1] }}_retorno" class="popup__forecast_container">
+          <p class="popup__forecast_data content">-</p>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_popup('forecast_route')">Voltar</button>
+    </footer>
+  </div>
+</section>
+
+{% if role == 'motorista' %}
+<section id="notice_migrate" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Recurso de Migração</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <span id="notice_migrate_type" class="inactive"></span>
+      <span id="notice_migrate_date" class="inactive"></span>
+      <p class="text secundario justify">Este recurso permite que qualquer motorista da linha possa realizar a transferência de passageiros de um veículo lotado para outro disponível, mesmo que não seja o condutor atual do veículo. Recomenda-se a comunicação entre os motoristas envolvidos antes de realizar essa ação.</p>
+      <h1 class="page__division"></h1>
+      <p class="text secundario justify">Essa ação não é permanente; o recurso cria uma diária obrigatória no veículo selecionado, válida apenas para o dia da migração.</p>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('notice_migrate')">Voltar</button>
+      <button class="popup__btn" onclick="create_migrate_crowded('page')">Proseguir</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="migrate_capacity" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Recurso de Migração</h1>
+    </header>
+
+    <div class="popup__container--content">
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('migrate_capacity')">Voltar</button>
+      <button id="migrate_capacity_migrar" class="popup__btn">Migrar</button>
+    </footer>
+  </div>
+</section>
+{% endif %}

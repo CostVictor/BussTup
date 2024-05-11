@@ -409,20 +409,44 @@ def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
   role = current_user.roles[0].name
   linha = Linha.query.filter_by(nome=name_line).first()
   if linha:
+    retorno = {'error': False, 'role': role, 'data_forecast': True}
+    if linha.ferias:
+      retorno['data_forecast'] = False
+      retorno['data'] = 'Os registros de previsão mais recentes não estarão disponíveis enquanto a linha estiver em período de férias.'
+    
     rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
     if rota:
+      dates = return_dates_week()
       today = date.today()
-      relationship = return_relationship(linha.codigo)
+      tomorrow = today + timedelta(days=1)
+      if today.weekday() in [5, 6]:
+        today = dates[0]
 
+      relationship = return_relationship(linha.codigo)
       not_dis = (
         db.session.query(Registro_Linha.data)
         .filter(db.and_(
           Registro_Linha.Linha_codigo == linha.codigo,
-          Registro_Linha.funcionando == False
+          Registro_Linha.funcionando == False,
+          Registro_Linha.data.in_(dates)
         ))
         .all()
       )
       not_dis = [_date[0] for _date in not_dis]
+
+      while True:
+        if today.weekday() == 5:
+          retorno['data_forecast'] = False
+          retorno['data'] = 'Os registros de previsão da próxima semana ainda não estão disponíveis.'
+          break
+
+        elif (
+          not check_valid_datetime(today, rota.horario_retorno, add_limit=0.75)
+          or today in not_dis
+        ):
+          today = today + timedelta(days=1)
+        
+        else: break
 
       check_daily = (
         db.session.query(Parada, Passagem)
@@ -438,13 +462,11 @@ def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
       
       if (
         (relationship and relationship != 'não participante') or 
-        (not linha.ferias and today not in not_dis and check_daily)
+        (not linha.ferias and check_daily)
       ):
         veiculo = rota.onibus
         capacidade = veiculo.capacidade if veiculo else 'Indefinido'
-
-        data = {}
-        retorno = {'error': False, 'role': role, 'capacidade': capacidade, 'data': data}
+        retorno['capacidade'] = capacidade
 
         estado = 'Inativa'
         if rota.em_partida:
@@ -453,12 +475,31 @@ def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
           estado = 'Em retorno'
         retorno['estado'] = estado
 
-        for tipo in ['partida', 'retorno']:
-          registro = Registro_Rota.query.filter_by(
-            data=date.today(), tipo=tipo, Rota_codigo=rota.codigo
-          ).first()
-          data[f'previsao_{tipo}'] = registro.previsao_pessoas
-        
+        if retorno['data_forecast']:
+          data = {}
+          if today == date.today():
+            forecast = 'Hoje'
+          elif today == tomorrow:
+            forecast = 'Amanhã'
+          else:
+            forecast = f'{return_day_week(today.weekday())} {format_date(today)}'
+
+          for tipo in ['partida', 'retorno']:
+            registro = Registro_Rota.query.filter_by(
+              data=today, tipo=tipo, Rota_codigo=rota.codigo
+            ).first()
+
+            if registro.atualizar:
+              modify_forecast_route(rota, registro)
+            if tipo == 'partida':
+              data['partida_passou'] = not check_valid_datetime(today, rota.horario_partida, add_limit=0.75)
+            data[f'previsao_{tipo}'] = registro.previsao_pessoas
+
+          retorno['data'] = data
+        else:
+          forecast = 'Indisponível'
+
+        retorno['day_week'] = f'Previsão: {forecast}'
         return jsonify(retorno)
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da rota. Por favor, recarregue a página e tente novamente.'})
@@ -825,11 +866,99 @@ def get_crowded():
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar os dados de previsão. Por favor, recarregue a página e tente novamente.'})
 
 
-@app.route("/get_forecast_route", methods=['GET'])
+@app.route("/get_forecast_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>", methods=['GET'])
 @login_required
-def get_forecast():
+def get_forecast(name_line, surname, shift, hr_par, hr_ret):
+  pos = request.args.get('pos')
   user = return_my_user()
-  if user:...
+
+  if user and name_line and surname and shift and hr_par and hr_ret:
+    linha = Linha.query.filter_by(nome=name_line).first()
+    if linha:
+      relationship = return_relationship(linha.codigo)
+      role = current_user.roles[0].name
+      retorno = {'error': False, 'role': role, 'relacao': relationship}
+
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, pos)
+      if rota is not None:
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+
+        data = {}
+        vehicle = rota.onibus
+        dates = return_dates_week()
+        today = date.today()
+
+        records_line = (
+          db.session.query(Registro_Linha)
+          .filter(db.and_(
+            Registro_Linha.data.in_(dates),
+            Registro_Linha.Linha_codigo == linha.codigo
+          ))
+          .order_by(Registro_Linha.data)
+          .all()
+        )
+        not_includes = [
+          record.data for record in records_line
+          if not record.funcionando
+        ]
+
+        records_route = (
+          db.session.query(Registro_Rota)
+          .filter(db.and_(
+            Registro_Rota.data.in_(dates),
+            Registro_Rota.Rota_codigo == rota.codigo
+          ))
+          .order_by(Registro_Rota.data)
+          .all()
+        )
+
+        for record in records_route:
+          week_day = return_day_week(record.data.weekday())
+          if week_day not in data:
+            data_local = {
+              'date': format_date(record.data), 'date_valid': check_valid_datetime(record.data),
+              'not_dis': False
+            }
+            data_local['info'] = {'partida': {}, 'retorno': {}}
+            data_local['today'] = (record.data == today)
+
+            if (
+              (linha.ferias and data_local['date_valid'])
+              or record.data in not_includes
+            ):
+              data_local['not_dis'] = True
+              msg = '<Férias>'
+
+              if not linha.ferias:
+                msg = '<Fora de serviço>'
+                if records_line[record.data.weekday()].feriado:
+                  msg = '<Feriado>'
+              data_local['msg'] = msg
+
+            data[week_day] = data_local
+
+          if not data_local['not_dis']:
+            time_reference = rota.horario_partida if record.tipo == 'partida' else rota.horario_retorno
+            if (
+              check_valid_datetime(record.data, time_reference, add_limit=0.75)
+              and record.atualizar
+            ):
+              modify_forecast_route(rota, record)
+            
+            data_local['info'][record.tipo]['qnt'] = record.previsao_pessoas
+            color = 'normal'
+
+            if record.previsao_pessoas > vehicle.capacidade:
+              color = 'red'
+            elif (vehicle.capacidade - 5) <= record.previsao_pessoas <= vehicle.capacidade:
+              color = 'yellow'
+            data_local['info'][record.tipo]['color'] = color
+        
+        retorno['data'] = data
+        return jsonify(retorno)
+          
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar os dados de previsão. Por favor, recarregue a página e tente novamente.'})
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''

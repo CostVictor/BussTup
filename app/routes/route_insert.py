@@ -900,7 +900,7 @@ def create_pass_daily():
                     return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Não é possível agendar uma diária neste dia, pois a linha não estará em funcionamento devido a um feriado.'})
                   
                   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Não é possível agendar uma diária neste dia, pois a linha estará fora de serviço.'})
-
+                
                 db.session.add(Passagem(
                   passagem_fixa=False,
                   passagem_contraturno=False,
@@ -908,6 +908,78 @@ def create_pass_daily():
                   Aluno_id=user.id,
                   data=date_
                 ))
+
+                if user.turno == route.turno:
+                  if type_ == return_ignore_route(user.turno):
+                    my_pass_fixed = (
+                      db.session.query(Passagem)
+                      .filter(db.and_(
+                        Passagem.Aluno_id == user.id,
+                        Passagem.passagem_fixa == True,
+                        Passagem.passagem_contraturno == False
+                      ))
+                      .first()
+                    )
+                    if my_pass_fixed:
+                      route_fixed = my_pass_fixed.parada.rota
+                      record_route_fixed = (
+                        db.session.query(Registro_Rota)
+                        .filter(db.and_(
+                          Registro_Rota.Rota_codigo == route_fixed.codigo,
+                          Registro_Rota.tipo == type_,
+                          Registro_Rota.data == date_
+                        ))
+                        .first()
+                      )
+                      if record_route_fixed:
+                        set_update_record_route(record_route_fixed)
+                else:
+                  check_contraturno = (
+                    db.session.query(Registro_Aluno)
+                    .filter(db.and_(
+                      Registro_Aluno.Aluno_id == user.id,
+                      Registro_Aluno.contraturno == True,
+                      Registro_Aluno.data == date_
+                    ))
+                    .first()
+                  )
+                  if check_contraturno and type_ == return_ignore_route(user.turno):
+                    my_pass_contraturno = (
+                      db.session.query(Passagem)
+                      .filter(db.and_(
+                        Passagem.Aluno_id == user.id,
+                        Passagem.passagem_fixa == True,
+                        Passagem.passagem_contraturno == True
+                      ))
+                      .first()
+                    )
+                    if my_pass_contraturno:
+                      route_contraturno = my_pass_contraturno.parada.rota
+                      if route_contraturno.turno == route.turno:
+                        record_route_contraturno = (
+                          db.session.query(Registro_Rota)
+                          .filter(db.and_(
+                            Registro_Rota.Rota_codigo == route_contraturno.codigo,
+                            Registro_Rota.tipo == type_,
+                            Registro_Rota.data == date_
+                          ))
+                          .first()
+                        )
+                        if record_route_contraturno:
+                          set_update_record_route(record_route_contraturno)
+
+                record_route_daily = (
+                  db.session.query(Registro_Rota)
+                  .filter(db.and_(
+                    Registro_Rota.Rota_codigo == route.codigo,
+                    Registro_Rota.tipo == type_,
+                    Registro_Rota.data == date_
+                  ))
+                  .first()
+                )
+                if record_route_daily:
+                  set_update_record_route(record_route_daily)
+
               else:
                 execute = False
                 types = [value for value in types if value == type_]
