@@ -78,8 +78,20 @@ function loadStops() {
             document.getElementById("area_agenda_diaria");
           container_diarias.classList.remove("inactive");
 
-          if (diarias.msg) {
-            container_diarias.querySelector("span").textContent = diarias.msg;
+          const container_span_msg = document.getElementById('area_agenda_diaria_span_msg')
+          container_span_msg.innerHTML = ''
+
+          if (diarias.msg.length) {
+            for (index in diarias.msg) {
+              const text = document.createElement("p");
+              text.className = `text secundario fundo cinza justify${index ? ' margin_top' : ''}`;
+              text.style.fontSize = 'calc(0.75vw + 0.75vh + 1vmin)'
+              text.textContent = diarias.msg[index];
+              container_span_msg.appendChild(text);
+            }
+            container_span_msg.classList.remove('inactive')
+          } else {
+            container_span_msg.classList.add('inactive')
           }
           criar_visualizacao_parada(
             model_parada,

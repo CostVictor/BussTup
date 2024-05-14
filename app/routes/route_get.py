@@ -465,7 +465,7 @@ def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
         (not linha.ferias and check_daily)
       ):
         veiculo = rota.onibus
-        capacidade = veiculo.capacidade if veiculo else 'Indefinido'
+        capacidade = veiculo.capacidade if veiculo else '-'
         retorno['capacidade'] = capacidade
 
         estado = 'Inativa'
@@ -592,7 +592,7 @@ def get_summary_line(name_line):
 def get_stops_student():
   user = return_my_user()
   if user:
-    data = {'fixa': {'msg': [], 'paradas': deque()}, 'diaria': {'msg': None, 'paradas': []}}
+    data = {'fixa': {'msg': [], 'paradas': deque()}, 'diaria': {'msg': [], 'paradas': []}}
     retorno = {'error': False, 'data': data}
     msg_ferias = 'Sua linha está em período de férias.'
 
@@ -630,7 +630,7 @@ def get_stops_student():
           data['fixa']['msg'].append(msg_ferias)
 
         if passagem.passagem_contraturno:
-          info['data'] = 'fixo | contraturno'
+          info['data'] = 'fixo | Contraturno'
           data['fixa']['paradas'].append(info)
           tipos.remove('contraturno')
         else:
@@ -649,6 +649,8 @@ def get_stops_student():
         )
         if not linha.ferias and not not_dis:
           today = date.today()
+          tomorrow = date.today() + timedelta(days=1)
+
           if check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25):
             info_date = format_date(passagem.data)
             day_week = return_day_week(passagem.data.weekday())
@@ -656,15 +658,21 @@ def get_stops_student():
 
             if passagem.data == today:
               info['data'] = 'Hoje'
-            else: info['data'] = f'{day_week} - {info_date}'
+            elif passagem.data == tomorrow:
+              info['data'] = 'Amanhã'
+            else: info['data'] = f'{day_week[:3]} - {info_date}'
 
             if passagem.migracao_lotado:
-              info['data'] = f'{info["data"]} | migrado devido lotação'
-              data['diaria']['msg'] = 'Lotado: Seu motorista alterou o veículo que você usará no dia e trajeto especificado devido a uma lotação identificada em seu veículo habitual naquele dia.'
+              info['data'] = f'{info["data"]} | Transferido devido lotação'
+              msg = 'Veículo lotado: Seu motorista alterou o veículo que você usará devido a uma lotação prevista para seu transporte habitual.'
+              if msg not in data['diaria']['msg']:
+                data['diaria']['msg'].append(msg)
             
             elif passagem.migracao_manutencao:
-              info['data'] = f'{info["data"]} | migrado devido manutenção'
-              data['diaria']['msg'] = 'Veículo em manutenção: Seu motorista alterou o veículo que você usará devido a um defeito encontrado em seu veículo habitual.'
+              info['data'] = f'{info["data"]} | Transferido devido manutenção'
+              msg = 'Veículo em manutenção: Seu motorista alterou o veículo que você usará devido a um defeito encontrado em seu transporte habitual.'
+              if msg not in data['diaria']['msg']:
+                data['diaria']['msg'].append(msg)
     
     for tipo in tipos:
       data['fixa']['msg'].append(f'Você não definiu seu ponto de {tipo}.')
@@ -884,80 +892,83 @@ def get_forecast(name_line, surname, shift, hr_par, hr_ret):
         if not rota:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
 
-        data = {}
         vehicle = rota.onibus
-        dates = return_dates_week()
-        today = date.today()
+        if vehicle:
+          data = {}
+          dates = return_dates_week()
+          today = date.today()
 
-        records_line = (
-          db.session.query(Registro_Linha)
-          .filter(db.and_(
-            Registro_Linha.data.in_(dates),
-            Registro_Linha.Linha_codigo == linha.codigo
-          ))
-          .order_by(Registro_Linha.data)
-          .all()
-        )
-        not_includes = [
-          record.data for record in records_line
-          if not record.funcionando
-        ]
+          records_line = (
+            db.session.query(Registro_Linha)
+            .filter(db.and_(
+              Registro_Linha.data.in_(dates),
+              Registro_Linha.Linha_codigo == linha.codigo
+            ))
+            .order_by(Registro_Linha.data)
+            .all()
+          )
+          not_includes = [
+            record.data for record in records_line
+            if not record.funcionando
+          ]
 
-        records_route = (
-          db.session.query(Registro_Rota)
-          .filter(db.and_(
-            Registro_Rota.data.in_(dates),
-            Registro_Rota.Rota_codigo == rota.codigo
-          ))
-          .order_by(Registro_Rota.data)
-          .all()
-        )
+          records_route = (
+            db.session.query(Registro_Rota)
+            .filter(db.and_(
+              Registro_Rota.data.in_(dates),
+              Registro_Rota.Rota_codigo == rota.codigo
+            ))
+            .order_by(Registro_Rota.data)
+            .all()
+          )
 
-        for record in records_route:
-          week_day = return_day_week(record.data.weekday())
-          if week_day not in data:
-            data_local = {
-              'date': format_date(record.data), 'date_valid': check_valid_datetime(record.data),
-              'not_dis': False
-            }
-            data_local['info'] = {'partida': {}, 'retorno': {}}
-            data_local['today'] = (record.data == today)
+          for record in records_route:
+            week_day = return_day_week(record.data.weekday())
+            if week_day not in data:
+              data_local = {
+                'date': format_date(record.data), 'date_valid': check_valid_datetime(record.data),
+                'not_dis': False
+              }
+              data_local['info'] = {'partida': {}, 'retorno': {}}
+              data_local['today'] = (record.data == today)
 
-            if (
-              (linha.ferias and data_local['date_valid'])
-              or record.data in not_includes
-            ):
-              data_local['not_dis'] = True
-              msg = '<Férias>'
+              if (
+                (linha.ferias and data_local['date_valid'])
+                or record.data in not_includes
+              ):
+                data_local['not_dis'] = True
+                msg = '<Férias>'
 
-              if not linha.ferias:
-                msg = '<Fora de serviço>'
-                if records_line[record.data.weekday()].feriado:
-                  msg = '<Feriado>'
-              data_local['msg'] = msg
+                if not linha.ferias:
+                  msg = '<Fora de serviço>'
+                  if records_line[record.data.weekday()].feriado:
+                    msg = '<Feriado>'
+                data_local['msg'] = msg
 
-            data[week_day] = data_local
+              data[week_day] = data_local
 
-          if not data_local['not_dis']:
-            time_reference = rota.horario_partida if record.tipo == 'partida' else rota.horario_retorno
-            if (
-              check_valid_datetime(record.data, time_reference, add_limit=0.75)
-              and record.atualizar
-            ):
-              modify_forecast_route(rota, record)
-            
-            data_local['info'][record.tipo]['qnt'] = record.previsao_pessoas
-            color = 'normal'
+            if not data_local['not_dis']:
+              time_reference = rota.horario_partida if record.tipo == 'partida' else rota.horario_retorno
+              check_valid = check_valid_datetime(record.data, time_reference, add_limit=0.75)
 
-            if record.previsao_pessoas > vehicle.capacidade:
-              color = 'red'
-            elif (vehicle.capacidade - 5) <= record.previsao_pessoas <= vehicle.capacidade:
-              color = 'yellow'
-            data_local['info'][record.tipo]['color'] = color
-        
-        retorno['data'] = data
-        return jsonify(retorno)
+              if check_valid and record.atualizar:
+                modify_forecast_route(rota, record)
+              
+              data_local['info'][record.tipo]['valid'] = check_valid
+              data_local['info'][record.tipo]['qnt'] = record.previsao_pessoas
+              color = 'normal'
+
+              if record.previsao_pessoas > vehicle.capacidade:
+                color = 'red'
+              elif (vehicle.capacidade - 5) <= record.previsao_pessoas <= vehicle.capacidade:
+                color = 'yellow'
+              data_local['info'][record.tipo]['color'] = 'red'
           
+          retorno['data'] = data
+          return jsonify(retorno)
+        
+        return jsonify({'error': True, 'title': 'Previsão Indisponível', 'text': 'A previsão completa não está disponível pois a rota não possui vínculo com nenhum veículo.'})
+
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar os dados de previsão. Por favor, recarregue a página e tente novamente.'})
 
 
@@ -1328,6 +1339,7 @@ def get_options_driver(name_line):
 @roles_required("motorista")
 def get_options_vehicle(name_line):
   surname_ignore = request.args.get('surname_ignore')
+  only_valid = request.args.get('only_valid')
 
   if surname_ignore == 'Não definido':
     surname_ignore = None
@@ -1336,16 +1348,23 @@ def get_options_vehicle(name_line):
   if linha:
     relacao = return_relationship(linha.codigo)
     if relacao and relacao != 'membro':
-      retorno = {'error': False, 'data': deque()}
+      retorno = {'error': False}
+      vehicles = (
+        Onibus.query.filter_by(Linha_codigo=linha.codigo)
+        .order_by(Onibus.apelido).all()
+      )
+      list_valid = []
+      list_invalid = []
 
-      for onibus in linha.onibus:
-        if surname_ignore != onibus.apelido:
-          motorista = onibus.motorista
+      for vehicle in vehicles:
+        if surname_ignore != vehicle.apelido:
+          motorista = vehicle.motorista
           if motorista:
-            retorno['data'].appendleft(f"{onibus.apelido} > {motorista.nome}")
-          else: retorno['data'].append(f"{onibus.apelido} > Nenhum")
+            list_valid.append(f"{vehicle.apelido} > {motorista.nome}")
+          elif not only_valid:
+            list_invalid.append(f"{vehicle.apelido} > Nenhum")
 
-      retorno['data'] = list(retorno['data'])
+      retorno['data'] = list_valid + list_invalid
       return jsonify(retorno)
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao carregar as informações da linha.'})

@@ -33,9 +33,15 @@
         <span id="forecast_route_{{ dias_semana[index - 1] }}_span" class="popup__forecast_title max inactive"></span>
         <div id="forecast_route_{{ dias_semana[index - 1] }}_partida" class="popup__forecast_container">
           <p class="popup__forecast_data content">-</p>
+          {% if role == 'motorista' %}
+          <i id="forecast_route_{{ dias_semana[index - 1] }}_partida_lotado" class="bi bi-hand-index-thumb popup__icon click_min red"></i>
+          {% endif %}
         </div>
         <div id="forecast_route_{{ dias_semana[index - 1] }}_retorno" class="popup__forecast_container">
           <p class="popup__forecast_data content">-</p>
+          {% if role == 'motorista' %}
+          <i id="forecast_route_{{ dias_semana[index - 1] }}_retorno_lotado" class="bi bi-hand-index-thumb popup__icon click_min red"></i>
+          {% endif %}
         </div>
       </div>
       {% endif %}
@@ -52,7 +58,7 @@
 <section id="notice_migrate" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header">
-      <h1 class="popup__title">Recurso de Migração</h1>
+      <h1 class="popup__title">Transferência</h1>
     </header>
 
     <div class="popup__container--content">
@@ -60,7 +66,7 @@
       <span id="notice_migrate_date" class="inactive"></span>
       <p class="text secundario justify">Este recurso permite que qualquer motorista da linha possa realizar a transferência de passageiros de um veículo lotado para outro disponível, mesmo que não seja o condutor atual do veículo. Recomenda-se a comunicação entre os motoristas envolvidos antes de realizar essa ação.</p>
       <h1 class="page__division"></h1>
-      <p class="text secundario justify">Essa ação não é permanente; o recurso cria uma diária obrigatória no veículo selecionado, válida apenas para o dia da migração.</p>
+      <p class="text secundario justify">Essa ação não é permanente; o recurso cria uma diária obrigatória no veículo selecionado, válida apenas para o dia da transferência.</p>
     </div>
 
     <footer class="popup__container--footer">
@@ -74,15 +80,37 @@
 <section id="migrate_capacity" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header">
-      <h1 class="popup__title">Recurso de Migração</h1>
+      <h1 class="popup__title">Transferência</h1>
     </header>
 
     <div class="popup__container--content">
+      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
+        <h1 class="text secundario fundo justify">Certifique-se de informar os motoristas dos veículos selecionados antes de realizar essa ação.</h1>
+        <h1 class="page__division"></h1>
+
+        <h3 class="popup__text question first">Selecione os veículos-alvo:</h3>
+        <div id="migrate_capacity_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
+          <h3 class="text secundario fundo max_width">Veículos disponíveis</h3>
+          <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+  
+        <div id="migrate_capacity_container" class="scroll_vertical popup__container--scroll margin_top inactive">
+          <span class="text secundario emphasis justify">Carregando...</span>
+        </div>
+  
+        <h3 class="popup__text question">Quantos serão transferidos?</h3>
+        <form id="formulario_migrate_capacity" class="form__container--card max_width">
+          <div class="form__container--input first">
+            <input id="migrate_capacity_qnt" class="form__input white input_notIcon" type="number" step="1" min="1" max="30" required>
+            <label class="form__label intense label_notIcon" for="migrate_capacity_qnt">Quantidade</label>
+          </div>
+        </form>
+      </div>
     </div>
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('migrate_capacity')">Voltar</button>
-      <button id="migrate_capacity_migrar" class="popup__btn">Migrar</button>
+      <button class="popup__btn" onclick="submit('formulario_migrate_capacity')">Transferir</button>
     </footer>
   </div>
 </section>

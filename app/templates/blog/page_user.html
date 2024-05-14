@@ -22,6 +22,7 @@
 
     <template id="templates_model">
       {% include "/models/page/model_index.html" %}
+      {% include "/models/model_global.html" %}
     </template>
 
     <template id="templates_popup">
@@ -64,7 +65,7 @@
           <h1 class="text title -enter-">Meus pontos</h1>
           <div id="area_agenda_diaria" class="-enter- inactive">
             <h2 class="text secundario fundo justify">Diárias marcadas</h2>
-            <span class="text secundario fundo cinza justify inactive"></span>
+            <div id="area_agenda_diaria_span_msg" class="margin_top margin_bottom inactive"></div>
             <div id="area_agenda_diaria_local"></div>
             <h1 class="page__division"></h1>
           </div>

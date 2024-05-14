@@ -26,6 +26,7 @@
   <p class="hidden_point">.</p>
 
   <template id="templates_model">
+    {% include "/models/model_global.html" %}
     {% include "/models/line/model_index.html" %}
     {% if role == 'motorista' %}
     {% include "/models/line/model_driver.html" %}

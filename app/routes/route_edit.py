@@ -166,40 +166,77 @@ def edit_day():
   dates = return_dates_week(only_valid=True)
 
   if user and data and 'faltara' in data and 'contraturno' in data and 'data' in data:
-    fixa = (
+    fixas = (
       Passagem.query
       .filter_by(Aluno_id=user.id, passagem_fixa=True)
-      .first()
+      .all()
     )
-    code_line = fixa.parada.rota.linha.codigo if fixa else False
-    feriados = (
+
+    code_line = None
+    routes = {'fixa': False, 'contraturno': False}
+    for passagem in fixas:
+      rota = passagem.parada.rota
+      routes['contraturno' if passagem.passagem_contraturno else 'fixa'] = rota.codigo
+      if not code_line:
+        code_line = rota.Linha_codigo
+
+    not_dis = (
       db.session.query(Registro_Linha.data)
       .filter(db.and_(
         Registro_Linha.data.in_(dates),
         Registro_Linha.Linha_codigo == code_line,
-        Registro_Linha.feriado == True
+        Registro_Linha.funcionando == False
       ))
       .all()
     ) if code_line else []
 
     try:
       dia = format_date(data['data'], reverse=True)
-      check_feriado = [True for feriado in feriados if dia in feriado]
+      check_not_dis = [True for date_ in not_dis if dia in date_]
 
-      if dia in dates and not check_feriado:
-        record = Registro_Aluno.query.filter_by(
+      if dia in dates and not check_not_dis:
+        record_student = Registro_Aluno.query.filter_by(
           Aluno_id=user.id, data=dia
         ).first()
-        if record:
+
+        record_route_fixed = (
+          Registro_Rota.query.filter_by(Rota_codigo=routes['fixa'], data=dia).all()
+        ) if routes['fixa'] else []
+
+        record_route_contraturno = (
+          Registro_Rota.query.filter_by(
+            Rota_codigo=routes['contraturno'], data=dia, 
+            tipo=return_ignore_route(user.turno)
+          ).first()
+        ) if routes['contraturno'] else []
+
+        if record_student:
           if data['faltara']:
-            record.faltara = True
-            record.contraturno = False
+            if not record_student.faltara and record_route_fixed:
+              for record in record_route_fixed:
+                set_update_record_route(record)
+            
+            if record_student.contraturno and record_route_contraturno:
+              set_update_record_route(record_route_contraturno)
+
+            record_student.faltara = True
+            record_student.contraturno = False
           else:
-            record.faltara = False
-            record.contraturno = data['contraturno']
+            if record_student.faltara and record_route_fixed:
+              for record in record_route_fixed:
+                set_update_record_route(record)
+            
+            if record_student.contraturno != data['contraturno'] and record_route_contraturno:
+              set_update_record_route(record_route_contraturno)
+              for record in record_route_fixed:
+                if record.tipo == return_ignore_route(user.turno):
+                  set_update_record_route(record)
+
+            record_student.faltara = False
+            record_student.contraturno = data['contraturno']
           
           db.session.commit()
-          return jsonify({'error': False, 'title': f'{return_day_week(dia.weekday())} atualizada', 'text': ''})
+          return jsonify({'error': False, 'title': f'{return_day_week(dia.weekday())}-feira atualizada', 'text': ''})
 
     except Exception as e:
       db.session.rollback()

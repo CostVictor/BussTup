@@ -605,23 +605,64 @@ function criar_visualizacao_parada(model, list, container) {
   }
 }
 
-function migrate_capacity(data_route) {
-  console.log(data_route)
+function migrate_capacity(data_route, function_reload) {
+  const container = document.getElementById("migrate_capacity_container");
+  const selected = return_option_selected(container, true);
+  if (selected) {
+    data_route.targets = selected.map((item) => item.split(" ")[0]);
+    data_route.qnt = document
+      .getElementById("migrate_capacity_qnt")
+      .value.trim();
+
+    popup_button_load("migrate_capacity");
+    fetch("/migrate_capacity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data_route),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (!response.error) {
+          function_reload()
+          const local_popup = document.getElementById("popup_local");
+          local_popup.removeChild(local_popup.querySelector("#notice_migrate"));
+          close_popup("migrate_capacity");
+          create_popup(response.title, response.text, "Ok", "success");
+
+        } else {
+          create_popup(response.title, response.text);
+          popup_button_load("migrate_capacity", "Transferir");
+        }
+      });
+  } else {
+    create_popup(
+      "Nenhum Veículo Selecionado",
+      "Você precisa selecionar pelo menos um veículo para transferir a quantidade de usuários desejada."
+    );
+  }
 }
 
 function create_migrate_crowded(local) {
   open_popup("migrate_capacity", false, false);
   let data = null;
+  let function_reload = function() {}
+
   if (local === "page") {
-    data = return_data_route(document.getElementById("summary_route"));
+    const popup_route = document.getElementById("summary_route")
+    data = return_data_route(popup_route);
+    function_reload = function() {
+      load_popup_route(popup_route)
+    }
   } else if (local === "line") {
     data = return_data_route(null);
   }
-  data.type = document.getElementById('notice_migrate_type').textContent
-  data.date = document.getElementById('notice_migrate_date').textContent
-  
-  const button = document.getElementById('migrate_capacity_migrar')
-  button.onclick = function() {
-    migrate_capacity(data)
-  }
+  data.type = document.getElementById("notice_migrate_type").textContent;
+  data.date = document.getElementById("notice_migrate_date").textContent;
+  load_popup_migrate(data.name_line, data.surname);
+
+  const form = document.getElementById("formulario_migrate_capacity");
+  form.onsubmit = function (event) {
+    event.preventDefault();
+    migrate_capacity(data, function_reload);
+  };
 }

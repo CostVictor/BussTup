@@ -94,7 +94,7 @@
     <div class="popup__container--content">
       <div class="scroll_vertical popup__container--scroll principal_max">
         <span>
-          <h1 id="summary_route_estado" class="popup__text_local big">teste</h1>
+          <h1 id="summary_route_estado" class="popup__text_local big">...</h1>
         </span>
         <div class="page__container">
           <p class="text secundario fundo">Linha:</p>
@@ -142,7 +142,7 @@
             </div>
             <span id="summary_route_partida_passou" class="popup__text_sinal cinza inactive">Passou</span>
             {% if role == 'motorista' %}
-            <span id="summary_route_partida_lotado" class="popup__text_sinal button" onclick="open_popup('notice_migrate', this, false)">
+            <span id="summary_route_partida_lotado" class="popup__text_sinal button inactive" onclick="open_popup('notice_migrate', this, false)">
               Lotado
               <i style="margin-left: 5px;" class="bi bi-hand-index-thumb"></i>
             </span>
@@ -157,7 +157,7 @@
               <p id="summary_route_previsao_retorno" class="text secundario content fundo nowrap">Carregando...</p>
             </div>
             {% if role == 'motorista' %}
-            <span id="summary_route_retorno_lotado" class="popup__text_sinal button" onclick="open_popup('notice_migrate', this, false)">
+            <span id="summary_route_retorno_lotado" class="popup__text_sinal button inactive" onclick="open_popup('notice_migrate', this, false)">
               Lotado
               <i style="margin-left: 5px;" class="bi bi-hand-index-thumb"></i>
             </span>

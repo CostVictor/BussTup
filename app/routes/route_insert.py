@@ -840,7 +840,11 @@ def create_pass_daily():
       if route is not None:
         if not route:
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
-
+        
+        if not route.Onibus_id:
+          return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Você não pode agendar diárias em uma rota que não possui veículo.'})
+        
+        vehicle = route.onibus
         types = []
         execute = True
 
@@ -873,6 +877,10 @@ def create_pass_daily():
                   Passagem.Parada_codigo == Parada.codigo,
                   Passagem.Aluno_id == user.id,
                   Passagem.passagem_fixa == False,
+                  db.not_(db.and_(
+                    Passagem.migracao_lotado == True,
+                    Passagem.migracao_manutencao == True
+                  )),
                   Passagem.data == date_,
                   Parada.horario_passagem.between(time_ant.time(), time_dep.time())
                 ))
@@ -890,16 +898,32 @@ def create_pass_daily():
 
               if check_valid_datetime(date_, stop.horario_passagem):
                 if check_indis:
+                  db.session.rollback()
                   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Você já possui uma diária marcada para a mesma data com horários muito próximos do(s) ponto(s) selecionado(s). Este agendamento foi interrompido para evitar conflito de horários.'})
                 
                 if linha.ferias:
+                  db.session.rollback()
                   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Não é possível agendar diárias enquanto a linha estiver em período de férias.'})
                 
                 if not_dis:
+                  db.session.rollback()
                   if not_dis.feriado:
                     return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Não é possível agendar uma diária neste dia, pois a linha não estará em funcionamento devido a um feriado.'})
                   
                   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Não é possível agendar uma diária neste dia, pois a linha estará fora de serviço.'})
+                
+                record_route = (
+                  db.session.query(Registro_Rota)
+                  .filter(db.and_(
+                    Registro_Rota.Rota_codigo == route.codigo,
+                    Registro_Rota.data == date_,
+                    Registro_Rota.tipo == stop.tipo
+                  ))
+                  .first()
+                )
+                if record_route.previsao_pessoas >= vehicle.capacidade:
+                  db.session.rollback()
+                  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': f'Você não pode agendar uma diária no trajeto de <strong>{stop.tipo}</strong> pois o mesmo já atingiu o limite de capacidade do veículo.'})
                 
                 db.session.add(Passagem(
                   passagem_fixa=False,
@@ -989,7 +1013,7 @@ def create_pass_daily():
           
           if execute:
             db.session.commit()
-            return jsonify({'error': False, 'title': 'Diária Agendada', 'text': f'Você marcou {"uma diária" if len(types) == 1 else "duas diárias"} para <strong>{return_day_week(date_.weekday())} {format_date(date_)}</strong>.'})
+            return jsonify({'error': False, 'title': 'Diária Agendada', 'text': f'Você marcou {"uma diária" if len(types) == 1 else "duas diárias"} para <strong>{return_day_week(date_.weekday())}-feira {format_date(date_)}</strong>.'})
           
           else:
             return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': f'A data fornecida não é válida para agendar uma diária de <strong>{types[0]}</strong> no ponto <strong>{data[types[0]]}</strong> pois o horário de funcionamento deste dia já passou.'})
@@ -999,3 +1023,205 @@ def create_pass_daily():
           print(f'Erro ao criar a diaria: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': 'Ocorreu um erro inesperado ao tentar cadastrar a passagem na rota.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~ Inserts Global ~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/migrate_capacity", methods=['POST'])
+@login_required
+@roles_required("motorista")
+def migrate_capacity():
+  data = request.get_json()
+  if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'type' in data and 'targets' in data and 'qnt' in data and 'date' in data:
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    if linha and return_relationship(linha.codigo):
+      if 'pos' not in data:
+        data['pos'] = ''
+      
+      _date = data['date'].lower()
+      if _date == 'hoje':
+        _date = date.today()
+      elif _date == 'amanhã':
+        _date = date.today() + timedelta(days=1)
+      else:
+        _date = format_date(_date, reverse=True)
+
+      hr_par = data['time_par']; hr_ret = data['time_ret']
+      surname = data['surname']; tipo = data['type'].lower()
+      shift = data['shift']
+      try:
+        qnt = int(data['qnt'])
+        if qnt > 30:
+          qnt = False
+      except:
+        qnt = False
+      
+      if hr_par and hr_ret and surname and shift and qnt and tipo:
+        route = return_route(linha.codigo, surname, shift, hr_par, hr_ret, data['pos'])
+        if route is not None:
+          if not route:
+            return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+          
+          reference = route.horario_partida if tipo == 'partida' else route.horario_retorno
+          time_ant = datetime.combine(_date, reference) - timedelta(minutes=20)
+          time_dep = datetime.combine(_date, reference) + timedelta(minutes=20)
+
+          record_route_ant = (
+            db.session.query(Registro_Rota)
+            .filter(db.and_(
+              Registro_Rota.Rota_codigo == route.codigo,
+              Registro_Rota.data == _date,
+              Registro_Rota.tipo == tipo
+            ))
+            .first()
+          )
+
+          previsao_ant = record_route_ant.previsao_pessoas
+          if previsao_ant:
+            contador = 0
+            if qnt > previsao_ant:
+              qnt = record_route_ant.previsao_pessoas
+
+            stops_ant = (
+              db.session.query(Parada)
+              .filter(db.and_(
+                Parada.Rota_codigo == route.codigo,
+                Parada.tipo == tipo
+              ))
+              .all()
+            )
+            stops_code = [stop.codigo for stop in stops_ant]
+            points_dis = [stop.Ponto_id for stop in stops_ant]
+
+            subquery = (
+              db.session.query(Passagem.Aluno_id)
+              .filter(Passagem.Parada_codigo.in_(stops_code))
+              .subquery()
+            )
+            student_not_dis = (
+              db.session.query(func.distinct(Passagem.Aluno_id))
+              .join(Parada).join(Rota).join(Aluno).join(Registro_Aluno)
+              .filter(db.and_(
+                Parada.Rota_codigo == Rota.codigo,
+                Passagem.Parada_codigo == Parada.codigo,
+                Passagem.Aluno_id == Aluno.id,
+                Registro_Aluno.Aluno_id == Aluno.id,
+
+                Passagem.Aluno_id.in_(subquery.select()),
+                Rota.turno == shift,
+                (
+                  (Rota.horario_partida.between(time_ant.time(), time_dep.time())) if tipo == 'partida' 
+                  else (Rota.horario_retorno.between(time_ant.time(), time_dep.time()))
+                ),
+                db.or_(
+                  db.and_(
+                    Passagem.passagem_fixa == True,
+                    db.or_(
+                      Registro_Aluno.faltara == True,
+                      (
+                        (Registro_Aluno.contraturno == True) 
+                        if tipo == return_ignore_route(route.turno)
+                        else False
+                      )
+                    )
+                  ),
+                  db.and_(
+                    Passagem.passagem_fixa == False,
+                    Passagem.data == _date,
+                    Parada.tipo == tipo
+                  )
+                )
+              ))
+              .all()
+            )
+            student_not_dis = [record[0] for record in student_not_dis]
+
+            len_targets = len(data['targets'])
+            execute = True
+
+            for index, vehicle_name in enumerate(data['targets']):
+              if not qnt:
+                break
+
+              vehicle = Onibus.query.filter_by(Linha_codigo=linha.codigo, apelido=vehicle_name).first()
+              last = (index == len_targets - 1)
+
+              if vehicle:
+                paradas_dis = (
+                  db.session.query(Parada, Rota, Registro_Rota)
+                  .filter(db.and_(
+                    Parada.Rota_codigo == Rota.codigo,
+                    Registro_Rota.Rota_codigo == Rota.codigo,
+                    Registro_Rota.tipo == tipo,
+                    Registro_Rota.data == _date,
+                    Rota.turno == shift,
+                    Rota.Onibus_id == vehicle.id,
+                    (
+                      (Rota.horario_partida.between(time_ant.time(), time_dep.time())) if tipo == 'partida' 
+                      else (Rota.horario_retorno.between(time_ant.time(), time_dep.time()))
+                    ),
+                    Registro_Rota.previsao_pessoas < vehicle.capacidade,
+                    Parada.Ponto_id.in_(points_dis),
+                    Parada.tipo == tipo
+                  ))
+                  .all()
+                )
+
+                for parada, _, registro in paradas_dis:
+                  if not qnt:
+                    break
+
+                  students = (
+                    db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada)
+                    .filter(db.and_(
+                      db.not_(Passagem.Aluno_id.in_(student_not_dis)),
+                      Passagem.Parada_codigo == Parada.codigo,
+                      Parada.codigo.in_(stops_code),
+                      Parada.Ponto_id == parada.Ponto_id
+                    ))
+                    .all()
+                  )
+                  len_students = len(students)
+                  limit_range = vehicle.capacidade - registro.previsao_pessoas
+                  range_ = limit_range if limit_range <= len_students else len_students
+                  for index in range(range_):
+                    if not qnt:
+                      break
+                    
+                    student_id = students[index][0]
+                    db.session.add(Passagem(
+                      passagem_fixa=False,
+                      passagem_contraturno=False,
+                      migracao_lotado=True,
+                      Parada_codigo=parada.codigo,
+                      Aluno_id=student_id,
+                      data=_date
+                    ))
+                    registro.atualizar = True
+                    contador += 1
+                    qnt -= 1
+
+                if last and qnt:
+                  db.session.rollback()
+                  if not contador:
+                    return jsonify({'error': True, 'title': 'Transferência Interrompida', 'text': 'Não foi possível encontrar usuários compatíveis para realizar uma transferência adequada.'})
+
+                  return jsonify({'error': True, 'title': 'Transferência Interrompida', 'text': 'Não é possível distribuir a quantidade de usuários exigida com as opções definidas sem exceder a capacidade de outro veículo.'})
+              else:
+                db.session.rollback()
+                execute = False
+                break
+
+            if execute:
+              record_route_ant.atualizar = True
+              try:
+                db.session.commit()
+                return jsonify({'error': False, 'title': 'Transferência Concluída', 'text': f'O sistema conseguiu distribuir {f"<strong>{contador}</strong> usuário" if contador == 1 else f"<strong>{contador}</strong> usuários"} para {"outro veículo" if len_targets == 1 else "outros veículos"} com sucesso.'})
+
+              except Exception as e:
+                db.session.rollback()
+                print(f'Erro ao criar a diaria de lotação: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Transferência Interrompida', 'text': 'Ocorreu um erro inesperado ao gerar as diárias de transferência.'})

@@ -388,6 +388,19 @@
   transition: opacity 0.2s ease, scale 0.2s ease;
 }
 
+.popup__icon.click_min {
+  cursor: pointer;
+  padding: 0 calc(0.1vw + 0.1vh + 0.1vmin);
+  margin-left: calc(0.1vw + 0.1vh + 0.5vmin);
+  font-size: calc(0.5vw + 0.5vh + 1vmin);
+}
+
+.popup__icon.click_min.red {
+  color: var(--vermelho_intenso);
+  border: var(--vermelho_intenso) solid 0.06rem;
+  border-radius: 6px;
+}
+
 .popup__icon.selected {
   scale: 1.2;
 }

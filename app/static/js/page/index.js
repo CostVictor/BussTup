@@ -382,51 +382,67 @@ function load_popup_route(popup) {
           "summary_route_capacidade"
         ).textContent = `${response.capacidade} pessoas`;
 
-        document.getElementById('summary_route_dia_previsao').textContent = response.day_week
-        const span_forecast = document.getElementById('summary_route_span_forecast')
-        const forecast = document.getElementById('summary_route_forecast')
+        document.getElementById("summary_route_dia_previsao").textContent =
+          response.day_week;
+        const span_forecast = document.getElementById(
+          "summary_route_span_forecast"
+        );
+        const forecast = document.getElementById("summary_route_forecast");
 
         if (response.data_forecast) {
-          span_forecast.textContent = 'Inclui contraturnos e diárias'
-          span_forecast.classList.add('margin_bottom')
-          forecast.classList.remove('inactive')
+          span_forecast.textContent = "Inclui contraturnos e diárias";
+          span_forecast.classList.add("margin_bottom");
+          forecast.classList.remove("inactive");
 
           let previsao_partida = data.previsao_partida;
           previsao_partida = `${previsao_partida} ${
             previsao_partida === 1 ? "pessoa" : "pessoas"
           }`;
-          document.getElementById("summary_route_previsao_partida").textContent =
-            previsao_partida;
-          
-          const span_passou = document.getElementById('summary_route_partida_passou')
-          if (data.partida_passou) {
-            span_passou.classList.remove('inactive')
-          } else {
-            span_passou.classList.add('inactive')
-          } 
+          document.getElementById(
+            "summary_route_previsao_partida"
+          ).textContent = previsao_partida;
 
-          if (data.previsao_partida > response.capacidade && !data.partida_passou) {
-            document
-              .getElementById("summary_route_partida_lotado")
-              .classList.remove("inactive");
+          const span_passou = document.getElementById(
+            "summary_route_partida_passou"
+          );
+          if (data.partida_passou) {
+            span_passou.classList.remove("inactive");
+          } else {
+            span_passou.classList.add("inactive");
           }
-  
+
+          const msg_partida_lotado = document.getElementById(
+            "summary_route_partida_lotado"
+          );
+          if (
+            data.previsao_partida > response.capacidade &&
+            !data.partida_passou
+          ) {
+            msg_partida_lotado.classList.remove("inactive");
+          } else {
+            msg_partida_lotado.classList.add("inactive");
+          }
+
           let previsao_retorno = data.previsao_retorno;
           previsao_retorno = `${previsao_retorno} ${
             previsao_retorno === 1 ? "pessoa" : "pessoas"
           }`;
-          document.getElementById("summary_route_previsao_retorno").textContent =
-            previsao_retorno;
-  
+          document.getElementById(
+            "summary_route_previsao_retorno"
+          ).textContent = previsao_retorno;
+
+          const msg_retorno_lotado = document.getElementById(
+            "summary_route_retorno_lotado"
+          );
           if (data.previsao_retorno > response.capacidade) {
-            document
-              .getElementById("summary_route_retorno_lotado")
-              .classList.remove("inactive");
+            msg_retorno_lotado.classList.remove("inactive");
+          } else {
+            msg_retorno_lotado.classList.add("inactive");
           }
         } else {
-          forecast.classList.add('inactive')
-          span_forecast.textContent = data
-          span_forecast.classList.remove('margin_bottom')
+          forecast.classList.add("inactive");
+          span_forecast.textContent = data;
+          span_forecast.classList.remove("margin_bottom");
         }
       } else {
         create_popup(response.title, response.text, "Ok");
@@ -452,9 +468,11 @@ function load_popup_line(card, name_line) {
         for (info in data) {
           card.querySelector(`[id*="${info}"]`).textContent = data[info];
         }
-        const calendar = response.calendario
+        const calendar = response.calendario;
         for (day in calendar) {
-          document.getElementById(`summary_line_${day}_color`).classList.add(calendar[day])
+          document
+            .getElementById(`summary_line_${day}_color`)
+            .classList.add(calendar[day]);
         }
       } else {
         create_popup(response.title, response.text, "Ok");
@@ -558,8 +576,8 @@ function return_data_route(obj) {
 }
 
 function page_load_forecast() {
-  open_popup('forecast_route', false, false)
-  const popup = document.getElementById("summary_route")
+  open_popup("forecast_route", false, false);
+  const popup = document.getElementById("summary_route");
   const data = { principal: Object.values(return_data_route(popup)) };
-  load_popup_forecast(data)
+  load_popup_forecast(data);
 }

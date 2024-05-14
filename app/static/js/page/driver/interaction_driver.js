@@ -34,10 +34,31 @@ function action_popup(popup, card, id, obj_click) {
       let date = document
         .getElementById("summary_route_dia_previsao")
         .textContent.split(" ");
-      date = date[date.length - 1]
-      span_date.textContent = date
+      date = date[date.length - 1];
+      span_date.textContent = date;
+    } else if (obj_click.id.includes("forecast_route")) {
+      const info = obj_click.id.split("_");
+      span_type.textContent = info[info.length - 1];
+      span_date.textContent = document.getElementById(
+        `forecast_route_${info[info.length - 2]}_date`
+      ).textContent;
     }
   }
 }
 
-function loadSchedule() {}
+function load_popup_migrate(name_line, surname) {
+  const container = document.getElementById("migrate_capacity_container");
+  const data = {
+    principal: [name_line],
+    secondary: { surname_ignore: surname, only_valid: true },
+  };
+  include_options_container(
+    container,
+    "option_vehicle",
+    data,
+    false,
+    false,
+    "model_option_box",
+    true
+  );
+}
