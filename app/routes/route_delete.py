@@ -378,6 +378,37 @@ def del_pass_daily():
                     )
                     if record_route_contraturno:
                       set_update_record_route(record_route_contraturno)
+            
+            combine = datetime.combine(date_, parada.horario_passagem)
+            time_ant = combine - timedelta(minutes=15)
+            time_dep = combine + timedelta(minutes=15)
+            routes_migrate = (
+              db.session.query(Rota).join(Parada).join(Passagem)
+              .filter(db.and_(
+                Passagem.Parada_codigo == Parada.codigo,
+                Parada.Rota_codigo == Rota.codigo,
+                Passagem.data == date_,
+                Passagem.Aluno_id == user.id,
+                Passagem.passagem_fixa == False,
+                Parada.horario_passagem.between(time_ant.time(), time_dep.time()),
+                db.or_(
+                  Passagem.migracao_lotado == True,
+                  Passagem.migracao_manutencao == True
+                )
+              ))
+              .all()
+            )
+            for route_migrate in routes_migrate:
+              record_migrate = (
+                db.session.query(Registro_Rota)
+                .filter(db.and_(
+                  Registro_Rota.Rota_codigo == route_migrate.codigo,
+                  Registro_Rota.data == date_,
+                  Registro_Rota.tipo == parada.tipo
+                ))
+                .first()
+              )
+              set_update_record_route(record_migrate)
 
             record_daily = (
               db.session.query(Registro_Rota)

@@ -473,86 +473,86 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
 }
 
 function load_popup_forecast(data_route) {
-  fetch(`/get_forecast_route` + generate_url_dict(data_route), {
-    method: "GET",
-  })
-    .then((response) => response.json())
-    .then((response) => {
-      if (!response.error) {
-        const data = response.data;
-        for (day in data) {
-          data_day = data[day];
-          info_day = data_day.info;
-
-          const text_day = document.getElementById(`forecast_route_${day}_day`);
-          if (data_day.date_valid) {
-            if (data_day.today) {
-              text_day.classList.add("normal");
-            }
-          } else {
-            text_day.classList.add("gray");
-          }
-          document.getElementById(`forecast_route_${day}_date`).textContent =
-            data_day.date;
-
-          for (type in info_day) {
-            const span = document.getElementById(`forecast_route_${day}_span`);
-            const container = document.getElementById(
-              `forecast_route_${day}_${type}`
-            );
-            if (data_day.not_dis) {
-              container.classList.add("inactive");
-              span.textContent = data_day.msg;
-              span.classList.remove("inactive");
+  if (document.getElementById('popup_local').querySelector('[id*="forecast_route"]')) {
+    fetch(`/get_forecast_route` + generate_url_dict(data_route), {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (!response.error) {
+          const data = response.data;
+          for (day in data) {
+            data_day = data[day];
+            info_day = data_day.info;
+  
+            const text_day = document.getElementById(`forecast_route_${day}_day`);
+            if (data_day.date_valid) {
+              if (data_day.today) {
+                text_day.classList.add("normal");
+              }
             } else {
-              span.textContent = "";
-              span.classList.add("inactive");
-              container.classList.remove("inactive");
-
-              const value = container.querySelector("p");
-              value.textContent = info_day[type].qnt;
-
-              const color = info_day[type].color;
-              if (color !== "normal") {
-                value.classList.add(color);
-                if (response.role === "motorista") {
-                  const local_lotado = document.getElementById(`forecast_route_${day}_${type}`)
-                  const icon_lotado = document.getElementById(`forecast_route_${day}_${type}_lotado`)
-
-                  if (
-                    response.relacao &&
-                    response.relacao !== "membro" &&
-                    info_day[type].valid &&
-                    color === 'red'
-                  ) {
-                    icon_lotado.classList.remove('inactive')
-                    local_lotado.style.cursor = 'pointer'
-                    local_lotado.onclick = function() {
-                      open_popup('notice_migrate', this, false)
-                    }
-                  } else {
-                    icon_lotado.classList.add('inactive')
-                    local_lotado.removeAttribute('style')
-                    local_lotado.onclick = function() {}
-                  }
-                }
+              text_day.classList.add("gray");
+            }
+            document.getElementById(`forecast_route_${day}_date`).textContent =
+              data_day.date;
+  
+            for (type in info_day) {
+              const span = document.getElementById(`forecast_route_${day}_span`);
+              const container = document.getElementById(
+                `forecast_route_${day}_${type}`
+              );
+              if (data_day.not_dis) {
+                container.classList.add("inactive");
+                span.textContent = data_day.msg;
+                span.classList.remove("inactive");
               } else {
-                value.classList.remove("yellow");
-                value.classList.remove("red");
-                if (role === 'motorista') {
-                  for (type in ['partida', 'retorno']) {
+                span.textContent = "";
+                span.classList.add("inactive");
+                container.classList.remove("inactive");
+  
+                const value = container.querySelector("p");
+                value.textContent = info_day[type].qnt;
+  
+                const color = info_day[type].color;
+                if (color !== "normal") {
+                  value.classList.add(color);
+                  if (response.role === "motorista") {
+                    const local_lotado = document.getElementById(`forecast_route_${day}_${type}`)
+                    const icon_lotado = document.getElementById(`forecast_route_${day}_${type}_lotado`)
+  
+                    if (
+                      response.relacao &&
+                      response.relacao !== "membro" &&
+                      info_day[type].valid &&
+                      color === 'red'
+                    ) {
+                      icon_lotado.classList.remove('inactive')
+                      local_lotado.style.cursor = 'pointer'
+                      local_lotado.onclick = function() {
+                        open_popup('notice_migrate', this, false)
+                      }
+                    } else {
+                      icon_lotado.classList.add('inactive')
+                      local_lotado.removeAttribute('style')
+                      local_lotado.onclick = function() {}
+                    }
+                  }
+                } else {
+                  value.classList.remove("yellow");
+                  value.classList.remove("red");
+                  if (response.role === 'motorista') {
                     document.getElementById(`forecast_route_${day}_${type}_lotado`).classList.add('inactive')
                   }
                 }
               }
             }
           }
+          document.getElementById("forecast_route_msg").textContent =
+            `Cap: ${response.capacidade} pessoas`;
+        } else {
+          create_popup(response.title, response.text);
+          document.getElementById('forecast_route_msg').textContent = 'Não disponível'
         }
-        document.getElementById("forecast_route_msg").textContent =
-          "Dados em pessoas";
-      } else {
-        create_popup(response.title, response.text);
-        document.getElementById('forecast_route_msg').textContent = 'Não disponível'
-      }
-    });
+      });
+  }
 }

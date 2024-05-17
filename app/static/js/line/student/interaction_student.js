@@ -319,11 +319,9 @@ function config_popup_sched() {
               container.appendChild(option);
             }
           } else {
-            const nenhum = model.cloneNode(true);
-            nenhum.id = `${container.id}-option_nenhum`;
-            nenhum.querySelector("p").textContent = "Nenhum";
-
-            nenhum.classList.remove("inactive");
+            const nenhum = document.createElement('p');
+            nenhum.textContent = "Nenhum disponível";
+            nenhum.className = 'text secundario fundo cinza justify'
             container.appendChild(nenhum);
           }
         }

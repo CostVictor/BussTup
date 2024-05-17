@@ -179,6 +179,7 @@ def get_routes():
       for linha, rota, parada, passagem in rotas_diarias:
         if (
           check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25)
+          and passagem.data == date.today()
         ):
           if rota.codigo not in routes_includes:
             not_dis = (
@@ -191,37 +192,62 @@ def get_routes():
               .first()
             )
             if not linha.ferias and not not_dis:
-              routes_includes.append(rota.codigo)
-              if linha.nome not in diarias:
-                diarias[linha.nome] = []
+              execute = True
+              if passagem.migracao_lotado or passagem.migracao_manutencao:
+                combine = datetime.combine(passagem.data, parada.horario_passagem)
+                time_ant = combine - timedelta(minutes=15)
+                time_dep = combine + timedelta(minutes=15)
 
-              estado = 'Inativa'
-              if rota.em_partida:
-                estado = 'Em partida'
-              elif rota.em_retorno:
-                estado = 'Em retorno'
-              
-              info = {
-                'line': linha.nome,
-                'turno': rota.turno,
-                'horario_partida': format_time(rota.horario_partida),
-                'horario_retorno': format_time(rota.horario_retorno),
-                'quantidade': count_part_route(rota.codigo),
-                'estado': estado
-              }
-              veiculo = rota.onibus
-              surname = 'Sem veículo'
-              motorista = 'Desativada'
+                if (
+                  db.session.query(Passagem).join(Parada)
+                  .filter(db.and_(
+                    Passagem.Parada_codigo == Parada.codigo,
+                    Passagem.data == passagem.data,
+                    Passagem.Aluno_id == user.id,
+                    Passagem.passagem_fixa == False,
+                    Parada.horario_passagem.between(time_ant.time(), time_dep.time()),
+                    Parada.tipo == parada.tipo,
+                    db.not_(db.or_(
+                      Passagem.migracao_lotado == True,
+                      Passagem.migracao_manutencao == True
+                    ))
+                  ))
+                  .first()
+                ):
+                  execute = False
 
-              if veiculo:
-                surname = veiculo.apelido
-                motorista = 'Nenhum'
-                if veiculo.motorista:
-                  motorista = veiculo.motorista.nome
-              info['apelido'] = surname
-              info['motorista'] = motorista
+              if execute:
+                routes_includes.append(rota.codigo)
+                if linha.nome not in diarias:
+                  diarias[linha.nome] = []
 
-              diarias[linha.nome].append(info)
+                estado = 'Inativa'
+                if rota.em_partida:
+                  estado = 'Em partida'
+                elif rota.em_retorno:
+                  estado = 'Em retorno'
+                
+                info = {
+                  'line': linha.nome,
+                  'turno': rota.turno,
+                  'horario_partida': format_time(rota.horario_partida),
+                  'horario_retorno': format_time(rota.horario_retorno),
+                  'quantidade': count_part_route(rota.codigo),
+                  'estado': estado
+                }
+                veiculo = rota.onibus
+                surname = 'Sem veículo'
+                motorista = 'Desativada'
+
+                if veiculo:
+                  surname = veiculo.apelido
+                  motorista = 'Nenhum'
+                  if veiculo.motorista:
+                    motorista = veiculo.motorista.nome
+                info['apelido'] = surname
+                info['motorista'] = motorista
+
+                diarias[linha.nome].append(info)
 
       if rota_fixa:
         linha_codigo = rota_fixa.linha.codigo
@@ -652,27 +678,50 @@ def get_stops_student():
           tomorrow = date.today() + timedelta(days=1)
 
           if check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25):
-            info_date = format_date(passagem.data)
-            day_week = return_day_week(passagem.data.weekday())
-            data['diaria']['paradas'].append(info)
-
-            if passagem.data == today:
-              info['data'] = 'Hoje'
-            elif passagem.data == tomorrow:
-              info['data'] = 'Amanhã'
-            else: info['data'] = f'{day_week[:3]} - {info_date}'
-
-            if passagem.migracao_lotado:
-              info['data'] = f'{info["data"]} | Transferido devido lotação'
-              msg = 'Veículo lotado: Seu motorista alterou o veículo que você usará devido a uma lotação prevista para seu transporte habitual.'
-              if msg not in data['diaria']['msg']:
-                data['diaria']['msg'].append(msg)
+            execute = True
+            if passagem.migracao_lotado or passagem.migracao_manutencao:
+              combine = datetime.combine(passagem.data, parada.horario_passagem)
+              time_ant = combine - timedelta(minutes=15)
+              time_dep = combine + timedelta(minutes=15)
+              if (
+                db.session.query(Passagem).join(Parada)
+                .filter(db.and_(
+                  Passagem.Parada_codigo == Parada.codigo,
+                  Passagem.Aluno_id == user.id,
+                  Passagem.data == passagem.data,
+                  Parada.horario_passagem.between(time_ant.time(), time_dep.time()),
+                  Passagem.passagem_fixa == False,
+                  db.not_(db.or_(
+                    Passagem.migracao_lotado == True,
+                    Passagem.migracao_manutencao == True
+                  ))
+                ))
+                .first()
+              ):
+                execute = False
             
-            elif passagem.migracao_manutencao:
-              info['data'] = f'{info["data"]} | Transferido devido manutenção'
-              msg = 'Veículo em manutenção: Seu motorista alterou o veículo que você usará devido a um defeito encontrado em seu transporte habitual.'
-              if msg not in data['diaria']['msg']:
-                data['diaria']['msg'].append(msg)
+            if execute:
+              info_date = format_date(passagem.data)
+              day_week = return_day_week(passagem.data.weekday())
+              data['diaria']['paradas'].append(info)
+
+              if passagem.data == today:
+                info['data'] = 'Hoje'
+              elif passagem.data == tomorrow:
+                info['data'] = 'Amanhã'
+              else: info['data'] = f'{day_week[:3]} - {info_date}'
+
+              if passagem.migracao_lotado:
+                info['data'] = f'{info["data"]} | Transferido devido lotação'
+                msg = 'Veículo lotado: Seu motorista alterou o veículo que você usará devido a uma lotação prevista para seu transporte habitual.'
+                if msg not in data['diaria']['msg']:
+                  data['diaria']['msg'].append(msg)
+              
+              elif passagem.migracao_manutencao:
+                info['data'] = f'{info["data"]} | Transferido devido manutenção'
+                msg = 'Veículo em manutenção: Seu motorista alterou o veículo que você usará devido a um defeito encontrado em seu transporte habitual.'
+                if msg not in data['diaria']['msg']:
+                  data['diaria']['msg'].append(msg)
     
     for tipo in tipos:
       data['fixa']['msg'].append(f'Você não definiu seu ponto de {tipo}.')
@@ -727,6 +776,10 @@ def get_schedule_student():
         Passagem.passagem_fixa == False,
         Passagem.data.in_(dates),
         Passagem.Parada_codigo == Parada.codigo,
+        db.not_(db.or_(
+          Passagem.migracao_lotado == True,
+          Passagem.migracao_manutencao == True
+        )),
         Parada.Rota_codigo == Rota.codigo
       ))
       .order_by(
@@ -897,6 +950,7 @@ def get_forecast(name_line, surname, shift, hr_par, hr_ret):
           data = {}
           dates = return_dates_week()
           today = date.today()
+          retorno['capacidade'] = vehicle.capacidade
 
           records_line = (
             db.session.query(Registro_Linha)
@@ -962,7 +1016,7 @@ def get_forecast(name_line, surname, shift, hr_par, hr_ret):
                 color = 'red'
               elif (vehicle.capacidade - 5) <= record.previsao_pessoas <= vehicle.capacidade:
                 color = 'yellow'
-              data_local['info'][record.tipo]['color'] = 'red'
+              data_local['info'][record.tipo]['color'] = color
           
           retorno['data'] = data
           return jsonify(retorno)
@@ -1219,29 +1273,52 @@ def get_interface_route(name_line):
           check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25)
           and not linha.ferias and not not_dis
         ):
-          rota = parada.rota
-          if rota.codigo not in routes_includes:
-            routes_includes.append(rota.codigo)
-            info = {
-              'turno': rota.turno,
-              'horario_partida': format_time(rota.horario_partida),
-              'horario_retorno': format_time(rota.horario_retorno),
-              'quantidade': count_part_route(rota.codigo),
-            }
+          execute = True
+          if passagem.migracao_lotado or passagem.migracao_manutencao:
+            combine = datetime.combine(passagem.data, parada.horario_passagem)
+            time_ant = combine - timedelta(minutes=15)
+            time_dep = combine + timedelta(minutes=15)
+            if (
+              db.session.query(Passagem).join(Parada)
+              .filter(db.and_(
+                Passagem.Parada_codigo == Parada.codigo,
+                Passagem.Aluno_id == user.id,
+                Passagem.data == passagem.data,
+                Parada.horario_passagem.between(time_ant.time(), time_dep.time()),
+                Passagem.passagem_fixa == False,
+                db.not_(db.or_(
+                  Passagem.migracao_lotado == True,
+                  Passagem.migracao_manutencao == True
+                ))
+              ))
+              .first()
+            ):
+              execute = False
 
-            veiculo = rota.onibus
-            surname = 'Sem veículo'
-            motorista = 'Desativada'
+          if execute:
+            rota = parada.rota
+            if rota.codigo not in routes_includes:
+              routes_includes.append(rota.codigo)
+              info = {
+                'turno': rota.turno,
+                'horario_partida': format_time(rota.horario_partida),
+                'horario_retorno': format_time(rota.horario_retorno),
+                'quantidade': count_part_route(rota.codigo),
+              }
+              
+              veiculo = rota.onibus
+              surname = 'Sem veículo'
+              motorista = 'Desativada'
 
-            if veiculo:
-              surname = veiculo.apelido
-              motorista = 'Nenhum'
-              if veiculo.motorista:
-                motorista = veiculo.motorista.nome
-            info['apelido'] = surname
-            info['motorista'] = motorista
+              if veiculo:
+                surname = veiculo.apelido
+                motorista = 'Nenhum'
+                if veiculo.motorista:
+                  motorista = veiculo.motorista.nome
+              info['apelido'] = surname
+              info['motorista'] = motorista
 
-            retorno['diarias'].append(info)
+              retorno['diarias'].append(info)
 
       if retorno['relacao'] == 'participante':
         retorno['minhas_rotas'] = {'turno': [], 'contraturno': []}
@@ -1709,6 +1786,8 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
           retorno['diarias'] = {}
 
           today = datetime.today()
+          tomorrow = today + timedelta(days=1)
+
           diarias = (
             db.session.query(Parada, Ponto, Passagem)
             .filter(db.and_(
@@ -1739,22 +1818,47 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
               check_valid_datetime(diaria.data, parada.horario_passagem, add_limit=0.25)
               and not linha.ferias and not not_dis
             ):
-              date = format_date(diaria.data)
-              if date == today:
-                date = 'Hoje'
+              execute = True
+              if diaria.migracao_lotado or diaria.migracao_manutencao:
+                combine = datetime.combine(diaria.data, parada.horario_passagem)
+                time_ant = combine - timedelta(minutes=15)
+                time_dep = combine + timedelta(minutes=15)
+                if (
+                  db.session.query(Passagem).join(Parada)
+                  .filter(db.and_(
+                    Passagem.Parada_codigo == Parada.codigo,
+                    Passagem.Aluno_id == user.id,
+                    Passagem.data == diaria.data,
+                    Parada.horario_passagem.between(time_ant.time(), time_dep.time()),
+                    Passagem.passagem_fixa == False,
+                    db.not_(db.or_(
+                      Passagem.migracao_lotado == True,
+                      Passagem.migracao_manutencao == True
+                    ))
+                  ))
+                  .first()
+                ):
+                  execute = False
 
-              if date not in retorno['diarias']:
-                retorno['diarias'][date] = {}
-                retorno['diarias'][date]['dayweek'] = return_day_week(diaria.data.weekday())
-                retorno['diarias'][date]['date'] = date
-                retorno['diarias'][date]['data'] = []
-                
-              retorno['diarias'][date]['data'].append({
-                'valid': check_valid_datetime(diaria.data, parada.horario_passagem),
-                'edit': False if diaria.migracao_lotado or diaria.migracao_manutencao else True,
-                'tipo': parada.tipo.capitalize(),
-                'nome': ponto.nome
-              })
+              if execute:
+                date = format_date(diaria.data)
+                if date == today:
+                  date = 'Hoje'
+                elif date == tomorrow:
+                  date = 'Amanhã'
+
+                if date not in retorno['diarias']:
+                  retorno['diarias'][date] = {}
+                  retorno['diarias'][date]['dayweek'] = return_day_week(diaria.data.weekday())
+                  retorno['diarias'][date]['date'] = date
+                  retorno['diarias'][date]['data'] = []
+                  
+                retorno['diarias'][date]['data'].append({
+                  'valid': check_valid_datetime(diaria.data, parada.horario_passagem),
+                  'edit': False if diaria.migracao_lotado or diaria.migracao_manutencao else True,
+                  'tipo': parada.tipo.capitalize(),
+                  'nome': ponto.nome
+                })
           retorno['diarias'] = [value for value in retorno['diarias'].values()]
 
           if user.turno == rota.turno:

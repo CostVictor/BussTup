@@ -713,51 +713,65 @@ function config_popup_route(obj_click, data = false) {
 
           if (Object.keys(response.diarias).length) {
             container_diarias.classList.remove("inactive");
-            const model_daily = models.querySelector('#model_interface_daily')
+            const model_daily = models.querySelector("#model_interface_daily");
 
-            let container_division_first = document.createElement('h1')
-            container_division_first.className = 'page__division'
-            container_diarias.appendChild(container_division_first)
+            let container_division_first = document.createElement("h1");
+            container_division_first.className = "page__division";
+            container_diarias.appendChild(container_division_first);
 
             for (index in response.diarias) {
-              const data = response.diarias[index]
-              const container_date = document.createElement('div')
-              container_date.id = `${container_diarias.id}_${data.dayweek} ${data.date}`
+              const data = response.diarias[index];
+              const container_date = document.createElement("div");
+              container_date.id = `${container_diarias.id}_${data.dayweek} ${data.date}`;
 
-              const text_title = document.createElement('h1')
-              text_title.className = 'text secundario emphasis justify'
-              text_title.textContent = `Diárias | ${data.dayweek} ${data.date}`
-              container_date.appendChild(text_title)
-              
-              const dailys = data.data
+              const text_title = document.createElement("h1");
+              text_title.className = "text secundario emphasis justify";
+              text_title.textContent = `Diárias | ${data.dayweek} ${data.date}`;
+              container_date.appendChild(text_title);
+
+              const dailys = data.data;
               for (index in dailys) {
-                const daily = model_daily.cloneNode(true)
-                const daily_info = daily.querySelector('p')
-                const daily_icon = daily.querySelector('i')
+                const daily = model_daily.cloneNode(true);
+                const daily_info = daily.querySelector("p");
+                const daily_icon = daily.querySelector("i");
 
-                daily.id = `${container_date.id}-daily_${index}`
-                container_date.appendChild(daily)
+                daily.id = `${container_date.id}-daily_${index}`;
+                container_date.appendChild(daily);
 
-                const values = dailys[index]
-                daily_info.textContent = `${values.tipo} ~> ${values.nome}`
+                const values = dailys[index];
+                daily_info.textContent = `${values.tipo} ~> ${values.nome}`;
+
+                if (!values.edit && !container_diarias.querySelector("span")) {
+                  const span_warning = document.createElement("span");
+                  span_warning.className =
+                    "text secundario fundo justify margin_bottom";
+                  span_warning.textContent =
+                    "Diárias criadas por transferência não podem ser excluídas, mas podem ser substituídas caso você deseje criar uma diária no mesmo dia e horário.";
+                  container_diarias.insertBefore(
+                    span_warning,
+                    container_diarias.children[1]
+                  );
+                }
 
                 if (values.valid) {
                   if (values.edit) {
-                    daily_icon.onclick = function() {
-                      open_popup('confirm_del_daily', this)
-                    }
+                    daily_icon.onclick = function () {
+                      open_popup("confirm_del_daily", this);
+                    };
                   } else {
-                    daily_icon.className = 'bi bi-person-lock page__icon content info'
+                    daily_icon.className =
+                      "bi bi-person-lock page__icon content info";
                   }
                 } else {
-                  daily_icon.className = 'bi bi-stopwatch page__icon content info'
+                  daily_icon.className =
+                    "bi bi-stopwatch page__icon content info";
                 }
               }
-              container_diarias.appendChild(container_date)
+              container_diarias.appendChild(container_date);
             }
-            const container_division_last = document.createElement('h1')
-            container_division_last.className = 'page__division'
-            container_diarias.appendChild(container_division_last)
+            const container_division_last = document.createElement("h1");
+            container_division_last.className = "page__division";
+            container_diarias.appendChild(container_division_last);
           }
         } else {
           const route_division = document.getElementById("route_division");
@@ -971,4 +985,10 @@ function return_data_route(obj_model = false, format_dict_url = false) {
     time_ret: time_ret,
     pos: pos,
   };
+}
+
+function line_load_forecast() {
+  open_popup("forecast_route", false, false)
+  const data_route = return_data_route(null, (format_dict_url = true));
+  load_popup_forecast(data_route);
 }

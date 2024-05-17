@@ -623,12 +623,11 @@ function migrate_capacity(data_route, function_reload) {
       .then((response) => response.json())
       .then((response) => {
         if (!response.error) {
-          function_reload()
+          function_reload();
           const local_popup = document.getElementById("popup_local");
           local_popup.removeChild(local_popup.querySelector("#notice_migrate"));
           close_popup("migrate_capacity");
           create_popup(response.title, response.text, "Ok", "success");
-
         } else {
           create_popup(response.title, response.text);
           popup_button_load("migrate_capacity", "Transferir");
@@ -645,16 +644,24 @@ function migrate_capacity(data_route, function_reload) {
 function create_migrate_crowded(local) {
   open_popup("migrate_capacity", false, false);
   let data = null;
-  let function_reload = function() {}
+  let function_reload = null;
 
   if (local === "page") {
-    const popup_route = document.getElementById("summary_route")
+    const popup_route = document.getElementById("summary_route");
     data = return_data_route(popup_route);
-    function_reload = function() {
-      load_popup_route(popup_route)
-    }
+    const data_url = {
+      principal: Object.values(data),
+    };
+
+    function_reload = function () {
+      load_popup_route(popup_route);
+      load_popup_forecast(data_url);
+    };
   } else if (local === "line") {
     data = return_data_route(null);
+    function_reload = function () {
+      load_popup_forecast(return_data_route(null, (format_dict_url = true)));
+    };
   }
   data.type = document.getElementById("notice_migrate_type").textContent;
   data.date = document.getElementById("notice_migrate_date").textContent;

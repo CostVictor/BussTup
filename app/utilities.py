@@ -476,7 +476,7 @@ def modify_forecast_route(route, record, commit=True):
   day = record.data
 
   reject_contraturno = (type_ == return_ignore_route(route.turno))
-  not_includes = (
+  not_includes_daily = (
     db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada).join(Rota)
     .filter(db.and_(
       Parada.Rota_codigo == Rota.codigo,
@@ -485,6 +485,28 @@ def modify_forecast_route(route, record, commit=True):
       Parada.Rota_codigo != route.codigo,
       Parada.tipo == type_,
       Passagem.passagem_fixa == False,
+      db.not_(db.or_(
+        Passagem.migracao_lotado == True,
+        Passagem.migracao_manutencao == True
+      )),
+      Passagem.data == day
+    ))
+    .subquery()
+  )
+
+  not_includes_migrate = (
+    db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada).join(Rota)
+    .filter(db.and_(
+      Parada.Rota_codigo == Rota.codigo,
+      Passagem.Parada_codigo == Parada.codigo,
+      Rota.turno == route.turno,
+      Parada.Rota_codigo != route.codigo,
+      Parada.tipo == type_,
+      Passagem.passagem_fixa == False,
+      db.or_(
+        Passagem.migracao_lotado == True,
+        Passagem.migracao_manutencao == True
+      ),
       Passagem.data == day
     ))
     .subquery()
@@ -501,7 +523,16 @@ def modify_forecast_route(route, record, commit=True):
       Aluno.id == Passagem.Aluno_id,
       Registro_Aluno.Aluno_id == Aluno.id,
       
-      db.not_(Aluno.id.in_(not_includes.select())),
+      db.not_(db.or_(
+        Aluno.id.in_(not_includes_daily.select()),
+        db.and_(
+          db.not_(db.and_(
+            Passagem.passagem_fixa == False,
+            Passagem.data == day
+          )),
+          Aluno.id.in_(not_includes_migrate.select())
+        )
+      )),
       Registro_Aluno.data == day,
       db.or_(
         db.and_(
@@ -524,7 +555,7 @@ def modify_forecast_route(route, record, commit=True):
         ),
         db.and_(
           db.not_(Passagem.passagem_fixa),
-          Passagem.data == day
+          Passagem.data == day,
         )
       )
     ))
