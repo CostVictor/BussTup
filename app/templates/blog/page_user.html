@@ -275,18 +275,22 @@
               Você ainda não está relacionado a nenhuma linha.
             </p>
             <p class="text secundario fundo">
-              Solicite entrada em alguma linha ou crie a sua:
+              Solicite participação em alguma linha ou crie a sua:
             </p>
-            <div class="page__container--line selected">
+            <div id="btn_create_line" class="page__container--line selected">
               <i
                 class="bi bi-plus-lg page__icon--box plus"
                 onclick="open_popup('create_line', false, false)"
               ></i>
             </div>
           </div>
+
+          <h2 id="linhas_participacao_title" class="text title big_space -enter-">Participação</h2>
+          <div id="linhas_participacao_local" class="-enter-"></div>
+
           <h1 class="page__division -enter-"></h1>
           <div id="msg_solicitar_entrada" class="page__container">
-            <p class="text secundario fundo -enter-">Solicite entrada:</p>
+            <p class="text secundario fundo -enter-">Solicite participação:</p>
           </div>
           {% endif %}
 

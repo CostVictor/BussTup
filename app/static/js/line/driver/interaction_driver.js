@@ -191,6 +191,10 @@ function action_popup(popup, card, id, obj_click) {
       set_selected_bool(option_feriado, "Não");
     }
     config_popup_calendar();
+  } else if (id === "transfer_by_defect_info") {
+    const surname = extract_info(obj_click, "surname");
+    document.getElementById("transfer_by_defect_info_vehicle").textContent =
+      surname;
   }
 }
 
@@ -301,7 +305,7 @@ function criar_aluno(list_aluno, container, response, model_aluno) {
       }
     }
 
-    if (response.relacao !== "membro") {
+    if (response.relacao) {
       aluno.classList.add("grow");
       aluno.querySelector("i").classList.remove("inactive");
       aluno.onclick = function () {
@@ -326,11 +330,18 @@ function config_popup_point(name_point) {
         const utilizacao = response.utilizacao;
         const turnos = response.turnos;
 
+        const container_delete = document.getElementById('config_point_delete')
+        if (response.relacao && response.relacao !== 'membro') {
+          container_delete.classList.remove('inactive')
+        } else {
+          container_delete.classList.add('inactive')
+        }
+
         for (info in data) {
           const local = document.getElementById("config_point_" + info);
           local.textContent = data[info];
 
-          if (response.relacao !== "membro") {
+          if (response.relacao && response.relacao !== "membro") {
             document
               .getElementById(local.id + "_edit")
               .classList.remove("inactive");
@@ -399,11 +410,12 @@ function config_popup_aluno(nome, turno, pos, contraturno, name_point = false) {
         }
       } else {
         const local_popup = document.getElementById("popup_local");
-        local_popup.removeChild(
-          local_popup.querySelector("#config_rel_point_route")
-        );
+        const rel = local_popup.querySelector("#config_rel_point_route");
+        if (rel) {
+          local_popup.removeChild(rel);
+        }
         close_popup("config_aluno");
-        create_popup(response.title, response.text, "Voltar");
+        create_popup(response.title, response.text, "Ok");
       }
     });
 }
@@ -497,4 +509,28 @@ function config_popup_calendar() {
       };
     });
   }
+}
+
+function config_popup_defect() {
+  open_popup("transfer_by_defect", false, false);
+  const container = document.getElementById(
+    "transfer_by_defect_veiculo_container"
+  );
+  const data = {
+    principal: [document.getElementById("interface_nome").textContent.trim()],
+    secondary: {
+      surname_ignore: document.getElementById("transfer_by_defect_info_vehicle")
+        .textContent,
+      only_valid: true,
+    },
+  };
+  include_options_container(
+    container,
+    "option_vehicle",
+    data,
+    false,
+    false,
+    "model_option_box",
+    true
+  );
 }

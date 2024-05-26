@@ -1,7 +1,8 @@
 from flask_security import login_required, roles_required, current_user
 from app import app, cidades, turnos
 from flask import request, jsonify
-from datetime import time
+from datetime import time, datetime
+from app.tasks import sched, transferir_por_defeito
 from app.utilities import *
 from app.database import *
 import bcrypt
@@ -167,18 +168,46 @@ def edit_day():
 
   if user and data and 'faltara' in data and 'contraturno' in data and 'data' in data:
     fixas = (
-      Passagem.query
-      .filter_by(Aluno_id=user.id, passagem_fixa=True)
+      db.session.query(Passagem)
+      .filter(db.and_(
+        Passagem.Aluno_id == user.id,
+        db.or_(
+          Passagem.passagem_fixa == True,
+          db.and_(
+            Passagem.data.in_(dates),
+            db.or_(
+              Passagem.migracao_lotado == True,
+              Passagem.migracao_manutencao == True
+            )
+          )
+        )
+      ))
+      .order_by(db.desc(Passagem.passagem_fixa))
       .all()
     )
 
     code_line = None
-    routes = {'fixa': False, 'contraturno': False}
+    routes = {
+      'fixa': False, 'contraturno': False, 
+      'tr_fixa': False, 'tr_contraturno': False
+    }
     for passagem in fixas:
-      rota = passagem.parada.rota
-      routes['contraturno' if passagem.passagem_contraturno else 'fixa'] = rota.codigo
+      parada = passagem.parada
+      if passagem.passagem_fixa:
+        routes['contraturno' if passagem.passagem_contraturno else 'fixa'] = parada
+      else:
+        if routes['fixa'] and parada.Ponto_id == routes['fixa'].Ponto_id:
+          routes['tr_fixa'] = parada
+        
+        if routes['contraturno'] and parada.Ponto_id == routes['contraturno'].Ponto_id:
+          routes['tr_contraturno'] = parada
+
       if not code_line:
-        code_line = rota.Linha_codigo
+        code_line = parada.rota.Linha_codigo
+    
+    for key, value in routes.items():
+      if value:
+        routes[key] = value.Rota_codigo
 
     not_dis = (
       db.session.query(Registro_Linha.data)
@@ -203,6 +232,10 @@ def edit_day():
           Registro_Rota.query.filter_by(Rota_codigo=routes['fixa'], data=dia).all()
         ) if routes['fixa'] else []
 
+        record_route_tr_fixed = (
+          Registro_Rota.query.filter_by(Rota_codigo=routes['tr_fixa'], data=dia).all()
+        ) if routes['tr_fixa'] else []
+
         record_route_contraturno = (
           Registro_Rota.query.filter_by(
             Rota_codigo=routes['contraturno'], data=dia, 
@@ -210,25 +243,39 @@ def edit_day():
           ).first()
         ) if routes['contraturno'] else []
 
+        record_route_tr_contraturno = (
+          Registro_Rota.query.filter_by(
+            Rota_codigo=routes['tr_contraturno'], data=dia, 
+            tipo=return_ignore_route(user.turno)
+          ).first()
+        ) if routes['tr_contraturno'] else []
+
         if record_student:
           if data['faltara']:
-            if not record_student.faltara and record_route_fixed:
-              for record in record_route_fixed:
+            if not record_student.faltara and (record_route_fixed or record_route_tr_fixed):
+              for record in (record_route_fixed + record_route_tr_fixed):
                 set_update_record_route(record)
             
-            if record_student.contraturno and record_route_contraturno:
-              set_update_record_route(record_route_contraturno)
+            if record_student.contraturno and (record_route_contraturno or record_route_tr_contraturno):
+              if record_route_contraturno:
+                set_update_record_route(record_route_contraturno)
+              if record_route_tr_contraturno:
+                set_update_record_route(record_route_tr_contraturno)
 
             record_student.faltara = True
             record_student.contraturno = False
           else:
-            if record_student.faltara and record_route_fixed:
-              for record in record_route_fixed:
+            if record_student.faltara and (record_route_fixed or record_route_tr_fixed):
+              for record in (record_route_fixed + record_route_tr_fixed):
                 set_update_record_route(record)
             
-            if record_student.contraturno != data['contraturno'] and record_route_contraturno:
-              set_update_record_route(record_route_contraturno)
-              for record in record_route_fixed:
+            if record_student.contraturno != data['contraturno'] and (record_route_contraturno or record_route_tr_contraturno):
+              if record_route_contraturno:
+                set_update_record_route(record_route_contraturno)
+              if record_route_tr_contraturno:
+                set_update_record_route(record_route_tr_contraturno)
+
+              for record in (record_route_fixed + record_route_tr_fixed):
                 if record.tipo == return_ignore_route(user.turno):
                   set_update_record_route(record)
 
@@ -236,6 +283,11 @@ def edit_day():
             record_student.contraturno = data['contraturno']
           
           db.session.commit()
+          if dia == date.today():
+            sched.add_job(
+              None, transferir_por_defeito, trigger='date', 
+              run_date=datetime.now() + timedelta(seconds=1), max_instances=30
+            )
           return jsonify({'error': False, 'title': f'{return_day_week(dia.weekday())}-feira atualizada', 'text': ''})
 
     except Exception as e:

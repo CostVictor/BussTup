@@ -374,7 +374,7 @@ DEFAULT CHARACTER SET = utf8;
 CREATE TABLE IF NOT EXISTS `busstup`.`manutencao` (
   `codigo` BIGINT NOT NULL AUTO_INCREMENT,
   `data_inicio` DATETIME NOT NULL,
-  `data_fim` DATETIME NOT NULL,
+  `data_fim` DATETIME NULL,
   `onibus_id` BIGINT(20) NOT NULL,
   PRIMARY KEY (`codigo`),
   INDEX `fk_manutencao_onibus1_idx` (`onibus_id` ASC),
@@ -400,6 +400,24 @@ CREATE TABLE IF NOT EXISTS `busstup`.`registro_linha` (
   CONSTRAINT `fk_calendario_linha1`
     FOREIGN KEY (`linha_codigo`)
     REFERENCES `busstup`.`linha` (`codigo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `busstup`.`migracao`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busstup`.`migracao` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `onibus_alvo` BIGINT NOT NULL,
+  `turno_alvo` ENUM('Matutino', 'Vespertino', 'Noturno') NOT NULL,
+  `manutencao_codigo` BIGINT NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_migracao_manutencao1_idx` (`manutencao_codigo` ASC),
+  CONSTRAINT `fk_migracao_manutencao1`
+    FOREIGN KEY (`manutencao_codigo`)
+    REFERENCES `busstup`.`manutencao` (`codigo`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

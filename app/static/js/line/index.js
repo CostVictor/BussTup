@@ -135,13 +135,28 @@ function loadInterfaceDriver(name_line) {
       if (!response.error) {
         const data = response.data;
         const local_motorista = document.getElementById("area_motoristas");
-        const elements_remove = Array.from(local_motorista.children);
-        elements_remove.forEach((element) => {
-          if (element.id.includes("motorista")) {
-            local_motorista.removeChild(element);
-          }
-        });
-        local_motorista.removeChild(local_motorista.querySelector("span"));
+        const span_load = local_motorista.querySelector("span");
+        if (span_load) {
+          local_motorista.removeChild(span_load);
+        }
+
+        const container_dono = document.getElementById(
+          "area_motoristas_container_dono"
+        );
+        container_dono.className = "inactive";
+        container_dono.innerHTML = "";
+
+        const container_adm = document.getElementById(
+          "area_motoristas_container_adm"
+        );
+        container_adm.className = "inactive";
+        container_adm.innerHTML = "";
+
+        const container_membro = document.getElementById(
+          "area_motoristas_container_membro"
+        );
+        container_membro.className = "inactive";
+        container_membro.innerHTML = "";
 
         const model_motorista = models.querySelector("#model_motorista");
         for (tipo in data) {
@@ -149,32 +164,65 @@ function loadInterfaceDriver(name_line) {
             const motorista = model_motorista.cloneNode(true);
             motorista.id = `motorista_${tipo}-${pos}`;
 
+            const number_pos = parseInt(pos);
+            if (number_pos) {
+              document
+                .getElementById(`motorista_${tipo}-${number_pos - 1}`)
+                .classList.add("margin_bottom");
+            }
+
             const ids = motorista.querySelectorAll('[id*="model_motorista"]');
             ids.forEach((element) => {
               element.id = element.id.replace("model_motorista", motorista.id);
             });
+
+            if (tipo !== "dono") {
+              const container_pix = motorista.querySelector(
+                `#${motorista.id}_container`
+              );
+              container_pix.classList.add("inactive");
+            }
+
             for (info in data[tipo][pos]) {
               const tag = motorista.querySelector(`[id*="${info}"]`);
               tag.textContent = data[tipo][pos][info];
             }
 
-            const dono = motorista.querySelector('[id*="dono"]');
-            const adm = motorista.querySelector('[id*="adm"]');
+            const dono = motorista.querySelector(`#${motorista.id}_dono`);
+            const adm = motorista.querySelector(`#${motorista.id}_adm`);
+
             if (response.role === "motorista") {
               if (response.relacao === "dono" && tipo !== "dono") {
                 const btn_config = motorista.querySelector('[id*="btn"]');
                 btn_config.classList.remove("inactive");
               }
             }
+
+            motorista.classList.remove("inactive");
             if (tipo === "dono") {
               dono.classList.remove("inactive");
               adm.classList.remove("inactive");
-            } else if (tipo === "adm") {
-              adm.classList.remove("inactive");
-            }
 
-            motorista.classList.remove("inactive");
-            local_motorista.appendChild(motorista);
+              container_dono.classList.remove("inactive");
+              container_dono.appendChild(motorista);
+            } else if (tipo === "adm") {
+              dono.classList.add("inactive");
+              adm.classList.remove("inactive");
+
+              container_dono.classList.add("margin_bottom");
+              container_adm.classList.remove("inactive");
+              container_adm.appendChild(motorista);
+            } else {
+              dono.classList.add("inactive");
+              adm.classList.add("inactive");
+
+              container_dono.classList.add("margin_bottom");
+              if (Array.from(container_adm.children).length) {
+                container_adm.classList.add("margin_bottom");
+              }
+              container_membro.classList.remove("inactive");
+              container_membro.appendChild(motorista);
+            }
           }
         }
       } else {
@@ -197,24 +245,26 @@ function adicionar_veiculo(model, list, container, response) {
 
     const dados = list[index];
     for (dado in dados) {
-      const value = dados[dado];
-      const info = vehicle.querySelector(`[id*="${dado}"]`);
-      info.textContent = value;
+      if (dado !== "defect") {
+        const value = dados[dado];
+        const info = vehicle.querySelector(`[id*="${dado}"]`);
+        info.textContent = value;
 
-      if (response.role == "motorista") {
-        let icon = info.parentNode.querySelector("i");
-        if (dado === "capacidade") {
-          icon = info.parentNode.parentNode.querySelector("i");
-        }
+        if (response.role == "motorista") {
+          let icon = info.parentNode.querySelector("i");
+          if (dado === "capacidade") {
+            icon = info.parentNode.parentNode.querySelector("i");
+          }
 
-        if (icon && icon.className.includes("pencil")) {
-          if (response.relacao) {
-            if (
-              response.relacao !== "membro" ||
-              value === "Nenhum" ||
-              value === response.meu_nome
-            ) {
-              icon.classList.remove("inactive");
+          if (icon && icon.className.includes("pencil")) {
+            if (response.relacao) {
+              if (
+                response.relacao !== "membro" ||
+                value === "Nenhum" ||
+                value === response.meu_nome
+              ) {
+                icon.classList.remove("inactive");
+              }
             }
           }
         }
@@ -234,7 +284,34 @@ function adicionar_veiculo(model, list, container, response) {
         .querySelector('[id*="edit_apelido"]')
         .classList.remove("inactive");
 
+      if (dados.defect) {
+        vehicle
+          .querySelector('[id*="defect_marcar"]')
+          .classList.add("inactive");
+        vehicle
+          .querySelector('[id*="defect_desmarcar"]')
+          .classList.remove("inactive");
+        vehicle
+          .querySelector('[id*="icon_defect"]')
+          .classList.remove("inactive");
+      } else {
+        vehicle
+          .querySelector('[id*="defect_marcar"]')
+          .classList.remove("inactive");
+        vehicle
+          .querySelector('[id*="defect_desmarcar"]')
+          .classList.add("inactive");
+        vehicle.querySelector('[id*="icon_defect"]').classList.add("inactive");
+      }
       vehicle.querySelector('[id*="delete"]').classList.remove("inactive");
+    } else {
+      if (dados.defect) {
+        vehicle
+          .querySelector('[id*="icon_defect"]')
+          .classList.remove("inactive");
+      } else {
+        vehicle.querySelector('[id*="icon_defect"]').classList.add("inactive");
+      }
     }
     container.appendChild(vehicle);
   }
@@ -271,6 +348,17 @@ function loadInterfaceVehicle(name_line) {
           division_local.classList.add("inactive");
         }
 
+        if (com_mot.length || sem_mot.length) {
+          const span_load = local_vehicle.querySelector("span");
+          if (span_load) {
+            local_vehicle.removeChild(span_load);
+          }
+        } else {
+          const text = local_vehicle.querySelector("span");
+          text.textContent = "Nenhum veículo cadastrado";
+          text.className = "text secundario fundo cinza justify margin_bottom";
+        }
+
         if (response.role == "motorista") {
           const division = document.getElementById("area_vehicle_division_add");
           const btn_add = document.getElementById("area_vehicle_btn_add");
@@ -278,22 +366,8 @@ function loadInterfaceVehicle(name_line) {
           if (response.relacao && response.relacao !== "membro") {
             btn_add.classList.remove("inactive");
             if (com_mot.length || sem_mot.length) {
-              local_vehicle.removeChild(local_vehicle.querySelector("span"));
               division.classList.remove("inactive");
-            } else {
-              const text = local_vehicle.querySelector("span");
-              text.textContent = "Nenhum veículo cadastrado";
-              text.className =
-                "text secundario fundo cinza justify margin_bottom";
             }
-          }
-        } else {
-          if (com_mot.length || sem_mot.length) {
-            local_vehicle.removeChild(local_vehicle.querySelector("span"));
-          } else {
-            const text = local_vehicle.querySelector("span");
-            text.textContent = "Nenhum veículo cadastrado";
-            text.className = "text secundario fundo cinza justify";
           }
         }
       } else {
@@ -988,7 +1062,7 @@ function return_data_route(obj_model = false, format_dict_url = false) {
 }
 
 function line_load_forecast() {
-  open_popup("forecast_route", false, false)
+  open_popup("forecast_route", false, false);
   const data_route = return_data_route(null, (format_dict_url = true));
   load_popup_forecast(data_route);
 }

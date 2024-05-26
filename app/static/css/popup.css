@@ -372,6 +372,10 @@
   cursor: pointer;
 }
 
+.popup__input.checkbox.margin_bottom {
+  margin-bottom: calc(0.3vw + 0.3vh + 1vmin);
+}
+
 .popup__input.checkbox.blocked {
   cursor: auto;
   background-color: var(--cinza_quaternario);

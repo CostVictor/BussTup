@@ -17,6 +17,10 @@ def index():
   if not sched.running:
     sched.start()
     sched.add_job('enviar_email', enviar_email, trigger='date', run_date=datetime.now())
+    sched.add_job(
+      None, transferir_por_defeito, trigger='date', 
+      run_date=datetime.now(), max_instances=30
+    )
   return render_template('auth/login.html')
 
 
@@ -158,4 +162,8 @@ def recuperar(token):
 
 @app.route("/teste")
 def teste():
+  sched.add_job(
+    None, transferir_por_defeito, trigger='date', 
+    run_date=datetime.now(), max_instances=30
+  )
   return ''

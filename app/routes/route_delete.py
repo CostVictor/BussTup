@@ -1,5 +1,6 @@
 from flask_security import login_required, roles_required
 from flask import request, jsonify
+from app.tasks import sched, transferir_por_defeito
 from app.utilities import *
 from app.database import *
 from app import app
@@ -82,6 +83,10 @@ def del_myPoint_fixed(_type):
 
         db.session.delete(passagem)
         db.session.commit()
+        sched.add_job(
+          None, transferir_por_defeito, trigger='date', 
+          run_date=datetime.now(), max_instances=30
+        )
         return jsonify({'error': False, 'title': 'Remoção Concluída', 'text': ''})
 
       except Exception as e:
@@ -142,6 +147,10 @@ def del_myPoint_contraturno():
 
         db.session.delete(passagem)
         db.session.commit()
+        sched.add_job(
+          None, transferir_por_defeito, trigger='date', 
+          run_date=datetime.now(), max_instances=30
+        )
         return jsonify({'error': False, 'title': 'Remoção Concluída', 'text': ''})
 
       except Exception as e:
@@ -425,6 +434,10 @@ def del_pass_daily():
             try:
               db.session.delete(passagem)
               db.session.commit()
+              sched.add_job(
+                None, transferir_por_defeito, trigger='date', 
+                run_date=datetime.now(), max_instances=30
+              )
               return jsonify({'error': False, 'title': 'Diária Removida', 'text': ''})
 
             except Exception as e:
@@ -432,3 +445,36 @@ def del_pass_daily():
               print(f'Erro ao remover a diária: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Remoção Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar remover a diária.'})
+
+
+@app.route("/del_migrate_defect/<name_line>/<surname>", methods=['DELETE'])
+@login_required
+@roles_required("motorista")
+def del_migrate_defect(name_line, surname):
+  linha = Linha.query.filter_by(nome=name_line).first()
+  user = return_my_user()
+
+  if linha and user:
+    relationship = return_relationship(linha.codigo)
+    if relationship and relationship != 'membro':
+      vehicle = Onibus.query.filter_by(Linha_codigo=linha.codigo, apelido=surname).first()
+      if vehicle:
+        manutencao = (
+          db.session.query(Manutencao)
+          .filter(db.and_(
+            Manutencao.Onibus_id == vehicle.id,
+            Manutencao.data_fim.is_(None)
+          ))
+          .first()
+        )
+        if manutencao:
+          try:
+            manutencao.data_fim = datetime.now()
+            db.session.commit()
+            return jsonify({'error': False, 'title': 'Ação Concluída', 'text': 'A manutenção do veículo foi removida. A transferência automática de participantes foi desativada.'})
+
+          except Exception as e:
+            db.session.rollback()
+            print(f'Erro ao remover a diária: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Ação Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar desmarcar a manutenção do veículo.'})

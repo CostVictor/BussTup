@@ -1,7 +1,8 @@
 from flask_security import login_required, roles_required, current_user
 from app import app, limiter, cidades, turnos
 from flask import request, jsonify
-from datetime import date
+from datetime import date, datetime
+from app.tasks import sched, transferir_por_defeito
 from app.utilities import *
 from app.database import *
 
@@ -396,7 +397,12 @@ def create_pass_fixed():
                   db.session.delete(check_passagem)
                   with db.session.begin_nested():
                     db.session.add(new_passagem)
+
                   db.session.commit()
+                  sched.add_job(
+                    None, transferir_por_defeito, trigger='date', 
+                    run_date=datetime.now(), max_instances=30
+                  )
 
                   return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong>. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong>, caso não possua.'})
                 
@@ -476,7 +482,12 @@ def create_pass_fixed():
                 
                 for record in records + records_ant:
                   set_update_record_route(record)
+
                 db.session.commit()
+                sched.add_job(
+                  None, transferir_por_defeito, trigger='date', 
+                  run_date=datetime.now(), max_instances=30
+                )
 
                 if linha.codigo == code_line:
                   return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto fixo de <strong>{tipo.capitalize()}</strong> para esta rota; suas relações fixas na rota anterior foram removidas. Certifique-se de possuir um cadastro de <strong>{reverse.capitalize()}</strong> nesta rota.'})
@@ -579,6 +590,10 @@ def create_pass_fixed():
                 set_update_record_route(record)
 
               db.session.commit()
+              sched.add_job(
+                None, transferir_por_defeito, trigger='date', 
+                run_date=datetime.now(), max_instances=30
+              )
               return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': text})
             
             except Exception as e:
@@ -674,8 +689,12 @@ def create_pass_contraturno():
                 db.session.delete(check_passagem)
                 with db.session.begin_nested():
                   db.session.add(new_contraturno)
+                
                 db.session.commit()
-
+                sched.add_job(
+                  None, transferir_por_defeito, trigger='date', 
+                  run_date=datetime.now(), max_instances=30
+                )
                 return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto de contraturno.'})
               
               except Exception as e:
@@ -734,8 +753,12 @@ def create_pass_contraturno():
 
                 with db.session.begin_nested():
                   db.session.add(new_contraturno)
-                db.session.commit()
 
+                db.session.commit()
+                sched.add_job(
+                  None, transferir_por_defeito, trigger='date', 
+                  run_date=datetime.now(), max_instances=30
+                )
                 return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': f'Você trocou seu ponto de contraturno para esta linha. Todos os vínculos com a linha anterior foram removidos. Certifique-se de configurar sua rota fixa.'})
               
               except Exception as e:
@@ -805,6 +828,10 @@ def create_pass_contraturno():
               db.session.add(new_contraturno)
 
               db.session.commit()
+              sched.add_job(
+                None, transferir_por_defeito, trigger='date', 
+                run_date=datetime.now(), max_instances=30
+              )
               return jsonify({'error': False, 'title': 'Cadastro Efetuado', 'text': ''})
             
             except Exception as e:
@@ -925,6 +952,20 @@ def create_pass_daily():
                   db.session.rollback()
                   return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': f'Você não pode agendar uma diária no trajeto de <strong>{stop.tipo}</strong> pois o mesmo já atingiu o limite de capacidade do veículo.'})
                 
+                check_manutencao = (
+                  db.session.query(Manutencao).join(Migracao)
+                  .filter(db.and_(
+                    Migracao.Manutencao_codigo == Manutencao.codigo,
+                    Manutencao.Onibus_id == vehicle.id,
+                    Manutencao.data_fim.is_(None),
+                    Migracao.turno_alvo == route.turno
+                  ))
+                  .first()
+                )
+                if check_manutencao:
+                  db.session.rollback()
+                  return jsonify({'error': True, 'title': 'Cadastro Interrompido', 'text': f'Você não pode agendar uma diária em um veículo que está em manutenção prevista para o turno <strong>{route.turno}</strong>.'})
+                
                 routes_migrate = (
                   db.session.query(Rota).join(Parada).join(Passagem)
                   .filter(db.and_(
@@ -962,29 +1003,28 @@ def create_pass_daily():
                 ))
 
                 if user.turno == route.turno:
-                  if type_ == return_ignore_route(user.turno):
-                    my_pass_fixed = (
-                      db.session.query(Passagem)
+                  my_pass_fixed = (
+                    db.session.query(Passagem)
+                    .filter(db.and_(
+                      Passagem.Aluno_id == user.id,
+                      Passagem.passagem_fixa == True,
+                      Passagem.passagem_contraturno == False
+                    ))
+                    .first()
+                  )
+                  if my_pass_fixed:
+                    route_fixed = my_pass_fixed.parada.rota
+                    record_route_fixed = (
+                      db.session.query(Registro_Rota)
                       .filter(db.and_(
-                        Passagem.Aluno_id == user.id,
-                        Passagem.passagem_fixa == True,
-                        Passagem.passagem_contraturno == False
+                        Registro_Rota.Rota_codigo == route_fixed.codigo,
+                        Registro_Rota.tipo == type_,
+                        Registro_Rota.data == date_
                       ))
                       .first()
                     )
-                    if my_pass_fixed:
-                      route_fixed = my_pass_fixed.parada.rota
-                      record_route_fixed = (
-                        db.session.query(Registro_Rota)
-                        .filter(db.and_(
-                          Registro_Rota.Rota_codigo == route_fixed.codigo,
-                          Registro_Rota.tipo == type_,
-                          Registro_Rota.data == date_
-                        ))
-                        .first()
-                      )
-                      if record_route_fixed:
-                        set_update_record_route(record_route_fixed)
+                    if record_route_fixed:
+                      set_update_record_route(record_route_fixed)
                 else:
                   check_contraturno = (
                     db.session.query(Registro_Aluno)
@@ -1044,7 +1084,7 @@ def create_pass_daily():
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
-''' ~~~~~ Inserts Global ~~~~~ '''
+''' ~~~~ Inserts Global ~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 
 @app.route("/migrate_capacity", methods=['POST'])
@@ -1054,7 +1094,7 @@ def migrate_capacity():
   data = request.get_json()
   if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'type' in data and 'targets' in data and 'qnt' in data and 'date' in data:
     linha = Linha.query.filter_by(nome=data['name_line']).first()
-    if linha and return_relationship(linha.codigo):
+    if linha and return_relationship(linha.codigo) and data['targets']:
       if 'pos' not in data:
         data['pos'] = ''
       
@@ -1243,6 +1283,63 @@ def migrate_capacity():
 
                 except Exception as e:
                   db.session.rollback()
-                  print(f'Erro ao criar a diaria de lotação: {str(e)}')
+                  print(f'Erro ao criar a diária de lotação: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Transferência Interrompida', 'text': 'Ocorreu um erro inesperado ao gerar as diárias de transferência.'})
+
+
+@app.route("/migrate_defect", methods=['POST'])
+@login_required
+@roles_required("motorista")
+def migrate_defect():
+  data = request.get_json()
+  if data and 'name_line' in data and 'surname' in data and 'targets' in data and 'shifts' in data:
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    vehicle = Onibus.query.filter_by(apelido=data['surname'], Linha_codigo=linha.codigo).first()
+    relationship = return_relationship(linha.codigo)
+
+    if linha and vehicle and relationship and relationship != 'membro' and data['targets']:
+      if not (
+        db.session.query(Manutencao)
+        .filter(db.and_(
+          Manutencao.Onibus_id == vehicle.id,
+          Manutencao.data_fim.is_(None)
+        ))
+        .first()
+      ):
+        try:
+          manutencao = Manutencao(data_inicio=datetime.now(), Onibus_id=vehicle.id)
+          db.session.add(manutencao)
+
+          execute = True
+          with db.session.begin_nested():
+            for surname in data['targets']:
+              for shift in data['shifts']:
+                vehicle_target = Onibus.query.filter_by(Linha_codigo=linha.codigo, apelido=surname).first()
+                if vehicle_target and shift in turnos:
+                  db.session.add(Migracao(
+                    Manutencao_codigo=manutencao.codigo,
+                    onibus_alvo=vehicle_target.id,
+                    turno_alvo=shift
+                  ))
+                else:
+                  execute = False
+            
+          if execute:
+            db.session.commit()
+            sched.add_job(
+              None, transferir_por_defeito, trigger='date', 
+              run_date=datetime.now(), max_instances=30
+            )
+            return jsonify({'error': False, 'title': 'Ação Concluída', 'text': f'O sistema marcou este transporte como defeituoso. A transferência automática de participantes foi ativada.'})
+          else:
+            db.session.rollback()
+
+        except Exception as e:
+          db.session.rollback()
+          print(f'Erro ao criar a diária de manutenção: {str(e)}')
+      
+      else:
+        return jsonify({'error': True, 'title': 'Ação Interrompida', 'text': 'Este veículo já está marcado como defeituoso.'})
+
+  return jsonify({'error': True, 'title': 'Ação Interrompida', 'text': 'Ocorreu um erro inesperado ao marcar o transporte como defeituoso.'})

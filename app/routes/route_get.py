@@ -137,6 +137,7 @@ def get_routes():
       retorno['data']['minhas_rotas'] = minhas_rotas
       retorno['data']['rotas'] = rotas
       retorno['data']['diarias'] = diarias
+      retorno['diaria_agendada'] = False
       retorno['msg'] = []
 
       rotas_diarias = (
@@ -349,7 +350,10 @@ def get_routes():
           })
       
       else:
-        return jsonify({'error': True, 'title': 'Erro de Identificação', 'text': 'Ocorreu um erro inesperado ao identificar a linha.'})
+        if rotas_diarias:
+          retorno['diaria_agendada'] = True
+        else:
+          return jsonify({'error': True, 'title': 'Erro de Identificação', 'text': 'Ocorreu um erro inesperado ao identificar a linha.'})
 
     return jsonify(retorno)
   
@@ -422,8 +426,14 @@ def get_lines():
         data['cidades'][linha.cidade].append(dict_linha)
         dict_linha['dono'] = result.motorista.nome
 
-        if role == 'motorista' and dict_linha['dono'] == user.nome:
-          data['minha_linha'].append(dict_linha)
+        if role == 'motorista':
+          if 'participacao' not in data:
+            data['participacao'] = []
+
+          if dict_linha['dono'] == user.nome:
+            data['minha_linha'].append(dict_linha)
+          elif return_relationship(linha.codigo):
+            data['participacao'].append(dict_linha)
 
   else: data['identify'] = False
   return jsonify(data)
@@ -648,7 +658,8 @@ def get_stops_student():
         'veiculo': veiculo.apelido if veiculo else 'Nenhum',
         'nome_ponto': parada.ponto.nome,
         'horario': format_time(parada.horario_passagem),
-        'tipo': parada.tipo.capitalize()
+        'tipo': parada.tipo.capitalize(),
+        'exibicao': 'normal'
       }
 
       if passagem.passagem_fixa:
@@ -704,6 +715,7 @@ def get_stops_student():
               info_date = format_date(passagem.data)
               day_week = return_day_week(passagem.data.weekday())
               data['diaria']['paradas'].append(info)
+              info['exibicao'] = 'agendado'
 
               if passagem.data == today:
                 info['data'] = 'Hoje'
@@ -712,12 +724,14 @@ def get_stops_student():
               else: info['data'] = f'{day_week[:3]} - {info_date}'
 
               if passagem.migracao_lotado:
+                info['exibicao'] = 'lotado'
                 info['data'] = f'{info["data"]} | Transferido devido lotação'
                 msg = 'Veículo lotado: Seu motorista alterou o veículo que você usará devido a uma lotação prevista para seu transporte habitual.'
                 if msg not in data['diaria']['msg']:
                   data['diaria']['msg'].append(msg)
               
               elif passagem.migracao_manutencao:
+                info['exibicao'] = 'manutencao'
                 info['data'] = f'{info["data"]} | Transferido devido manutenção'
                 msg = 'Veículo em manutenção: Seu motorista alterou o veículo que você usará devido a um defeito encontrado em seu transporte habitual.'
                 if msg not in data['diaria']['msg']:
@@ -1081,7 +1095,15 @@ def get_interface_line(name_line):
 def get_interface_driver(name_line):
   linha = Linha.query.filter_by(nome=name_line).first()
   if linha:
-    relacoes = Membro.query.filter_by(Linha_codigo=linha.codigo).all()
+    relacoes = (
+      db.session.query(Membro).join(Motorista)
+      .filter(db.and_(
+        Membro.Motorista_id == Motorista.id,
+        Membro.Linha_codigo == linha.codigo
+      ))
+      .order_by(Motorista.nome)
+      .all()
+    )
     motoristas = {}
     retorno = {
       'error': False,
@@ -1140,8 +1162,19 @@ def get_interface_vehicle(name_line):
     for vehicle in vehicles:
       info = {
         'surname': vehicle.apelido,
-        'capacidade': vehicle.capacidade
+        'capacidade': vehicle.capacidade,
+        'defect': False
       }
+
+      if (
+        db.session.query(Manutencao)
+        .filter(db.and_(
+          Manutencao.Onibus_id == vehicle.id,
+          Manutencao.data_fim.is_(None)
+        ))
+        .first()
+      ):
+        info['defect'] = True
 
       if vehicle.motorista:
         info['nome'] = vehicle.motorista.nome
@@ -1391,8 +1424,8 @@ def get_options_driver(name_line):
       if relacao == 'membro':
         if not Onibus.query.filter_by(Motorista_id=current_user.primary_key, Linha_codigo=linha.codigo).first():
           user = return_my_user()
-          return jsonify({'error': False, 'data': user.nome})
-        return jsonify({'error': False, 'data': None})
+          return jsonify({'error': False, 'data': [user.nome]})
+        return jsonify({'error': False, 'data': []})
 
       not_includes = db.session.query(Onibus.Motorista_id).filter(
         db.and_(Onibus.Linha_codigo == linha.codigo, Onibus.Motorista_id.isnot(None))

@@ -174,14 +174,14 @@ function loadLines() {
           create_lines(
             regiao,
             response["cidades"][cidade],
-            response.minha_linha
+            response.minha_linha.concat(
+              response.role === "motorista" ? response.participacao : []
+            )
           );
         }
         if (minha_linha_area) {
           create_lines(minha_linha_area, response.minha_linha);
         }
-        const elements = divs[2].querySelectorAll('[class*="-enter-"]');
-        animate_itens(elements, "fadeDown", 0.7, 0);
       } else {
         const text_span = local_linhas.querySelector("span");
         if (text_span) {
@@ -196,7 +196,7 @@ function loadLines() {
         const texts_msg = container_msg.querySelectorAll("p");
         const text_solicitar = document.getElementById("msg_solicitar_entrada");
 
-        if (!response.minha_linha.length) {
+        if (!response.minha_linha.length && !response.participacao.length) {
           text_solicitar.classList.remove("inactive");
           texts_msg.forEach((msg) => {
             msg.classList.remove("inactive");
@@ -207,7 +207,34 @@ function loadLines() {
             msg.classList.add("inactive");
           });
         }
+
+        const btn_create_line = document.getElementById("btn_create_line");
+        const participacap_title = document.getElementById(
+          "linhas_participacao_title"
+        );
+        const participacap_local = document.getElementById(
+          "linhas_participacao_local"
+        );
+        participacap_local.innerHTML = "";
+
+        if (response.participacao.length) {
+          if (!response.minha_linha.length) {
+            btn_create_line.style.margin = "0px";
+          } else {
+            btn_create_line.removeAttribute("style");
+          }
+
+          participacap_title.classList.remove("inactive");
+          participacap_local.classList.remove("inactive");
+          create_lines(participacap_local, response.participacao);
+        } else {
+          btn_create_line.removeAttribute("style");
+          participacap_title.classList.add("inactive");
+          participacap_local.classList.add("inactive");
+        }
       }
+      const elements = divs[2].querySelectorAll('[class*="-enter-"]');
+      animate_itens(elements, "fadeDown", 0.7, 0);
     });
 }
 
@@ -326,7 +353,16 @@ function loadRoutes() {
               container_diarias.appendChild(container_diaria_local);
             }
           } else {
-            area_diarias.classList.add("inactive");
+            if (response.diaria_agendada) {
+              area_diarias.classList.remove("inactive");
+              const text_span = document.createElement("span");
+              text_span.className = "text secundario fundo justify -enter-";
+              text_span.textContent =
+                "O acesso à rota de uma diária só estará disponível no dia previsto.";
+              container_diarias.appendChild(text_span);
+            } else {
+              area_diarias.classList.add("inactive");
+            }
           }
 
           create_routes(data.minhas_rotas, area_minhas_rotas);
@@ -353,7 +389,9 @@ function loadRoutes() {
             const text = document.createElement("p");
             text.className =
               "text secundario fundo cinza justify margin_bottom -enter-";
-            text.textContent = "Nenhuma rota válida encontrada.";
+            text.textContent = response.diaria_agendada
+              ? "Seu acesso a esta interface será mantido até o fim da última diária agendada."
+              : "Nenhuma rota válida encontrada.";
             area_rotas.appendChild(text);
           }
         }

@@ -606,10 +606,12 @@
         </div>
         {% endfor %}
 
-        <h1 class="page__division"></h1>
-        <div class="page__container justify">
-          <div class="line__container--btn remove" onclick="open_popup('del_ponto', this)">
-            <i class="bi bi-trash3 line__icon del"></i>
+        <div id="config_point_delete">
+          <h1 class="page__division"></h1>
+          <div class="page__container justify">
+            <div class="line__container--btn remove" onclick="open_popup('del_ponto', this)">
+              <i class="bi bi-trash3 line__icon del"></i>
+            </div>
           </div>
         </div>
       </div>
@@ -715,6 +717,68 @@
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('rebaixar_motorista')">Cancelar</button>
       <button class="popup__btn">Rebaixar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="transfer_by_defect_info" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Marcar defeito</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <span id="transfer_by_defect_info_vehicle" class="inactive"></span>
+      <h1 class="text secundario fundo cinza margin_bottom justify">Importante!</h1>
+      <p class="text secundario margin_bottom justify">Para marcar um veículo como defeituoso, você precisa definir os veículos-alvo para que todos os alunos deste transporte sejam transferidos e comunicados sobre o problema.</p>
+      <p class="text secundario justify">É de extrema importância que os veículos escolhidos tenham capacidade suficiente para todos os usuários do transporte atual. Caso contrário, o sistema não conseguirá transferir todos os alunos.</p>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('transfer_by_defect_info')">Cancelar</button>
+      <button class="popup__btn" onclick="config_popup_defect()">Proseguir</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="transfer_by_defect" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Marcar defeito</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div class="scroll_vertical init_top no_borderY popup__container--scroll principal_max">
+        <h1 class="text secundario fundo justify">Certifique-se de informar os motoristas dos veículos selecionados antes de realizar essa ação.</h1>
+        <h1 class="page__division"></h1>
+
+        <h3 class="popup__text question first">Selecione os turnos afetados:</h3>
+        <div id="transfer_by_defect_shifts_container">
+          {% for index in range(3) %}
+          <div class="popup__input checkbox{{' margin_bottom' if index != 2 else ''}}" onclick="popup_confirmBox(this)">
+            <i class="bi bi-circle popup__icon ratio"></i>
+            <p class="popup__text input nowrap">{{ turnos[index] }}</p>
+          </div>
+          {% endfor %}
+        </div>
+
+        <h3 class="popup__text question">Selecione os veículos-alvo:</h3>
+        <div id="transfer_by_defect_veiculo_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
+          <h3 class="text secundario fundo max_width">Veículos disponíveis</h3>
+          <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+  
+        <div id="transfer_by_defect_veiculo_container" class="scroll_vertical popup__container--scroll margin_top inactive">
+          <span class="text secundario emphasis justify">Carregando...</span>
+        </div>
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('transfer_by_defect')">Voltar</button>
+      <button class="popup__btn" onclick="migrate_by_defect()">Marcar</button>
     </footer>
   </div>
 </section>

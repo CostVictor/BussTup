@@ -242,9 +242,18 @@ class Manutencao(db.Model):
   __tablename__ = 'Manutencao'
   codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
   data_inicio = db.Column(db.DateTime, nullable=True)
-  data_fim = db.Column(db.DateTime, nullable=True)
+  data_fim = db.Column(db.DateTime)
   Onibus_id = db.Column(db.BigInteger, db.ForeignKey('Onibus.id'))
-  onibus = db.relationship('Onibus', backref=db.backref('manutencoes'), lazy=True)
+  onibus = db.relationship('Onibus', backref=db.backref('manutencoes', cascade='all, delete'), lazy=True)
+
+
+class Migracao(db.Model):
+  __tablename__ = 'Migracao'
+  id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+  onibus_alvo = db.Column(db.BigInteger, nullable=False)
+  turno_alvo = db.Column(db.Enum(*turnos), nullable=False)
+  Manutencao_codigo = db.Column(db.BigInteger, db.ForeignKey('Manutencao.codigo'))
+  manutencao = db.relationship('Manutencao', backref=db.backref('migracoes', cascade='all, delete'), lazy=True)
 
 
 class Registro_Linha(db.Model):

@@ -34,13 +34,13 @@
         <div id="forecast_route_{{ dias_semana[index - 1] }}_partida" class="popup__forecast_container">
           <p class="popup__forecast_data content">-</p>
           {% if role == 'motorista' %}
-          <i id="forecast_route_{{ dias_semana[index - 1] }}_partida_lotado" class="bi bi-hand-index-thumb popup__icon click_min red"></i>
+          <i id="forecast_route_{{ dias_semana[index - 1] }}_partida_lotado" class="bi bi-hand-index-thumb popup__icon click_min red inactive"></i>
           {% endif %}
         </div>
         <div id="forecast_route_{{ dias_semana[index - 1] }}_retorno" class="popup__forecast_container">
           <p class="popup__forecast_data content">-</p>
           {% if role == 'motorista' %}
-          <i id="forecast_route_{{ dias_semana[index - 1] }}_retorno_lotado" class="bi bi-hand-index-thumb popup__icon click_min red"></i>
+          <i id="forecast_route_{{ dias_semana[index - 1] }}_retorno_lotado" class="bi bi-hand-index-thumb popup__icon click_min red inactive"></i>
           {% endif %}
         </div>
       </div>
@@ -64,6 +64,7 @@
     <div class="popup__container--content">
       <span id="notice_migrate_type" class="inactive"></span>
       <span id="notice_migrate_date" class="inactive"></span>
+      <h1 class="text secundario fundo cinza margin_bottom justify">Importante!</h1>
       <p class="text secundario justify">Este recurso permite que qualquer motorista da linha possa realizar a transferência de passageiros de um veículo lotado para outro disponível, mesmo que não seja o condutor atual do veículo. Recomenda-se a comunicação entre os motoristas envolvidos antes de realizar essa ação.</p>
       <h1 class="page__division"></h1>
       <p class="text secundario justify">Essa ação não é permanente; o recurso cria uma diária obrigatória no veículo selecionado, válida apenas para o dia da transferência.</p>

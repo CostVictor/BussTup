@@ -495,10 +495,13 @@ def modify_forecast_route(route, record, commit=True):
   )
 
   not_includes_migrate = (
-    db.session.query(func.distinct(Passagem.Aluno_id)).join(Parada).join(Rota)
+    db.session.query(func.distinct(Passagem.Aluno_id))
+    .join(Parada).join(Rota).join(Aluno).join(Registro_Aluno)
     .filter(db.and_(
       Parada.Rota_codigo == Rota.codigo,
       Passagem.Parada_codigo == Parada.codigo,
+      Passagem.Aluno_id == Aluno.id,
+      Registro_Aluno.Aluno_id == Aluno.id,
       Rota.turno == route.turno,
       Parada.Rota_codigo != route.codigo,
       Parada.tipo == type_,
@@ -507,16 +510,25 @@ def modify_forecast_route(route, record, commit=True):
         Passagem.migracao_lotado == True,
         Passagem.migracao_manutencao == True
       ),
-      Passagem.data == day
+      db.not_(db.or_(
+        Registro_Aluno.faltara == True,
+        db.and_(
+          Registro_Aluno.contraturno == False,
+          Aluno.turno != Rota.turno
+        )
+      )),
+      Passagem.data == day,
+      Registro_Aluno.data == day
     ))
     .subquery()
   )
 
   count = (
     db.session.query(func.count(func.distinct(Passagem.Aluno_id)))
-    .join(Aluno).join(Registro_Aluno).join(Parada)
+    .join(Aluno).join(Registro_Aluno).join(Parada).join(Rota)
     .filter(db.and_(
-      Parada.Rota_codigo == route.codigo,
+      Rota.codigo == route.codigo,
+      Parada.Rota_codigo == Rota.codigo,
       Parada.tipo == type_,
 
       Passagem.Parada_codigo == Parada.codigo,
@@ -556,6 +568,19 @@ def modify_forecast_route(route, record, commit=True):
         db.and_(
           db.not_(Passagem.passagem_fixa),
           Passagem.data == day,
+          db.not_(db.and_(
+            db.or_(
+              Passagem.migracao_lotado == True,
+              Passagem.migracao_manutencao == True
+            ),
+            db.or_(
+              Registro_Aluno.faltara == True,
+              db.and_(
+                Registro_Aluno.contraturno == False,
+                Aluno.turno != Rota.turno
+              )
+            )
+          ))
         )
       )
     ))

@@ -78,20 +78,24 @@ function loadStops() {
             document.getElementById("area_agenda_diaria");
           container_diarias.classList.remove("inactive");
 
-          const container_span_msg = document.getElementById('area_agenda_diaria_span_msg')
-          container_span_msg.innerHTML = ''
+          const container_span_msg = document.getElementById(
+            "area_agenda_diaria_span_msg"
+          );
+          container_span_msg.innerHTML = "";
 
           if (diarias.msg.length) {
             for (index in diarias.msg) {
               const text = document.createElement("p");
-              text.className = `text secundario fundo cinza justify${index ? ' margin_top' : ''}`;
-              text.style.fontSize = 'calc(0.75vw + 0.75vh + 1vmin)'
+              text.className = `text secundario fundo cinza justify${
+                index ? " margin_top" : ""
+              }`;
+              text.style.fontSize = "calc(0.75vw + 0.75vh + 1vmin)";
               text.textContent = diarias.msg[index];
               container_span_msg.appendChild(text);
             }
-            container_span_msg.classList.remove('inactive')
+            container_span_msg.classList.remove("inactive");
           } else {
-            container_span_msg.classList.add('inactive')
+            container_span_msg.classList.add("inactive");
           }
           criar_visualizacao_parada(
             model_parada,
@@ -107,10 +111,10 @@ function loadStops() {
             .classList.add("inactive");
         }
 
-        if (fixas.paradas.length) {
-          const span_msg = document.getElementById("area_agenda_pontos_msg");
-          span_msg.innerHTML = "";
+        const span_msg = document.getElementById("area_agenda_pontos_msg");
+        span_msg.innerHTML = "";
 
+        if (fixas.paradas.length) {
           for (msg in fixas.msg) {
             const text = document.createElement("p");
             text.className = "text secundario fundo cinza justify";
@@ -118,6 +122,13 @@ function loadStops() {
             span_msg.appendChild(text);
           }
           criar_visualizacao_parada(model_parada, fixas.paradas, local_fixas);
+        } else {
+          const text = document.createElement("p");
+          text.className = "text secundario fundo cinza justify";
+          text.style.fontSize = "calc(0.75vw + 0.75vh + 1vmin)"
+          text.textContent =
+            "Nenhum vínculo fixo encontrado. Seu acesso a esta interface será mantido até o fim da última diária agendada.";
+          span_msg.appendChild(text);
         }
       } else {
         create_popup(response.title, response.text, "Ok");
@@ -160,8 +171,8 @@ function loadWeek() {
 
                 for (index in value) {
                   const div = document.createElement("div");
-                  div.className = 'page__container'
-                  div.id = `${day}-diaria_${value[index]}`
+                  div.className = "page__container";
+                  div.id = `${day}-diaria_${value[index]}`;
 
                   const text_ = document.createElement("p");
                   text_.className = "text terciario";
@@ -285,6 +296,8 @@ function config_popup_day() {
   const optios_faltara = document.getElementById("options_falta");
   const optios_contraturno = document.getElementById("options_contraturno");
 
+  let daily_partida = false;
+  let daily_contraturno = false;
   let blocked_faltara = false;
   let blocked_contraturno = false;
 
@@ -302,11 +315,13 @@ function config_popup_day() {
           "Você possui uma diária do tipo partida marcada para este dia.";
         blocked_faltara = true;
         blocked_contraturno = true;
+        daily_partida = true;
       } else {
         set_selected_bool(optios_contraturno, "Não");
         text.textContent =
           "Você possui uma diária do tipo retorno marcada para este dia.";
         blocked_contraturno = true;
+        daily_contraturno = true;
       }
     });
   }
@@ -314,41 +329,23 @@ function config_popup_day() {
   const p_faltara = document.getElementById(`faltara_${day}`);
   const p_contraturno = document.getElementById(`contraturno_${day}`);
   if (!p_faltara.className.includes("content")) {
-    const list_msg = Array.from(span_msg.children);
     container.classList.remove("inactive");
     blocked_faltara = true;
 
-    if (list_msg.length) {
-      if (!list_msg[0].textContent.includes("diária")) {
-        const text = document.createElement("p");
-        text.className = "text secundario fundo justify";
-        text.textContent =
-          "A opção de falta foi bloqueada pois o horário limite de alteração foi atingido.";
-        span_msg.appendChild(text);
-      }
-    } else {
+    if (!daily_partida) {
       const text = document.createElement("p");
       text.className = "text secundario fundo justify";
       text.textContent =
         "A opção de falta foi bloqueada pois o horário limite de alteração foi atingido.";
-      span_msg.appendChild(text);
+      span_msg.insertBefore(text, span_msg.children[0]);
     }
   }
 
   if (!p_contraturno.className.includes("content")) {
-    const list_msg = Array.from(span_msg.children);
     container.classList.remove("inactive");
     blocked_contraturno = true;
 
-    if (list_msg.length >= 2) {
-      if (!list_msg[1].textContent.includes("diária")) {
-        const text = document.createElement("p");
-        text.className = "text secundario fundo justify";
-        text.textContent =
-          "A opção de contraturno foi bloqueada pois o horário limite de alteração foi atingido.";
-        span_msg.appendChild(text);
-      }
-    } else {
+    if (!daily_partida && !daily_contraturno) {
       const text = document.createElement("p");
       text.className = "text secundario fundo justify";
       text.textContent =

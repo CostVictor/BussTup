@@ -236,7 +236,7 @@ function action_container(
   set_limit = false,
   visible_contante_scroll = true
 ) {
-  const icon = obj_click.querySelector("i");
+  const icon = obj_click.querySelector("i.bi-caret-right-fill");
   const container = document.getElementById(
     obj_click.id.replace("btn", "container")
   );
@@ -245,15 +245,17 @@ function action_container(
   container.removeAttribute("style");
 
   if (obj_click.id.includes("vehicle")) {
-    const motorista_nome = obj_click.querySelectorAll("h3");
-    motorista_nome.forEach((element, index) => {
+    const container_click = Array.from(obj_click.children);
+    container_click.forEach((element, index) => {
       if (!index) {
         if (icon.className.includes("open")) {
           element.classList.remove("max_width");
+          element.querySelector("i").style.marginRight = "0";
         } else {
+          element.querySelector("i").style.marginRight = "auto";
           element.classList.add("max_width");
         }
-      } else {
+      } else if (index === 1) {
         if (icon.className.includes("open")) {
           element.classList.remove("inactive");
         } else {
@@ -579,24 +581,47 @@ function criar_visualizacao_parada(model, list, container) {
     const data = list[index];
     for (info in data) {
       const value = data[info];
-      const tag = parada.querySelector(`[id*="${info}"]`);
-      tag.textContent = value;
+      if (info === "exibicao") {
+        const icon_agendado = parada.querySelector(
+          `#${parada.id}_icon_agendado`
+        );
+        icon_agendado.classList.add("inactive");
 
-      if (info === "data") {
-        if (value.includes("fixo")) {
-          const icon = parada.querySelector(`#${parada.id}_icon_fixed`);
-          icon.classList.remove("inactive");
-          icon.classList.add(value.includes("|") ? "verde" : "roxo");
-          parada.querySelector(`#${parada.id}_point`).classList.add("fixed");
-          tag.parentNode.classList.add("fixed");
-        } else if (container.id.includes("diaria")) {
-          const icon_redirect = parada.querySelector(
-            `#${parada.id}_icon_redirect`
-          );
-          icon_redirect.classList.remove("inactive");
-          icon_redirect.onclick = function () {
-            stop_redirect(data.linha);
-          };
+        const icon_manutencao = parada.querySelector(
+          `#${parada.id}_icon_manutencao`
+        );
+        icon_manutencao.classList.add("inactive");
+
+        const icon_lotado = parada.querySelector(`#${parada.id}_icon_lotado`);
+        icon_lotado.classList.add("inactive");
+
+        if (value === "agendado") {
+          icon_agendado.classList.remove("inactive");
+        } else if (value === "manutencao") {
+          icon_manutencao.classList.remove("inactive");
+        } else if (value === "lotado") {
+          icon_lotado.classList.remove("inactive");
+        }
+      } else {
+        const tag = parada.querySelector(`[id*="${info}"]`);
+        tag.textContent = value;
+
+        if (info === "data") {
+          if (value.includes("fixo")) {
+            const icon = parada.querySelector(`#${parada.id}_icon_fixed`);
+            icon.classList.remove("inactive");
+            icon.classList.add(value.includes("|") ? "verde" : "roxo");
+            parada.querySelector(`#${parada.id}_point`).classList.add("fixed");
+            tag.parentNode.classList.add("fixed");
+          } else if (container.id.includes("diaria")) {
+            const icon_redirect = parada.querySelector(
+              `#${parada.id}_icon_redirect`
+            );
+            icon_redirect.classList.remove("inactive");
+            icon_redirect.onclick = function () {
+              stop_redirect(data.linha);
+            };
+          }
         }
       }
     }

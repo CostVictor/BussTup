@@ -63,10 +63,10 @@
       {% if role == 'motorista' %}
       <h2 class="text title">Aviso</h2>
       <p class="text secundario fundo cinza">Você não participa desta linha.</p>
-      <p class="text secundario fundo margin_bottom">Solicite entrada para conseguir interagir:</p>
+      <p class="text secundario fundo margin_bottom">Solicite participação para conseguir interagir:</p>
       <div class="page__container justify">
         <div class="line__container--btn add aba" onclick="open_popup('indisponivel')">
-          <p class="line__text">Solicitar entrada</p>
+          <p class="line__text">Solicitar participação</p>
         </div>
       </div>
 
@@ -136,6 +136,9 @@
     <section id="area_motoristas" class="-enter- line__container--area">
       <h2 class="text title">Motoristas</h2>
       <span class="text secundario emphasis justify">Carregando...</span>
+      <div id="area_motoristas_container_dono" class="inactive"></div>
+      <div id="area_motoristas_container_adm" class="inactive"></div>
+      <div id="area_motoristas_container_membro" class="inactive"></div>
     </section>
 
     <section id="area_vehicle" class="-enter- line__container--area">

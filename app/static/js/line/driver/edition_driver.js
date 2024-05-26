@@ -873,3 +873,61 @@ function del_line(event) {
       }
     });
 }
+
+function migrate_by_defect() {
+  let execute = true;
+  const container_vehicles = document.getElementById(
+    "transfer_by_defect_veiculo_container"
+  );
+  const container_shifts = document.getElementById(
+    "transfer_by_defect_shifts_container"
+  );
+
+  const selected_vehicle = return_option_selected(container_vehicles, true);
+  const selected_shifts = return_option_selected(container_shifts, true);
+
+  if (!selected_shifts) {
+    execute = false;
+    var title = "Nenhum Turno Selecionado";
+    var text =
+      "Você precisa selecionar pelo menos um turno que será afetado pelo defeito do veículo.";
+  } else if (!selected_vehicle) {
+    execute = false;
+    var title = "Nenhum Veículo Selecionado";
+    var text =
+      "Você precisa selecionar pelo menos um veículo para transferir os participantes do transporte atual.";
+  }
+
+  if (execute) {
+    const data = {
+      name_line: document.getElementById("interface_nome").textContent.trim(),
+      surname: document
+        .getElementById("transfer_by_defect_info_vehicle")
+        .textContent.trim(),
+      targets: selected_vehicle.map((item) => item.split(" ")[0]),
+      shifts: selected_shifts,
+    };
+
+    popup_button_load("transfer_by_defect");
+    fetch("/migrate_defect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (!response.error) {
+          loadInterfaceVehicle(data.name_line);
+          local_popup.removeChild(
+            local_popup.querySelector("#transfer_by_defect_info")
+          );
+          close_popup("transfer_by_defect");
+          create_popup(response.title, response.text, "Ok", "success");
+        } else {
+          popup_button_load("transfer_by_defect", "Marcar");
+        }
+      });
+  } else {
+    create_popup(title, text);
+  }
+}
