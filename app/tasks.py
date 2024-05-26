@@ -147,6 +147,7 @@ def transferir_por_defeito():
   with app.app_context():
     dates = return_dates_week(only_valid=True)
     today = date.today()
+    executar_novamente = False
 
     if today in dates:
       data = (
@@ -206,6 +207,24 @@ def transferir_por_defeito():
                 ))
                 .all()
               )]
+
+            dailys = (
+              db.session.query(Passagem).join(Parada).join(Rota)
+              .filter(db.and_(
+                Parada.Rota_codigo == Rota.codigo,
+                Passagem.Parada_codigo == Parada.codigo,
+                Rota.Onibus_id == vehicle_atual.id,
+                Rota.turno == migracao.turno_alvo,
+                Passagem.passagem_fixa == False
+              ))
+              .all()
+            )
+            if dailys:
+              with db.session.begin_nested():
+                for daily in dailys:
+                  db.session.delete(daily)
+              db.session.commit()
+              executar_novamente = True
 
             if vehicle_alvo:
               routes_dis = (
@@ -314,6 +333,11 @@ def transferir_por_defeito():
               db.session.delete(migracao)
 
           db.session.commit()
+          if executar_novamente:
+            sched.add_job(
+              None, transferir_por_defeito, trigger='date', 
+              run_date=datetime.now(), max_instances=30
+            )
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~'''

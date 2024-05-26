@@ -195,6 +195,9 @@ function action_popup(popup, card, id, obj_click) {
     const surname = extract_info(obj_click, "surname");
     document.getElementById("transfer_by_defect_info_vehicle").textContent =
       surname;
+  } else if (id === "remove_transfer_by_defect") {
+    document.getElementById("remove_transfer_by_defect_vehicle").textContent =
+      extract_info(obj_click, "surname");
   }
 }
 
@@ -330,11 +333,11 @@ function config_popup_point(name_point) {
         const utilizacao = response.utilizacao;
         const turnos = response.turnos;
 
-        const container_delete = document.getElementById('config_point_delete')
-        if (response.relacao && response.relacao !== 'membro') {
-          container_delete.classList.remove('inactive')
+        const container_delete = document.getElementById("config_point_delete");
+        if (response.relacao && response.relacao !== "membro") {
+          container_delete.classList.remove("inactive");
         } else {
-          container_delete.classList.add('inactive')
+          container_delete.classList.add("inactive");
         }
 
         for (info in data) {

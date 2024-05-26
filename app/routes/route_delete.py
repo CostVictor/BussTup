@@ -452,9 +452,8 @@ def del_pass_daily():
 @roles_required("motorista")
 def del_migrate_defect(name_line, surname):
   linha = Linha.query.filter_by(nome=name_line).first()
-  user = return_my_user()
 
-  if linha and user:
+  if linha:
     relationship = return_relationship(linha.codigo)
     if relationship and relationship != 'membro':
       vehicle = Onibus.query.filter_by(Linha_codigo=linha.codigo, apelido=surname).first()
@@ -471,7 +470,7 @@ def del_migrate_defect(name_line, surname):
           try:
             manutencao.data_fim = datetime.now()
             db.session.commit()
-            return jsonify({'error': False, 'title': 'Ação Concluída', 'text': 'A manutenção do veículo foi removida. A transferência automática de participantes foi desativada.'})
+            return jsonify({'error': False, 'title': 'Ação Concluída', 'text': 'A manutenção do veículo foi removida e a transferência automática de participantes foi desativada.'})
 
           except Exception as e:
             db.session.rollback()

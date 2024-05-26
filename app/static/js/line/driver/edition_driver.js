@@ -925,9 +925,36 @@ function migrate_by_defect() {
           create_popup(response.title, response.text, "Ok", "success");
         } else {
           popup_button_load("transfer_by_defect", "Marcar");
+          create_popup(response.title, response.text);
         }
       });
   } else {
     create_popup(title, text);
   }
+}
+
+function remove_migrate_by_defect() {
+  const name_line = document
+    .getElementById("interface_nome")
+    .textContent.trim();
+  const surname = document
+    .getElementById("remove_transfer_by_defect_vehicle")
+    .textContent.trim();
+  const data = {
+    principal: [name_line, surname],
+  };
+
+  popup_button_load("remove_transfer_by_defect");
+  fetch("/del_migrate_defect" + generate_url_dict(data), { method: "DELETE" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        create_popup(response.title, response.text, "Ok", "success");
+        close_popup("remove_transfer_by_defect");
+        loadInterfaceVehicle(name_line);
+      } else {
+        popup_button_load("remove_transfer_by_defect", "Desmarcar");
+        create_popup(response.title, response.text);
+      }
+    });
 }

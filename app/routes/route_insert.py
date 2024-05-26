@@ -1207,8 +1207,20 @@ def migrate_capacity():
                   break
 
                 vehicle = Onibus.query.filter_by(Linha_codigo=linha.codigo, apelido=vehicle_name).first()
-                last = (index == len_targets - 1)
+                check_defect = (
+                  db.session.query(Manutencao).join(Migracao)
+                  .filter(db.and_(
+                    Migracao.Manutencao_codigo == Manutencao.codigo,
+                    Manutencao.Onibus_id == vehicle.id,
+                    Manutencao.data_fim.is_(None),
+                    Migracao.turno_alvo == shift
+                  ))
+                  .first()
+                )
+                if check_defect:
+                  return jsonify({'error': True, 'title': 'Transferência Interrompida', 'text': 'Não é possível transferir usuários para um veículo com manutenção prevista para o turno atual.'})
 
+                last = (index == len_targets - 1)
                 if vehicle:
                   paradas_dis = (
                     db.session.query(Parada, Rota, Registro_Rota)
@@ -1315,7 +1327,21 @@ def migrate_defect():
           with db.session.begin_nested():
             for surname in data['targets']:
               for shift in data['shifts']:
-                vehicle_target = Onibus.query.filter_by(Linha_codigo=linha.codigo, apelido=surname).first()
+                vehicle_target = Onibus.query.filter_by(Linha_codigo=linha.codigo, apelido=surname).first()     
+                check_defect = (
+                  db.session.query(Manutencao).join(Migracao)
+                  .filter(db.and_(
+                    Migracao.Manutencao_codigo == Manutencao.codigo,
+                    Manutencao.Onibus_id == vehicle_target.id,
+                    Manutencao.data_fim.is_(None),
+                    Migracao.turno_alvo == shift
+                  ))
+                  .first()
+                )
+                if check_defect:
+                  db.session.rollback()
+                  return jsonify({'error': True, 'title': 'Transferência Interrompida', 'text': 'Não é possível transferir usuários para um veículo com manutenção prevista para o turno selecionado.'})
+
                 if vehicle_target and shift in turnos:
                   db.session.add(Migracao(
                     Manutencao_codigo=manutencao.codigo,
