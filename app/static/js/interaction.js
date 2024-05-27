@@ -666,6 +666,23 @@ function migrate_capacity(data_route, function_reload) {
   }
 }
 
+function load_popup_migrate(name_line, surname) {
+  const container = document.getElementById("migrate_capacity_container");
+  const data = {
+    principal: [name_line],
+    secondary: { surname_ignore: surname, only_valid: true },
+  };
+  include_options_container(
+    container,
+    "option_vehicle",
+    data,
+    false,
+    false,
+    "model_option_box",
+    true
+  );
+}
+
 function create_migrate_crowded(local) {
   open_popup("migrate_capacity", false, false);
   let data = null;

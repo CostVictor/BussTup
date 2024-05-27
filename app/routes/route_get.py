@@ -896,8 +896,9 @@ def get_schedule_student():
 def get_crowded():
   user = return_my_user()
   if user:
-    data = {}
+    data = []
     retorno = {'error': False, 'data': data}
+    dates = return_dates_week(only_valid=True)
     subquery = (
       db.session.query(Linha.codigo).join(Membro)
       .filter(db.and_(
@@ -913,28 +914,35 @@ def get_crowded():
         Rota.Linha_codigo == Linha.codigo,
         Registro_Rota.Rota_codigo == Rota.codigo,
         Onibus.id == Rota.Onibus_id,
-
         Onibus.Motorista_id.isnot(None),
-        Registro_Rota.previsao_pessoas > Onibus.capacidade
+        Registro_Rota.previsao_pessoas > Onibus.capacidade,
+        Registro_Rota.atualizar == False,
+        Registro_Rota.data.in_(dates)
       ))
-      .order_by(Registro_Rota.data, Linha.nome, Rota.horario_partida)
+      .order_by(Registro_Rota.data, Rota.horario_partida)
       .all()
     )
 
     for line, route, record, onibus in todas_as_rotas:
-      if line.nome not in data:
-        data[line.nome] = []
-      
-      info = {
-        'turno': route.turno,
-        'horario_partida': format_time(route.horario_partida),
-        'horario_retorno': format_time(route.horario_retorno),
-        'motorista': onibus.motorista.nome,
-        'veiculo': onibus.apelido,
-        'capacidade': onibus.capacidade,
-        'previsao': record.previsao_pessoas
-      }
-      data[line.nome].append(info)
+      reference = route.horario_partida if record.tipo == 'partida' else route.horario_retorno
+      if check_valid_datetime(record.data, reference, add_limit=0.75):
+        estado = 'Inativa'
+        if route.em_partida:
+          estado = 'Em partida'
+        elif route.em_retorno:
+          estado = 'Em retorno'
+        
+        info = {
+          'line': line.nome,
+          'turno': route.turno,
+          'horario_partida': format_time(route.horario_partida),
+          'horario_retorno': format_time(route.horario_retorno),
+          'quantidade': count_part_route(route.codigo),
+          'apelido': onibus.apelido,
+          'motorista': onibus.motorista.nome,
+          'estado': estado
+        }
+        data.append(info)
 
     return jsonify(retorno)
 

@@ -198,6 +198,19 @@ function action_popup(popup, card, id, obj_click) {
   } else if (id === "remove_transfer_by_defect") {
     document.getElementById("remove_transfer_by_defect_vehicle").textContent =
       extract_info(obj_click, "surname");
+  } else if (id === "notice_migrate") {
+    const btn_action = document.getElementById('notice_migrate_action')
+    const span_type = document.getElementById("notice_migrate_type");
+    const span_date = document.getElementById("notice_migrate_date");
+
+    const info = obj_click.id.split("_");
+    span_type.textContent = info[info.length - 1];
+    span_date.textContent = document.getElementById(
+      `forecast_route_${info[info.length - 2]}_date`
+    ).textContent;
+    btn_action.onclick = function() {
+      create_migrate_crowded('line')
+    }
   }
 }
 

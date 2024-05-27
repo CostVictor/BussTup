@@ -25,6 +25,7 @@ function action_popup(popup, card, id, obj_click) {
   } else if (id === "notice_migrate") {
     const span_type = document.getElementById("notice_migrate_type");
     const span_date = document.getElementById("notice_migrate_date");
+    const btn_action = document.getElementById('notice_migrate_action')
 
     if (obj_click.id.includes("summary_route")) {
       let type = obj_click.id.split("_");
@@ -43,22 +44,50 @@ function action_popup(popup, card, id, obj_click) {
         `forecast_route_${info[info.length - 2]}_date`
       ).textContent;
     }
+    btn_action.onclick = function() {
+      create_migrate_crowded('page')
+    }
   }
 }
 
-function load_popup_migrate(name_line, surname) {
-  const container = document.getElementById("migrate_capacity_container");
-  const data = {
-    principal: [name_line],
-    secondary: { surname_ignore: surname, only_valid: true },
-  };
-  include_options_container(
-    container,
-    "option_vehicle",
-    data,
-    false,
-    false,
-    "model_option_box",
-    true
-  );
+function loadSchedule() {
+  const load_span = document.getElementById("rotas_lotadas_span_load");
+  load_span.classList.remove('inactive')
+  const container_lotacao = document.getElementById("rotas_lotadas_container");
+  container_lotacao.innerHTML = "";
+
+  fetch("/get_crowded", { method: "GET" })
+  .then((response) => response.json())
+  .then((response) => {
+    load_span.classList.add('inactive')
+    const text = document.createElement("p");
+    text.className =
+      "text secundario fundo cinza justify";
+    container_lotacao.appendChild(text);
+
+    if (!response.error) {
+      const data = response.data
+      if (data.length) {
+        text.classList.remove('cinza')
+        text.classList.add('margin_bottom')
+        text.style.width = 'fit-content'
+
+        if (data.length > 1) {
+          text.textContent = 'Identificado nas rotas:';
+        } else {
+          text.textContent = 'Identificado na rota:';
+        }
+        create_routes(data, container_lotacao, false, false, false, false);
+      } else {
+        text.textContent = 'Nenhuma lotação identificada';
+      }
+    } else {
+      create_popup(response.title, response.text);
+      const text = document.createElement("p");
+      text.className =
+        "text secundario fundo cinza justify -enter-";
+      text.textContent = 'Recarregue a página e tente novamente';
+      container_lotacao.appendChild(text);
+    }
+  })
 }

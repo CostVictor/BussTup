@@ -308,11 +308,14 @@
 <section id="add_point" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header">
-      <h1 class="popup__title">Criar ponto</h1>
+      <h1 class="popup__title">Criar Ponto</h1>
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical popup__container--scroll principal">
+      <div class="scroll_vertical popup__container--scroll principal_max">
+        <p class="text secundario fundo justify">Recomendamos que o nome do ponto seja o mais curto possível para facilitar sua identificação e funcionamento.</p>
+        <h1 class="page__division"></h1>
+
         <form id="formulario_add_point" class="form__container--card max_width" onsubmit="create_point(event)">
           <div class="form__container--input first">
             <input id="add_point_nome" class="form__input white input_notIcon" type="text" required>
@@ -404,11 +407,11 @@
 <section id="add_route" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header">
-      <h1 class="popup__title">Criar rota</h1>
+      <h1 class="popup__title">Criar Rota</h1>
     </header>
 
     <div class="popup__container--content">
-      <div class="scroll_vertical popup__container--scroll principal">
+      <div class="scroll_vertical popup__container--scroll principal_max">
         <form id="formulario_add_route" class="form__container--card max_width" onsubmit="create_route(event)">
           <div class="form__container--input_options">
             <div class="form__container--input first">
@@ -424,6 +427,8 @@
             </ul>
           </div>
 
+          <h3 class="popup__text question">Defina os horários base:</h3>
+          <p class="text secundario fundo justify">Estes horários indicam quando a rota estará em funcionamento.</p>
           <div class="form__container--input">
             <input id="add_route_horario_partida" class="form__input white input_notIcon time" type="time"
               name="horario_partida" required>
