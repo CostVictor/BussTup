@@ -250,6 +250,8 @@ function animate_itens(
   if (list_itens) {
     let list_execute = [];
     list_itens.forEach((item) => {
+      const pai = item.parentNode;
+
       if (exception) {
         if (
           !item.classList.contains("inactive") ||
@@ -258,7 +260,10 @@ function animate_itens(
           list_execute.push(item);
         }
       } else {
-        if (!item.classList.contains("inactive")) {
+        if (
+          !item.classList.contains("inactive") &&
+          !pai.classList.contains("inactive")
+        ) {
           list_execute.push(item);
         }
       }
@@ -473,7 +478,11 @@ function closeInterface(type, redirect = false, args = false, add_url = []) {
 }
 
 function load_popup_forecast(data_route) {
-  if (document.getElementById('popup_local').querySelector('[id*="forecast_route"]')) {
+  if (
+    document
+      .getElementById("popup_local")
+      .querySelector('[id*="forecast_route"]')
+  ) {
     fetch(`/get_forecast_route` + generate_url_dict(data_route), {
       method: "GET",
     })
@@ -484,8 +493,10 @@ function load_popup_forecast(data_route) {
           for (day in data) {
             data_day = data[day];
             info_day = data_day.info;
-  
-            const text_day = document.getElementById(`forecast_route_${day}_day`);
+
+            const text_day = document.getElementById(
+              `forecast_route_${day}_day`
+            );
             if (data_day.date_valid) {
               if (data_day.today) {
                 text_day.classList.add("normal");
@@ -495,9 +506,11 @@ function load_popup_forecast(data_route) {
             }
             document.getElementById(`forecast_route_${day}_date`).textContent =
               data_day.date;
-  
+
             for (type in info_day) {
-              const span = document.getElementById(`forecast_route_${day}_span`);
+              const span = document.getElementById(
+                `forecast_route_${day}_span`
+              );
               const container = document.getElementById(
                 `forecast_route_${day}_${type}`
               );
@@ -509,49 +522,57 @@ function load_popup_forecast(data_route) {
                 span.textContent = "";
                 span.classList.add("inactive");
                 container.classList.remove("inactive");
-  
+
                 const value = container.querySelector("p");
                 value.textContent = info_day[type].qnt;
-  
+
                 const color = info_day[type].color;
                 if (color !== "normal") {
                   value.classList.add(color);
                   if (response.role === "motorista") {
-                    const local_lotado = document.getElementById(`forecast_route_${day}_${type}`)
-                    const icon_lotado = document.getElementById(`forecast_route_${day}_${type}_lotado`)
-  
+                    const local_lotado = document.getElementById(
+                      `forecast_route_${day}_${type}`
+                    );
+                    const icon_lotado = document.getElementById(
+                      `forecast_route_${day}_${type}_lotado`
+                    );
+
                     if (
                       response.relacao &&
                       response.relacao !== "membro" &&
                       info_day[type].valid &&
-                      color === 'red'
+                      color === "red"
                     ) {
-                      icon_lotado.classList.remove('inactive')
-                      local_lotado.style.cursor = 'pointer'
-                      local_lotado.onclick = function() {
-                        open_popup('notice_migrate', this, false)
-                      }
+                      icon_lotado.classList.remove("inactive");
+                      local_lotado.style.cursor = "pointer";
+                      local_lotado.onclick = function () {
+                        open_popup("notice_migrate", this, false);
+                      };
                     } else {
-                      icon_lotado.classList.add('inactive')
-                      local_lotado.removeAttribute('style')
-                      local_lotado.onclick = function() {}
+                      icon_lotado.classList.add("inactive");
+                      local_lotado.removeAttribute("style");
+                      local_lotado.onclick = function () {};
                     }
                   }
                 } else {
                   value.classList.remove("yellow");
                   value.classList.remove("red");
-                  if (response.role === 'motorista') {
-                    document.getElementById(`forecast_route_${day}_${type}_lotado`).classList.add('inactive')
+                  if (response.role === "motorista") {
+                    document
+                      .getElementById(`forecast_route_${day}_${type}_lotado`)
+                      .classList.add("inactive");
                   }
                 }
               }
             }
           }
-          document.getElementById("forecast_route_msg").textContent =
-            `Cap: ${response.capacidade} pessoas`;
+          document.getElementById(
+            "forecast_route_msg"
+          ).textContent = `Cap: ${response.capacidade} pessoas`;
         } else {
           create_popup(response.title, response.text);
-          document.getElementById('forecast_route_msg').textContent = 'Não disponível'
+          document.getElementById("forecast_route_msg").textContent =
+            "Não disponível";
         }
       });
   }

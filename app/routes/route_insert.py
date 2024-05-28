@@ -334,7 +334,7 @@ def create_pass_fixed():
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
 
         dates = return_dates_week(only_valid=True)
-        dates_contraturno = (
+        dates_contraturno = [value[0] for value in (
           db.session.query(Registro_Aluno.data)
           .filter(db.and_(
             Registro_Aluno.Aluno_id == user.id,
@@ -342,7 +342,7 @@ def create_pass_fixed():
             Registro_Aluno.data.in_(dates)
           ))
           .all()
-        )
+        )]
         records = (
           db.session.query(Registro_Rota)
           .filter(db.and_(
@@ -439,7 +439,7 @@ def create_pass_fixed():
                   .all()
                 )
                 for migracao, _, rota in migracoes:
-                  if migracao.data.in_(dates):
+                  if migracao.data in dates:
                     rotas_migracoes.append(rota.codigo)
                   db.session.delete(migracao)
 
@@ -533,7 +533,7 @@ def create_pass_fixed():
                       .all()
                     )
                     for migracao, _, rota in migracoes:
-                      if migracao.data.in_(dates):
+                      if migracao.data in dates:
                         rotas_migracoes.append(rota.codigo)
                       db.session.delete(migracao)
 
@@ -627,7 +627,7 @@ def create_pass_contraturno():
           return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
 
         dates = return_dates_week(only_valid=True)
-        dates_contraturno = (
+        dates_contraturno = [value[0] for value in (
           db.session.query(Registro_Aluno.data)
           .filter(db.and_(
             Registro_Aluno.Aluno_id == user.id,
@@ -635,7 +635,7 @@ def create_pass_contraturno():
             Registro_Aluno.data.in_(dates)
           ))
           .all()
-        )
+        )]
         
         check_passagem = (
           Passagem.query.filter_by(

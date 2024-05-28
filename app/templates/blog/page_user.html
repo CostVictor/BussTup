@@ -54,6 +54,16 @@
           <div class="page__container title -enter-">
             <h1 class="text principal">Agenda ~ Não vinculado</h1>
           </div>
+          <h2 class="text title -enter-">Aviso</h2>
+          <p class="text secundario fundo cinza justify margin_bottom -enter-">Você ainda não possui nenhum vínculo</p>
+          {% if role == 'aluno' %}
+          <p class="text secundario fundo justify -enter-">Cadastre-se em alguma linha ou agende uma diária para liberar as funcionalidades de edição da Agenda.</p>
+          {% else %}
+          <p class="text secundario fundo justify -enter-">Crie sua própria linha ou solicite participação para liberar acesso a interface de registros.</p>
+          {% endif %}
+          <div class="page__btn_redirect -enter-" onclick="replaceAba(null, 'linhas')">
+            <p class="text secundario justify">Acessar Linhas</p>
+          </div>
         </div>
 
         <div id="area_agenda" class="page__container column">
@@ -197,6 +207,17 @@
           <div class="page__container title -enter-">
             <h1 class="text principal">Rotas ~ Não vinculado</h1>
           </div>
+          <h2 class="text title -enter-">Aviso</h2>
+          <p class="text secundario fundo cinza justify margin_bottom -enter-">Você ainda não possui nenhum vínculo</p>
+          {% if role == 'aluno' %}
+          <p class="text secundario fundo justify -enter-">Cadastre-se em alguma linha ou agende uma diária para liberar o acesso ao painel da rota.</p>
+          {% else %}
+          <p class="text secundario fundo justify -enter-">Crie sua própria linha ou solicite participação para liberar acesso ao painel da rota.</p>
+          {% endif %}
+          <div class="page__btn_redirect -enter-" onclick="replaceAba(null, 'linhas')">
+            <p class="text secundario justify">Acessar Linhas</p>
+          </div>
+        </div>
         </div>
 
         <div id="area_rota" class="page__container column inactive">
@@ -309,6 +330,16 @@
           <div class="page__container title -enter-">
             <h1 class="text principal">Chat ~ Não vinculado</h1>
           </div>
+          <h2 class="text title -enter-">Aviso</h2>
+          <p class="text secundario fundo cinza justify margin_bottom -enter-">Você ainda não possui nenhum vínculo</p>
+          {% if role == 'aluno' %}
+          <p class="text secundario fundo justify -enter-">Cadastre-se em alguma linha para liberar esta interface.</p>
+          {% else %}
+          <p class="text secundario fundo justify -enter-">Crie sua própria linha ou solicite participação para liberar esta interface.</p>
+          {% endif %}
+          <div class="page__btn_redirect -enter-" onclick="replaceAba(null, 'linhas')">
+            <p class="text secundario justify">Acessar Linhas</p>
+          </div>
         </div>
 
         <div id="area_chat" class="page__container column inactive">
@@ -317,12 +348,11 @@
           </div>
 
           <h2 class="text title -enter-">Aviso</h2>
-          <p class="text secundario justify emphasis -enter-">
-            O recurso de chat ainda está em desenvolvimento.
+          <p class="text secundario justify emphasis -enter-" style="font-size: calc(0.85vw + 0.85vh + 1vmin);">
+            O recurso de chat ainda está em desenvolvimento
           </p>
-          <p class="text secundario justify fundo -enter-">
-            Estamos trabalhando para permitir uma linha de comunicação estável
-            para todos os usuários.
+          <p class="text secundario justify fundo -enter-" style="font-size: calc(0.85vw + 0.85vh + 1vmin);">
+            Estamos trabalhando para permitir uma linha de comunicação estável para todos os usuários.
           </p>
         </div>
       </section>

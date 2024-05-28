@@ -819,8 +819,9 @@ function config_popup_route(obj_click, data = false) {
                   const span_warning = document.createElement("span");
                   span_warning.className =
                     "text secundario fundo justify margin_bottom";
+                  span_warning.style.fontSize = "calc(0.75vw + 0.75vh + 1vmin)";
                   span_warning.textContent =
-                    "Diárias criadas por transferência não podem ser excluídas, mas podem ser substituídas caso você deseje criar uma diária no mesmo dia e horário.";
+                    "Diárias criadas por transferência não podem ser excluídas, mas podem ser substituídas caso você deseje criar uma diária no mesmo dia e horário, ou removidas caso marque que faltará no dia.";
                   container_diarias.insertBefore(
                     span_warning,
                     container_diarias.children[1]

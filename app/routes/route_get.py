@@ -99,9 +99,9 @@ def get_routes():
         if motorista:
           estado = 'Inativa'
           if rota.em_partida:
-            estado = 'Em partida'
+            estado = 'Em Partida'
           elif rota.em_retorno:
-            estado = 'Em retorno'
+            estado = 'Em Retorno'
 
           info = {
             'line': linha.nome,
@@ -178,9 +178,25 @@ def get_routes():
 
       routes_includes = []
       for linha, rota, parada, passagem in rotas_diarias:
+        condiction = False
+        if passagem.migracao_lotado or passagem.migracao_manutencao:
+          record_day = (
+            db.session.query(Registro_Aluno)
+            .filter(db.and_(
+              Registro_Aluno.Aluno_id == user.id,
+              Registro_Aluno.data == passagem.data
+            ))
+            .first()
+          )
+          faltara = record_day.faltara
+          contraturno = record_day.contraturno
+          condiction = (
+            faltara if rota.turno == user.turno else (faltara or not contraturno)
+          )
+
         if (
           check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25)
-          and passagem.data == date.today()
+          and passagem.data == date.today() and not condiction
         ):
           if rota.codigo not in routes_includes:
             not_dis = (
@@ -224,9 +240,9 @@ def get_routes():
 
                 estado = 'Inativa'
                 if rota.em_partida:
-                  estado = 'Em partida'
+                  estado = 'Em Partida'
                 elif rota.em_retorno:
-                  estado = 'Em retorno'
+                  estado = 'Em Retorno'
                 
                 info = {
                   'line': linha.nome,
@@ -255,9 +271,9 @@ def get_routes():
 
         estado = 'Inativa'
         if rota_fixa.em_partida:
-          estado = 'Em partida'
+          estado = 'Em Partida'
         elif rota_fixa.em_retorno:
-          estado = 'Em retorno'
+          estado = 'Em Retorno'
 
         info = {
           'line': rota_fixa.linha.nome,
@@ -290,9 +306,9 @@ def get_routes():
         
         estado = 'Inativa'
         if rota_contraturno.em_partida:
-          estado = 'Em partida'
+          estado = 'Em Partida'
         elif rota_contraturno.em_retorno:
-          estado = 'Em retorno'
+          estado = 'Em Retorno'
 
         info = {
           'line': rota_contraturno.linha.nome,
@@ -334,9 +350,9 @@ def get_routes():
         for rota, onibus in todas_as_rotas:
           estado = 'Inativa'
           if rota.em_partida:
-            estado = 'Em partida'
+            estado = 'Em Partida'
           elif rota.em_retorno:
-            estado = 'Em retorno'
+            estado = 'Em Retorno'
 
           rotas.append({
             'line': rota.linha.nome,
@@ -394,7 +410,23 @@ def get_lines():
         )
 
         diarias_codes = []
-        for linha, _, parada, _passagem in diarias:
+        for linha, rota, parada, _passagem in diarias:
+          condiction = False
+          if _passagem.migracao_lotado or _passagem.migracao_manutencao:
+            record_day = (
+              db.session.query(Registro_Aluno)
+              .filter(db.and_(
+                Registro_Aluno.Aluno_id == user.id,
+                Registro_Aluno.data == _passagem.data
+              ))
+              .first()
+            )
+            faltara = record_day.faltara
+            contraturno = record_day.contraturno
+            condiction = (
+              faltara if rota.turno == user.turno else (faltara or not contraturno)
+            )
+
           not_dis = (
             db.session.query(Registro_Linha)
             .filter(db.and_(
@@ -406,7 +438,7 @@ def get_lines():
           )
           if (
             check_valid_datetime(_passagem.data, parada.horario_passagem, add_limit=0.25)
-            and not linha.ferias and not not_dis
+            and not linha.ferias and not not_dis and not condiction
           ):
             diarias_codes.append(linha.codigo)
 
@@ -506,9 +538,9 @@ def get_summary_route(name_line, surname, shift, hr_par, hr_ret):
 
         estado = 'Inativa'
         if rota.em_partida:
-          estado = 'Em partida'
+          estado = 'Em Partida'
         elif rota.em_retorno:
-          estado = 'Em retorno'
+          estado = 'Em Retorno'
         retorno['estado'] = estado
 
         if retorno['data_forecast']:
@@ -689,7 +721,9 @@ def get_stops_student():
           tomorrow = date.today() + timedelta(days=1)
 
           if check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25):
-            execute = True
+            faltara = False; contraturno = False
+            execute = True; condiction = False
+
             if passagem.migracao_lotado or passagem.migracao_manutencao:
               combine = datetime.combine(passagem.data, parada.horario_passagem)
               time_ant = combine - timedelta(minutes=15)
@@ -710,8 +744,22 @@ def get_stops_student():
                 .first()
               ):
                 execute = False
+              else:
+                record_day = (
+                  db.session.query(Registro_Aluno)
+                  .filter(db.and_(
+                    Registro_Aluno.Aluno_id == user.id,
+                    Registro_Aluno.data == passagem.data
+                  ))
+                  .first()
+                )
+                faltara = record_day.faltara
+                contraturno = record_day.contraturno
+                condiction = (
+                  faltara if rota.turno == user.turno else (faltara or not contraturno)
+                )
             
-            if execute:
+            if execute and not condiction:
               info_date = format_date(passagem.data)
               day_week = return_day_week(passagem.data.weekday())
               data['diaria']['paradas'].append(info)
@@ -923,14 +971,17 @@ def get_crowded():
       .all()
     )
 
+    routes_includes = []
     for line, route, record, onibus in todas_as_rotas:
       reference = route.horario_partida if record.tipo == 'partida' else route.horario_retorno
-      if check_valid_datetime(record.data, reference, add_limit=0.75):
+      if check_valid_datetime(record.data, reference, add_limit=0.75) and route.codigo not in routes_includes:
+        routes_includes.append(route.codigo)
+
         estado = 'Inativa'
         if route.em_partida:
-          estado = 'Em partida'
+          estado = 'Em Partida'
         elif route.em_retorno:
-          estado = 'Em retorno'
+          estado = 'Em Retorno'
         
         info = {
           'line': line.nome,
@@ -1314,7 +1365,10 @@ def get_interface_route(name_line):
           check_valid_datetime(passagem.data, parada.horario_passagem, add_limit=0.25)
           and not linha.ferias and not not_dis
         ):
+          rota = parada.rota
           execute = True
+          condiction = False
+
           if passagem.migracao_lotado or passagem.migracao_manutencao:
             combine = datetime.combine(passagem.data, parada.horario_passagem)
             time_ant = combine - timedelta(minutes=15)
@@ -1335,9 +1389,22 @@ def get_interface_route(name_line):
               .first()
             ):
               execute = False
+            else:
+              record_day = (
+                db.session.query(Registro_Aluno)
+                .filter(db.and_(
+                  Registro_Aluno.Aluno_id == user.id,
+                  Registro_Aluno.data == passagem.data
+                ))
+                .first()
+              )
+              faltara = record_day.faltara
+              contraturno = record_day.contraturno
+              condiction = (
+                faltara if rota.turno == user.turno else (faltara or not contraturno)
+              )
 
-          if execute:
-            rota = parada.rota
+          if execute and not condiction:
             if rota.codigo not in routes_includes:
               routes_includes.append(rota.codigo)
               info = {
@@ -1855,9 +1922,26 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
               ))
               .first()
             )
+
+            condiction = False
+            if diaria.migracao_lotado or diaria.migracao_manutencao:
+              record_day = (
+                db.session.query(Registro_Aluno)
+                .filter(db.and_(
+                  Registro_Aluno.Aluno_id == user.id,
+                  Registro_Aluno.data == diaria.data
+                ))
+                .first()
+              )
+              faltara = record_day.faltara
+              contraturno = record_day.contraturno
+              condiction = (
+                faltara if rota.turno == user.turno else (faltara or not contraturno)
+              )
+
             if (
               check_valid_datetime(diaria.data, parada.horario_passagem, add_limit=0.25)
-              and not linha.ferias and not not_dis
+              and not linha.ferias and not not_dis and not condiction
             ):
               execute = True
               if diaria.migracao_lotado or diaria.migracao_manutencao:
