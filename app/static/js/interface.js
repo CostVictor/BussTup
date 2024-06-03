@@ -326,7 +326,7 @@ function enterInterface(type, args = null, dalay = 0) {
         break;
 
       case "line":
-        const name_line = document.getElementById("interface_nome").textContent;
+        var name_line = document.getElementById("interface_nome").textContent;
         loadInterfaceLine(name_line);
         break;
 
@@ -336,6 +336,11 @@ function enterInterface(type, args = null, dalay = 0) {
         animate_itens(elements, "fadeDown", 0.5, 0.2);
 
         break;
+      
+      case "route":
+        var name_line = document.getElementById("interface_nome").textContent;
+        loadInterfaceRoute(name_line);
+        break
     }
   }, dalay);
 }

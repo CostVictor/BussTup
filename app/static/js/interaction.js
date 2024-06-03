@@ -265,7 +265,6 @@ function action_container(
     });
   }
 
-  animate_itens(elements);
   if (icon.className.includes("open")) {
     container.classList.add("inactive");
     icon.classList.remove("open");
@@ -275,6 +274,8 @@ function action_container(
     });
   } else {
     container.classList.remove("inactive");
+    animate_itens(elements);
+    
     container.scrollTop = 0;
     icon.classList.add("open");
 

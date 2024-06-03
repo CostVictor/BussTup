@@ -895,8 +895,8 @@ def create_pass_daily():
 
             if stop:
               combine = datetime.combine(date_, stop.horario_passagem)
-              time_ant = combine - timedelta(minutes=15)
-              time_dep = combine + timedelta(minutes=15)
+              time_ant = combine - timedelta(minutes=45)
+              time_dep = combine + timedelta(minutes=45)
 
               check_indis = (
                 db.session.query(Parada, Passagem)

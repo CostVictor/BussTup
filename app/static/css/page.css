@@ -396,6 +396,10 @@ body {
   justify-content: center;
 }
 
+.page__btn_redirect.inactive {
+  display: none;
+}
+
 .page__btn_redirect:hover {
   scale: 1.03;
 }

@@ -54,7 +54,7 @@ def pag_rota(name_line, surname, shift, time_par, time_ret):
       rota = return_route(linha.codigo, surname, shift, time_par, time_ret, None)
 
       if rota:
-        return render_template('blog/route.html', name_line=name_line, role=role, local_page=local_page, rota=rota)
+        return render_template('blog/route.html', name_line=name_line, role=role, local_page=local_page, rota=rota, dias_semana=dias_semana, horario_partida=format_time(rota.horario_partida), horario_retorno=format_time(rota.horario_retorno))
 
   return 'Rota não encontrada.'
 

@@ -212,8 +212,8 @@ def get_routes():
               execute = True
               if passagem.migracao_lotado or passagem.migracao_manutencao:
                 combine = datetime.combine(passagem.data, parada.horario_passagem)
-                time_ant = combine - timedelta(minutes=15)
-                time_dep = combine + timedelta(minutes=15)
+                time_ant = combine - timedelta(minutes=45)
+                time_dep = combine + timedelta(minutes=45)
 
                 if (
                   db.session.query(Passagem).join(Parada)
@@ -381,8 +381,10 @@ def get_routes():
 def get_lines():
   role = current_user.roles[0].name
   data = {'role': role, 'identify': True, 'cidades': {}, 'minha_linha': []}
-  query = Membro.query.filter_by(dono=True).join(Linha).order_by(Linha.nome).all()
+  if role == 'motorista':
+    data['participacao'] = []
 
+  query = Membro.query.filter_by(dono=True).join(Linha).order_by(Linha.nome).all()
   if query:
     user = return_my_user()
     if user:
@@ -459,9 +461,6 @@ def get_lines():
         dict_linha['dono'] = result.motorista.nome
 
         if role == 'motorista':
-          if 'participacao' not in data:
-            data['participacao'] = []
-
           if dict_linha['dono'] == user.nome:
             data['minha_linha'].append(dict_linha)
           elif return_relationship(linha.codigo):
@@ -726,8 +725,8 @@ def get_stops_student():
 
             if passagem.migracao_lotado or passagem.migracao_manutencao:
               combine = datetime.combine(passagem.data, parada.horario_passagem)
-              time_ant = combine - timedelta(minutes=15)
-              time_dep = combine + timedelta(minutes=15)
+              time_ant = combine - timedelta(minutes=45)
+              time_dep = combine + timedelta(minutes=45)
               if (
                 db.session.query(Passagem).join(Parada)
                 .filter(db.and_(
@@ -1371,8 +1370,8 @@ def get_interface_route(name_line):
 
           if passagem.migracao_lotado or passagem.migracao_manutencao:
             combine = datetime.combine(passagem.data, parada.horario_passagem)
-            time_ant = combine - timedelta(minutes=15)
-            time_dep = combine + timedelta(minutes=15)
+            time_ant = combine - timedelta(minutes=45)
+            time_dep = combine + timedelta(minutes=45)
             if (
               db.session.query(Passagem).join(Parada)
               .filter(db.and_(
@@ -1946,8 +1945,8 @@ def get_route(name_line, surname, shift, hr_par, hr_ret):
               execute = True
               if diaria.migracao_lotado or diaria.migracao_manutencao:
                 combine = datetime.combine(diaria.data, parada.horario_passagem)
-                time_ant = combine - timedelta(minutes=15)
-                time_dep = combine + timedelta(minutes=15)
+                time_ant = combine - timedelta(minutes=45)
+                time_dep = combine + timedelta(minutes=45)
                 if (
                   db.session.query(Passagem).join(Parada)
                   .filter(db.and_(
@@ -2300,3 +2299,183 @@ def get_stundet(name_line, shift, name_student):
         return jsonify(retorno)
     
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações do aluno.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~ GET Route ~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/get_stop_path/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type_>", methods=['GET'])
+@login_required
+def get_stop_path(name_line, surname, shift, hr_par, hr_ret, type_):
+  if name_line and shift and hr_par and hr_ret and type_:
+      linha = Linha.query.filter_by(nome=name_line).first()
+      if linha:
+        role = current_user.roles[0].name
+        relationship = return_relationship(linha.codigo)
+
+        data = []
+        retorno = {'error': False, 'role': role, 'relacao': relationship, 'data': data}
+        rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+        if rota is not None:
+          if not rota:
+            return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+          
+          today = date.today()
+          pass_daily = False
+          meu_ponto = None
+
+          if role == 'aluno':
+            not_dis_line = (
+              db.session.query(Registro_Linha)
+              .filter(db.and_(
+                Registro_Linha.Linha_codigo == linha.codigo,
+                Registro_Linha.data == today,
+                Registro_Linha.funcionando == False
+              ))
+              .first()
+            )
+
+            user = return_my_user()
+            record_stundent = (
+              db.session.query(Registro_Aluno)
+              .filter(db.and_(
+                Registro_Aluno.data == today,
+                Registro_Aluno.Aluno_id == user.id
+              ))
+              .first()
+            )
+            check_daily_in_route = (
+              db.session.query(Parada, Passagem)
+              .filter(db.and_(
+                Passagem.Parada_codigo == Parada.codigo,
+                Parada.Rota_codigo == rota.codigo,
+                Passagem.data == today,
+                Passagem.passagem_fixa == False,
+                Passagem.Aluno_id == user.id
+              ))
+              .all()
+            )
+
+            execute = True
+            for stop, pass_ in check_daily_in_route:
+              if pass_.migracao_lotado or pass_.migracao_manutencao:
+                combine = datetime.combine(today, stop.horario_passagem)
+                time_ant = combine - timedelta(minutes=45)
+                time_dep = combine + timedelta(minutes=45)
+
+                condiction = (
+                  db.session.query(Passagem).join(Parada)
+                  .filter(db.and_(
+                    Passagem.Parada_codigo == Parada.codigo,
+                    Parada.horario_passagem.between(time_ant.time(), time_dep.time()),
+                    Passagem.data == today,
+                    Passagem.passagem_fixa == False,
+                    Passagem.Aluno_id == user.id,
+                    db.not_(db.or_(
+                      Passagem.migracao_lotado == True,
+                      Passagem.migracao_manutencao == True
+                    ))
+                  ))
+                  .first()
+                )
+
+                student_dis = True
+                ignore = return_ignore_route(user.turno)
+                if user.turno == rota.turno:
+                  if (record_stundent.contraturno and stop.tipo == ignore) or record_stundent.faltara:
+                    student_dis = False
+                else:
+                  if not (record_stundent.contraturno and stop.tipo == ignore) or record_stundent.faltara:
+                      student_dis = False
+
+                if not condiction and not not_dis_line and student_dis:
+                  pass_daily = True
+                  if stop.tipo == type_:
+                    meu_ponto = stop.ponto.nome
+                    execute = False
+                  break
+              else:
+                pass_daily = True
+                if stop.tipo == type_:
+                  meu_ponto = stop.ponto.nome
+                  execute = False
+                break
+            
+            if execute and record_stundent:
+              check_daily = (
+                db.session.query(Parada).join(Passagem).join(Rota)
+                .filter(db.and_(
+                  Passagem.Parada_codigo == Parada.codigo,
+                  Parada.Rota_codigo == Rota.codigo,
+                  Passagem.data == today,
+                  Passagem.passagem_fixa == False,
+                  Passagem.Aluno_id == user.id,
+                  Parada.tipo == type_,
+                  Rota.turno == rota.turno
+                ))
+                .first()
+              )
+
+              if not check_daily and not not_dis_line:
+                pass_fixed = (
+                  db.session.query(Parada, Ponto).join(Passagem)
+                  .filter(db.and_(
+                    Parada.Ponto_id == Ponto.id,
+                    Passagem.Parada_codigo == Parada.codigo,
+                    Parada.Rota_codigo == rota.codigo,
+                    Parada.tipo == type_,
+                    Passagem.passagem_fixa == True,
+                    Passagem.Aluno_id == user.id
+                  ))
+                  .first()
+                )
+                if pass_fixed:
+                  parada_fixed, ponto_fixed = pass_fixed
+                  pass_contraturno = Passagem.query.filter_by(Aluno_id=user.id, passagem_contraturno=True).first()
+                  ignore = return_ignore_route(user.turno)
+
+                  if user.turno == rota.turno:
+                    if pass_contraturno:
+                      if not (record_stundent.contraturno and parada_fixed.tipo == ignore) and not record_stundent.faltara:
+                        meu_ponto = ponto_fixed.nome
+                    else:
+                      if not record_stundent.faltara:
+                        meu_ponto = ponto_fixed.nome
+                  else:
+                    if record_stundent.contraturno and parada_fixed.tipo == ignore and not record_stundent.faltara:
+                      meu_ponto = ponto_fixed.nome
+
+          if (relationship and relationship != 'não participante') or pass_daily:
+            stops = (
+              db.session.query(Parada, Ponto)
+              .filter(db.and_(
+                Parada.Ponto_id == Ponto.id,
+                Parada.Rota_codigo == rota.codigo,
+                Parada.tipo == type_,
+              ))
+              .order_by(Parada.ordem)
+              .all()
+            )
+
+            for parada, ponto in stops:
+              passou = False
+              if (
+                Registro_Passagem.query
+                .filter_by(data=today, Parada_codigo=parada.codigo)
+                .first()
+              ):
+                passou = True
+
+              data.append({
+                'local': ponto.nome,
+                'horario': format_time(parada.horario_passagem),
+                'tolerancia': f'{ponto.tempo_tolerancia} min',
+                'meu_ponto': (ponto.nome == meu_ponto),
+                'passou': passou
+              })
+            
+            retorno['passagem_diaria'] = pass_daily
+            return jsonify(retorno)
+            
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações da linha.'})

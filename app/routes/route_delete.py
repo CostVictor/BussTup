@@ -389,8 +389,8 @@ def del_pass_daily():
                       set_update_record_route(record_route_contraturno)
             
             combine = datetime.combine(date_, parada.horario_passagem)
-            time_ant = combine - timedelta(minutes=15)
-            time_dep = combine + timedelta(minutes=15)
+            time_ant = combine - timedelta(minutes=45)
+            time_dep = combine + timedelta(minutes=45)
             routes_migrate = (
               db.session.query(Rota).join(Parada).join(Passagem)
               .filter(db.and_(

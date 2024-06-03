@@ -209,13 +209,13 @@ function loadLines() {
         }
 
         const btn_create_line = document.getElementById("btn_create_line");
-        const participacap_title = document.getElementById(
+        const participacao_title = document.getElementById(
           "linhas_participacao_title"
         );
-        const participacap_local = document.getElementById(
+        const participacao_local = document.getElementById(
           "linhas_participacao_local"
         );
-        participacap_local.innerHTML = "";
+        participacao_local.innerHTML = "";
 
         if (response.participacao.length) {
           if (!response.minha_linha.length) {
@@ -224,13 +224,13 @@ function loadLines() {
             btn_create_line.removeAttribute("style");
           }
 
-          participacap_title.classList.remove("inactive");
-          participacap_local.classList.remove("inactive");
-          create_lines(participacap_local, response.participacao);
+          participacao_title.classList.remove("inactive");
+          participacao_local.classList.remove("inactive");
+          create_lines(participacao_local, response.participacao);
         } else {
           btn_create_line.removeAttribute("style");
-          participacap_title.classList.add("inactive");
-          participacap_local.classList.add("inactive");
+          participacao_title.classList.add("inactive");
+          participacao_local.classList.add("inactive");
         }
       }
       const elements = divs[2].querySelectorAll('[class*="-enter-"]');

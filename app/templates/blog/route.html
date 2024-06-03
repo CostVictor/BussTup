@@ -1,14 +1,111 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rota</title>
-    <link rel="icon" href="/static/img/icon_busstup.png">
-    <link rel="stylesheet" href="/static/css/index.css">
-    <link rel="stylesheet" href="/static/css/page.css">
-    <link rel="stylesheet" href="/static/css/form.css">
-    <link rel="stylesheet" href="/static/css/popup.css">
-  </head>
-  <body style="background-color: var(--branco_secundario);"></body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rota</title>
+
+  <link rel="icon" href="/static/img/icon_busstup.png">
+  <link rel="stylesheet" href="/static/css/index.css">
+  <link rel="stylesheet" href="/static/css/page.css">
+  <link rel="stylesheet" href="/static/css/form.css">
+  <link rel="stylesheet" href="/static/css/popup.css">
+  <link rel="stylesheet" href="/static/css/line.css">
+  <link rel="stylesheet" href="/static/css/route.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"
+    integrity="sha512-0bEtK0USNd96MnO4XhH8jhv3nyRF0eK87pJke6pkYf3cM0uDIhNJy9ltuzqgypoIFXw3JSuiy04tVk4AjpZdZw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body onload="enterInterface('route')">
+  <p class="hidden_point">.</p>
+
+  <template id="templates_model">
+    {% include "/models/model_global.html" %}
+    {% include "/models/route/model_index.html" %}
+  </template>
+
+  <template id="templates_popup">
+    {% include "/popups/popup_global.html" %}
+  </template>
+
+  <header id="interface_line_header" class="-enter- line__container--header">
+    <i class="bi bi-arrow-left-short line__icon animate"
+      onclick="closeInterface('line', 'page_user', '{{ local_page }}')"></i>
+    <h1 id="interface_nome" class="text title no_marge no_border">{{ name_line }}</h1>
+    <h1 class="text title no_marge no_border">></h1>
+    <h1 id="interface_vehicle" class="text title no_marge no_border">{{ rota.onibus.apelido }}</h1>
+  </header>
+
+  <main id="interface_line_content" class="line__container--content">
+    <section id="interface_ferias" class="-enter- line__container--aviso inactive">
+      <h1 class="line__aviso">Linha de férias</h1>
+      <h1 class="page__division"></h1>
+    </section>
+
+    <section class="-enter- line__container--area">
+      <h2 class="text title">Dados da rota</h2>
+      <div class="page__container">
+        <p class="text secundario emphasis">Horários:</p>
+        <p id="interface_horarios" class="text secundario fundo">{{ rota.turno }} > {{ horario_partida }} ~ {{ horario_retorno }}</p>
+      </div>
+
+      <div class="page__container">
+        <p class="text secundario emphasis">Motorista:</p>
+        <p id="interface_shift" class="text secundario fundo">{{ rota.onibus.motorista.nome }}</p>
+      </div>
+      <h1 class="page__division"></h1>
+    </section>
+
+    <section class="-enter- line__container--area">
+      <p id="interface_shift" class="text secundario fundo justify">...</p>
+      <div class="form__container--btn_select">
+        <button id="route_btn_partida" class="form__btn--select" onclick="replace_path('partida')">Partida</button>
+        <button id="route_btn_retorno" class="form__btn--select" onclick="replace_path('retorno')">Retorno</button>
+      </div>
+
+      <div>
+
+      </div>
+      
+      {% if role == 'motorista' %}
+      <div class="route__btn">
+        <p id="btn_atualizar_trajeto" class="text secundario justify">Iniciar trajeto de partida</p>
+      </div>
+      {% else %}
+      <div class="route__btn">
+        <p class="text secundario justify">Solicitar espera ao motorista</p>
+      </div>
+      {% endif %}
+      
+      <div class="route__btn">
+        <p class="text secundario justify">Atualizar trajeto</p>
+      </div>
+      <h1 class="page__division"></h1>
+    </section>
+
+    <section class="line__container--area -enter-">
+      <div id="route_container_partida" class="inactive">
+        <span class="text secundario fundo justify">Carregando...</span>
+      </div>
+    </section>
+    
+    <section class="line__container--area -enter-">
+      <div id="route_container_retorno" class="inactive">
+        <span class="text secundario fundo justify">Carregando...</span>
+      </div>
+    </section>
+  </main>
+  <div id="popup_local"></div>
+  
+  <script src="/static/js/interface.js"></script>
+  <script src="/static/js/interaction.js"></script>
+  <script src="/static/js/route/index.js"></script>
+</body>
 </html>
