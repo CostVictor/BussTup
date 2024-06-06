@@ -114,6 +114,10 @@
   overflow-y: auto;
 }
 
+.text.secundario.border_bottom {
+  border-bottom: var(--cinza_quaternario) solid 0.15rem;
+}
+
 .text.terciario {
   margin: 0;
   font-size: calc(0.65vw + 0.65vh + 1vmin);

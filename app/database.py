@@ -190,7 +190,7 @@ class Membro(db.Model):
 class Registro_Passagem(db.Model):
   __tablename__ = 'Registro_Passagem'
   codigo = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-  data = db.Column(db.DateTime, nullable=False)
+  data = db.Column(db.Date, nullable=False)
   Parada_codigo = db.Column(db.BigInteger, db.ForeignKey('Parada.codigo'), nullable=False)
   parada = db.relationship('Parada', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 

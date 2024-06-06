@@ -116,3 +116,77 @@
 .route__icon.inactive {
   display: none;
 }
+
+.route__card_body {
+  display: flex;
+  align-items: end;
+  width: 100%;
+  background-color: var(--branco_terciario);
+  margin-top: calc(0.5vw + 0.5vh + 1vmin);
+  border-radius: 10px;
+}
+
+.route__card_title {
+  font-size: calc(3vw + 3vh + 1vmin);
+  color: var(--azul_terciario);
+  margin: calc(1vw + 1vh + 1vmin) 0 calc(1vw + 1vh + 1vmin) calc(1vw + 1vh + 1vmin);
+  padding: calc(0.3vw + 0.3vh + 1vmin) calc(0.3vw + 0.3vh + 1vmin) calc(0.3vw + 0.3vh + 1vmin) calc(1vw + 1vh + 1vmin);
+  border: var(--azul_terciario) solid 0.06rem;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 10px 0 0 0;
+}
+
+.route__card_title.reverse {
+  margin: calc(1vw + 1vh + 1vmin) calc(1vw + 1vh + 1vmin) calc(1vw + 1vh + 1vmin) 0;
+  padding: calc(0.3vw + 0.3vh + 1vmin) calc(1vw + 1vh + 1vmin) calc(0.3vw + 0.3vh + 1vmin) calc(0.3vw + 0.3vh + 1vmin) ;
+  border-radius: 0 0 10px 0;
+  border: var(--azul_terciario) solid 0.06rem;
+  border-left: none;
+  border-top: none;
+}
+
+.route__card_text {
+  font-size: calc(0.8vw + 0.8vh + 1vmin);
+  color: var(--azul_terciario);
+  padding: calc(2.5vw + 2.4vh + 1vmin) calc(1.5vw + 1.5vh + 1vmin) calc(1.5vw + 1.5vh + 1vmin) 0;
+  margin: calc(1vw + 1vh + 1vmin) 0;
+  border-top: var(--azul_terciario) solid 0.06rem;
+}
+
+.route__card_text.reverse {
+  padding: 0 0 calc(1.5vw + 1.5vh + 1vmin) calc(1.5vw + 1.5vh + 1vmin);
+  border-top: none;
+  border-bottom: var(--azul_terciario) solid 0.06rem;
+}
+
+.route__card_efect {
+  height: 100%;
+  width: 22%;
+  margin: auto;
+  position: relative;
+}
+
+.route__card_efect::before {
+  content: '';
+  position: absolute;
+  width: 35%;
+  height: 165%;
+  background-color: var(--branco_terciario);
+  transform: rotate(-45deg) translate(6px, 2px);
+  border-right: var(--azul_terciario) solid 0.06rem;
+  border-radius: 50px 0px 0px 50px;
+}
+
+.route__img {
+  width: 100%;
+}
+
+.route__card_icon {
+  font-size: calc(1.3vw + 1.3vh + 1vmin);
+  left: 0;
+  bottom: 0;
+  position: absolute;
+  color: var(--azul_primario);
+  transform: translate(7px, 4px);
+}

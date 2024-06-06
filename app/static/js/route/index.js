@@ -5,11 +5,10 @@ function loadInterfaceRoute() {
   const elements = document.querySelectorAll('[class*="-enter-"]');
   animate_itens(elements, "fadeDown", 0.6, 0.2);
 
+  load_info((type = "partida"), (execute = true));
+  load_info((type = "retorno"), (execute = false));
   load_path("partida");
   load_path("retorno");
-  setTimeout(() => {
-    replace_path("partida");
-  }, 450);
 }
 
 function replace_path(type) {
@@ -24,6 +23,7 @@ function replace_path(type) {
   );
   let elements = [];
   if (type === "partida") {
+    replace_forecast("partida");
     btn_partida.classList.add("selected");
     btn_retorno.classList.remove("selected");
 
@@ -35,6 +35,7 @@ function replace_path(type) {
       btn_atualizar_trajeto.textContent = "Iniciar trajeto de partida";
     }
   } else {
+    replace_forecast("retorno");
     btn_retorno.classList.add("selected");
     btn_partida.classList.remove("selected");
 
@@ -89,10 +90,13 @@ function load_path(type) {
             value.id = value.id.replace(model_stop_path.id, stop.id);
           });
 
-          if ((response.relacao && response.relacao !== 'não participante') || response.passagem_diaria) {
-            stop.onclick = function() {
-              create_popup('Título', 'Texto')
-            }
+          if (
+            (response.relacao && response.relacao !== "não participante") ||
+            response.passagem_diaria
+          ) {
+            stop.onclick = function () {
+              create_popup("Título", "Texto");
+            };
           }
 
           for (info in data[index]) {
@@ -119,9 +123,9 @@ function load_path(type) {
                   text_efect.classList.add("inactive");
                 }
               }
-            } else if (info === 'meu_ponto') {
+            } else if (info === "meu_ponto") {
               if (value) {
-                stop.classList.add('selected')
+                stop.classList.add("selected");
               }
             } else {
               stop.querySelector(`#${stop.id}_${info}`).textContent = value;
@@ -133,4 +137,65 @@ function load_path(type) {
         create_popup(response.title, response.text);
       }
     });
+}
+
+function load_info(type, execute = false) {
+  const data = {
+    principal: Object.values(return_data_route()),
+  };
+  data.principal.push(type);
+
+  fetch("/get_data_route" + generate_url_dict(data), { method: "GET" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        const data = response.data;
+        document.getElementById("interface_estado").textContent = data.estado;
+        const msg_load_forecast = document.getElementById(
+          "interface_load_forecast"
+        );
+        if (response.hoje.includes("Indisponível")) {
+          msg_load_forecast.textContent = response.hoje;
+        } else {
+          msg_load_forecast.textContent = `Painel de Hoje (${response.hoje})`;
+        }
+
+        document.getElementById(`previsao_${type}`).textContent = data.previsao;
+        document.getElementById(`no_veiculo_${type}`).textContent =
+          data.presente;
+
+        if (execute) {
+          replace_path("partida");
+        }
+      } else {
+        document.getElementById("interface_load_forecast").textContent =
+          "Erro de carregamento";
+        create_popup(response.title, response.text);
+      }
+    });
+}
+
+function replace_forecast(type) {
+  const previsao = document.getElementById("previsao_pessoas");
+  const quantidade = document.getElementById("quantidade_veiculo");
+
+  if (type === "partida") {
+    const previsao_partida = document
+      .getElementById("previsao_partida")
+      .textContent.trim();
+    const quantidade_partida = document
+      .getElementById("no_veiculo_partida")
+      .textContent.trim();
+    previsao.textContent = previsao_partida;
+    quantidade.textContent = quantidade_partida;
+  } else {
+    const previsao_retorno = document
+      .getElementById("previsao_retorno")
+      .textContent.trim();
+    const quantidade_retorno = document
+      .getElementById("no_veiculo_retorno")
+      .textContent.trim();
+    previsao.textContent = previsao_retorno;
+    quantidade.textContent = quantidade_retorno;
+  }
 }

@@ -333,7 +333,7 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `busstup`.`registro_passagem` (
   `codigo` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `data` DATETIME NOT NULL,
+  `data` DATE NOT NULL,
   `Parada_codigo` BIGINT(20) NOT NULL,
   PRIMARY KEY (`codigo`),
   INDEX `fk_Registro_Parada_Parada1_idx` (`Parada_codigo` ASC),

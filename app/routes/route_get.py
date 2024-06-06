@@ -2305,10 +2305,101 @@ def get_stundet(name_line, shift, name_student):
 ''' ~~~~~ GET Route ~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~'''
 
+@app.route("/get_data_route/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type_>", methods=['GET'])
+@login_required
+def get_data_route(name_line, surname, shift, hr_par, hr_ret, type_):
+  if name_line and surname and shift and hr_par and hr_ret and type_:
+    linha = Linha.query.filter_by(nome=name_line).first()
+    if linha:
+      role = current_user.roles[0].name
+      relationship = return_relationship(linha.codigo)
+
+      data = {}
+      today = date.today()
+      week_day = today.weekday()
+
+      check_indis = (
+        db.session.query(Registro_Linha)
+        .filter(db.and_(
+          Registro_Linha.Linha_codigo == linha.codigo,
+          Registro_Linha.data == today,
+          Registro_Linha.funcionando == False
+        ))
+        .first()
+      )
+      if linha.ferias:
+        date_formated = 'Painel Indisponível (Férias)'
+      elif week_day in [5, 6]:
+        day = 'Sábado' if week_day == 5 else 'Domingo'
+        date_formated = f'Painel Indisponível ({day})'
+      elif check_indis:
+        if check_indis.feriado:
+          date_formated = 'Painel Indisponível (Feriado)'
+        else:
+          date_formated = 'Painel Indisponível (Fora de serviço)'
+      else:
+        date_formated = f'{return_day_week(week_day)[:3]} - {format_date(today)}'
+
+      retorno = {'error': False, 'data': data, 'hoje': date_formated}
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+      if rota is not None:
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+        user = return_my_user()
+        pass_daily = False
+
+        if role == 'aluno':
+          check_daily = (
+            db.session.query(Parada).join(Passagem)
+            .filter(db.and_(
+              Passagem.Parada_codigo == Parada.codigo,
+              Parada.Rota_codigo == rota.codigo,
+              Passagem.data == today,
+              Passagem.passagem_fixa == False,
+              Passagem.Aluno_id == user.id
+            ))
+            .all()
+          )
+          if check_daily and check_valid_datetime(today, check_daily.horario_passagem, add_limit=0.25):
+            pass_daily = True
+        
+        if (relationship and relationship != 'não participante') or pass_daily:
+          data['estado'] = 'Inativa'
+          if rota.em_partida:
+            data['estado'] = 'Em Partida'
+          elif rota.em_retorno:
+            data['estado'] = 'Em Retorno'
+          
+          data['previsao'] = 0
+          data['presente'] = 0
+
+          record_route = (
+            db.session.query(Registro_Rota)
+            .filter(db.and_(
+              Registro_Rota.Rota_codigo == rota.codigo,
+              Registro_Rota.data == today,
+              Registro_Rota.tipo == type_
+            ))
+            .first()
+          )
+          if record_route and 'Indisponível' not in date_formated:
+            referece = rota.horario_partida if record_route.tipo == 'partida' else rota.horario_retorno
+            if record_route.atualizar and check_valid_datetime(today, referece, add_limit=0.75):
+              modify_forecast_route(rota, record_route)
+            
+            data['previsao'] = record_route.previsao_pessoas
+            data['presente'] = record_route.quantidade_pessoas
+          
+          return jsonify(retorno)
+  
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações da rota.'})
+
+
 @app.route("/get_stop_path/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type_>", methods=['GET'])
 @login_required
 def get_stop_path(name_line, surname, shift, hr_par, hr_ret, type_):
-  if name_line and shift and hr_par and hr_ret and type_:
+  if name_line and surname and shift and hr_par and hr_ret and type_:
       linha = Linha.query.filter_by(nome=name_line).first()
       if linha:
         role = current_user.roles[0].name

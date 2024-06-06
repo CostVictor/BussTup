@@ -64,22 +64,38 @@
     </section>
 
     <section class="-enter- line__container--area">
-      <p id="interface_shift" class="text secundario fundo justify">...</p>
+      <p id="interface_estado" class="text secundario fundo justify border_bottom">...</p>
       <div class="form__container--btn_select">
         <button id="route_btn_partida" class="form__btn--select" onclick="replace_path('partida')">Partida</button>
         <button id="route_btn_retorno" class="form__btn--select" onclick="replace_path('retorno')">Retorno</button>
       </div>
 
-      <div>
+      <p id="interface_load_forecast" class="text secundario fundo justify margin_top">Carregando...</p>
+      <div class="route__card_body">
+        <h1 id="previsao_pessoas" class="route__card_title">0</h1>
+        <p class="route__card_text">pessoas previstas</p>
+        <div class="route__card_efect">
+          <img class="route__img" src="/static/img/logo_busstup.png" alt="Logo do aplicativo BussTup">
+          <i class="bi bi-people-fill route__card_icon"></i>
+        </div>
+      </div>
 
+      <div class="route__card_body">
+        <div class="route__card_efect">
+          <img class="route__img" src="/static/img/logo_busstup.png" alt="Logo do aplicativo BussTup">
+          <i class="bi bi-person-fill-check route__card_icon"></i>
+        </div>
+        <p class="route__card_text reverse">Presente no veículo:</p>
+        <h1 id="quantidade_veiculo" class="route__card_title reverse">0</h1>
       </div>
       
+      <h1 class="page__division"></h1>
       {% if role == 'motorista' %}
-      <div class="route__btn">
+      <div class="route__btn first">
         <p id="btn_atualizar_trajeto" class="text secundario justify">Iniciar trajeto de partida</p>
       </div>
       {% else %}
-      <div class="route__btn">
+      <div class="route__btn first">
         <p class="text secundario justify">Solicitar espera ao motorista</p>
       </div>
       {% endif %}
@@ -91,12 +107,16 @@
     </section>
 
     <section class="line__container--area -enter-">
+      <span id="previsao_partida" class="inactive">0</span>
+      <span id="no_veiculo_partida" class="inactive">0</span>
       <div id="route_container_partida" class="inactive">
         <span class="text secundario fundo justify">Carregando...</span>
       </div>
     </section>
     
     <section class="line__container--area -enter-">
+      <span id="previsao_retorno" class="inactive">0</span>
+      <span id="no_veiculo_retorno" class="inactive">0</span>
       <div id="route_container_retorno" class="inactive">
         <span class="text secundario fundo justify">Carregando...</span>
       </div>
