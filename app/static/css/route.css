@@ -190,3 +190,45 @@
   color: var(--azul_primario);
   transform: translate(7px, 4px);
 }
+
+.route__contaciner_student {
+  display: flex;
+  width: 100%;
+  background-color: var(--branco_terciario);
+  border-radius: 10px;
+}
+
+.route__container_student.click {
+  cursor: pointer;
+}
+
+.route__text_info {
+  display: flex;
+  align-items: center;
+  font-size: calc(0.7vw + 0.7vh + 1vmin);
+  color: var(--azul_terciario);
+  padding: calc(0.1vw + 0.1vh + 0.8vmin) calc(0.5vw + 0.5vh + 1vmin);
+  background-color: var(--branco_primario);
+  border-radius: 10px;
+}
+  
+.route__text_info.inactive {
+  display: none;
+}
+    
+.route__icon_container_remove {
+  display: flex;
+  align-self: center;
+  height: 100%;
+  font-size: calc(0.7vw + 0.7vh + 1vmin);
+  color: var(--vermelho_intenso);
+  padding: calc(0.6vw + 0.6vh + 1vmin);
+  background-color: var(--vermelho_secundario);
+  margin-left: auto;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.route__icon_container_remove.inactive {
+  display: none;
+}

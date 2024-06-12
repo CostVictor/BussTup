@@ -1,0 +1,38 @@
+<section id="route_stop_path" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 id="route_stop_path_local" class="popup__title"></h1>
+    </header>
+
+    <div class="popup__container--content">
+      <div id="route_stop_path_container_span" class="inactive">
+        <span id="route_stop_path_passou" class="text secundario fundo cinza justify inactive">O veículo já passou por este ponto.</span>
+        <span id="route_stop_path_atual" class="text secundario emphasis justify inactive">O veículo está neste ponto ou segue em direção a ele.</span>
+        <span id="route_stop_path_finalizado" class="text secundario emphasis justify inactive">Trajeto finalizado.</span>
+        <h1 class="page__division"></h1>
+      </div>
+      {% if role == 'aluno' %}
+      <div id="solicitacao_espera" class="inactive">
+        <div class="route__btn first">
+          <p class="text secundario justify">Solicitar espera ao motorista</p>
+        </div>
+        <h1 class="page__division"></h1>
+      </div>
+      {% endif %}
+      <div id="route_stop_path_espera" class="inactive">
+        <h3 id="route_stop_path_title_espera" class="popup__text question first">Pedindo para esperar:</h3>
+        <div id="route_stop_path_container_espera"></div>
+      </div>
+      <h3 id="route_stop_path_title_students" class="popup__text question first">sobe neste ponto:</h3>
+      <div id="route_stop_path_container_students"></div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn cancel" onclick="close_popup('route_stop_path')">Fechar</button>
+      <button class="popup__btn inactive">Acessar atual</button>
+      {% if role == 'motorista' %}
+      <button class="popup__btn" onclick="open_popup('confirmar_passou')">Seguir trajeto</button>
+      {% endif %}
+    </footer>
+  </div>
+</section>

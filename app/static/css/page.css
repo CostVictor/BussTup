@@ -489,7 +489,7 @@ body {
   display: flex;
   justify-content: center;
   font-size: calc(0.8vw + 0.9vh + 1vmin);
-  color: var(--vermelho_primario);
+  color: var(--vermelho_intenso);
   background-color: var(--vermelho_secundario);
   border-radius: calc(0.5vw + 0.5vh + 1vmin);
   margin: calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin) calc(0.3vw + 0.3vh + 0.5vmin) calc(0.1vw + 0.1vh + 0.5vmin);

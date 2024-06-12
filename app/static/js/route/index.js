@@ -95,7 +95,7 @@ function load_path(type) {
             response.passagem_diaria
           ) {
             stop.onclick = function () {
-              create_popup("Título", "Texto");
+              open_stop_path(this);
             };
           }
 
@@ -197,5 +197,54 @@ function replace_forecast(type) {
       .textContent.trim();
     previsao.textContent = previsao_retorno;
     quantidade.textContent = quantidade_retorno;
+  }
+}
+
+function return_path_selected() {
+  const route_btn_partida = document.getElementById("route_btn_partida");
+  if (route_btn_partida.className.includes("selected")) {
+    return "partida";
+  }
+  return "retorno";
+}
+
+function return_stop_path(pos) {
+  const container = document.getElementById(
+    `route_container_${return_path_selected()}`
+  );
+  const elements = Array.from(container.children);
+  let target = null;
+  if (elements.length) {
+    if (pos === "primeiro") {
+      target = elements[0];
+    } else if (pos === "ultimo") {
+      target = elements[elements.length - 1];
+    } else if (pos === "atual") {
+      const icon = container.querySelector("i:not(.inactive)");
+      if (icon) {
+        target = icon.parentNode.parentNode;
+      }
+    }
+  }
+
+  if (target) {
+    return document.getElementById(`${target.id}_local`).textContent.trim();
+  }
+  return null;
+}
+
+function open_stop_path(obj_click) {
+  open_popup("route_stop_path");
+  const type = return_path_selected();
+  const local = obj_click
+    .querySelector(`#${obj_click.id}_local`)
+    .textContent.trim();
+  document.getElementById("route_stop_path_local").textContent = local;
+
+  const title = document.getElementById("route_stop_path_title_students");
+  if (type === "partida") {
+    title.textContent = "Sobe neste ponto:";
+  } else {
+    title.textContent = "Desce neste ponto:";
   }
 }

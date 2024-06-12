@@ -332,6 +332,10 @@
   color: var(--azul_terciario);
 }
 
+.popup__btn.inactive {
+  display: none;
+}
+
 .popup__input {
   display: flex;
   align-items: center;

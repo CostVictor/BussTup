@@ -29,10 +29,14 @@
   <template id="templates_model">
     {% include "/models/model_global.html" %}
     {% include "/models/route/model_index.html" %}
-  </template>
-
-  <template id="templates_popup">
-    {% include "/popups/popup_global.html" %}
+    </template>
+    
+    <template id="templates_popup">
+      {% include "/popups/popup_global.html" %}
+      {% include "/popups/route/popup_index.html" %}
+      {% if role == 'motorista' %}
+      {% include "/popups/route/popup_driver.html" %}
+      {% endif %}
   </template>
 
   <header id="interface_line_header" class="-enter- line__container--header">
