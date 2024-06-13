@@ -247,4 +247,19 @@ function open_stop_path(obj_click) {
   } else {
     title.textContent = "Desce neste ponto:";
   }
+  const data = {
+    principal: Object.values(return_data_route()),
+  };
+  data.principal.push(type)
+  data.principal.push(local)
+
+  fetch("/get_data_stop_path" + generate_url_dict(data), { method: "GET" })
+    .then((response) => response.json())
+    .then((response) => {
+      if (!response.error) {
+        console.log(response)
+      } else {
+        create_popup(response.title, response.text)
+      }
+    });
 }
