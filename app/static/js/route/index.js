@@ -233,6 +233,46 @@ function return_stop_path(pos) {
   return null;
 }
 
+function create_student(container, list, response, list_espera = false) {
+  const model_student = models.querySelector('#model_student_path')
+  if (list_espera) {
+    for (index in list) {
+      const name_student = list[index]
+      
+      const student = model_student.cloneNode(true)
+      student.id = `${container.id}_student_${index}`
+      student.querySelector('p').textContent = name_student
+
+      if (response.role === 'aluno' && response.meu_nome === name_student) {
+        student.querySelector('i').classList.remove('inactive')
+      }
+      container.appendChild(student)
+    }
+  } else {
+    for (index in list) {
+      const data_student = list[index]
+
+      const student = model_student.cloneNode(true)
+      student.id = `${container.id}_student_${index}`
+      student.querySelector('p').textContent = data_student.nome
+
+      if (data_student.diaria || data_student.contraturno) {
+        const info_daily = document.createElement('h1')
+        info_daily.className = 'route__text_info'
+        student.insertBefore(info_daily, student.children[0])
+        info_daily.textContent = data_student.diaria ? 'Diária' : "Contr..."
+      }
+      if (response.role === 'motorista') {
+        student.classList.add('click')
+        student.onclick = function() {
+          create_popup('Teste', 'Texto')
+        }
+      }
+      container.appendChild(student)
+    }
+  }
+}
+
 function open_stop_path(obj_click) {
   open_popup("route_stop_path");
   const type = return_path_selected();
@@ -250,16 +290,114 @@ function open_stop_path(obj_click) {
   const data = {
     principal: Object.values(return_data_route()),
   };
-  data.principal.push(type)
-  data.principal.push(local)
+  data.principal.push(type);
+  data.principal.push(local);
 
   fetch("/get_data_stop_path" + generate_url_dict(data), { method: "GET" })
     .then((response) => response.json())
     .then((response) => {
       if (!response.error) {
-        console.log(response)
+        const data = response.data;
+        const local_espera = document.getElementById("route_stop_path_espera");
+        const container_espera = local_espera.querySelector("div");
+        const container_subira = document.getElementById(
+          "route_stop_path_container_students"
+        );
+        container_espera.innerHTML = "";
+        container_subira.innerHTML = "";
+
+        const btn_fechar = document.getElementById(
+          "route_stop_path_btn_fechar"
+        );
+        btn_fechar.classList.remove("cancel");
+
+        const btn_atual = document.getElementById(
+          "route_stop_path_acessar_atual"
+        );
+        btn_atual.classList.add("inactive");
+
+        const btn_confirmar = document.getElementById(
+          "route_stop_path_confirmar"
+        );
+        if (btn_confirmar) {
+          btn_confirmar.classList.add("inactive");
+        }
+
+        const title_subira = document.getElementById(
+          "route_stop_path_title_students"
+        );
+        const title_espera = document.getElementById(
+          "route_stop_path_title_espera"
+        );
+
+        if (data.pedindo_espera.length) {
+          title_subira.classList.remove('first')
+          local_espera.classList.remove("inactive");
+          title_espera.textContent = `Pedindo para esperar (${data.pedindo_espera.length}):`;
+          create_student(
+            container_espera,
+            data.pedindo_espera,
+            response,
+            (list_espera = true)
+          );
+        } else {
+          title_espera.textContent = "Pedindo para esperar:";
+          local_espera.classList.add("inactive");
+          title_subira.classList.add('first')
+        }
+
+        const container_msg = document.getElementById(
+          "route_stop_path_container_span"
+        );
+        container_msg.classList.add("inactive");
+
+        const msg_finalizado = document.getElementById(
+          "route_stop_path_finalizado"
+        );
+        msg_finalizado.classList.add("inactive");
+
+        const msg_passou = document.getElementById("route_stop_path_passou");
+        msg_passou.classList.add("inactive");
+
+        const msg_atual = document.getElementById("route_stop_path_atual");
+        msg_atual.classList.add("inactive");
+
+        if (response.passou) {
+          container_msg.classList.remove("inactive");
+          if (response.ponto_atual === local) {
+            msg_finalizado.classList.remove("inactive");
+          } else {
+            msg_passou.classList.remove("inactive");
+            if (response.estado === type) {
+              btn_fechar.classList.add("cancel");
+              btn_atual.classList.remove("inactive");
+            }
+          }
+        } else if (response.ponto_atual === local && response.estado === type) {
+          container_msg.classList.remove("inactive");
+          msg_atual.classList.remove("inactive");
+          if (response.role === "motorista" && response.condutor_atual) {
+            btn_fechar.classList.add("cancel");
+            btn_confirmar.classList.remove("inactive");
+          }
+        }
+
+        if (type === "partida") {
+          title_subira.textContent = `Sobe neste ponto (${data.subira.length}):`;
+        } else {
+          title_subira.textContent = `Desce neste ponto (${data.subira.length}):`;
+        }
+
+        if (data.subira.length) {
+          create_student(container_subira, data.subira, response);
+        } else {
+          const text = document.createElement("p");
+          text.className = "text secundario fundo cinza justify";
+          text.textContent = "Nenhum aluno previstro para este ponto hoje.";
+          container_subira.appendChild(text);
+        }
       } else {
-        create_popup(response.title, response.text)
+        create_popup(response.title, response.text);
       }
     });
 }

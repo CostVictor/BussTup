@@ -2361,8 +2361,11 @@ def get_data_route(name_line, surname, shift, hr_par, hr_ret, type_):
             ))
             .all()
           )
-          if check_daily and check_valid_datetime(today, check_daily.horario_passagem, add_limit=0.25):
-            pass_daily = True
+          if check_daily:
+            for daily in check_daily:
+              if check_valid_datetime(today, daily.horario_passagem, add_limit=0.25):
+                pass_daily = True
+                break
         
         if (relationship and relationship != 'não participante') or pass_daily:
           data['estado'] = 'Inativa'
@@ -2626,8 +2629,11 @@ def get_data_stop_path(name_line, surname, shift, hr_par, hr_ret, type_, name_po
               ))
               .all()
             )
-            if check_daily and check_valid_datetime(today, check_daily.horario_passagem, add_limit=0.25):
-              pass_daily = True
+            if check_daily:
+              for daily in check_daily:
+                if check_valid_datetime(today, daily.horario_passagem, add_limit=0.25):
+                  pass_daily = True
+                  break
           else:
             onibus = rota.onibus
             if onibus and onibus.Motorista_id == user.id:
@@ -2637,7 +2643,34 @@ def get_data_stop_path(name_line, surname, shift, hr_par, hr_ret, type_, name_po
           if (relationship and relationship != 'não participante') or pass_daily:
             data = {'pedindo_espera': [], 'subira': []}
             retorno = {'error': False, 'role': role, 'condutor_atual': condutor_atual, 'data': data}
+            retorno['meu_nome'] = user.nome
+
+            estado = 'inativa'
+            if rota.em_partida:
+              estado = 'partida'
+            elif rota.em_retorno:
+              estado = 'retorno'
+            
+            retorno['estado'] = estado
+            parada_atual = return_stop_atual(rota, type_)
+            if parada_atual:
+              retorno['ponto_atual'] = parada_atual.ponto.nome
+            else:
+              retorno['ponto_atual'] = None
+
+            passou = False
+            if (
+              db.session.query(Registro_Passagem)
+              .filter(db.and_(
+                Registro_Passagem.Parada_codigo == parada.codigo,
+                Registro_Passagem.data == today
+              ))
+              .first()
+            ):
+              passou = True
+
             reject_contraturno = (type_ == return_ignore_route(rota.turno))
+            retorno['passou'] = passou
 
             if today.weekday() not in [5, 6] and not line_indis:
               combine = datetime.combine(today, parada.horario_passagem)

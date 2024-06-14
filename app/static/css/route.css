@@ -191,7 +191,7 @@
   transform: translate(7px, 4px);
 }
 
-.route__contaciner_student {
+.route__container_student {
   display: flex;
   width: 100%;
   background-color: var(--branco_terciario);

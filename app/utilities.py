@@ -306,6 +306,36 @@ def return_user_email(email: str):
   return None
 
 
+def return_stop_atual(route, type_):
+  all_stops = (
+    db.session.query(Parada)
+    .filter(db.and_(
+      Parada.Rota_codigo == route.codigo,
+      Parada.tipo == type_
+    ))
+    .order_by(Parada.ordem)
+    .all()
+  )
+
+  if all_stops:
+    stops_passou = (
+      db.session.query(Parada).join(Registro_Passagem)
+      .filter(db.and_(
+        Registro_Passagem.Parada_codigo == Parada.codigo,
+        Parada.Rota_codigo == route.codigo,
+        Parada.tipo == type_,
+        Registro_Passagem.data == date.today(),
+      ))
+      .all()
+    )
+    if stops_passou:
+      if len(stops_passou) == len(all_stops):
+        return all_stops[-1]
+      return all_stops[len(stops_passou) + 1]
+    return all_stops[0]
+  return None
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~~~ Check ~~~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
