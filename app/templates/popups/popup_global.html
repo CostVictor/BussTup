@@ -115,4 +115,58 @@
     </footer>
   </div>
 </section>
+
+
+<section id="config_aluno" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header pos_relative">
+      <h1 class="popup__title">Dados do Aluno</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <p class="text secundario justify">Estes dados são confidenciais e só podem ser visualizados pelos motoristas que fazem parte desta linha.</p>
+      <h1 class="page__division"></h1>
+      <div class="scroll_vertical popup__container--scroll principal_big">
+        <div class="page__container">
+          <p class="text secundario emphasis">Nome</p>
+          <div class="scroll_horizontal">
+            <p id="config_aluno_nome" class="text secundario nowrap content fundo">Carregando...</p>
+          </div>
+          <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
+        </div>
+
+        <div class="page__container">
+          <p class="text secundario emphasis">Telefone</p>
+          <p id="config_aluno_telefone" class="text secundario content fundo">Carregando...</p>
+          <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
+        </div>
+
+        <div class="page__container">
+          <p class="text secundario emphasis">Curso</p>
+          <p id="config_aluno_curso" class="text secundario content fundo">Carregando...</p>
+          <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
+        </div>
+
+        <div class="page__container">
+          <p class="text secundario emphasis">Turno</p>
+          <p id="config_aluno_turno" class="text secundario content fundo">Carregando...</p>
+          <i class="bi bi-clipboard page__icon content copy" onclick="copy_text(this)"></i>
+        </div>
+
+        <h1 class="page__division"></h1>
+        <div id="config_aluno_btn" class="page__container interaction pos_relative" onclick="action_container(this)">
+          <h3 class="text secundario fundo">Tickets</h3>
+          <h3 id="config_aluno_qnt_tickets" class="text secundario fundo max_width">Em desenvolvimento</h3>
+          <i class="bi bi-caret-right-fill pos_absolute page__icon icon_container"></i>
+        </div>
+
+        <div id="config_aluno_container" class="scroll_vertical popup__container--scroll inactive"></div>
+      </div>
+    </div>
+
+    <footer class="popup__container--footer">
+      <button class="popup__btn" onclick="close_popup('config_aluno')">Fechar</button>
+    </footer>
+  </div>
+</section>
 {% endif %}

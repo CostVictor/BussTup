@@ -5,11 +5,16 @@
     </header>
 
     <div class="popup__container--content">
+      <div id="route_update_data_stop" class="route__btn" style="margin: 0;">
+        <p class="text secundario justify">Atualizar informações</p>
+      </div>
+      <h1 class="page__division"></h1>
+
       <div class="scroll_vertical popup__container--scroll principal_max">
         <div id="route_stop_path_container_span" class="inactive">
           <span id="route_stop_path_passou" class="text secundario fundo cinza justify inactive">O veículo já passou por este ponto.</span>
-          <span id="route_stop_path_atual" class="text secundario emphasis justify inactive">O veículo está neste ponto ou segue em direção a ele.</span>
-          <span id="route_stop_path_finalizado" class="text secundario emphasis justify inactive">Trajeto finalizado.</span>
+          <span id="route_stop_path_atual" class="text secundario fundo justify inactive">O veículo está neste ponto ou segue em direção a ele.</span>
+          <span id="route_stop_path_finalizado" class="text secundario fundo justify inactive">Trajeto finalizado.</span>
           <h1 class="page__division"></h1>
         </div>
         {% if role == 'aluno' %}

@@ -351,7 +351,7 @@ function open_popup(id, obj_click = false, jquery = true) {
   const popups = document.importNode(templates_popup.content, true);
   const popup = popups.querySelector(`#${id}`);
 
-  if (popup) {
+  if (popup && !local_popup.querySelector(`#${id}`)) {
     const card = popup.querySelector("div.popup__container");
 
     const inputs = popup.querySelectorAll("input");

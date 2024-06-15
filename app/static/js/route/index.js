@@ -133,6 +133,11 @@ function load_path(type) {
           }
           container.appendChild(stop);
         }
+        const btn_update = document.getElementById("route_update_path");
+        btn_update.querySelector("p").textContent = "Atualizar trajeto";
+        btn_update.onclick = function () {
+          reload_data_path();
+        };
       } else {
         create_popup(response.title, response.text);
       }
@@ -173,6 +178,32 @@ function load_info(type, execute = false) {
         create_popup(response.title, response.text);
       }
     });
+}
+
+function reload_data_path() {
+  const btn_update = document.getElementById("route_update_path");
+  btn_update.querySelector("p").textContent = "Aguarde...";
+  btn_update.onclick = null;
+
+  const type = return_path_selected();
+  load_info(type);
+  load_path(type);
+}
+
+function reload_data_stop() {
+  const btn_update = document.getElementById("route_update_data_stop");
+  btn_update.querySelector("p").textContent = "Aguarde...";
+  btn_update.onclick = null;
+
+  const container = document.getElementById(
+    `route_container_${return_path_selected()}`
+  );
+  const local = Array.from(container.children).find(
+    (value) =>
+      value.querySelector(`#${value.id}_local`).textContent ===
+      document.getElementById("route_stop_path_local").textContent
+  );
+  open_stop_path(local);
 }
 
 function replace_forecast(type) {
@@ -234,41 +265,42 @@ function return_stop_path(pos) {
 }
 
 function create_student(container, list, response, list_espera = false) {
-  const model_student = models.querySelector('#model_student_path')
+  const model_student = models.querySelector("#model_student_path");
   if (list_espera) {
     for (index in list) {
-      const name_student = list[index]
-      
-      const student = model_student.cloneNode(true)
-      student.id = `${container.id}_student_${index}`
-      student.querySelector('p').textContent = name_student
+      const name_student = list[index];
 
-      if (response.role === 'aluno' && response.meu_nome === name_student) {
-        student.querySelector('i').classList.remove('inactive')
+      const student = model_student.cloneNode(true);
+      student.id = `${container.id}_student_${index}`;
+      student.querySelector("p").textContent = name_student;
+
+      if (response.role === "aluno" && response.meu_nome === name_student) {
+        student.querySelector("i").classList.remove("inactive");
       }
-      container.appendChild(student)
+      container.appendChild(student);
     }
   } else {
     for (index in list) {
-      const data_student = list[index]
+      const data_student = list[index];
 
-      const student = model_student.cloneNode(true)
-      student.id = `${container.id}_student_${index}`
-      student.querySelector('p').textContent = data_student.nome
+      const student = model_student.cloneNode(true);
+      student.id = `${container.id}_student_${index}`;
+      student.querySelector("p").textContent = data_student.nome;
 
       if (data_student.diaria || data_student.contraturno) {
-        const info_daily = document.createElement('h1')
-        info_daily.className = 'route__text_info'
-        student.insertBefore(info_daily, student.children[0])
-        info_daily.textContent = data_student.diaria ? 'Diária' : "Contr..."
+        const info_daily = document.createElement("h1");
+        info_daily.className = "route__text_info";
+        student.insertBefore(info_daily, student.children[0]);
+        info_daily.textContent = data_student.diaria ? "Diária" : "Contr...";
       }
-      if (response.role === 'motorista') {
-        student.classList.add('click')
-        student.onclick = function() {
-          create_popup('Teste', 'Texto')
-        }
+      if (response.role === "motorista") {
+        student.classList.add("click");
+        student.querySelector("i").classList.remove("inactive");
+        student.onclick = function () {
+          get_data_student(this);
+        };
       }
-      container.appendChild(student)
+      container.appendChild(student);
     }
   }
 }
@@ -330,8 +362,17 @@ function open_stop_path(obj_click) {
           "route_stop_path_title_espera"
         );
 
+        const atual = return_stop_path("atual");
+        if (
+          atual &&
+          atual !== response.ponto_atual &&
+          response.estado === type
+        ) {
+          reload_data_path();
+        }
+
         if (data.pedindo_espera.length) {
-          title_subira.classList.remove('first')
+          title_subira.classList.remove("first");
           local_espera.classList.remove("inactive");
           title_espera.textContent = `Pedindo para esperar (${data.pedindo_espera.length}):`;
           create_student(
@@ -343,7 +384,7 @@ function open_stop_path(obj_click) {
         } else {
           title_espera.textContent = "Pedindo para esperar:";
           local_espera.classList.add("inactive");
-          title_subira.classList.add('first')
+          title_subira.classList.add("first");
         }
 
         const container_msg = document.getElementById(
@@ -396,6 +437,12 @@ function open_stop_path(obj_click) {
           text.textContent = "Nenhum aluno previstro para este ponto hoje.";
           container_subira.appendChild(text);
         }
+
+        const btn_update = document.getElementById("route_update_data_stop");
+        btn_update.querySelector("p").textContent = "Atualizar informações";
+        btn_update.onclick = function () {
+          reload_data_stop();
+        };
       } else {
         create_popup(response.title, response.text);
       }

@@ -18,5 +18,9 @@
 
 <div id="model_student_path" class="route__container_student">
   <p class="text secundario justify margin_left margin_right"></p>
+  {% if role == 'motorista' %}
+  <i class="bi bi-three-dots-vertical page__icon content right inactive"></i>
+  {% else %}
   <i class="bi bi-trash3 route__icon_container_remove inactive"></i>
+  {% endif %}
 </div>
