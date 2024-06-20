@@ -306,7 +306,7 @@ def return_user_email(email: str):
   return None
 
 
-def return_stop_atual(route, type_):
+def return_stop_current(route, type_):
   all_stops = (
     db.session.query(Parada)
     .filter(db.and_(
@@ -331,7 +331,7 @@ def return_stop_atual(route, type_):
     if stops_passou:
       if len(stops_passou) == len(all_stops):
         return all_stops[-1]
-      return all_stops[len(stops_passou) + 1]
+      return all_stops[len(stops_passou)]
     return all_stops[0]
   return None
 

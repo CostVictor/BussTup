@@ -2340,7 +2340,7 @@ def get_data_route(name_line, surname, shift, hr_par, hr_ret, type_):
       else:
         date_formated = f'{return_day_week(week_day)[:3]} - {format_date(today)}'
 
-      retorno = {'error': False, 'data': data, 'hoje': date_formated}
+      retorno = {'error': False, 'data': data, 'hoje': date_formated, 'role': role, 'relationship': relationship}
       rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
       if rota is not None:
         if not rota:
@@ -2348,6 +2348,7 @@ def get_data_route(name_line, surname, shift, hr_par, hr_ret, type_):
         
         user = return_my_user()
         pass_daily = False
+        motorista_atual = False
 
         if role == 'aluno':
           check_daily = (
@@ -2366,6 +2367,13 @@ def get_data_route(name_line, surname, shift, hr_par, hr_ret, type_):
               if check_valid_datetime(today, daily.horario_passagem, add_limit=0.25):
                 pass_daily = True
                 break
+        else:
+          onibus = rota.onibus
+          if onibus and onibus.Motorista_id == user.id:
+            motorista_atual = True
+
+        retorno['pass_daily'] = pass_daily
+        retorno['driver_current'] = motorista_atual
         
         if (relationship and relationship != 'não participante') or pass_daily:
           data['estado'] = 'Inativa'
@@ -2409,7 +2417,7 @@ def get_stop_path(name_line, surname, shift, hr_par, hr_ret, type_):
         relationship = return_relationship(linha.codigo)
 
         data = []
-        retorno = {'error': False, 'role': role, 'relacao': relationship, 'data': data}
+        retorno = {'error': False, 'role': role, 'relacao': relationship, 'data': data, 'estado': 'inativa'}
         rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
         if rota is not None:
           if not rota:
@@ -2485,13 +2493,13 @@ def get_stop_path(name_line, surname, shift, hr_par, hr_ret, type_):
 
                 if not condiction and not not_dis_line and student_dis:
                   pass_daily = True
-                  if stop.tipo == type_:
+                  if stop.tipo == type_.lower():
                     meu_ponto = stop.ponto.nome
                     execute = False
                   break
               else:
                 pass_daily = True
-                if stop.tipo == type_:
+                if stop.tipo == type_.lower():
                   meu_ponto = stop.ponto.nome
                   execute = False
                 break
@@ -2551,6 +2559,11 @@ def get_stop_path(name_line, surname, shift, hr_par, hr_ret, type_):
               .order_by(Parada.ordem)
               .all()
             )
+
+            if rota.em_partida:
+              retorno['estado'] = 'partida'
+            elif rota.em_retorno:
+              retorno['estado'] = 'retorno'
 
             for parada, ponto in stops:
               passou = False
@@ -2652,7 +2665,7 @@ def get_data_stop_path(name_line, surname, shift, hr_par, hr_ret, type_, name_po
               estado = 'retorno'
             
             retorno['estado'] = estado
-            parada_atual = return_stop_atual(rota, type_)
+            parada_atual = return_stop_current(rota, type_.lower())
             if parada_atual:
               retorno['ponto_atual'] = parada_atual.ponto.nome
             else:
@@ -2669,7 +2682,7 @@ def get_data_stop_path(name_line, surname, shift, hr_par, hr_ret, type_, name_po
             ):
               passou = True
 
-            reject_contraturno = (type_ == return_ignore_route(rota.turno))
+            reject_contraturno = (type_.lower() == return_ignore_route(rota.turno))
             retorno['passou'] = passou
 
             if today.weekday() not in [5, 6] and not line_indis:
@@ -2802,3 +2815,83 @@ def get_data_stop_path(name_line, surname, shift, hr_par, hr_ret, type_, name_po
             return jsonify(retorno)
   
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações do ponto.'})
+
+
+@app.route("/confirm_start_path/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type_>", methods=['GET'])
+@login_required
+@roles_required("motorista")
+def confirm_start_path(name_line, surname, shift, hr_par, hr_ret, type_):
+  if name_line and surname and shift and hr_par and hr_ret and type_:
+    linha = Linha.query.filter_by(nome=name_line).first()
+    if linha:
+      today = date.today()
+      week_day = today.weekday()
+
+      check_indis = (
+        db.session.query(Registro_Linha)
+        .filter(db.and_(
+          Registro_Linha.Linha_codigo == linha.codigo,
+          Registro_Linha.data == today,
+          Registro_Linha.funcionando == False
+        ))
+        .first()
+      )
+
+      execute = True
+      if linha.ferias:
+        execute = False
+        aviso = 'Você não pode iniciar um trajeto enquanto a linha estiver de <strong>férias</strong>.'
+
+      elif week_day in [5, 6]:
+        execute = False
+        aviso = 'Você não pode iniciar um trajeto no final de semana.'
+
+      elif check_indis:
+        execute = False
+        if check_indis.feriado:
+          aviso = 'Você não pode iniciar um trajeto em dias de <strong>feriado</strong>.'
+        else:
+          aviso = 'Você não pode iniciar um trajeto em um dia marcado como <strong>fora de serviço</strong>.'
+      
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+      if rota is not None:
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+        if execute:
+          onibus = rota.onibus
+          if onibus and onibus.Motorista_id == current_user.primary_key:
+            if rota.em_partida or rota.em_retorno:
+              return jsonify({'error': True, 'title': 'Trajeto em Andamento', 'text': 'Você não pode iniciar um trajeto enquanto outro estiver em andamento.'})
+            
+            check_invalid = (
+              db.session.query(Registro_Passagem).join(Parada)
+              .filter(db.and_(
+                Registro_Passagem.data == today,
+                Registro_Passagem.Parada_codigo == Parada.codigo,
+                Parada.Rota_codigo == rota.codigo,
+                Parada.tipo == type_,
+              ))
+              .first()
+            )
+            if check_invalid:
+              return jsonify({'error': True, 'title': 'Ação Indisponível', 'text': f'Você já realizou o trajeto de <strong>{type_.lower()}</strong> desta rota hoje.'})
+
+            reference = rota.horario_partida if type_.lower() == 'partida' else rota.horario_retorno
+            combine = datetime.combine(today, reference)
+            time_ant = combine - timedelta(minutes=30)
+            time_dep = combine + timedelta(minutes=30)
+
+            now = datetime.now()
+            if now < time_ant:
+              aviso = f'Você iniciará o trajeto de {type_.lower()} muito antes do horário padrão definido na rota. Ao fazer isso, não poderá cancelar o trajeto nem iniciar outro. Deseja mesmo prosseguir?'
+            elif now > time_dep:
+              aviso = f'Você iniciará o trajeto de {type_.lower()} muito depois do horário padrão definido na rota. Ao fazer isso, não poderá cancelar o trajeto nem iniciar outro. Deseja mesmo prosseguir?'
+            else:
+              aviso = f'Você iniciará o trajeto de {type_.lower()}. Ao fazer isso, não poderá cancelar o trajeto nem iniciar outro. Deseja mesmo prosseguir?'
+
+            return jsonify({'error': False, 'aviso': aviso})
+        else:
+          return jsonify({'error': True, 'title': 'Ação Indisponível', 'text': aviso})
+  
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar carregar as informações da rota.'})

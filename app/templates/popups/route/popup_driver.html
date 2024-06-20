@@ -1,16 +1,35 @@
-<section id="confirmar_passou" class="popup__container--shadow inactive">
+<section id="confirmar_iniciar_trajeto" class="popup__container--shadow inactive">
   <div class="popup__container">
     <header class="popup__container--header">
-      <h1 id="route_stop_path_local" class="popup__title">Seguir Trajeto</h1>
+      <h1 class="popup__title">Confirmação</h1>
     </header>
 
     <div class="popup__container--content">
+      <p id="confirmar_iniciar_trajeto_info" class="text secundario fundo justify">Aguarde...</p>
+    </div>
 
+    <footer class="popup__container--footer">
+      <button id="confirmar_iniciar_trajeto_btn_cancell" class="popup__btn" onclick="close_popup('confirmar_iniciar_trajeto')">Cancelar</button>
+      <button id="confirmar_iniciar_trajeto_btn_confirm" class="popup__btn inactive" onclick="start_path()">Iniciar</button>
+    </footer>
+  </div>
+</section>
+
+
+<section id="confirmar_passou" class="popup__container--shadow inactive">
+  <div class="popup__container">
+    <header class="popup__container--header">
+      <h1 class="popup__title">Seguir Trajeto</h1>
+    </header>
+
+    <div class="popup__container--content">
+      <p class="text secundario fundo justify">É muito importante que, antes de seguir com esta ação, você tenha clicado em "Atualizar informações" no ponto para garantir que os dados estejam atualizados.</p>
+      <p class="text secundario fundo justify margin_top">Esta ação marcará o ponto atual como "Passou" e contabilizará os alunos presentes neste local no painel do veículo.</p>
     </div>
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('confirmar_passou')">Cancelar</button>
-      <button class="popup__btn">Próximo ponto</button>
+      <button id="confirmar_passou_btn_follow" class="popup__btn" onclick="follow_path()">Próximo ponto</button>
     </footer>
   </div>
 </section>

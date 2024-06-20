@@ -624,6 +624,146 @@ def edit_calendar():
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ Edit Route ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/start_path", methods=['PATCH'])
+@login_required
+@roles_required("motorista")
+def start_path():
+  data = request.get_json()
+  if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'type' in data:
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    if linha:
+      type_ = data['type'].lower()
+      surname = data['surname']; shift = data['shift']
+      hr_par = data['time_par']; hr_ret = data['time_ret']
+
+      today = date.today()
+      week_day = today.weekday()
+      
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+      if rota is not None:
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+        check_indis = (
+          db.session.query(Registro_Linha)
+          .filter(db.and_(
+            Registro_Linha.Linha_codigo == linha.codigo,
+            Registro_Linha.data == today,
+            Registro_Linha.funcionando == False
+          ))
+          .first()
+        )
+
+        check_invalid = (
+          db.session.query(Registro_Passagem).join(Parada)
+          .filter(db.and_(
+            Registro_Passagem.data == today,
+            Registro_Passagem.Parada_codigo == Parada.codigo,
+            Parada.Rota_codigo == rota.codigo,
+            Parada.tipo == type_,
+          ))
+          .first()
+        )
+        
+        execute = True
+        if linha.ferias:
+          execute = False
+        elif week_day in [5, 6]:
+          execute = False
+        elif check_indis:
+          execute = False
+        elif rota.em_partida or rota.em_retorno:
+          execute = False      
+        elif check_invalid:
+          execute = False
+        
+        onibus = rota.onibus
+        if execute and onibus and onibus.Motorista_id == current_user.primary_key:
+          stops_path = (
+            Parada.query.filter_by(Rota_codigo=rota.codigo, tipo=type_)
+            .all()
+          )
+
+          if stops_path and len(stops_path) >= 2:
+            if type_ == 'partida':
+              rota.em_partida = True
+            else:
+              rota.em_retorno = True
+            
+            try:
+              db.session.commit()
+              return jsonify({'error': False})
+              
+            except Exception as e:
+              db.session.rollback()
+              print(f'Erro ao iniciar trajeto: {str(e)}')
+          else:
+            return jsonify({'error': True, 'title': 'Ação Interrompida', 'text': f'Só é possível iniciar o trajeto de {type_} quando ele possuir pelo menos dois (2) pontos.'})
+            
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar iniciar o trajeto.'})
+
+
+@app.route("/follow_path", methods=['PATCH'])
+@login_required
+@roles_required("motorista")
+def follow_path():
+  data = request.get_json()
+  if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'type' in data and 'qnt' in data:
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    if linha:
+      type_ = data['type'].lower()
+      surname = data['surname']; shift = data['shift']
+      hr_par = data['time_par']; hr_ret = data['time_ret']
+      today = date.today()
+
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+      if rota is not None and isinstance(data['qnt'], int):
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+        execute = rota.em_partida if type_ == 'partida' else rota.em_retorno
+        if execute:
+          stops_path = (
+            Parada.query.filter_by(Rota_codigo=rota.codigo, tipo=type_)
+            .all()
+          )
+          stop_current = return_stop_current(rota, type_)
+          onibus = rota.onibus
+
+          if stop_current and onibus and onibus.Motorista_id == current_user.primary_key:
+            record_route = Registro_Rota.query.filter_by(
+              Rota_codigo=rota.codigo, tipo=type_, data=today
+            ).first()
+            
+            if record_route:
+              try:
+                ultimo = False
+                with db.session.begin_nested():
+                  record_route.quantidade_pessoas += data['qnt']
+                  db.session.add(Registro_Passagem(
+                    data=today, Parada_codigo=stop_current.codigo
+                  ))
+                  if len(stops_path) == stop_current.ordem:
+                    ultimo = True
+                    if type_ == 'partida':
+                      rota.em_partida = False
+                    else:
+                      rota.em_retorno = False
+
+                db.session.commit()
+                return jsonify({'error': False, 'ultimo': ultimo})
+
+              except Exception as e:
+                db.session.rollback()
+                print(f'Erro ao iniciar trajeto: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar prosseguir no trajeto.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Auto-save ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 

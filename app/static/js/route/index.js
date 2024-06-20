@@ -18,9 +18,7 @@ function replace_path(type) {
   const btn_retorno = document.getElementById("route_btn_retorno");
   const container_retorno = document.getElementById("route_container_retorno");
 
-  const btn_atualizar_trajeto = document.getElementById(
-    "btn_atualizar_trajeto"
-  );
+  const btn_iniciar_trajeto = document.getElementById("btn_iniciar_trajeto");
   let elements = [];
   if (type === "partida") {
     replace_forecast("partida");
@@ -31,8 +29,8 @@ function replace_path(type) {
     container_retorno.classList.add("inactive");
     elements = Array.from(container_partida.children);
 
-    if (btn_atualizar_trajeto) {
-      btn_atualizar_trajeto.textContent = "Iniciar trajeto de partida";
+    if (btn_iniciar_trajeto) {
+      btn_iniciar_trajeto.textContent = "Iniciar trajeto de partida";
     }
   } else {
     replace_forecast("retorno");
@@ -43,11 +41,24 @@ function replace_path(type) {
     container_partida.classList.add("inactive");
     elements = Array.from(container_retorno.children);
 
-    if (btn_atualizar_trajeto) {
-      btn_atualizar_trajeto.textContent = "Iniciar trajeto de retorno";
+    if (btn_iniciar_trajeto) {
+      btn_iniciar_trajeto.textContent = "Iniciar trajeto de retorno";
     }
   }
   animate_itens(elements, "fadeDown", 0.7, 0);
+}
+
+function open_stop_current() {
+  const container = document.getElementById(
+    `route_container_${return_path_selected()}`
+  );
+  const local = Array.from(container.children).find((value) =>
+    value.querySelector("i:not(.inactive)")
+  );
+  close_popup("route_stop_path");
+  setTimeout(() => {
+    open_stop_path(local);
+  }, 250);
 }
 
 function return_data_route() {
@@ -118,7 +129,10 @@ function load_path(type) {
                 text_efect.classList.remove("inactive");
                 container_efect.classList.add("passou");
               } else {
-                if (number && data[number - 1][info]) {
+                if (
+                  (!number && type === response.estado) ||
+                  (number && data[number - 1][info])
+                ) {
                   icon.classList.remove("inactive");
                   text_efect.classList.add("inactive");
                 }
@@ -159,6 +173,36 @@ function load_info(type, execute = false) {
         const msg_load_forecast = document.getElementById(
           "interface_load_forecast"
         );
+
+        const btn_atualizar_trajeto =
+          document.getElementById("route_update_path");
+        btn_atualizar_trajeto.style.margin = "0px";
+
+        if (response.role === "motorista") {
+          const btn_iniciar_trajeto = document.getElementById(
+            "btn_iniciar_trajeto"
+          );
+          btn_iniciar_trajeto.parentNode.classList.add("inactive");
+
+          if (response.driver_current && data.estado === "Inativa") {
+            btn_iniciar_trajeto.parentNode.classList.remove("inactive");
+            btn_atualizar_trajeto.removeAttribute("style");
+          }
+        } else {
+          const btn_solicitar_espera = document.getElementById(
+            "btn_solicitar_espera"
+          );
+          btn_solicitar_espera.classList.add("inactive");
+
+          if (
+            response.relationship !== "não participante" ||
+            response.pass_daily
+          ) {
+            btn_solicitar_espera.classList.remove("inactive");
+            btn_atualizar_trajeto.removeAttribute("style");
+          }
+        }
+
         if (response.hoje.includes("Indisponível")) {
           msg_load_forecast.textContent = response.hoje;
         } else {
@@ -170,7 +214,7 @@ function load_info(type, execute = false) {
           data.presente;
 
         if (execute) {
-          replace_path("partida");
+          replace_path(type);
         }
       } else {
         document.getElementById("interface_load_forecast").textContent =
@@ -186,7 +230,7 @@ function reload_data_path() {
   btn_update.onclick = null;
 
   const type = return_path_selected();
-  load_info(type);
+  load_info(type, true);
   load_path(type);
 }
 
@@ -239,7 +283,7 @@ function return_path_selected() {
   return "retorno";
 }
 
-function return_stop_path(pos) {
+function return_stop_path(pos, return_obj = false) {
   const container = document.getElementById(
     `route_container_${return_path_selected()}`
   );
@@ -255,10 +299,20 @@ function return_stop_path(pos) {
       if (icon) {
         target = icon.parentNode.parentNode;
       }
+    } else if (pos === 'proximo') {
+      const icon = container.querySelector("i:not(.inactive)");
+      const current = icon.parentNode.parentNode
+      const pos_element = Array.prototype.indexOf.call(container.children, current)
+      if ((pos_element + 1) <= elements.length) {
+        target = elements[pos_element + 1]
+      }
     }
   }
 
   if (target) {
+    if (return_obj) {
+      return target
+    }
     return document.getElementById(`${target.id}_local`).textContent.trim();
   }
   return null;
@@ -392,11 +446,6 @@ function open_stop_path(obj_click) {
         );
         container_msg.classList.add("inactive");
 
-        const msg_finalizado = document.getElementById(
-          "route_stop_path_finalizado"
-        );
-        msg_finalizado.classList.add("inactive");
-
         const msg_passou = document.getElementById("route_stop_path_passou");
         msg_passou.classList.add("inactive");
 
@@ -405,21 +454,23 @@ function open_stop_path(obj_click) {
 
         if (response.passou) {
           container_msg.classList.remove("inactive");
-          if (response.ponto_atual === local) {
-            msg_finalizado.classList.remove("inactive");
-          } else {
-            msg_passou.classList.remove("inactive");
-            if (response.estado === type) {
-              btn_fechar.classList.add("cancel");
-              btn_atual.classList.remove("inactive");
-            }
-          }
-        } else if (response.ponto_atual === local && response.estado === type) {
-          container_msg.classList.remove("inactive");
-          msg_atual.classList.remove("inactive");
-          if (response.role === "motorista" && response.condutor_atual) {
+          msg_passou.classList.remove("inactive");
+          if (response.estado === type) {
             btn_fechar.classList.add("cancel");
-            btn_confirmar.classList.remove("inactive");
+            btn_atual.classList.remove("inactive");
+          }
+        } else if (response.estado === type) {
+          if (response.ponto_atual === local) {
+            if (response.role === "motorista" && response.condutor_atual) {
+              btn_fechar.classList.add("cancel");
+              btn_confirmar.classList.remove("inactive");
+            } else {
+              container_msg.classList.remove("inactive");
+              msg_atual.classList.remove("inactive");
+            }
+          } else {
+            btn_fechar.classList.add("cancel");
+            btn_atual.classList.remove("inactive");
           }
         }
 

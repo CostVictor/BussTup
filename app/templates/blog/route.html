@@ -95,11 +95,11 @@
       
       <h1 class="page__division"></h1>
       {% if role == 'motorista' %}
-      <div class="route__btn first">
-        <p id="btn_atualizar_trajeto" class="text secundario justify">Iniciar trajeto de partida</p>
+      <div class="route__btn first" onclick="confirm_star_path()">
+        <p id="btn_iniciar_trajeto" class="text secundario justify">Iniciar trajeto de partida</p>
       </div>
       {% else %}
-      <div class="route__btn first">
+      <div id="btn_solicitar_espera" class="route__btn first">
         <p class="text secundario justify">Solicitar espera ao motorista</p>
       </div>
       {% endif %}
@@ -132,6 +132,7 @@
   <script src="/static/js/interaction.js"></script>
   <script src="/static/js/route/index.js"></script>
   {% if role == 'motorista' %}
+  <script src="/static/js/route/driver/edition_driver.js"></script>
   <script src="/static/js/route/driver/interaction_driver.js"></script>
   {% endif %}
 </body>
