@@ -410,7 +410,7 @@ def edit_vehicle():
                 if Onibus.query.filter_by(Motorista_id=motorista.id, Linha_codigo=code_line).first():
                   if new_value == user.nome:
                     return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Você não pode possuir mais de uma relação com um veículo em uma mesma linha.'})
-                  return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Identificamos que o(a) motorista selecionado(a) já possui vínculo com outro veículo.'})
+                  return jsonify({'error': True, 'title': 'Edição interrompida', 'text': 'Identificamos que o motorista selecionado já possui vínculo com outro veículo.'})
                 
                 new_value = motorista.id
               else: new_value = None
@@ -421,8 +421,8 @@ def edit_vehicle():
               
                 if new_value:
                   if motorista.id == current_user.primary_key:
-                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido(a) como condutor(a) de <strong>{vehicle.apelido}</strong>.'})
-                  return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'{motorista.nome} foi definido(a) como condutor(a) de <strong>{vehicle.apelido}</strong>.'}) 
+                    return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'Você foi definido como condutor de <strong>{vehicle.apelido}</strong>.'})
+                  return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'{motorista.nome} foi definido como condutor de <strong>{vehicle.apelido}</strong>.'}) 
                 return jsonify({'error': False, 'title': 'Edição Concluída', 'text': f'O condutor de <strong>{vehicle.apelido}</strong> foi definido como: <strong>Nenhum</strong>.'}) 
               
               except Exception as e:
@@ -742,10 +742,32 @@ def follow_path():
               try:
                 ultimo = False
                 with db.session.begin_nested():
-                  record_route.quantidade_pessoas += data['qnt']
+                  if type_ == 'partida':
+                    waits = Passagem.query.filter_by(Parada_codigo=stop_current.codigo, pediu_espera=True).all()
+                    record_route.quantidade_pessoas += data['qnt']
+                  else:
+                    waits = []
+                    if stop_current.ordem == 1:
+                      record_route.quantidade_pessoas = record_route.previsao_pessoas
+                      waits = (
+                        db.session.query(Passagem).join(Parada)
+                        .filter(db.and_(
+                          Passagem.Parada_codigo == Parada.codigo,
+                          Passagem.pediu_espera == True,
+                          Parada.Rota_codigo == rota.codigo,
+                          Parada.tipo == 'retorno'
+                        ))
+                        .all()
+                      )
+                    record_route.quantidade_pessoas -= data['qnt']
+                  
+                  for wait in waits:
+                    wait.pediu_espera = False
+
                   db.session.add(Registro_Passagem(
                     data=today, Parada_codigo=stop_current.codigo
                   ))
+
                   if len(stops_path) == stop_current.ordem:
                     ultimo = True
                     if type_ == 'partida':
@@ -761,6 +783,106 @@ def follow_path():
                 print(f'Erro ao iniciar trajeto: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar prosseguir no trajeto.'})
+
+
+@app.route("/request_wait", methods=['PATCH'])
+@login_required
+@roles_required("aluno")
+def request_wait():
+  data = request.get_json()
+  if data and 'name_line' in data and 'surname' in data and 'shift' in data and 'time_par' in data and 'time_ret' in data and 'type' in data:
+    linha = Linha.query.filter_by(nome=data['name_line']).first()
+    if linha:
+      type_ = data['type'].lower()
+      surname = data['surname']; shift = data['shift']
+      hr_par = data['time_par']; hr_ret = data['time_ret']
+      today = date.today()
+
+      user = return_my_user()
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+      if rota is not None and user:
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+        
+        execute = rota.em_partida if type_ == 'partida' else rota.em_retorno
+        record_student = Registro_Aluno.query.filter_by(Aluno_id=user.id, data=today).first()
+        if execute and record_student:
+          pass_ = (
+            db.session.query(Passagem, Parada)
+            .filter(db.and_(
+              Passagem.Parada_codigo == Parada.codigo,
+              Passagem.Aluno_id == user.id,
+              Parada.Rota_codigo == rota.codigo,
+              Parada.tipo == type_
+            ))
+            .all()
+          )
+
+          try:
+            for passagem, parada in pass_:
+              combine = datetime.combine(today, parada.horario_passagem)
+              time_ant = combine - timedelta(minutes=45)
+              time_dep = combine + timedelta(minutes=45)
+
+              check_daily = (
+                db.session.query(Passagem).join(Parada)
+                .filter(db.and_(
+                  Passagem.Parada_codigo == Parada.codigo,
+                  Parada.horario_passagem.between(time_ant.time(), time_dep.time()),
+                  Passagem.Aluno_id == user.id,
+                  Passagem.passagem_fixa == False,
+                  Passagem.data == today
+                ))
+                .all()
+              )
+
+              if type_ == 'partida':
+                registro_passagem = Registro_Passagem.query.filter_by(Parada_codigo=parada.codigo, data=today).first()
+              else:
+                registro_passagem = (
+                  db.session.query(Registro_Passagem).join(Parada)
+                  .filter(db.and_(
+                    Parada.Rota_codigo == rota.codigo,
+                    Parada.tipo == 'retorno',
+                    Parada.ordem == 1,
+                    Registro_Passagem.Parada_codigo == Parada.codigo,
+                    Registro_Passagem.data == today
+                  ))
+                  .first()
+                )
+
+              wait = True
+              if not passagem.passagem_fixa:
+                if passagem.migracao_lotado or passagem.migracao_manutencao:
+                  if record_student.faltara or (record_student.contraturno and type_ == return_ignore_route(user.turno)):
+                    wait = False
+
+                  for daily in check_daily:
+                    if not daily.migracao_lotado and not daily.migracao_manutencao:
+                      wait = False; break
+              elif (
+                record_student.faltara or
+                (record_student.contraturno and type_ == return_ignore_route(user.turno)) or
+                check_daily
+              ):
+                wait = False
+                
+              if wait and registro_passagem:
+                db.session.rollback()
+                return jsonify({'error': True, 'title': 'Espera Indisponível', 'text': f'O veículo já passou pelo ponto em que você iria subir no trajeto de <strong>{type_}</storng>.'})
+              passagem.pediu_espera = wait
+
+            db.session.commit()
+            return jsonify({'error': False, 'title': 'Solicitação Efetuada', 'text': f'O motorista será notificado para esperar caso você esteja presente em um dos pontos do trajeto de <strong>{type_}</storng>.'})
+
+          except Exception as e:
+            db.session.rollback()
+            print(f'Erro ao solicitar espera: {str(e)}') 
+        
+        else:
+          return jsonify({'error': True, 'title': 'Fora de Funcionamento', 'text': f'Só é possível solicitar espera quando o veículo estiver realizando o trajeto de <strong>{type_}</storng>.'})
+      
+  return jsonify({'error': True, 'title': 'Erro de Carregamento', 'text': 'Ocorreu um erro inesperado ao tentar solicitar a espera.'})
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''

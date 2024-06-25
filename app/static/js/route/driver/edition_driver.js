@@ -1,9 +1,11 @@
 function action_popup(popup, card, id, obj_click) {
-  if (id === 'confirmar_passou') {
-    const btn_confirm = document.getElementById('confirmar_passou_btn_follow')
-    const ponto_atual = document.getElementById('route_stop_path_local').textContent.trim()
-    if (ponto_atual === return_stop_path('ultimo')) {
-      btn_confirm.textContent = 'Finalizar'
+  if (id === "confirmar_passou") {
+    const btn_confirm = document.getElementById("confirmar_passou_btn_follow");
+    const ponto_atual = document
+      .getElementById("route_stop_path_local")
+      .textContent.trim();
+    if (ponto_atual === return_stop_path("ultimo")) {
+      btn_confirm.textContent = "Finalizar";
     }
   }
 }
@@ -44,6 +46,7 @@ function start_path() {
     document.getElementById(`route_container_${data.type}`).children
   );
 
+  popup_button_load("confirmar_iniciar_trajeto");
   fetch("/start_path", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -64,17 +67,21 @@ function start_path() {
 }
 
 function follow_path() {
-  const container_students = document.getElementById("route_stop_path_container_students")
-  const count_students = container_students.querySelectorAll('div').length
+  const container_students = document.getElementById(
+    "route_stop_path_container_students"
+  );
+  const count_students = container_students.querySelectorAll("div").length;
 
-  const btn_follow = document.getElementById('confirmar_passou_btn_follow')
-  btn_follow.onclick = null
+  const btn_follow = document.getElementById("confirmar_passou_btn_follow");
+  const text_btn_follow = btn_follow.textContent
+  btn_follow.onclick = null;
 
-  const data = return_data_route()
-  data.type = return_path_selected()
-  data.qnt = count_students
 
-  popup_button_load('confirmar_passou');
+  const data = return_data_route();
+  data.type = return_path_selected();
+  data.qnt = count_students;
+
+  popup_button_load("confirmar_passou");
   fetch("/follow_path", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -85,24 +92,24 @@ function follow_path() {
       if (!response.error) {
         const local_popup = document.getElementById("popup_local");
         local_popup.removeChild(local_popup.querySelector("#route_stop_path"));
-        close_popup('confirmar_passou')
+        close_popup("confirmar_passou");
 
-        const proximo = return_stop_path('proximo', true)
+        const proximo = return_stop_path("proximo", true);
         if (proximo) {
           setTimeout(() => {
             open_stop_path(proximo);
-          }, 250)
+          }, 250);
         }
 
         if (response.ultimo) {
-          reload_data_path()
-          create_popup('Trajeto Finalizado', '', 'Ok', 'success')
+          reload_data_path();
+          create_popup("Trajeto Finalizado", "", "Ok", "success");
         }
       } else {
-        popup_button_load('confirmar_passou', 'Próximo ponto');
-        btn_follow.onclick = function() {
-          follow_path()
-        }
+        popup_button_load("confirmar_passou", text_btn_follow);
+        btn_follow.onclick = function () {
+          follow_path();
+        };
       }
-    })
+    });
 }

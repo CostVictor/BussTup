@@ -6,6 +6,10 @@ from app.database import *
 from app import app
 
 
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ Dell Line ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
 @app.route("/del_line", methods=['POST'])
 @login_required
 @roles_required("motorista")
@@ -19,7 +23,7 @@ def del_line():
       try:
         db.session.delete(linha)
         db.session.commit()
-        return jsonify({'error': False, 'title': 'Linha Excluída', 'text': f'Esta linha foi excluída e todos os registros associados foram apagados. Você será redirecionado(a) para a página principal.'})
+        return jsonify({'error': False, 'title': 'Linha Excluída', 'text': f'Esta linha foi excluída e todos os registros associados foram apagados. Você será redirecionado para a página principal.'})
       
       except Exception as e:
         db.session.rollback()
@@ -115,7 +119,7 @@ def del_myPoint_contraturno():
       dates = return_dates_week()
       parada = passagem.parada
 
-      records_fixed = (
+      records_contraturno_fixed = (
         db.session.query(Registro_Rota)
         .filter(db.and_(
           Registro_Rota.Rota_codigo == parada.rota.codigo,
@@ -137,13 +141,38 @@ def del_myPoint_contraturno():
       dates_contraturno = [value.data for value in check_contraturno]
       ignore = return_ignore_route(user.turno)
 
+      routes_fixed = [rota.codigo for rota in (
+        db.session.query(Rota).join(Parada).join(Passagem)
+        .filter(db.and_(
+          Passagem.Parada_codigo == Parada.codigo,
+          Parada.Rota_codigo == Rota.codigo,
+          Passagem.Aluno_id == user.id,
+          Passagem.passagem_fixa == True,
+          Passagem.passagem_contraturno == False
+        ))
+        .all()
+      )]
+
+      check_in_contraturno = (
+        db.session.query(Registro_Rota)
+        .filter(db.and_(
+          Registro_Rota.Rota_codigo.in_(routes_fixed),
+          Registro_Rota.data.in_(dates_contraturno),
+          Registro_Rota.tipo == ignore
+        ))
+        .all()
+      )
+
       try:
-        for record in records_fixed:
+        for record in records_contraturno_fixed:
           if (
             (record.tipo == ignore and record.data in dates_contraturno)
             and check_valid_datetime(record.data)
           ):
             set_update_record_route(record)
+        
+        for record_check in check_in_contraturno:
+          set_update_record_route(record_check)
 
         db.session.delete(passagem)
         db.session.commit()
@@ -477,3 +506,46 @@ def del_migrate_defect(name_line, surname):
             print(f'Erro ao remover a diária: {str(e)}')
 
   return jsonify({'error': True, 'title': 'Ação Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar desmarcar a manutenção do veículo.'})
+
+
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~~ Dell Route ~~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/dell_request_wait/<name_line>/<surname>/<shift>/<hr_par>/<hr_ret>/<type_>", methods=['GET'])
+@login_required
+@roles_required("aluno")
+def dell_request_wait(name_line, surname, shift, hr_par, hr_ret, type_):
+  if name_line and surname and shift and hr_par and hr_ret and type_:
+    linha = Linha.query.filter_by(nome=name_line).first()
+    if linha:
+      rota = return_route(linha.codigo, surname, shift, hr_par, hr_ret, None)
+      if rota is not None:
+        if not rota:
+          return jsonify({'error': True, 'title': 'Falha de Identificação', 'text': 'Tivemos um problema ao tentar identificar a rota. Por favor, recarregue a página e tente novamente.'})
+      
+      pass_ = (
+        db.session.query(Passagem).join(Parada)
+        .filter(db.and_(
+          Passagem.Parada_codigo == Parada.codigo,
+          Parada.Rota_codigo == rota.codigo,
+          Parada.tipo == type_,
+          Passagem.Aluno_id == current_user.primary_key,
+          Passagem.pediu_espera == True
+        ))
+        .all()
+      )
+
+      try:
+        with db.session.begin_nested():
+          for passagem in pass_:
+            passagem.pediu_espera = False
+
+        db.session.commit()
+        return jsonify({'error': False})
+          
+      except Exception as e:
+        db.session.rollback()
+        print(f'Erro ao remover o pedido de espera: {str(e)}')
+
+  return jsonify({'error': True, 'title': 'Ação Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar remover o pedido de espera.'})

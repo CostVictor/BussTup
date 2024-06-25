@@ -2654,7 +2654,7 @@ def get_data_stop_path(name_line, surname, shift, hr_par, hr_ret, type_, name_po
 
           relationship = return_relationship(linha.codigo)
           if (relationship and relationship != 'não participante') or pass_daily:
-            data = {'pedindo_espera': [], 'subira': []}
+            data = {'pedindo_espera': [], 'subira/descera': []}
             retorno = {'error': False, 'role': role, 'condutor_atual': condutor_atual, 'data': data}
             retorno['meu_nome'] = user.nome
 
@@ -2803,14 +2803,34 @@ def get_data_stop_path(name_line, surname, shift, hr_par, hr_ret, type_, name_po
               )
 
               for passagem, aluno in students:
-                data['subira'].append({
+                data['subira/descera'].append({
                   'nome': aluno.nome,
                   'diaria': not passagem.passagem_fixa,
                   'contraturno': passagem.passagem_contraturno,
                 })
 
-                if passagem.pediu_espera:
-                  data['pedindo_espera'].append(aluno.nome)
+                if type_.lower() == 'partida':
+                  if passagem.pediu_espera:
+                    data['pedindo_espera'].append(aluno.nome)
+              
+
+              if type_.lower() == 'retorno' and parada.ordem == 1:
+                check_wait = (
+                  db.session.query(Aluno)
+                  .join(Passagem).join(Parada)
+                  .filter(db.and_(
+                    Passagem.Parada_codigo == Parada.codigo,
+                    Passagem.Aluno_id == Aluno.id,
+                    Parada.tipo == type_,
+                    Parada.Rota_codigo == rota.codigo,
+                    Passagem.pediu_espera == True
+                  ))
+                  .distinct(Aluno.id)
+                  .order_by(Aluno.nome)
+                  .all()
+                )
+                for student in check_wait:
+                  data['pedindo_espera'].append(student.nome)
 
             return jsonify(retorno)
   

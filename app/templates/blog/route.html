@@ -99,7 +99,7 @@
         <p id="btn_iniciar_trajeto" class="text secundario justify">Iniciar trajeto de partida</p>
       </div>
       {% else %}
-      <div id="btn_solicitar_espera" class="route__btn first">
+      <div id="btn_solicitar_espera" class="route__btn first" onclick="request_wait()">
         <p class="text secundario justify">Solicitar espera ao motorista</p>
       </div>
       {% endif %}
@@ -134,6 +134,8 @@
   {% if role == 'motorista' %}
   <script src="/static/js/route/driver/edition_driver.js"></script>
   <script src="/static/js/route/driver/interaction_driver.js"></script>
+  {% else %}
+  <script src="/static/js/route/student/edition_student.js"></script>
   {% endif %}
 </body>
 </html>

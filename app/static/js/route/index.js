@@ -299,19 +299,22 @@ function return_stop_path(pos, return_obj = false) {
       if (icon) {
         target = icon.parentNode.parentNode;
       }
-    } else if (pos === 'proximo') {
+    } else if (pos === "proximo") {
       const icon = container.querySelector("i:not(.inactive)");
-      const current = icon.parentNode.parentNode
-      const pos_element = Array.prototype.indexOf.call(container.children, current)
-      if ((pos_element + 1) <= elements.length) {
-        target = elements[pos_element + 1]
+      const current = icon.parentNode.parentNode;
+      const pos_element = Array.prototype.indexOf.call(
+        container.children,
+        current
+      );
+      if (pos_element + 1 <= elements.length) {
+        target = elements[pos_element + 1];
       }
     }
   }
 
   if (target) {
     if (return_obj) {
-      return target
+      return target;
     }
     return document.getElementById(`${target.id}_local`).textContent.trim();
   }
@@ -328,6 +331,10 @@ function create_student(container, list, response, list_espera = false) {
       student.id = `${container.id}_student_${index}`;
       student.querySelector("p").textContent = name_student;
 
+      if (parseInt(index)) {
+        student.classList.add('margin_top', 'min')
+      }
+
       if (response.role === "aluno" && response.meu_nome === name_student) {
         student.querySelector("i").classList.remove("inactive");
       }
@@ -340,6 +347,10 @@ function create_student(container, list, response, list_espera = false) {
       const student = model_student.cloneNode(true);
       student.id = `${container.id}_student_${index}`;
       student.querySelector("p").textContent = data_student.nome;
+
+      if (parseInt(index)) {
+        student.classList.add('margin_top', 'min')
+      }
 
       if (data_student.diaria || data_student.contraturno) {
         const info_daily = document.createElement("h1");
@@ -386,11 +397,11 @@ function open_stop_path(obj_click) {
         const data = response.data;
         const local_espera = document.getElementById("route_stop_path_espera");
         const container_espera = local_espera.querySelector("div");
-        const container_subira = document.getElementById(
+        const container_acao_estudante = document.getElementById(
           "route_stop_path_container_students"
         );
         container_espera.innerHTML = "";
-        container_subira.innerHTML = "";
+        container_acao_estudante.innerHTML = "";
 
         const btn_fechar = document.getElementById(
           "route_stop_path_btn_fechar"
@@ -409,7 +420,7 @@ function open_stop_path(obj_click) {
           btn_confirmar.classList.add("inactive");
         }
 
-        const title_subira = document.getElementById(
+        const title_acao_estudante = document.getElementById(
           "route_stop_path_title_students"
         );
         const title_espera = document.getElementById(
@@ -426,7 +437,7 @@ function open_stop_path(obj_click) {
         }
 
         if (data.pedindo_espera.length) {
-          title_subira.classList.remove("first");
+          title_acao_estudante.classList.remove("first");
           local_espera.classList.remove("inactive");
           title_espera.textContent = `Pedindo para esperar (${data.pedindo_espera.length}):`;
           create_student(
@@ -438,7 +449,7 @@ function open_stop_path(obj_click) {
         } else {
           title_espera.textContent = "Pedindo para esperar:";
           local_espera.classList.add("inactive");
-          title_subira.classList.add("first");
+          title_acao_estudante.classList.add("first");
         }
 
         const container_msg = document.getElementById(
@@ -475,18 +486,24 @@ function open_stop_path(obj_click) {
         }
 
         if (type === "partida") {
-          title_subira.textContent = `Sobe neste ponto (${data.subira.length}):`;
+          title_acao_estudante.textContent = `Sobe neste ponto (${data["subira/descera"].length}):`;
         } else {
-          title_subira.textContent = `Desce neste ponto (${data.subira.length}):`;
+          title_acao_estudante.textContent = `Desce neste ponto (${data["subira/descera"].length}):`;
         }
 
-        if (data.subira.length) {
-          create_student(container_subira, data.subira, response);
+        if (data["subira/descera"].length) {
+          create_student(
+            container_acao_estudante,
+            data["subira/descera"],
+            response
+          );
         } else {
           const text = document.createElement("p");
           text.className = "text secundario fundo cinza justify";
-          text.textContent = "Nenhum aluno previstro para este ponto hoje.";
-          container_subira.appendChild(text);
+          text.textContent = `Nenhum aluno previstro para ${
+            type === "partida" ? "subir" : "descer"
+          } neste ponto hoje.`;
+          container_acao_estudante.appendChild(text);
         }
 
         const btn_update = document.getElementById("route_update_data_stop");

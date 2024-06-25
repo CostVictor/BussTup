@@ -61,7 +61,7 @@ def create_line():
           db.session.add(relacao)
 
         db.session.commit()
-        return jsonify({'error': False, 'title': 'Linha Cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado(a) como usuário dono.'})
+        return jsonify({'error': False, 'title': 'Linha Cadastrada', 'text': 'Sua linha foi cadastrada e está disponível para utilização. Você foi adicionado como usuário dono.'})
 
       except Exception as e:
         db.session.rollback()
@@ -118,12 +118,12 @@ def create_vehicle():
               if motorista_id[0].id == current_user.primary_key:
                 return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'Ao realizar o cadastro, identificamos que você já possui vínculo com outro veículo nesta linha. O condutor deste veículo foi definido como: <strong>Nenhum</strong>.'})
               
-              return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'Ao realizar o cadastro, identificamos que o(a) motorista <strong>{motorista_nome}</strong> já possui vínculo com outro veículo. O condutor deste veículo foi definido como: <strong>Nenhum</strong>.'})
+              return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'Ao realizar o cadastro, identificamos que o motorista <strong>{motorista_nome}</strong> já possui vínculo com outro veículo. O condutor deste veículo foi definido como: <strong>Nenhum</strong>.'})
             
             if onibus.Motorista_id == current_user.primary_key:
-              return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'O veículo foi adicionado e está disponível para utilização. Você foi definido(a) como condutor(a).'})
+              return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'O veículo foi adicionado e está disponível para utilização. Você foi definido como condutor.'})
             
-            return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'O veículo foi adicionado e está disponível para utilização. <strong>{motorista_nome}</strong> foi definido(a) como condutor(a).'})
+            return jsonify({'error': False, 'title': 'Veículo Adicionado', 'text': f'O veículo foi adicionado e está disponível para utilização. <strong>{motorista_nome}</strong> foi definido como condutor.'})
             
           except Exception as e:
             db.session.rollback()
@@ -801,6 +801,31 @@ def create_pass_contraturno():
                 for rota, _, migracao in migracoes:
                   route_fixed.append(rota.codigo)
                   db.session.delete(migracao)
+              else:
+                routes_fixed = [rota.codigo for rota in (
+                  db.session.query(Rota).join(Parada).join(Passagem)
+                  .filter(db.and_(
+                    Passagem.Parada_codigo == Parada.codigo,
+                    Parada.Rota_codigo == Rota.codigo,
+                    Passagem.Aluno_id == user.id,
+                    Passagem.passagem_fixa == True,
+                    Passagem.passagem_contraturno == False
+                  ))
+                  .all()
+                )]
+
+                check_in_contraturno = (
+                  db.session.query(Registro_Rota)
+                  .filter(db.and_(
+                    Registro_Rota.Rota_codigo.in_(routes_fixed),
+                    Registro_Rota.data.in_(dates_contraturno),
+                    Registro_Rota.tipo == return_ignore_route(user.turno)
+                  ))
+                  .all()
+                )
+                
+                for record_check in check_in_contraturno:
+                  set_update_record_route(record_check)
               
               records = (
                 db.session.query(Registro_Rota)

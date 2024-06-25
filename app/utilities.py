@@ -553,6 +553,15 @@ def modify_forecast_route(route, record, commit=True):
     .subquery()
   )
 
+  all_contraturnos = [passagem.Aluno_id for passagem in (
+    db.session.query(Passagem)
+    .filter(db.and_(
+      Passagem.passagem_fixa == True,
+      Passagem.passagem_contraturno == True
+    ))
+    .all()
+  )]
+
   count = (
     db.session.query(func.count(func.distinct(Passagem.Aluno_id)))
     .join(Aluno).join(Registro_Aluno).join(Parada).join(Rota)
@@ -584,7 +593,10 @@ def modify_forecast_route(route, record, commit=True):
             (
               db.and_(
                 Aluno.turno == route.turno,
-                db.not_(Registro_Aluno.contraturno)
+                db.not_(db.and_(
+                  Registro_Aluno.contraturno == True,
+                  Aluno.id.in_(all_contraturnos)
+                ))
               )
               if reject_contraturno
               else (Aluno.turno == route.turno)
