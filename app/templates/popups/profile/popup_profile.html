@@ -299,7 +299,7 @@
         conta. Certifique-se de estar ciente das consequências antes de prosseguir com esta ação.</p>
 
       <h1 class="perfil__division"></h1>
-      <form id="formulario_termo_concordancia_excusao" class="form__container--card max_width" method="post">
+      <form id="formulario_termo_concordancia_excusao" class="form__container--card max_width" onsubmit="del_account(event)">
         <h3 class="popup__text info space">Confirme a exclusão com sua senha:</h3>
         <div class="form__container--input first">
           <input id="termo_concordancia_excusao_conf" class="form__input input_password white input_notIcon"
@@ -314,7 +314,7 @@
 
     <footer class="popup__container--footer">
       <button class="popup__btn cancel" onclick="close_popup('termo_concordancia_excusao')">Cancelar</button>
-      <button class="popup__btn">Excluir</button>
+      <button class="popup__btn" onclick="submit('formulario_termo_concordancia_excusao')">Excluir</button>
     </footer>
   </div>
 </section>

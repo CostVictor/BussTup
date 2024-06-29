@@ -250,8 +250,8 @@
   border: 0;
   cursor: pointer;
   
-  margin: calc(0.3vw + 0.2vh + 1vmin) 0;
+  margin: calc(0.3vw + 0.4vh + 1vmin) 0;
   background-color: var(--branco_secundario);
   color: var(--azul_terciario);
-  font-size: calc(0.6vw + 0.7vh + 1vmin);
+  font-size: calc(0.6vw + 0.6vh + 1vmin);
 }

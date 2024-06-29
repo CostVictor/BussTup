@@ -51,9 +51,22 @@ def edit_perfil():
           my_user = return_my_user()
           if my_user and hasattr(my_user, field) and field != 'id':
             if field == 'nome':
-              new_value = capitalize(new_value, current_user.roles[0].name)
+              role = current_user.roles[0].name
+              new_value = capitalize(new_value, role)
               if not new_value:
                 return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'O nome definido não atende aos critérios de cadastro do aluno. Por favor, defina seu nome completo para prosseguir.'})
+              
+              if role == 'motorista':
+                check_name = Motorista.query.filter_by(nome=new_value).first()
+                if check_name:
+                  return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Já existe um motorista utilizando este nome de exibição. Por favor, informe um nome diferente para evitar conflitos nos dados.'})
+              else:
+                check_name = Aluno.query.filter_by(nome=new_value).first()
+                if check_name:
+                  return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'Já existe um aluno cadastrado com o mesmo nome de exibição.'})
+            
+            elif field == 'email' and return_user_email(new_value):
+              return jsonify({'error': True, 'title': 'Edição Interrompida', 'text': 'O e-mail definido não está disponível para utilização.'})
 
             try:
               setattr(my_user, field, new_value)

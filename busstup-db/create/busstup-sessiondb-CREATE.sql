@@ -54,20 +54,6 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `busstup_session`.`Contribuicao`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `busstup_session`.`Contribuicao` (
-  `User_id` BIGINT(20) NOT NULL,
-  PRIMARY KEY (`User_id`),
-  CONSTRAINT `fk_Contribuicao_User1`
-    FOREIGN KEY (`User_id`)
-    REFERENCES `busstup_session`.`User` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `busstup_session`.`SendEmail`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `busstup_session`.`SendEmail` (
@@ -95,6 +81,35 @@ CREATE TABLE IF NOT EXISTS `busstup_session`.`AccessToken` (
     REFERENCES `busstup_session`.`User` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `busstup_session`.`Contribution`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busstup_session`.`Contribution` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `type` ENUM('relatar bug', 'opiniao') NOT NULL,
+  `text` TEXT NOT NULL,
+  `User_id` BIGINT(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_Contribuicao_User1_idx` (`User_id` ASC),
+  CONSTRAINT `fk_Contribuicao_User1`
+    FOREIGN KEY (`User_id`)
+    REFERENCES `busstup_session`.`User` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `busstup_session`.`Deleted_accounts`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busstup_session`.`Deleted_accounts` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `login` VARCHAR(100) NOT NULL,
+  `aceitou_termo_exclusao` TINYINT NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
 

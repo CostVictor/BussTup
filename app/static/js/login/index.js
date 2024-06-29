@@ -1,6 +1,9 @@
 function validationLogin(event) {
   event.preventDefault();
 
+  const btn_entrar = document.getElementById("btn_entrar");
+  btn_entrar.value = "Aguarde...";
+
   const form = document.getElementById("formulario_login");
   const usuario = form.elements.user.value.trim();
   const senha = form.elements.password.value.trim();
@@ -14,6 +17,7 @@ function validationLogin(event) {
     .then((response) => {
       if (response.error) {
         create_popup(response.title, response.text, "Ok");
+        btn_entrar.value = "Entrar";
       } else {
         closeInterface("login", response.redirect);
       }
@@ -21,14 +25,16 @@ function validationLogin(event) {
 }
 
 function recoverAccount(event) {
-  event.preventDefault()
+  event.preventDefault();
   const options = document.getElementById("popup_recover_options");
   const option_selected = return_text_bool_selected(options);
   const email = document.getElementById("popup_recover_email").value;
   const data = {
-    recover: option_selected, email: email 
-  }
+    recover: option_selected,
+    email: email,
+  };
 
+  popup_button_load("popup_recover");
   fetch("/schedule_recover", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -41,6 +47,7 @@ function recoverAccount(event) {
         create_popup(response.title, response.text, "Ok", "success");
       } else {
         create_popup(response.title, response.text, "Voltar");
+        popup_button_load("popup_recover", "Solicitar");
       }
     });
 }

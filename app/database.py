@@ -41,11 +41,22 @@ class Role(db.Model, RoleMixin):
   user = db.relationship('User', backref=db.backref('roles', cascade='all, delete'), lazy=True)
 
 
-class Contribuicao(db.Model):
+class Contribution(db.Model):
   __bind_key__ = 'db_session'
-  __tablename__ = 'Contribuicao'
-  User_id = db.Column(db.BigInteger, db.ForeignKey('User.id'), primary_key=True)
-  user = db.relationship('User', backref=db.backref('contribuicao', cascade='all, delete'), lazy=True)
+  __tablename__ = 'Contribution'
+  id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+  type = db.Column(db.Enum('relatar bug', 'opiniao'), nullable=False)
+  text = db.Column(db.String(255), nullable=False)
+  User_id = db.Column(db.BigInteger, db.ForeignKey('User.id'), nullable=False)
+  user = db.relationship('User', backref=db.backref('contribuicoes', cascade='all, delete'), lazy=True)
+
+
+class Deleted_accounts(db.Model):
+  __bind_key__ = 'db_session'
+  __tablename__ = 'Deleted_accounts'
+  id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+  login = db.Column(db.String(100), nullable=False)
+  aceitou_termo_exclusao = db.Column(db.Boolean, nullable=False, default=True)
 
 
 class AccessToken(db.Model):
@@ -127,8 +138,6 @@ class Registro_Aluno(db.Model):
   data = db.Column(db.Date, nullable=False)
   faltara = db.Column(db.Boolean, nullable=False, default=False)
   contraturno = db.Column(db.Boolean, nullable=False, default=False)
-  presente_partida = db.Column(db.Boolean, nullable=False, default=False)
-  presente_retorno = db.Column(db.Boolean, nullable=False, default=False)
   Aluno_id = db.Column(db.BigInteger, db.ForeignKey('Aluno.id'), nullable=False)
   aluno = db.relationship('Aluno', backref=db.backref('registros', cascade='all, delete'), lazy=True)
 

@@ -95,6 +95,19 @@ def format_register(dadosAdquiridos):
             erro_text = 'O nome definido não atende aos critérios de cadastro do aluno. Por favor, defina seu nome completo.'
             inconsistencia = True
             break
+
+          if data['role'] == 'motorista':
+            check_name = Motorista.query.filter_by(nome=name).first()
+            if check_name:
+              erro_text = 'Já existe um motorista utilizando este nome de exibição. Por favor, informe um nome diferente para evitar conflitos nos dados.'
+              inconsistencia = True
+              break
+          else:
+            check_name = Aluno.query.filter_by(nome=name).first()
+            if check_name:
+              erro_text = 'Já existe um aluno cadastrado com o mesmo nome de exibição. Se já possuir uma conta, acesse em "Logar".'
+              inconsistencia = True
+              break
         
           data[campo] = name
         

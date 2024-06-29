@@ -314,8 +314,6 @@ CREATE TABLE IF NOT EXISTS `busstup`.`registro_aluno` (
   `data` DATE NOT NULL,
   `faltara` TINYINT(4) NOT NULL DEFAULT 0,
   `contraturno` TINYINT(4) NOT NULL DEFAULT 0,
-  `presente_partida` TINYINT(4) NOT NULL DEFAULT 0,
-  `presente_retorno` TINYINT(4) NOT NULL DEFAULT 0,
   `Aluno_id` BIGINT(20) NOT NULL,
   PRIMARY KEY (`codigo`),
   INDEX `fk_Registro_Aluno_Aluno1_idx` (`Aluno_id` ASC),

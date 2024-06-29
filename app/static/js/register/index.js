@@ -78,6 +78,9 @@ function validationRegister(form_submit, event) {
   }
 
   if (execute) {
+    const btn_submit = document.getElementById("button_submit");
+    btn_submit.textContent = "Aguarde...";
+
     fetch("/register_user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -87,6 +90,7 @@ function validationRegister(form_submit, event) {
       .then((retorno) => {
         if (retorno.error) {
           create_popup(retorno.title, retorno.text, "Voltar");
+          btn_submit.textContent = "Enviar";
         } else {
           create_popup(
             retorno.title,

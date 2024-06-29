@@ -6,6 +6,49 @@ from app.database import *
 from app import app
 
 
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+''' ~~~~~ Dell Profile ~~~~~ '''
+'''~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+@app.route("/del_account", methods=['POST'])
+@login_required
+def del_account():
+  data = request.get_json()
+  if data and 'password' in data:
+    user = return_my_user()
+    if user and isinstance(data['password'], str):
+      senha = data['password'].encode('utf-8')
+      if bcrypt.checkpw(senha, current_user.password_hash):
+        try:
+          with db.session.begin_nested():
+            db.session.add(Deleted_accounts(login=current_user.login))
+            if current_user.roles[0].name == 'motorista':
+              all_lines = (
+                db.session.query(Linha).join(Membro)
+                .filter(db.and_(
+                  Membro.Linha_codigo == Linha.codigo,
+                  Membro.Motorista_id == user.id,
+                  Membro.dono == True
+                ))
+                .all()
+              )
+              for line in all_lines:
+                db.session.delete(line)
+            db.session.delete(user)
+            db.session.delete(current_user)
+
+          db.session.commit()
+          return jsonify({'error': False, 'title': 'Conta Apagada', 'text': 'Sua conta foi permanentemente apagada.'})
+
+        except Exception as e:
+          db.session.rollback()
+          print(f'Erro ao apagar a conta: {str(e)}')
+      else:
+        return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'A senha especificada está incorreta.'})
+    
+  return jsonify({'error': True, 'title': 'Exclusão Interrompida', 'text': 'Ocorreu um erro inesperado ao tentar excluir a linha.'})
+
+
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Dell Line ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~~'''

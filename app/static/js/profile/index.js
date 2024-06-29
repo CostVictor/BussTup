@@ -29,6 +29,7 @@ function editData_profile(obj_click) {
   }
 
   if (execute) {
+    popup_button_load(key);
     fetch("/edit_profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -58,6 +59,32 @@ function editData_profile(obj_click) {
             "",
             false
           );
+          popup_button_load(key, "Alterar");
+        }
+      });
+  }
+}
+
+function del_account(event) {
+  event.preventDefault();
+  const password = document
+    .getElementById("termo_concordancia_excusao_conf")
+    .value.trim();
+
+  if (password) {
+    popup_button_load("termo_concordancia_excusao");
+    fetch("/del_account", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: password }),
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        if (!response.error) {
+          create_popup(response.title, response.text, "Ok", "success", "login");
+        } else {
+          popup_button_load("termo_concordancia_excusao", "Excluir");
+          create_popup(response.title, response.text, "Voltar");
         }
       });
   }
