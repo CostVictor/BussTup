@@ -47,13 +47,33 @@ def pag_rota(name_line, surname, shift, time_par, time_ret):
   linha = Linha.query.filter_by(nome=name_line).first()
 
   if linha and not Marcador_Exclusao.query.filter_by(tabela='Linha', key_item=linha.codigo).first():
-    relationship = return_relationship(linha.codigo)
-    
-    if relationship and relationship != 'não participante':
+    rota = return_route(linha.codigo, surname, shift, time_par, time_ret, None)
+    if rota:
+      user = return_my_user()
       role = current_user.roles[0].name
-      rota = return_route(linha.codigo, surname, shift, time_par, time_ret, None)
+      relationship = return_relationship(linha.codigo)
 
-      if rota:
+      pass_daily = False
+      if role == 'aluno':
+        today = date.today()
+        check_daily = (
+          db.session.query(Parada).join(Passagem)
+          .filter(db.and_(
+            Passagem.Parada_codigo == Parada.codigo,
+            Parada.Rota_codigo == rota.codigo,
+            Passagem.data == today,
+            Passagem.passagem_fixa == False,
+            Passagem.Aluno_id == user.id
+          ))
+          .all()
+        )
+        if check_daily:
+          for daily in check_daily:
+            if check_valid_datetime(today, daily.horario_passagem, add_limit=0.25):
+              pass_daily = True
+              break
+      
+      if (relationship and relationship != 'não participante') or pass_daily:
         return render_template('blog/route.html', name_line=name_line, role=role, local_page=local_page, rota=rota, dias_semana=dias_semana, horario_partida=format_time(rota.horario_partida), horario_retorno=format_time(rota.horario_retorno))
 
   return 'Rota não encontrada.'
