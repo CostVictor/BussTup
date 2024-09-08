@@ -116,7 +116,7 @@ class Rota(db.Model):
   em_retorno = db.Column(db.Boolean, nullable=False, default=False)
   horario_partida = db.Column(db.Time, nullable=False)
   horario_retorno = db.Column(db.Time, nullable=False)
-  Linha_codigo = db.Column(db.BigInteger, db.ForeignKey('Linha.codigo'), nullable=False)
+  Linha_codigo = db.Column(db.Integer, db.ForeignKey('Linha.codigo'), nullable=False)
   Onibus_id = db.Column(db.BigInteger, db.ForeignKey('Onibus.id'))
   linha = db.relationship('Linha', backref=db.backref('rotas', cascade='all, delete'), lazy=True)
   onibus = db.relationship('Onibus', backref=db.backref('rotas'), lazy=True)
