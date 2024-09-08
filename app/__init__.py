@@ -3,23 +3,25 @@ from datetime import timedelta
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_jwt_extended import JWTManager
+from dotenv import load_dotenv
 from flask_mail import Mail
 import os
 
+load_dotenv()
 app = Flask(__name__)
 
-# app.config['SERVER_NAME'] = '127.0.0.1:5000'
-# app.config['APPLICATION_ROOT'] = '/'
-# app.config['PREFERRED_URL_SCHEME'] = 'http'
+app.config['SERVER_NAME'] = os.getenv("SERVER_NAME")
+app.config['APPLICATION_ROOT'] = '/'
+app.config['PREFERRED_URL_SCHEME'] = 'http'
 
 
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
 ''' ~~~~~~ Database ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/busstup'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_DATABASE_URI")
 app.config['SQLALCHEMY_BINDS'] = {
-  'db_session': 'mysql+pymysql://root@localhost/busstup_session'
+  'db_session': os.getenv("DB_SESSION")
 }
 
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
@@ -39,7 +41,7 @@ app.config['SQLALCHEMY_BINDS_OPTIONS'] = {
 ''' ~~~~~~ Security ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~~~'''
 
-app.config['SECRET_KEY'] = os.urandom(24)
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['SECURITY_DEFAULT_REMEMBER_ME'] = False
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECURITY_LOGIN_USER_TEMPLATE'] = 'auth/login.html'
@@ -68,9 +70,9 @@ app.config['SECURITY_RESET_PASSWORD_LOGIN_VIEW'] = 'auth.login'
 ''' ~~~~~~ Email ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~'''
 
-app.config['MAIL_DEFAULT_SENDER'] = 'btupmessage@gmail.com'
-app.config['MAIL_USERNAME'] = 'btupmessage@gmail.com'
-app.config['MAIL_PASSWORD'] = 'gjacxbkpgbcflvfo'
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -84,7 +86,7 @@ mail = Mail(app)
 ''' ~~~~~~ Cookie ~~~~~~ '''
 '''~~~~~~~~~~~~~~~~~~~~~~'''
 
-app.config['SESSION_COOKIE_NAME'] = 'btup$session@8401M'
+app.config['SESSION_COOKIE_NAME'] = os.getenv("SESSION_COOKIE_NAME")
 # app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 
